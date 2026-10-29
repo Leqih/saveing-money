@@ -43,12 +43,26 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--cobalt); ou
 .dbtn.action { top: 168px; height: 36px; } .dbtn.vup { top: 232px; height: 64px; } .dbtn.vdown { top: 310px; height: 64px; }
 .dbtn.power { top: 248px; height: 100px; }
 .dbtn.cam { top: 560px; height: 62px; right: -2px; width: 4px; background: linear-gradient(90deg, #5E5A54, #A8A49C); }
-.statusbar { position: absolute; left: 14px; right: 14px; top: 14px; height: 54px; z-index: 40; pointer-events: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 34px 0 50px; border-radius: 55px 55px 0 0; background: var(--paper); font-family: -apple-system, 'SF Pro Text', var(--f-body); font-weight: 700; font-size: 17px; color: var(--ink); }
+.statusbar { position: absolute; left: 14px; right: 14px; top: 14px; height: 54px; z-index: 40; pointer-events: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 34px 0 50px; border-radius: 55px 55px 0 0; }
+/* the phone scrolls by touch, so no desktop scrollbar inside the screen */
+.phone *, .phone { scrollbar-width: none; }
+.phone ::-webkit-scrollbar { display: none; }
+.statusbar { font-family: -apple-system, 'SF Pro Text', var(--f-body); font-weight: 700; font-size: 17px; color: var(--ink); }
 .island { position: absolute; left: 50%; top: 11px; width: 126px; height: 37px; margin-left: -63px; border-radius: 20px; background: #000; }
 .island::after { content: ""; position: absolute; right: 13px; top: 12px; width: 13px; height: 13px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #2A3346 0%, #0B0E15 60%); }
 .sb-icons { display: flex; align-items: center; gap: 6px; }
 .homebar { position: absolute; left: 50%; bottom: 22px; width: 140px; height: 5px; margin-left: -70px; border-radius: 3px; background: #111; z-index: 41; pointer-events: none; }
 .phone { position: relative; width: 402px; height: 874px; background: var(--paper); border-radius: 55px; overflow: hidden; }
+/* once the home screen scrolls, the top row folds into a compact title bar pinned under the status bar */
+.minibar { position: absolute; left: 0; right: 0; top: 0; z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: calc(var(--top) - 4px) 18px 10px; background: var(--paper); box-shadow: 0 10px 18px -12px rgba(20,20,30,0.4); border: 0; width: 100%; text-align: left; opacity: 0; transform: translateY(-12px); pointer-events: none; transition: opacity 0.18s ease, transform 0.18s ease; }
+#app.scrolled .minibar { opacity: 1; transform: none; pointer-events: auto; }
+.minibar .mt { font-family: var(--f-px); font-size: 15px; font-weight: 600; }
+.minibar .mr { display: flex; align-items: center; gap: 6px; }
+.minibar .mm { height: 28px; padding: 0 10px; border-radius: 14px; background: #C9C3FF; color: #2B2470; font-family: var(--f-display); font-size: 15px; display: flex; align-items: center; }
+.minibar .ms { height: 28px; padding: 0 10px; border-radius: 14px; background: var(--ink); color: var(--lime); font-family: var(--f-px); font-size: 13px; display: flex; align-items: center; }
+/* sheets keep their title and close button pinned the same way */
+.sheet .bar-top { position: sticky; top: calc(-1 * var(--top)); z-index: 6; margin: calc(-1 * var(--top)) -18px 0; padding: calc(var(--top) - 4px) 18px 10px; background: var(--paper); transition: box-shadow 0.18s ease; }
+.sheet.scrolled .bar-top { box-shadow: 0 10px 18px -12px rgba(20,20,30,0.4); }
 .screen { height: 100%; overflow-y: auto; padding: var(--top) 18px 110px; display: flex; flex-direction: column; gap: 14px; }
 .screen > * { flex-shrink: 0; }
 
@@ -175,19 +189,6 @@ button.chip:active { transform: translateY(2px); }
 .pill.no { background: #FFE1E1; border-color: #FFC2C2; color: #A10F0F; }
 .stars { font-family: var(--f-mono); letter-spacing: 1px; }
 
-/* draw: three face-down cards flip over, one gets picked */
-.fan { display: flex; justify-content: center; gap: 8px; padding: 22px 0 4px; }
-.pick { width: 108px; height: 153px; flex-shrink: 0; border: 0; background: none; padding: 0; perspective: 700px; transition: transform 0.2s ease; }
-.pick:nth-child(1) { transform: rotate(-6deg) translateY(8px); }
-.pick:nth-child(3) { transform: rotate(6deg) translateY(8px); }
-.pick.sel { transform: translateY(-14px) scale(1.04); }
-.pick.sel .face { outline: 4px solid var(--ink); outline-offset: 3px; border-radius: 12px; }
-.flip { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.5s ease; }
-.flip.down { transform: rotateY(180deg); }
-.face, .back { position: absolute; inset: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
-.face .scale { width: 240px; height: 340px; transform: scale(0.45); transform-origin: 0 0; }
-.back { transform: rotateY(180deg); border-radius: 12px; background-color: #111; background-image: linear-gradient(rgba(228,255,26,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(228,255,26,0.25) 1px, transparent 1px); background-size: 12px 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 16px -8px rgba(0,0,0,0.5); }
-.back span { width: 44px; height: 44px; border-radius: 50%; background: var(--lime); color: var(--ink); font-family: var(--f-display); font-size: 22px; display: flex; align-items: center; justify-content: center; transform: rotate(-8deg); }
 .pickinfo { border-radius: 24px; background: #F3F3F6; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
 .pickinfo h3 { margin: 0; font-size: 20px; font-weight: 900; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .pickinfo p { margin: 0; font-size: 14px; line-height: 1.55; }
@@ -211,10 +212,41 @@ button.chip:active { transform: translateY(2px); }
 .bigstamp { align-self: center; padding: 10px 26px; border: 4px solid var(--ink); border-radius: 18px; font-weight: 900; font-size: 34px; transform: rotate(-5deg); background: var(--lime); box-shadow: 0 8px 0 rgba(0,0,0,0.12); }
 .bigstamp.no { background: #FFE1E1; }
 
-.bigcard { align-self: center; }
-.kv { border-radius: 18px; background: #F3F3F6; padding: 12px 14px; }
-.kv small { display: block; font-size: 11px; font-weight: 900; color: var(--sub); margin-bottom: 2px; }
-.kv p { margin: 0; font-size: 14px; line-height: 1.55; }
+/* rule sheet: the launch screen's sticker collage, then the details as gently tilted candy cards */
+.rhero { position: relative; flex-shrink: 0; height: 400px; margin: 0 -4px; }
+.rh-glow { position: absolute; left: 50%; top: 10px; width: 330px; height: 330px; margin-left: -165px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--c) 28%, #FFF) 0%, color-mix(in srgb, var(--c) 10%, #FFF) 55%, transparent 70%); }
+.rh-blob { position: absolute; left: -8px; top: 64px; width: 190px; height: 150px; border-radius: 48% 52% 44% 56% / 58% 46% 54% 42%; background: #111; transform: rotate(-14deg); }
+.rh-spark { position: absolute; z-index: 3; }
+.rh-card { position: absolute; left: 50%; top: 14px; z-index: 1; margin-left: -120px; transform: rotate(-2.5deg); filter: drop-shadow(0 22px 22px rgba(20,20,30,0.22)); }
+.rh-cookie { position: absolute; right: -2px; top: 26px; z-index: 2; width: 88px; height: 88px; display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(10deg); filter: drop-shadow(0 6px 8px rgba(20,20,30,0.22)); clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
+.rh-cookie b { font-family: var(--f-display); font-weight: 400; font-size: 28px; line-height: 1; }
+.rh-cookie small { font-size: 10px; font-weight: 900; }
+.rh-state { left: 50%; top: 366px; transform: translateX(-50%) rotate(-3deg); }
+.rh-state.broken { background: var(--pink); color: #FFF; } .rh-state.pending { background: #FFF; }
+.rhead2 { display: flex; flex-direction: column; gap: 10px; padding: 4px 2px 0; }
+.rlead { margin: 0; font-size: 24px; font-weight: 900; line-height: 1.35; letter-spacing: -0.3px; }
+.rlead mark { background: linear-gradient(transparent 62%, var(--lime) 62%, var(--lime) 90%, transparent 90%); color: inherit; padding: 0 2px; }
+.rchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.rchips .chipk { height: 30px; padding: 0 12px; border-radius: 15px; background: #FFF; gap: 6px; }
+.rchips .chipk > i { width: 8px; height: 8px; border-radius: 50%; }
+.rdots { display: inline-flex; gap: 3px; } .rdots i { width: 6px; height: 6px; border-radius: 50%; background: #D6D6DC; } .rdots i.on { background: var(--ink); }
+.rcards { flex-shrink: 0; display: flex; flex-direction: column; gap: 22px; padding: 18px 6px 12px 10px; }
+.rc { position: relative; border-radius: 24px; padding: 18px 18px 16px 22px; box-shadow: 0 5px 0 rgba(0,0,0,0.12), 0 18px 24px -18px rgba(0,0,0,0.4); }
+.rc:nth-child(odd) { transform: rotate(-1deg); } .rc:nth-child(even) { transform: rotate(0.8deg); }
+.rc h3 { margin: 0 0 4px; font-size: 15px; font-weight: 900; letter-spacing: 0.2px; }
+.rc p { margin: 0; font-size: 14px; line-height: 1.65; }
+.rc .n { position: absolute; left: -10px; top: -12px; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #FFF; font-size: 13px; font-weight: 900; display: flex; align-items: center; justify-content: center; transform: rotate(-8deg); box-shadow: 0 0 0 3px #FFF; }
+.rquote::after { content: "\201D"; position: absolute; right: 16px; top: -6px; font-family: var(--f-display); font-size: 64px; line-height: 1; color: #2B2470; opacity: 0.18; }
+.rbig { font-family: var(--f-display); font-weight: 400; font-size: 20px; }
+.g-white { background: #FFF; border: 2px solid var(--ink); }
+.g-ink { background: #111; color: #FFF; } .g-ink .n { background: var(--lime); color: var(--ink); }
+.rclash { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.rclash span { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px 0 4px; border-radius: 16px; background: #F3F3F6; font-size: 12px; font-weight: 900; }
+.rclash i { width: 24px; height: 24px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.rprog { display: flex; align-items: center; gap: 5px; margin-top: 12px; }
+.rprog i { flex: 1; max-width: 60px; height: 10px; border-radius: 5px; background: rgba(255,255,255,0.16); }
+.rprog i.on { background: var(--lime); box-shadow: 0 0 10px rgba(228,255,26,0.5); }
+.rprog em { font-style: normal; font-family: var(--f-px); font-size: 13px; color: var(--lime); margin-left: 6px; }
 .unlock { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; border-radius: 22px; background: var(--lime); padding: 12px 14px; }
 
 /* beginner guide: slanted stacked cards */
@@ -257,21 +289,43 @@ button.chip:active { transform: translateY(2px); }
 
 /* ---- ported from the canvas screens (ToyTable nav, ToyFeed, ToyBill, ToyCats, ToyDeck, ToySetup, ToyPick) ---- */
 .cv-nav { position: absolute; left: 16px; right: 16px; bottom: 20px; z-index: 5; height: 76px; border-radius: 38px; padding: 8px; display: flex; gap: 6px; align-items: stretch; background: linear-gradient(180deg, #232327 0%, #0B0B0D 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 2px rgba(20,20,30,0.2), 0 18px 26px -10px rgba(20,20,30,0.45); }
-.cv-nav > button[data-tab] { position: relative; width: 60px; flex-shrink: 0; border: 0; border-radius: 22px; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.12); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #111; font-size: 11px; padding: 0; }
-.cv-nav > button[data-tab]::after { content: ""; position: absolute; left: 4px; right: 4px; top: 3px; height: 42%; border-radius: inherit; pointer-events: none; background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0)); }
-.cv-nav > button.on { font-weight: 900; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.12), 0 0 0 3px #FFFFFF; }
+.cv-nav > button[data-tab] { position: relative; width: 60px; flex-shrink: 0; border: 0; border-radius: 22px; background: #2A2A2F; box-shadow: inset 0 1px 0 rgba(255,255,255,0.06); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #9A9AA3; font-size: 11px; padding: 0; transition: transform 0.15s ease, background 0.15s ease; }
+.cv-nav > button[data-tab] svg { opacity: 0.85; }
+.cv-nav > button.on::after { content: ""; position: absolute; left: 4px; right: 4px; top: 3px; height: 42%; border-radius: inherit; pointer-events: none; background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0)); }
+.cv-nav > button.on { color: #111; font-weight: 900; transform: translateY(-5px); box-shadow: inset 0 -4px 0 rgba(0,0,0,0.14), 0 8px 12px -4px rgba(0,0,0,0.6); }
+.cv-nav > button.on svg { opacity: 1; }
 .cv-nav > button:active { transform: translateY(2px); }
 .cv-log { flex-grow: 1; border: 0; border-radius: 30px; background: #1F6BFF; color: #FFF; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 900; font-size: 15px; }
 .cv-tab { height: 30px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font-weight: 900; font-size: 15px; color: #B5B5BC; white-space: nowrap; }
 .cv-tab.on { padding: 0 14px; background: #E4FF1A; box-shadow: 0 0 0 3px #F4FF9E; color: #111; }
-.cv-slab { position: relative; display: block; width: 100%; height: 150px; border: 0; padding: 0; background: none; text-align: left; color: inherit; flex-shrink: 0; }
-.cv-slab > .sb, .cv-slab > .sf { position: absolute; left: 0; right: 0; top: 0; height: 150px; border-radius: 28px; }
-.cv-slab > .sb { top: 9px; }
-.cv-slab > .sf { padding: 0 22px; display: flex; align-items: center; }
-.cv-slab .si { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-button.cv-slab:active { transform: translateY(2px); }
-.cv-big { font-weight: 900; line-height: 1; letter-spacing: -2px; white-space: nowrap; }
-.cv-meta { display: flex; flex-direction: column; gap: 6px; white-space: nowrap; }
+/* 流水 ledger: category filter chips, then one white card per day with a row per expense */
+/* 牌库: the next unlock / last week as a tappable row under the tabs */
+.dk-next { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 2px solid var(--rule); border-radius: 20px; background: #FFF; text-align: left; color: var(--ink); }
+.dk-ico { width: 44px; height: 44px; flex-shrink: 0; border-radius: 13px; display: flex; align-items: center; justify-content: center; }
+.dk-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dk-main b { font-size: 14px; font-weight: 900; }
+.dk-main small { font-size: 12px; color: var(--sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dk-bar { height: 6px; margin-top: 5px; border-radius: 3px; background: #ECECF0; overflow: hidden; } .dk-bar i { display: block; height: 100%; border-radius: 3px; background: var(--ink); }
+.dk-tail { display: flex; align-items: center; gap: 8px; color: var(--mute); flex-shrink: 0; }
+.dk-tail b { font-weight: 400; font-size: 14px; color: var(--ink); } .dk-tail small { font-size: 11px; max-width: 90px; text-align: right; }
+.lg-chips { display: flex; gap: 6px; overflow-x: auto; margin: 0 -18px; padding: 2px 18px 4px; scrollbar-width: none; }
+.lg-chip { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 17px; border: 2px solid var(--rule); background: #FFF; font-size: 13px; font-weight: 900; white-space: nowrap; }
+.lg-chip i { width: 10px; height: 10px; border-radius: 50%; }
+.lg-chip b { font-family: var(--f-px); font-weight: 400; color: var(--sub); }
+.lg-chip.on { background: var(--ink); border-color: var(--ink); color: #FFF; } .lg-chip.on b { color: var(--lime); }
+.lg-day { display: flex; flex-direction: column; gap: 6px; }
+.lg-head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 4px; border: 0; background: none; font-size: 15px; font-weight: 900; text-align: left; width: 100%; }
+.lg-head small { font-family: var(--f-px); font-size: 12px; font-weight: 400; color: var(--mute); margin-left: 8px; }
+.lg-head .px { font-size: 13px; font-weight: 400; color: var(--sub); }
+.lg-list { border-radius: 22px; background: #F6F6F8; padding: 4px; display: flex; flex-direction: column; gap: 2px; }
+.lg-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 0; border-radius: 18px; background: #FFF; text-align: left; }
+.lg-ico { width: 38px; height: 38px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-style: normal; font-weight: 900; font-size: 15px; color: #111; }
+.lg-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.lg-main b { font-size: 15px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lg-main small { font-size: 12px; color: var(--mute); }
+.lg-main em { align-self: flex-start; margin-top: 3px; font-style: normal; padding: 1px 8px; border-radius: 8px; background: #111; color: #FFF; font-size: 11px; font-weight: 900; }
+.lg-amt { font-family: var(--f-px); font-size: 17px; white-space: nowrap; }
+.lg-amt.hit { color: #C8102E; } .lg-amt.wish { color: var(--mute); text-decoration: line-through; }
 .cv-cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
 .cv-day { height: 46px; border: 0; border-radius: 10px; padding: 2px 2px 6px; box-shadow: 0 4px 8px rgba(20,20,30,0.16); display: block; text-align: left; }
 .cv-day > span { display: flex; flex-direction: column; justify-content: space-between; height: 100%; border-radius: 8px; padding: 3px 5px; font-family: var(--f-px); font-size: 11px; color: #111; }
@@ -316,7 +370,7 @@ button.cv-cell:active .cv-icon { transform: translateY(2px); }
 .freq button[aria-pressed="true"] { background: #111; border-color: #111; color: #FFF; }
 /* first-time home tips: a bubble pointing at one element, with the rest dimmed */
 .coach-dim { position: absolute; inset: 0; z-index: 6; background: rgba(17,17,17,0.45); }
-.coach-on { position: relative; z-index: 7; box-shadow: 0 0 0 4px var(--lime), 0 0 0 8px rgba(228,255,26,0.35); border-radius: 18px; }
+.coach-on { position: relative; z-index: 7; }
 .coach { position: absolute; left: 18px; right: 18px; z-index: 8; background: #111; color: #FFF; border-radius: 18px; padding: 12px 14px; font-size: 14px; line-height: 1.5; box-shadow: 0 14px 24px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 8px; animation: up 0.2s ease; }
 .coach::before { content: ""; position: absolute; left: 44px; top: -8px; border: 8px solid transparent; border-top: 0; border-bottom-color: #111; }
 .coach.above::before { top: auto; bottom: -8px; border-bottom: 0; border-top: 8px solid #111; }
@@ -368,11 +422,6 @@ button.hcard:active > div { transform: translateY(2px); }
 .multc b { font-family: var(--f-display); font-weight: 400; font-size: 28px; line-height: 1; }
 .hold-lbl { font-size: 12px; font-weight: 900; color: var(--sub); margin-bottom: -4px; }
 /* deal of five: two rows, picked cards lift and get a number */
-.deal { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 10px; padding: 12px 0 4px; }
-.deal .pick, .deal .pick:nth-child(1), .deal .pick:nth-child(3) { position: relative; transform: none; }
-.deal .pick.sel { transform: translateY(-10px) rotate(-2deg); }
-.deal .pick.sel .face { outline: 4px solid var(--ink); outline-offset: 2px; box-shadow: 0 0 0 10px var(--lime); border-radius: 12px; }
-.deal.full .pick:not(.sel) { opacity: 0.4; filter: grayscale(0.7); }
 .draw-lead { margin: -4px 0 0; font-size: 14px; font-weight: 900; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .drawfoot { position: sticky; bottom: -24px; z-index: 3; margin: auto -18px -24px; padding: 12px 18px 22px; background: #FFF; border-radius: 22px 22px 0 0; box-shadow: 0 -10px 24px rgba(20,20,30,0.1); display: flex; flex-direction: column; gap: 10px; }
 .dsum { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--sub); }
@@ -380,7 +429,60 @@ button.hcard:active > div { transform: translateY(2px); }
 .dslots { display: flex; gap: 6px; }
 .dslot { width: 34px; height: 34px; border-radius: 11px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--ink); }
 .dslot.empty { border: 2px dashed #C4C4CC; background: #F6F6F8; }
-.pick-n { position: absolute; right: -8px; top: -10px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; background: var(--lime); border: 2px solid var(--ink); font-family: var(--f-display); font-size: 13px; display: flex; align-items: center; justify-content: center; }
+/* draw: a sealed pack tears open and the cards fan out of it like a hand */
+.hand { flex: 1 0 auto; display: flex; align-items: center; justify-content: center; min-height: 372px; margin: 0 -18px; overflow: hidden; }
+.hand-in { position: relative; flex-shrink: 0; width: 100%; height: 372px; }
+.hand.open { min-height: 352px; } .hand.open .hand-in { height: 352px; }
+.bag.closed { cursor: grab; touch-action: none; } .bag.tearing-drag { cursor: grabbing; }
+.bag.tearing-drag .bag-strip { transition: none; }
+.bag-strip { transition: transform 0.45s cubic-bezier(.3,1.7,.5,1); }
+/* the bag: closed it stands tall in the middle; opened it sits low and open with the cards fanned out of it */
+.bag { position: absolute; z-index: 20; left: 50%; top: 40px; width: 200px; height: 262px; margin-left: -100px; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform 0.7s cubic-bezier(.3,1.7,.5,1); filter: drop-shadow(0 18px 18px rgba(20,20,30,0.25)); }
+.bag.tilt { transition: transform 0.12s ease-out; }
+.bag svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.bag-strip { transform-origin: 96% 16%; }
+.bag-sheen { position: absolute; left: 6px; right: 6px; top: 52px; bottom: 12px; pointer-events: none; background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.55) 45%, transparent 58%); background-size: 260% 100%; background-position: calc(50% - var(--ry, 0deg) / 1deg * 3%) 0; mix-blend-mode: soft-light; transition: background-position 0.3s; }
+.bag-eyes { position: relative; z-index: 1; display: flex; gap: 18px; margin-top: 18px; transform: translate(var(--ex, 0px), var(--ey, 0px)); transition: transform 0.2s; }
+.bag-eyes i { width: 12px; height: 28px; border-radius: 6px; background: #111; animation: blink 4.2s infinite; }
+@keyframes blink { 0%, 92%, 100% { transform: none; } 95% { transform: scaleY(0.1); } }
+.pk-week { position: relative; z-index: 1; padding: 1px 10px; border-radius: 10px; border: 2px solid var(--ink); background: #FFF; font-size: 12px; transform: rotate(-6deg); order: -1; }
+.pk-title { position: relative; z-index: 1; font-weight: 900; font-size: 30px; letter-spacing: 1px; line-height: 1; transform: rotate(-3deg); }
+.pk-count { position: relative; z-index: 1; font-size: 12px; }
+.pk-tear { left: 50%; top: 318px; transform: translateX(-50%) rotate(-3deg); animation: nudge 1.6s ease-in-out infinite; font-size: 13px; padding: 4px 14px; pointer-events: none; }
+@keyframes nudge { 0%, 100% { transform: translateX(-50%) rotate(-3deg); } 50% { transform: translateX(calc(-50% + 10px)) rotate(-3deg); } }
+.pk-tear.shake { animation: hintShake 0.4s ease; }
+@keyframes hintShake { 25% { transform: translateX(calc(-50% - 8px)) rotate(-6deg); } 75% { transform: translateX(calc(-50% + 8px)) rotate(3deg); } }
+/* tearing: the strip peels off and flies, the bag squishes */
+.hand.tearing .bag-strip { animation: peel 0.5s cubic-bezier(.5,0,.7,1) forwards; }
+@keyframes peel { 30% { transform: rotate(-9deg) translate(-4px, -8px); } 100% { transform: translate(170px, -190px) rotate(75deg); opacity: 0; } }
+.hand.tearing .bag { animation: squish 0.46s ease; }
+@keyframes squish { 25% { transform: scale(1.06, 0.92); } 55% { transform: scale(0.96, 1.05); } 100% { transform: none; } }
+.hand.tearing .pk-tear { opacity: 0; transition: opacity 0.15s; }
+/* open: the bag drops low; a dark mouth sits behind the cards so they look tucked inside */
+.burst { position: absolute; left: 50%; top: 150px; z-index: 25; pointer-events: none; }
+.cf { position: absolute; left: 0; top: 0; opacity: 0; animation: confetti 1.15s cubic-bezier(.15,.7,.4,1) forwards; animation-delay: var(--cd); }
+@keyframes confetti { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 45% { opacity: 1; transform: translate(var(--cx), var(--cy)) rotate(var(--cr)); } 100% { opacity: 0; transform: translate(calc(var(--cx) * 1.25), calc(var(--cy) + 280px)) rotate(calc(var(--cr) * 2)); } }
+/* the stack: positions come from layoutStack(), CSS only animates between them */
+.stack { position: absolute; left: 0; right: 0; top: 0; height: 306px; overflow: visible; touch-action: pan-y; cursor: grab; }
+.stack.dragging { cursor: grabbing; }
+.sc2 { position: absolute; left: 50%; top: 44px; width: 180px; height: 255px; margin-left: -90px; border: 0; padding: 0; background: none; transition: transform 0.38s cubic-bezier(.25,1.3,.5,1), opacity 0.2s; }
+.stack.dragging .sc2 { transition: none; }
+.sc2-face { width: 240px; height: 340px; transform: scale(0.75); transform-origin: 0 0; pointer-events: none; }
+.sc2:not(.front) .sc2-face { filter: brightness(0.9); }
+.sc2:not(.front) { pointer-events: none; }
+.sc2.front .sc2-face { filter: drop-shadow(0 16px 18px rgba(20,20,30,0.28)); }
+.sc2 .carry-tag { left: 4px; top: -6px; }
+.sc2-rec { right: -6px; top: -8px; font-size: 11px; padding: 1px 8px; }
+.dsum-rec { height: 30px; padding: 0 12px; border-radius: 15px; border: 2px solid var(--ink); background: var(--lime); font-size: 12px; font-weight: 900; white-space: nowrap; }
+.sdots { position: absolute; left: 0; right: 0; top: 314px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--mute); }
+.sd { display: flex; gap: 6px; } .sd i { width: 7px; height: 7px; border-radius: 4px; background: #D6D6DC; transition: width 0.2s; } .sd i.on { width: 22px; }
+.hand.dealing .sc2 { animation: dealIn 0.95s cubic-bezier(.25,.8,.35,1) backwards; animation-delay: var(--d); }
+@keyframes dealIn { 0% { transform: translate(0, 60px) rotate(0) scale(0.3); opacity: 0; } 12% { opacity: 1; } 45% { transform: translate(var(--bx), var(--by)) rotate(var(--br)) scale(0.9); } }
+.hand.returning .sc2 { animation: dealOut 0.45s ease-in forwards; animation-delay: calc(var(--d) / 2); }
+@keyframes dealOut { to { transform: translate(0, 220px) rotate(0) scale(0.6); opacity: 0; } }
+.dslot { padding: 0; }
+.dslot.land { animation: land 0.5s cubic-bezier(.2,.9,.3,1.2); }
+@keyframes land { from { transform: translateY(-150px) scale(2.4) rotate(-14deg); opacity: 0.2; } 70% { transform: translateY(3px) scale(0.94); } }
 /* verdict after saving an entry */
 .fb { position: absolute; inset: 0; z-index: 35; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(17,17,17,0.55); animation: up 0.2s ease; cursor: pointer; }
 .fb-card { width: 100%; border-radius: 28px; background: #FFF; padding: 20px 18px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.35); }
@@ -510,11 +612,11 @@ button.hcard:active > div { transform: translateY(2px); }
 /* the live preview: a dark ticket whose star badge shows the multiplier you'll end up with */
 .vline { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 16px; border-radius: 22px; color: #FFF; background: linear-gradient(180deg, #1E1E22 0%, #0E0E11 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 14px 20px -12px rgba(20,20,30,0.5); }
 .vtext { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.vline b { font-size: 16px; font-weight: 900; }
-.vline span { font-size: 12px; color: #C9C3FF; }
-.vline small { font-size: 12px; font-weight: 900; color: var(--lime); line-height: 1.4; }
-.vline.bad b { color: #FF8FA3; } .vline.bad small { color: #FFD0D8; }
-.vline.good b { color: var(--lime); }
+.vtext b { font-size: 16px; font-weight: 900; }
+.vtext span { font-size: 12px; color: #C9C3FF; }
+.vtext small { font-size: 12px; font-weight: 900; color: var(--lime); line-height: 1.4; }
+.vline.bad .vtext b { color: #FF8FA3; } .vline.bad .vtext small { color: #FFD0D8; }
+.vline.good .vtext b { color: var(--lime); }
 .vmult { flex-shrink: 0; width: 64px; height: 64px; background: #C9C3FF; color: #2B2470; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
 .vmult b { font-family: var(--f-display); font-weight: 400; font-size: 21px; }
 .vmult small, .vmult s { font-size: 10px; font-weight: 900; color: inherit; opacity: 0.75; }
@@ -525,20 +627,9 @@ button.hcard:active > div { transform: translateY(2px); }
 .qchip { user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 .qchip.on { background: var(--lime); border-color: var(--ink); }
 /* recommended set on the draw page */
-.recbox { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 18px 12px 12px; margin-top: 8px; border-radius: 22px; background: #F1FFB0; border: 2px solid var(--lime-edge); }
-.rfoot { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 900; color: #3E5A00; }
-.rfoot .cap { width: auto; flex-shrink: 0; }
-.rhead b { display: block; font-size: 15px; font-weight: 900; }
-.rhead span { font-size: 12px; color: #3E5A00; }
-.ricons { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 6px; }
-.ricons > span { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 900; white-space: nowrap; min-width: 0; }
-.ricons i { width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-.ricons em { font-style: normal; font-family: var(--f-px); font-weight: 400; color: var(--sub); }
-.recbox .cap > .top { text-align: center; font-weight: 900; font-size: 13px; padding: 8px 14px; white-space: nowrap; }
 .linkbtn { border: 0; background: none; font-family: var(--f-px); font-size: 12px; color: #6A6A70; padding: 6px; }
 
 .toast { position: absolute; left: 50%; top: var(--top); transform: translateX(-50%); z-index: 30; max-width: calc(100% - 32px); padding: 8px 14px; border-radius: 14px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 900; box-shadow: 0 10px 20px rgba(0,0,0,0.25); text-align: center; }
-.sample { font-family: var(--f-mono); font-size: 11px; color: var(--mute); text-align: center; margin: 0; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 /* shrink the whole mockup on short windows so the phone fits without scrolling the page */
 @media (max-height: 960px) and (min-width: 441px) { .device { zoom: 0.9; } }
@@ -899,8 +990,7 @@ function homeHTML() {
     <div class="keys">${list}</div>
     <div class="lbl">常用 · 点一下选好是什么，再填金额</div>
     <div class="quick">${S.quicks.map((q, i) => `<button class="chip qchip" data-hquick="${i}">${esc(q.label)}</button>`).join("")}</div>
-    <button class="cap lime bigbtn endbtn" data-act="end"><div class="top">结束今天</div></button>
-    <p class="sample">示例数据 · 每天能花 ¥${dailyBudget()} · 吃饭、通勤每天 ¥${essQuota} 以内不算</p>`;
+    <button class="cap lime bigbtn endbtn" data-act="end"><div class="top">结束今天</div></button>`;
 }
 
 /* ---------- tab pages, ported from the canvas screens ---------- */
@@ -912,13 +1002,25 @@ const NAV = [
 ];
 function navHTML() {
   const on = S.view === 'flow' ? 'bill' : S.view;
-  return `<nav class="cv-nav" aria-label="主导航">${NAV.map(n => `<button data-tab="${n.id}" class="${on === n.id ? 'on' : ''}" style="background:${n.bg}" ${on === n.id ? 'aria-current="page"' : ''}>${n.icon}<span>${n.name}</span></button>`).join('')}<button class="cv-log" data-act="log"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M8 2v12M2 8h12"/></svg>记一笔</button></nav>`;
+  return `<nav class="cv-nav" aria-label="主导航">${NAV.map(n => `<button data-tab="${n.id}" class="${on === n.id ? 'on' : ''}" ${on === n.id ? `style="background:${n.bg}" aria-current="page"` : ''}>${n.icon}<span>${n.name}</span></button>`).join('')}<button class="cv-log" data-act="log"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M8 2v12M2 8h12"/></svg>记一笔</button></nav>`;
 }
 function renderTable() {
   const body = { home: homeHTML, bill: billHTML, deck: deckHTML }[S.view]();
-  app.innerHTML = `<div class="screen">${body}</div>${navHTML()}`;
+  app.innerHTML = `<div class="screen">${body}</div>${minibarHTML()}${navHTML()}`;
+  app.classList.remove('scrolled');
   showCoach();
 }
+function minibarHTML() {
+  const title = { home: `第 ${S.week} 周 · 周${DAYS[S.day]}`, bill: '账单', deck: '牌库' }[S.view];
+  const mult = S.held.length ? `<span class="mm">×${evaluate(S.today).mult}</span>` : '';
+  return `<button class="minibar" data-act="to-top" aria-label="回到顶部"><span class="mt">${title}</span><span class="mr">${mult}<span class="ms">★ ${S.stars}</span></span></button>`;
+}
+// past the first row the compact bar takes over; sheets just add a shadow under their pinned title
+app.addEventListener('scroll', e => {
+  const el = e.target;
+  if (el.classList.contains('screen')) app.classList.toggle('scrolled', el.scrollTop > 56);
+  else if (el.classList.contains('sheet')) el.classList.toggle('scrolled', el.scrollTop > 4);
+}, true);
 // replaces the old one-minute guide: tips on the real home screen, the first time it opens
 const COACH = [
   { sel: '.hold', text: '这是你这周留下的 3 张牌。守住一张就加它的倍率，碎了当天就不算，第二天零点恢复。' },
@@ -952,39 +1054,42 @@ function clearCoach() {
 const tabsHTML = (items, attr) => `<div role="tablist" style="border-radius:20px;padding:5px;${CHECK}"><div style="display:flex;align-items:center;gap:4px;height:42px;padding:0 6px;border-radius:15px;background:#FFF">
   ${items.map(t => `<button role="tab" aria-selected="${!!t.on}" class="cv-tab ${t.on ? 'on' : ''}" ${attr}="${t.id}">${t.name}</button>`).join('')}${items.extra || ''}</div></div>`;
 
-// flow: today's entries as tilted slabs (ToyFeed)
-const SLAB = { grey: ['#F2F2F5', '#CFCFD6', '#111', '#8A8A92'], green: ['#1E7A2E', '#12501D', '#FFF', 'rgba(255,255,255,0.8)'], pink: ['#FF8CC6', '#D25D9B', '#111', '#111'], lav: ['#DCD8FF', '#B7B0F0', '#2B2470', '#4A4390'], blue: ['#1F6BFF', '#1546B0', '#FFF', 'rgba(255,255,255,0.85)'] };
-function slabHTML(x, i, opts) {
-  const ess = !!cat(x.cat).ess;
-  const tone = opts.wish ? 'blue' : ess ? (i % 2 ? 'green' : 'grey') : opts.breaks ? 'pink' : 'lav';
-  const [face, back, fg, sub] = SLAB[tone];
-  const title = x.note && x.note.length <= 4 ? esc(x.note) : cat(x.cat).name;
-  const len = title.length, size = len <= 2 ? 68 : len === 3 ? 54 : 44;
-  const sk = i % 2 ? 7 : -7;
-  const tag = opts.wish ? `<span class="px" style="padding:2px 10px;border-radius:10px;background:#E4FF1A;color:#111;font-size:14px">没买 · 明天问你</span>`
-    : opts.breaks ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;background:#111;color:#FFF;font-size:11px;font-weight:900">碎了 ${opts.breaks.join('、')}</span>`
-    : `<span class="px" style="font-size:13px;color:${sub}">${ess ? '必需 · 额度内' : x.fromWish ? '等过 24 小时' : '没碰到规则'}</span>`;
-  const meta = `<div class="cv-meta" style="${i % 2 ? 'align-items:flex-end' : ''}"><span class="px" style="font-size:14px;color:${sub}">${x.night ? '22 点后' : '白天'}</span>${tag}</div>`;
-  const words = `<div style="${i % 2 ? '' : 'text-align:right'}"><div class="cv-big" style="font-size:${size}px;${opts.wish ? 'text-decoration:line-through;text-decoration-thickness:6px;text-decoration-color:#E4FF1A' : ''}">${title}</div><div class="px" style="font-size:${opts.wish ? 15 : 19}px;margin-top:4px;white-space:nowrap">¥${x.amt}${opts.wish ? ' · 进了待买清单' : ''}</div></div>`;
-  const elt = opts.edit != null ? 'button' : 'div';
-  return `<${elt} class="cv-slab" style="z-index:${opts.z};${i ? 'margin-top:-14px' : ''}" ${opts.edit != null ? `data-edit="${opts.edit}" aria-label="${entryName(x)} ${x.amt} 元，点一下修改"` : ''}>
-    <div class="sb" aria-hidden="true" style="background:${back};transform:skewY(${sk}deg)"></div>
-    <div class="sf" style="background:${face};color:${fg};transform:skewY(${sk}deg)"><div class="si" style="transform:skewY(${-sk}deg)">${i % 2 ? words + meta : meta + words}</div></div>
-  </${elt}>`;
-}
+// each category gets a color and a one-character badge so a long ledger scans at a glance
+const CAT_COLOR = { takeout: '#FF4D6A', tea: '#FF7BD5', online: '#2E8BFF', taxi: '#2FD15C', meal: '#FFD000', commute: '#C9C3FF', other: '#D4D4DB' };
+const catBadge = id => `<i class="lg-ico" style="background:${CAT_COLOR[id] || '#D4D4DB'}">${esc(cat(id).name.slice(0, 1))}</i>`;
 function flowHTML(tabs) {
-  const paid = S.today.reduce((a, x) => a + x.amt, 0), br = breakers(S.today);
-  const items = [...S.today.map((x, i) => ({ x, edit: i, breaks: br[i] })), ...S.wish.map(x => ({ x, wish: true }))];
-  const n = items.length;
+  const f = S.flowCat || 'all';
+  // today stays editable; past days come from history and open their receipt
+  const brT = breakers(S.today);
+  const days = [{ label: '今天', date: dateOf(S.week, S.day), items: [...S.today.map((x, i) => ({ x, edit: i, breaks: brT[i] })), ...S.wish.map(x => ({ x, wish: true }))] },
+    ...S.history.slice().reverse().map(h => { const br = breakers(h.entries, h.held, h.teaBefore, h.weekBefore || 0); return { label: `周${DAYS[h.day]}`, date: dateOf(h.week, h.day), cal: `${h.week}-${h.day}`, unlogged: h.unlogged, items: h.entries.map((x, i) => ({ x, breaks: br[i] })) }; })];
+  const all = days.flatMap(d => d.items.filter(it => !it.wish));
+  const byCat = {}; all.forEach(it => { byCat[it.x.cat] = (byCat[it.x.cat] || 0) + it.x.amt; });
+  const shown = all.filter(it => f === 'all' || it.x.cat === f), total = shown.reduce((a, it) => a + it.x.amt, 0);
+  const chips = [['all', '全部', all.reduce((a, it) => a + it.x.amt, 0)], ...Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([id, v]) => [id, cat(id).name, v])]
+    .map(([id, name, v]) => `<button class="lg-chip ${f === id ? 'on' : ''}" data-flowcat="${id}" aria-pressed="${f === id}">${id === 'all' ? '' : `<i style="background:${CAT_COLOR[id] || '#D4D4DB'}"></i>`}${name}<b>¥${v}</b></button>`).join('');
+  const row = it => {
+    const x = it.x, ess = !!cat(x.cat).ess;
+    const tags = [ess ? '必需' : '', x.night ? '22 点后' : '', x.fromWish ? '等过 24 小时' : '', it.wish ? '待买 · 明天问你' : ''].filter(Boolean).join(' · ');
+    const inner = `${catBadge(x.cat)}<span class="lg-main"><b>${x.note ? esc(x.note) : cat(x.cat).name}</b><small>${cat(x.cat).name}${tags ? ' · ' + tags : ''}</small>${it.breaks ? `<em>碎了 ${it.breaks.join('、')}</em>` : ''}</span><span class="lg-amt ${it.breaks ? 'hit' : ''} ${it.wish ? 'wish' : ''}">${it.wish ? '' : '−'}¥${x.amt}</span>`;
+    return it.edit != null ? `<button class="lg-row" data-edit="${it.edit}" aria-label="${entryName(x)} ${x.amt} 元，点一下修改">${inner}</button>` : `<div class="lg-row">${inner}</div>`;
+  };
+  const groups = days.map(d => {
+    const items = d.items.filter(it => f === 'all' || it.x.cat === f);
+    if (!items.length && (f !== 'all' || d.label !== '今天')) return '';
+    const sum = items.filter(it => !it.wish).reduce((a, it) => a + it.x.amt, 0);
+    const head = `<span>${d.label}<small>${d.date.getMonth() + 1}/${d.date.getDate()}</small></span><span class="px">¥${sum}${d.cal ? ' · 小票 →' : ''}</span>`;
+    return `<section class="lg-day">${d.cal ? `<button class="lg-head" data-cal="${d.cal}">${head}</button>` : `<div class="lg-head">${head}</div>`}
+      <div class="lg-list">${items.map(row).join('') || `<p class="note left" style="padding:12px 14px">${d.unlogged ? '这天没记账。' : '今天还没花钱，按下面的"记一笔"开始。'}</p>`}</div></section>`;
+  }).join('');
   return `<div style="display:flex;justify-content:space-between;align-items:center;min-height:44px">
-      <h1 style="margin:0;font-weight:900;font-size:26px">今天的流水</h1>
-      <span class="px" style="height:32px;padding:0 12px;border-radius:12px;border:2px solid #E2E2E8;display:inline-flex;align-items:center;font-size:14px;color:#55555C">周${DAYS[S.day]} · 实付 ¥${paid}</span>
+      <h1 style="margin:0;font-weight:900;font-size:26px">流水</h1>
+      <span class="px" style="height:32px;padding:0 12px;border-radius:12px;border:2px solid #E2E2E8;display:inline-flex;align-items:center;font-size:14px;color:#55555C">${shown.length} 笔 · ¥${total}</span>
     </div>
     ${tabs}
-    <div style="display:flex;flex-direction:column;margin-top:18px">${items.map((it, i) => slabHTML(it.x, i, { edit: it.edit, wish: it.wish, breaks: it.breaks, z: n - i })).join('') || '<p class="note">今天还没花钱。按下面的"记一笔"开始。</p>'}</div>
-    <p class="note left" style="margin-top:8px">点一块可以改或删。粉色那块是让牌碎掉的那笔。</p>
-    <h2>本周其他天 <small>点一天看小票</small></h2>
-    <div class="cap"><div class="top">${tilesHTML()}</div></div>`;
+    <div class="lg-chips">${chips}</div>
+    ${groups || '<p class="note">这个类别还没有花费。</p>'}
+    <p class="note">今天的可以点开改或删，以前的点日期看那天的小票。</p>`;
 }
 
 // bill: calendar month with keycap day cells (ToyBill) and where it went (ToyCats); always real money
@@ -1086,28 +1191,29 @@ function deckHTML() {
     const own = log ? '<span class="cv-own"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 5l2 2 4-4" stroke="#FFF" stroke-width="1.8" fill="none"/></svg></span>' : '';
     return isOpen
       ? `<button class="cv-cell" data-info="${x.no}" aria-label="${x.name}，+${x.plus} 倍率${log ? `，守住过 ${log.held}/${log.days} 天` : ''}"><div class="cv-icon" style="background:${coreOf(x.no)}">${artIcon(x.no, 54)}${badge}${own}</div><span class="cv-name">${x.name} <span class="px" style="font-weight:400">+${x.plus}</span></span></button>`
-      : `<div class="cv-cell" aria-label="${x.name}，攒到 ${x.unlock} 颗星解锁"><div class="cv-icon cv-lock"><span class="px" style="font-size:16px;color:#8A8A92">★${x.unlock}</span></div><span class="cv-name" style="color:#8A8A92">${x.name}</span></div>`;
+      : `<button class="cv-cell" data-info="${x.no}" aria-label="${x.name}，攒到 ${x.unlock} 颗星解锁"><div class="cv-icon cv-lock"><span class="px" style="font-size:16px;color:#8A8A92">★${x.unlock}</span></div><span class="cv-name" style="color:#8A8A92">${x.name}</span></button>`;
   }).join('');
   const last = S.lastResult;
   const banner = last && last.grads.length
     ? { no: last.grads[0], title: `「${CARDS[last.grads[0]].name}」毕业了`, sub: `连续 ${GRAD_WEEKS} 周守住 6/7 天以上，这个习惯改掉了。`, tail: `底倍率永久 +1，现在从 ${S.baseMult} 开始，目标分也跟着涨` }
     : last
     ? { no: last.best, title: `上周${last.pass ? '过关了' : '没过'} · ${last.score} / ${last.target} 分`, sub: last.pass ? `拿到 ${starStr(last.stars)}，现在共 ${S.stars} 颗星。守得最好的是「${CARDS[last.best].name}」` : '没过不扣钱，这周换几张更守得住的牌', tail: last.fresh ? `解锁新牌：${last.fresh}` : next ? `再攒 ${Math.max(0, next.unlock - S.stars)} 颗解锁：${next.name}` : '' }
-    : next ? { no: next.no, title: `下一张：${next.name}`, sub: next.cond, tail: `再攒 ${Math.max(0, next.unlock - S.starsTotal)} 颗星解锁` } : null;
+    : next ? { no: next.no, title: `下一张解锁：${next.name}`, sub: next.cond, tail: `再攒 ${Math.max(0, next.unlock - S.starsTotal)} 颗星`, have: S.starsTotal, need: next.unlock } : null;
   return `<div style="display:flex;justify-content:space-between;align-items:center">
       <div><h1 style="margin:0;font-weight:900;font-size:28px">牌库</h1><p class="px" style="margin:2px 0 0;font-size:12px;color:#6A6A70">第 ${S.week} 周 · ★ ${S.stars}</p></div>
       <div style="display:flex;align-items:center;height:52px;padding:0 14px 0 22px;border-radius:26px;border:2px solid #E2E2E8">${dots}
         <span class="px" aria-label="已解锁 ${open.length} / ${all.length}" style="margin-left:10px;display:flex;flex-direction:column;align-items:center;font-size:15px;line-height:1"><b style="font-weight:400">${open.length}</b><i style="width:22px;height:2px;margin:3px 0;background:#111"></i><b style="font-weight:400">${all.length}</b></span></div>
     </div>
     ${tabsHTML([{ id: 'all', name: `全部 <span class="px" style="font-weight:400">${all.length}</span>`, on: f === 'all' }, { id: 'open', name: `已解锁 <span class="px" style="font-weight:400">${open.length}</span>`, on: f === 'open' }, { id: 'grad', name: `已毕业 <span class="px" style="font-weight:400">${S.grad.length}</span>`, on: f === 'grad' }], 'data-deck')}
+    ${banner ? `<button class="dk-next" data-info="${banner.no}">
+      <i class="dk-ico" style="background:${coreOf(banner.no)}">${artIcon(banner.no, 30)}</i>
+      <span class="dk-main"><b>${banner.title}</b><small>${banner.sub}</small>${banner.need ? `<span class="dk-bar"><i style="width:${Math.min(100, Math.round(banner.have / banner.need * 100))}%"></i></span>` : ''}</span>
+      <span class="dk-tail">${banner.need ? `<b class="px">★${banner.have}/${banner.need}</b>` : ''}${banner.tail && !banner.need ? `<small>${banner.tail}</small>` : ''}<svg width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></span>
+    </button>` : ''}
     <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));row-gap:16px;column-gap:8px;margin-top:6px">${cells || '<p class="note">这里还没有牌。</p>'}</div>
-    ${banner ? `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:22px;background:#111;color:#FFF;margin-top:4px">
-      <div style="width:52px;height:52px;flex-shrink:0;border-radius:14px;background:${coreOf(banner.no)};display:flex;align-items:center;justify-content:center">${artIcon(banner.no, 40)}</div>
-      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:14px">${banner.title}</span><span style="font-size:12px;color:rgba(255,255,255,0.8)">${banner.sub}</span>${banner.tail ? `<span class="px" style="font-size:12px;color:#E4FF1A">${banner.tail}</span>` : ''}</div>
-    </div>` : ''}
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       <span style="font-weight:900;font-size:13px;margin-right:2px">守住加</span>
-      <span class="cv-pill" style="background:#2E8BFF;border-color:#2E8BFF;color:#FFF">+1 好守</span><span class="cv-pill" style="background:#FF4D6A;border-color:#FF4D6A;color:#FFF">+2 要留意</span><span class="cv-pill" style="background:#111;border-color:#111;color:#E4FF1A">+3 最难</span>
+      ${[...new Set(all.map(x => x.plus))].sort().map(n => `<span class="cv-pill" style="background:${TYPES[n].core};border-color:${TYPES[n].core};color:${TYPES[n].chipText}">+${n} ${n === 1 ? '好守' : n === 2 ? '要留意' : '最难'}</span>`).join('')}
     </div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       <span style="font-weight:900;font-size:13px;margin-right:2px">难度</span>
@@ -1139,27 +1245,45 @@ function bestCombo(hand, n, hasData) {
   const value = c => hasData ? simulate(c, S.lastWeek, S.weekStart).total : -c.reduce((a, no) => a + CARDS[no].diff * 10 - CARDS[no].plus, 0);
   return ok.sort((a, b) => value(b) - value(a))[0] || combos[0] || hand.slice(0, n);
 }
-function recHTML(need, hasData) {
-  draft.rec = draft.rec || bestCombo(draft.hand, need, hasData);
-  const r = draft.rec, mult = S.baseMult + r.reduce((a, no) => a + CARDS[no].plus, 0);
-  const how = hasData ? `约 ${simulate(r, S.lastWeek, S.weekStart).total} 分 / 目标 ${weekTarget()}` : `好守，全守住 ×${mult}`;
-  return `<div class="recbox"><span class="sticker" style="left:12px;top:-11px;transform:rotate(-4deg)">推荐</span>
-    <div class="ricons">${r.map(no => `<span><i style="background:${coreOf(no)}">${artIcon(no, 24)}</i>${CARDS[no].name}</span>`).join("")}</div>
-    <div class="rfoot"><span>${how}</span><button class="cap lime" data-act="use-rec"><div class="top">就用这 ${r.length} 张</div></button></div></div>`;
-}
 function renderDraw() {
   if (!draft.hand) {
     // a carried card and any pinned in the shop are always dealt; the carried one starts picked, the rest are random
     const forced = [...new Set([S.carry, ...S.pinned].filter(no => no && S.unlocked.includes(no)))];
     const others = S.unlocked.filter(no => !forced.includes(no)).sort(() => Math.random() - 0.5);
     draft.hand = S.firstDraw ? firstHand() : [...forced, ...others].slice(0, Math.max(DEALN(), forced.length));
-    draft.sel = !S.firstDraw && S.carry && draft.hand.includes(S.carry) ? [S.carry] : []; draft.flip = true;
+    draft.sel = !S.firstDraw && S.carry && draft.hand.includes(S.carry) ? [S.carry] : [];
   }
   // once enough cards graduate the pool can run short, so never ask for more than can be kept together
   const need = keepN(draft.hand);
-  const sel = draft.sel, focus = draft.focus;
+  const sel = draft.sel;
   const hasData = S.lastWeek.some(d => d.length);
-  const cards = draft.hand.map(no => `<button class="pick ${sel.includes(no) ? 'sel' : ''}" data-pick="${no}" aria-pressed="${sel.includes(no)}" aria-label="${CARDS[no].name} +${CARDS[no].plus}"><div class="flip ${draft.flip ? 'down' : ''}"><div class="face"><div class="scale">${cardHTML(CARDS[no])}</div></div><div class="back"><span>?</span></div></div>${sel.includes(no) ? `<span class="pick-n">${sel.indexOf(no) + 1}</span>` : ''}${no === S.carry && !S.firstDraw ? '<span class="carry-tag">续留</span>' : !sel.includes(no) && clashIn(no, sel) ? '<span class="carry-tag">重叠</span>' : ''}</button>`).join('');
+  // once the bag is torn the cards sit in a stack: the front one full size, the rest peeking out on either side.
+  // swipe sideways to bring another to the front; tap the front card to keep it
+  const inHand = draft.hand.filter(no => !sel.includes(no));
+  const rec = draft.rec = draft.rec || bestCombo(draft.hand, need, hasData), recMult = S.baseMult + rec.reduce((a, no) => a + CARDS[no].plus, 0);
+  const ci = draft.ci = inHand.length ? ((draft.ci || 0) % inHand.length + inHand.length) % inHand.length : 0;
+  const focus = draft.opened ? inHand[ci] : null;
+  const cards = inHand.map((no, i) => {
+    const tag = no === S.carry && !S.firstDraw ? '续留' : clashIn(no, sel) ? '重叠' : '';
+    return `<button class="sc2" data-pick="${no}" data-i="${i}" aria-label="${CARDS[no].name} +${CARDS[no].plus}${i === ci ? '，点一下留下' : '，点一下翻到前面'}"
+      style="--d:${i * 70}ms;--bx:${Math.round(Math.random() * 220 - 110)}px;--by:${Math.round(-40 - Math.random() * 60)}px;--br:${Math.round(Math.random() * 70 - 35)}deg">
+      <div class="sc2-face">${cardHTML(CARDS[no])}</div>${tag ? `<span class="carry-tag">${tag}</span>` : ''}${rec.includes(no) ? '<span class="sticker sc2-rec">推荐</span>' : ''}</button>`;
+  }).join('');
+  const dots = inHand.map((no, i) => `<i class="${i === ci ? 'on' : ''}" style="${i === ci ? `background:${coreOf(no)}` : ''}"></i>`).join('');
+  // the week's cards come in a crimped foil bag: it tilts toward your finger and tears open when you drag along the top
+  const burst = draft.dealIn ? Array.from({ length: 28 }, (_, i) => `<i class="cf" style="--cx:${Math.round(Math.random() * 340 - 170)}px;--cy:${Math.round(-60 - Math.random() * 170)}px;--cr:${Math.round(Math.random() * 720 - 360)}deg;--cd:${Math.round(Math.random() * 120)}ms;width:${6 + (i % 4) * 2}px;height:${6 + (i % 3) * 3}px;background:${['var(--lime)', 'var(--pink)', 'var(--blue)', 'var(--orange)', '#C9C3FF', '#111'][i % 6]};border-radius:${i % 2 ? '50%' : '2px'}"></i>`).join('') : '';
+  const pack = draft.opened ? '' : `<div class="bag closed" role="button" tabindex="0" aria-label="撕开这周的卡包：按住顶部往右拖">
+      <svg class="bag-body" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bagG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6FF9A"/><stop offset=".5" stop-color="#E4FF1A"/><stop offset="1" stop-color="#C6E000"/></linearGradient></defs><path d="${BAG_BODY}" fill="url(#bagG)" stroke="#111" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
+      <svg class="bag-strip" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><path d="${BAG_STRIP}" fill="#F2FF7A" stroke="#111" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M14 46H186" stroke="#111" stroke-width="2" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"/></svg>
+      <span class="bag-sheen" aria-hidden="true"></span>
+      <span class="bag-eyes" aria-hidden="true"><i></i><i></i></span>
+      <span class="pk-week px">WEEK ${String(S.week).padStart(2, '0')}</span>
+      <b class="pk-title">抽 ${DEALN()} 留 ${HOLDN()}</b>
+      <span class="pk-count px">${draft.hand.length} 张规则卡</span>
+    </div>
+    <span class="pk-tear sticker" aria-hidden="true">按住顶部 → 往右拖开</span>`;
+  const stage = draft.opened ? `<div class="stack">${cards}</div>
+    <div class="sdots"><span class="sd">${dots}</span><span>左右滑开换下一张 · 点最上面那张留下</span></div>${burst ? `<span class="burst" aria-hidden="true">${burst}</span>` : ''}` : pack;
   let info = '';
   if (focus) {
     const c = CARDS[focus];
@@ -1174,22 +1298,111 @@ function renderDraw() {
   }
   // the footer keeps the picks, what they add up to and the button on screen however far the cards scroll
   const multSel = S.baseMult + sel.reduce((a, no) => a + CARDS[no].plus, 0);
-  const sum = sel.length === need && hasData ? (sim => `约 <b>${sim.total}</b> 分 / 目标 ${weekTarget()}`)(simulate(sel, S.lastWeek, S.weekStart)) : sel.length ? `全守住 <b>×${multSel}</b>` : '点牌选进来';
-  const slots = Array.from({ length: need }, (_, i) => sel[i] ? `<span class="dslot" style="background:${coreOf(sel[i])}">${artIcon(sel[i], 22)}</span>` : '<span class="dslot empty"></span>').join('');
+  const sum = sel.length === need && hasData ? (sim => `约 <b>${sim.total}</b> 分 / 目标 ${weekTarget()}`)(simulate(sel, S.lastWeek, S.weekStart)) : sel.length ? `全守住 <b>×${multSel}</b>` : (draft.opened ? `<button class="dsum-rec" data-act="use-rec">用推荐 ${rec.length} 张 · ×${recMult}</button>` : '撕开卡包看看');
+  const slots = Array.from({ length: need }, (_, i) => sel[i] ? `<button class="dslot ${draft.landed === sel[i] || draft.landed === 'all' ? 'land' : ''}" data-unpick="${sel[i]}" style="background:${coreOf(sel[i])}" aria-label="${CARDS[sel[i]].name}，点一下放回手里">${artIcon(sel[i], 22)}</button>` : '<span class="dslot empty"></span>').join('');
   sheet('抽规则卡', `
     <div class="bar-top"><h1>第 ${S.week} 周 · 抽 ${DEALN()} 留 ${HOLDN()}</h1><span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
     <p class="draw-lead">留下的 ${need} 张这周同时生效，守住就加倍率${S.weekStart > 0 ? `<span class="chipk" style="background:var(--lime)">这周只剩 ${weekDays()} 天</span>` : ''}</p>
-    ${recHTML(need, hasData)}
-    <div class="deal ${sel.length === need ? 'full' : ''}">${cards}</div>
+    <div class="hand ${draft.opened ? 'open' : ''} ${draft.dealIn ? 'dealing' : ''}"><div class="hand-in">${stage}</div></div>
     ${info}
     <div class="drawfoot">
       <div class="dsum"><div class="dslots">${slots}</div><span>${sum}</span></div>
       <button class="go" data-act="choose" ${sel.length === need ? '' : 'disabled'}>${sel.length === need ? `就留这 ${need} 张` : combosOf(draft.hand, need).some(c => sel.every(x => c.includes(x))) ? `再选 ${need - sel.length} 张` : `有重叠，凑不满 ${need} 张，换掉一张`}</button>
     </div>`);
-  if (draft.flip) {
-    draft.flip = false;
-    lastSheet().querySelectorAll('.flip').forEach((f, i) => setTimeout(() => f.classList.remove('down'), 300 + i * 160));
+  const st = lastSheet().querySelector('.stack'); if (st) layoutStack(st, ci);
+  // one-shot animations only play on the render that triggered them
+  draft.dealIn = false; draft.landed = null;
+}
+// each card's place in the pile depends on how far behind the front card it is; only the top four show
+const PILE = [[0, 0, 0, 1], [24, -14, 7, 0.95], [-24, -26, -7, 0.9], [12, -40, 4, 0.85]];
+function layoutStack(stack, at) {
+  const els = [...stack.querySelectorAll('.sc2')], n = els.length;
+  els.forEach(el => {
+    const k = ((+el.dataset.i - at) % n + n) % n, [x, y, r, sc] = PILE[Math.min(k, 3)];
+    el.style.transform = `translate(${x}px, ${y}px) rotate(${r}deg) scale(${sc})`;
+    el.style.zIndex = String(50 - k);
+    el.style.opacity = k > 3 ? '0' : '1';
+    el.classList.toggle('front', k === 0);
+  });
+}
+const BAG_TEAR = Array.from({ length: 21 }, (_, i) => `L${i * 10} ${i % 2 ? 44 : 49}`).join('');
+const BAG_BODY = `M0 49${BAG_TEAR.slice(BAG_TEAR.indexOf('L', 1))}L200 242${Array.from({ length: 21 }, (_, i) => `L${200 - i * 10} ${i % 2 ? 250 : 242}`).join('')}Z`;
+const BAG_STRIP = `M0 8${Array.from({ length: 21 }, (_, i) => `L${i * 10} ${i % 2 ? 0 : 8}`).join('')}${Array.from({ length: 21 }, (_, i) => `L${200 - i * 10} ${(20 - i) % 2 ? 44 : 49}`).join('')}Z`;
+// the sealed bag leans toward the pointer and its eyes follow; letting go springs it back.
+// pressing on it and dragging right peels the top strip; let go past halfway and it tears, otherwise it springs back
+let tear = null, swipe = null;
+const TEAR_PX = 150, SWIPE_PX = 110;
+// capture can fail if the pointer already went away (or for synthetic events); the gesture still works without it
+const capture = (el, id) => { try { el.setPointerCapture(id); } catch (err) { /* keep going uncaptured */ } };
+function openPack(top) {
+  const hand = top.querySelector('.hand'); if (!hand || hand.classList.contains('tearing')) return;
+  hand.classList.add('tearing');
+  setTimeout(() => { draft.opened = true; draft.dealIn = true; replaceSheet(top, renderDraw); }, reducedMotion() ? 0 : 460);
+}
+app.addEventListener('pointerdown', e => {
+  const b = e.target.closest && e.target.closest('.bag.closed');
+  if (b) { tear = { b, strip: b.querySelector('.bag-strip'), x: e.clientX, p: 0 }; capture(b, e.pointerId); b.classList.add('tearing-drag'); return; }
+  const st = e.target.closest && e.target.closest('.stack');
+  if (st) { swipe = { st, x: e.clientX, y: e.clientY, dx: 0, n: st.querySelectorAll('.sc2').length, front: st.querySelector('.sc2.front'), moved: false, id: e.pointerId }; }
+});
+app.addEventListener('pointermove', e => {
+  if (tear) {
+    tear.p = Math.max(0, Math.min(1, (e.clientX - tear.x) / TEAR_PX));
+    tear.strip.style.transform = `translate(${(tear.p * 22).toFixed(1)}px, ${(-tear.p * 26).toFixed(1)}px) rotate(${(tear.p * 24).toFixed(1)}deg)`;
+    return;
   }
+  if (swipe) {
+    const dx = e.clientX - swipe.x;
+    // capture only once it's really a swipe, so a plain tap still lands on the card button
+    if (Math.abs(dx) > 6 && !swipe.moved) { swipe.moved = true; swipe.st.classList.add('dragging'); capture(swipe.st, swipe.id); }
+    if (!swipe.moved || !swipe.front) return;
+    // the front card follows the finger and tilts the way it's being pulled
+    swipe.dx = dx;
+    swipe.front.style.transform = `translate(${dx.toFixed(0)}px, ${((e.clientY - swipe.y) * 0.25).toFixed(0)}px) rotate(${(dx / 14).toFixed(1)}deg)`;
+    return;
+  }
+  const b = e.target.closest && e.target.closest('.bag.closed'); if (!b) return;
+  const r = b.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+  b.classList.add('tilt');
+  b.style.setProperty('--ry', `${(x * 34).toFixed(1)}deg`); b.style.setProperty('--rx', `${(-y * 26).toFixed(1)}deg`);
+  b.style.setProperty('--ex', `${(x * 10).toFixed(1)}px`); b.style.setProperty('--ey', `${(y * 8).toFixed(1)}px`);
+});
+['pointerup', 'pointercancel'].forEach(type => app.addEventListener(type, () => {
+  if (tear) {
+    const t = tear; tear = null; t.b.classList.remove('tearing-drag');
+    if (t.p > 0.5 && type === 'pointerup') { openPack(lastSheet()); return; }
+    t.strip.style.transform = '';
+    if (t.p < 0.04) { const hint = lastSheet().querySelector('.pk-tear'); if (hint) { hint.classList.remove('shake'); void hint.offsetWidth; hint.classList.add('shake'); } }
+    return;
+  }
+  if (swipe) {
+    const w = swipe; swipe = null; w.st.classList.remove('dragging');
+    if (!w.moved) return;
+    // the click that follows a swipe shouldn't also count as a tap on a card
+    draft.swiped = true; setTimeout(() => { draft.swiped = false; }, 0);
+    if (Math.abs(w.dx) < SWIPE_PX * 0.6 || w.n < 2) { layoutStack(w.st, draft.ci); return; }
+    // past the threshold the card is thrown off that side, then the next one (or the previous, swiping right) comes up
+    const dir = Math.sign(w.dx);
+    w.front.style.transform = `translate(${dir * 440}px, -30px) rotate(${dir * 28}deg)`;
+    setTimeout(() => {
+      draft.ci = ((draft.ci + (dir < 0 ? 1 : -1)) % w.n + w.n) % w.n;
+      layoutStack(w.st, draft.ci);
+      setTimeout(() => { const top = lastSheet(); if (top && top.querySelector('.stack') === w.st) replaceSheet(top, renderDraw); }, 380);
+    }, 200);
+  }
+}));
+app.addEventListener('pointerout', e => {
+  if (tear) return;
+  const b = e.target.closest && e.target.closest('.bag.closed'); if (!b || b.contains(e.relatedTarget)) return;
+  b.classList.remove('tilt'); ['--ry', '--rx', '--ex', '--ey'].forEach(v => b.style.removeProperty(v));
+});
+app.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('.bag.closed')) { e.preventDefault(); openPack(lastSheet()); } });
+// leftover cards slide back into the pack, then the week starts with the kept ones
+function keepHand(top) {
+  const hand = top.querySelector('.hand');
+  const go = () => { S.held = draft.sel.slice(); S.view = 'home'; draft = {}; top.remove(); renderTable(); toast(`这周的牌：${S.held.map(no => CARDS[no].name).join('、')}`); };
+  if (!hand || reducedMotion()) return go();
+  hand.classList.add('returning'); setTimeout(go, 520);
 }
 
 /* ---------- log: preview before saving, verdict after ---------- */
@@ -1380,17 +1593,31 @@ function renderRule(no) {
   const state = cur ? (cur.state === 'on' ? `今天还守着，倍率 +${c.plus}。${cur.near ? cur.near + '。' : ''}` : cur.state === 'pending' ? '还睡着：今天记一笔就醒。' : `今天碎了：${cur.why}。${c.weekly ? `碎到周日。${cur.gain < 0 ? `今天又超了，倍率 ${gainStr(cur.gain)}。` : ''}` : `${cur.saved ? `碎了以后没再花额度外的钱，止损 +${cur.gain}。` : ''}明天零点恢复。`}`) : '';
   const stopLoss = c.weekly ? '' : Math.floor(c.plus / 2) ? `当天不再花额度外的钱，今晚拿回一半倍率（+${Math.floor(c.plus / 2)}）。` : '这张只有 +1，碎了拿不回。';
   sheet(c.name, `
-    <div class="bar-top"><h1>${c.name}</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
-    <div class="bigcard">${cardHTML(c, cur ? cur.state : 'on')}</div>
-    <div class="kv"><small>规则</small><p>${c.cond}。守住时倍率 +${c.plus}。</p></div>
-    <div class="kv"><small>举个例子</small><p>${c.eg}</p></div>
-    ${stopLoss && c.broken ? `<div class="kv"><small>碎了以后</small><p>${stopLoss}</p></div>` : ''}
-    ${clashNames(no).length ? `<div class="kv"><small>重叠</small><p>不能和${clashNames(no).join('、')}一起留：守住${c.clash ? '它' : '零元日'}就已经守住了${c.clash ? '这几张' : '这张'}。</p></div>` : ''}
-    ${cur ? `<div class="kv"><small>今天</small><p>${state}</p></div>` : ''}
-    ${cur && cur.state === "broken" ? (S.glue ? `<button class="cap lime bigbtn" data-act="glue" data-no="${no}"><div class="top">用胶水粘回去（还剩 ${S.glue} 瓶）</div></button>` : `<p class="note">周一早上的商店里能买胶水，把碎掉的牌当天粘回去。</p>`) : ""}
-    ${sim ? `<div class="kv"><small>${S.estimated ? '按你选的花法估算' : '按上周的账'}</small><p>大概能守住 ${sim.per[no]}/${sim.days} 天。</p></div>` : ''}
-    ${c.noGrad ? `<div class="kv"><small>毕业</small><p>${log ? `用过 ${log.weeks} 周，一共守住 ${log.held}/${log.days} 天。` : ''}这张记一笔就守住，不会毕业，一直留在发牌池里。</p></div>` : log ? `<div class="kv"><small>以前</small><p>用过 ${log.weeks} 周，一共守住 ${log.held}/${log.days} 天。${S.grad.includes(no) ? '已经毕业，底倍率 +1。' : `毕业进度 ${log.streak || 0}/${GRAD_WEEKS}：连续 ${GRAD_WEEKS} 周守住 6/7 天以上就毕业。`}</p></div>` : `<div class="kv"><small>毕业</small><p>连续 ${GRAD_WEEKS} 周守住 6/7 天以上就毕业：离开发牌池，底倍率永久 +1。</p></div>`}
-    <p class="note">${c.weekly ? '这张按周算：碎了就碎到周日。' : '这张按天算：碎了第二天零点恢复。'}每周一重新抽 5 留 3。</p>`);
+    <div class="bar-top"><h1>规则卡</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
+    <div class="rhero" style="--c:${coreOf(no)}">
+      <span class="rh-glow" aria-hidden="true"></span>
+      <span class="rh-blob" aria-hidden="true"></span>
+      <svg class="rh-spark" style="left:18px;top:24px" width="22" height="22" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 0L12.6 7.4L20 10L12.6 12.6L10 20L7.4 12.6L0 10L7.4 7.4Z" fill="#111"/></svg>
+      <svg class="rh-spark" style="left:26px;top:250px" width="12" height="12" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 0L12.6 7.4L20 10L12.6 12.6L10 20L7.4 12.6L0 10L7.4 7.4Z" fill="#111"/></svg>
+      <svg class="rh-spark" style="right:20px;top:296px" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 0L12.6 7.4L20 10L12.6 12.6L10 20L7.4 12.6L0 10L7.4 7.4Z" fill="var(--c)"/></svg>
+      <div class="rh-card">${cardHTML(c, cur ? cur.state : 'on')}</div>
+      <div class="rh-cookie" style="background:var(--c);color:${TYPES[c.plus].chipText}"><b>+${c.plus}</b><small>倍率</small></div>
+      ${cur ? `<span class="sticker rh-state ${cur.state}">今天${cur.state === 'on' ? '守住 ✓' : cur.state === 'pending' ? '睡着 zzz' : brokenLabel(cur)}</span>` : ''}
+    </div>
+    <div class="rhead2">
+      <p class="rlead"><mark>${c.cond}</mark></p>
+      <div class="rchips"><span class="chipk"><i style="background:${c.weekly ? 'var(--purple)' : 'var(--blue)'}"></i>${c.weekly ? '按周算 · 碎到周日' : '按天算 · 零点恢复'}</span><span class="chipk"><b class="rdots">${[1, 2, 3].map(n => `<i class="${c.diff >= n ? 'on' : ''}"></i>`).join('')}</b>${['', '好守', '要留意', '最难也最值'][c.diff]}</span></div>
+    </div>
+    <div class="rcards">
+      ${!S.unlocked.includes(no) && !S.grad.includes(no) && c.unlock ? `<div class="rc g-ink"><span class="n">锁</span><h3>还没解锁</h3><p>累计攒到 ★${c.unlock} 颗星自动解锁（现在 ★${S.starsTotal}），也可以周一早上在商店用 ★${Math.max(1, Math.round(c.unlock / 2))} 提前买。</p></div>` : ''}
+      ${cur ? `<div class="rc g-lime"><span class="n">今</span><h3>今天</h3><p>${state}</p></div>` : ''}
+      <div class="rc g-lav rquote"><span class="n">例</span><h3>举个例子</h3><p>${c.eg}</p></div>
+      ${stopLoss && c.broken ? `<div class="rc g-orange"><span class="n">碎</span><h3>碎了以后</h3><p>${stopLoss}</p></div>` : ''}
+      ${clashNames(no).length ? `<div class="rc g-white"><span class="n">叠</span><h3>不能一起留</h3><div class="rclash">${Object.keys(CARDS).filter(x => clashes(no, x)).map(x => `<span><i style="background:${coreOf(x)}">${artIcon(x, 20)}</i>${CARDS[x].name}</span>`).join('')}</div></div>` : ''}
+      ${sim ? `<div class="rc g-lav"><span class="n">估</span><h3>${S.estimated ? '按你选的花法' : '按上周的账'}</h3><p>大概能守住 <b class="rbig">${sim.per[no]}/${sim.days}</b> 天。</p></div>` : ''}
+      <div class="rc g-ink"><span class="n">毕</span><h3>毕业</h3><p>${c.noGrad ? `${log ? `用过 ${log.weeks} 周，守住 ${log.held}/${log.days} 天。` : ''}记一笔就守住，不会毕业。` : S.grad.includes(no) ? '已经毕业，底倍率 +1。' : `连续 ${GRAD_WEEKS} 周守住 6/7 天就毕业，底倍率永久 +1。`}</p>${!c.noGrad && !S.grad.includes(no) ? `<span class="rprog">${Array.from({ length: GRAD_WEEKS }, (_, k) => `<i class="${log && k < (log.streak || 0) ? 'on' : ''}"></i>`).join('')}<em>${log ? `${log.streak || 0}/${GRAD_WEEKS} 周` : `0/${GRAD_WEEKS} 周`}</em></span>` : ''}</div>
+    </div>
+    ${cur && cur.state === "broken" ? (S.glue ? `<button class="cap lime bigbtn" data-act="glue" data-no="${no}"><div class="top">用胶水粘回去（还剩 ${S.glue} 瓶）</div></button>` : `<p class="note">周一早上的商店里能买胶水，把碎掉的牌当天粘回去。</p>`) : ""}`);
 }
 
 /* ---------- first use ---------- */
@@ -1882,11 +2109,13 @@ app.addEventListener('click', e => {
     return;
   }
   if (t.dataset.freq) { const [id, i] = t.dataset.freq.split(':'); S.freq[id] = +i; replaceSheet(top, renderWeak); return; }
+  if (act === 'to-top') { app.querySelector('.screen').scrollTo({ top: 0, behavior: 'smooth' }); return; }
   if (act === 'coach-next') { S.coach += 1; clearCoach(); showCoach(); return; }
   if (act === 'coach-skip') { S.coach = COACH.length; clearCoach(); return; }
   if (act === 'goflow') { S.view = 'bill'; S.billTab = 'flow'; renderTable(); return; }
   if (t.dataset.tab) { S.view = t.dataset.tab; renderTable(); return; }
   if (t.dataset.bill) { S.billTab = t.dataset.bill; renderTable(); return; }
+  if (t.dataset.flowcat) { S.flowCat = t.dataset.flowcat; const top0 = app.querySelector('.screen').scrollTop; renderTable(); app.querySelector('.screen').scrollTop = top0; return; }
   if (t.dataset.cal) { const [w, d] = t.dataset.cal.split('-').map(Number); renderDay(d, w); return; }
   if (t.dataset.info) { renderRule(t.dataset.info); return; }
   if (act === 'help') { renderGuide(); return; }
@@ -1902,16 +2131,19 @@ app.addEventListener('click', e => {
   if (act === 'close') { const lbl = top.getAttribute('aria-label'); top.remove(); if (lbl === '设置') { renderTable(); } return; }
   if (act === 'draw') { draft = {}; renderDraw(); return; }
   if (t.dataset.pick) {
-    const no = t.dataset.pick;
+    if (draft.swiped) return;
+    const no = t.dataset.pick, inHand = draft.hand.filter(x => !draft.sel.includes(x)), i = inHand.indexOf(no);
+    // a side card comes to the front first; the front card is the one you keep
+    if (i !== draft.ci) { draft.ci = i; layoutStack(top.querySelector('.stack'), i); setTimeout(() => replaceSheet(top, renderDraw), 340); return; }
     const other = clashIn(no, draft.sel);
-    if (draft.sel.includes(no)) draft.sel = draft.sel.filter(x => x !== no);
-    else if (other) toast(`「${CARDS[no].name}」和「${CARDS[other].name}」重叠，不能一起留`);
-    else if (draft.sel.length < keepN(draft.hand)) draft.sel.push(no);
-    else toast(`最多留 ${HOLDN()} 张，先点掉一张`);
-    draft.focus = no; replaceSheet(top, renderDraw); return;
+    if (other) toast(`「${CARDS[no].name}」和「${CARDS[other].name}」重叠，不能一起留`);
+    else if (draft.sel.length < keepN(draft.hand)) { draft.sel.push(no); draft.landed = no; }
+    else toast(`最多留 ${HOLDN()} 张，先点一下牌槽里的放回来`);
+    replaceSheet(top, renderDraw); return;
   }
-  if (act === 'use-rec') { draft.sel = draft.rec.slice(); }
-  if (act === 'choose' || act === 'use-rec') { S.held = draft.sel.slice(); S.view = 'home'; draft = {}; top.remove(); renderTable(); toast(`这周的牌：${S.held.map(no => CARDS[no].name).join('、')}`); return; }
+  if (t.dataset.unpick) { const no = t.dataset.unpick; draft.sel = draft.sel.filter(x => x !== no); draft.ci = draft.hand.filter(x => !draft.sel.includes(x)).indexOf(no); replaceSheet(top, renderDraw); return; }
+  if (act === 'use-rec') { draft.sel = draft.rec.slice(); draft.ci = 0; draft.landed = 'all'; draft.opened = true; replaceSheet(top, renderDraw); return; }
+  if (act === 'choose') { keepHand(top); return; }
   if (t.dataset.day) { renderDay(+t.dataset.day); return; }
   if (act === 'log') { if (!S.held.length) { toast('先抽这周的牌'); return; } draft = { amt: '', cat: 'takeout', night: S.clock >= 22, note: '' }; renderLog(); return; }
   if (act === 'clock') { renderClock(); return; }
