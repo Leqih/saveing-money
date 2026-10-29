@@ -1771,7 +1771,7 @@ function renderLaunch() {
       <h1>剩下的钱 × 守住的牌，<br>就是今天的分。</h1>
       <p>每周抽 5 张规则卡留 3 张；每记一笔，马上告诉你有没有打破规则；周日看分数过没过关。</p>
       <button class="cap lime bigbtn" data-act="launch-go"><div class="top">开始第一周</div></button>
-      <p class="px" style="text-align:center;font-size:12px;color:#6A6A70">分数是游戏 · 账单是真的</p>
+      <button class="linkbtn" data-act="launch-skip">跳过引导，直接抽卡</button>
     </div>
   </div>`);
   sh.classList.add('launch');
@@ -2224,6 +2224,8 @@ app.addEventListener('click', e => {
   const act = t.dataset.act, top = t.closest('.sheet');
   if (act === 'fb-close') { app.querySelectorAll('.fb').forEach(n => n.remove()); return; }
   if (act === 'launch-go') { top.remove(); renderSetup(); return; }
+  // skip the setup: default budget, no weak spots picked, straight to the first pack
+  if (act === 'launch-skip') { S.base = BASE; top.remove(); renderTable(); S.lastWeek = estimateWeek(); S.estimated = S.lastWeek.some(d => d.length); draft = {}; renderDraw(); return; }
   if (act === 'setup-next') { S.base = weeklyFrom(S.setup); top.remove(); renderTable(); renderWeak(); return; }
   if (t.dataset.weak) { const id = t.dataset.weak; S.weak = S.weak.includes(id) ? S.weak.filter(x => x !== id) : [...S.weak, id]; replaceSheet(top, renderWeak); return; }
   if (t.dataset.quota) { essQuota = Math.min(100, Math.max(0, essQuota + +t.dataset.quota)); replaceSheet(top, top.getAttribute('aria-label') === '设置' ? renderSettings : renderSetup); return; }
