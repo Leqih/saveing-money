@@ -903,6 +903,21 @@ button.hcard:active > div { transform: translateY(2px); }
 .crt.over .crt-money { color: #FF8A8A; text-shadow: 0 0 6px #FF2A2A, 0 0 18px rgba(255, 42, 42, 0.8); animation: crtBad 0.6s steps(2) infinite; }
 @keyframes crtBad { 50% { transform: translateX(2px); opacity: 0.8; } }
 .crt.over .crt-wave { color: #FF3A3A; }
+
+/* the computer is the card: no red frame around it, everything lives on the screen or in the control strip */
+.hero.herocrt { background: none; box-shadow: none; padding: 0; }
+.crt-top { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 4px; }
+.crt-ttl { font-family: var(--f-body) !important; font-weight: 900; font-size: 14px !important; letter-spacing: 1px !important; color: #FF8FB8 !important; text-shadow: 0 0 6px rgba(255, 79, 160, 0.7); }
+.crt-streak { display: inline-flex; align-items: center; gap: 4px; font-family: var(--f-px); font-size: 12px; color: #8A4A66; } .crt-streak.on { color: #E4FF1A; text-shadow: 0 0 6px rgba(228, 255, 26, 0.6); }
+.crt-base .lcd { flex: 1; display: flex; justify-content: space-between; align-items: center; height: 24px; padding: 0 10px; border-radius: 4px; background: #17140F; box-shadow: inset 0 2px 3px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.6); font-family: var(--f-px); color: #FF8FB8; text-shadow: 0 0 5px rgba(255, 79, 160, 0.7); }
+.crt-base .lcd b { font-weight: 400; font-size: 14px; } .crt-base .lcd i { font-style: normal; font-size: 13px; color: #B8E86A; text-shadow: 0 0 5px rgba(150, 230, 80, 0.7); }
+.crt.over .lcd b { color: #FF8A8A; }
+.hero .crt { filter: drop-shadow(0 10px 0 rgba(0, 0, 0, 0.08)); }
+.crt-base { box-shadow: inset 0 2px 0 rgba(255,255,255,0.5), inset 0 -3px 0 rgba(120, 100, 70, 0.35); }
+.hero .crt { filter: none; }
+.hero .crt-base { box-shadow: inset 0 2px 0 rgba(255,255,255,0.5), inset 0 -3px 0 rgba(120, 100, 70, 0.35), 0 7px 0 #A89E8C, 0 14px 18px -8px rgba(60, 40, 20, 0.45); }
+.hero .crt-in { box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6), inset 0 -4px 6px rgba(120, 100, 70, 0.35), 0 0 0 2px #CFC7B8; }
+.hero.herocrt.over .crt-in { box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6), inset 0 -4px 6px rgba(120, 100, 70, 0.35), 0 0 0 2px #E6A0B4; }
 </style>
 
 <div class="device">
@@ -1242,18 +1257,19 @@ function crtHTML(ev) {
   const ghosts = Array.from({ length: n }, (_, i) => ghostSVG(`g${i % 3}`)).join('') + (dropped && n < 6 ? ghostSVG('poof') : '');
   const steps = Array.from({ length: 24 }, (_, i) => [6, 11, 4, 9, 13, 5, 10, 3][i % 8]);
   const wave = `<svg class="crt-wave" viewBox="0 0 96 40" preserveAspectRatio="none" shape-rendering="crispEdges" aria-hidden="true" style="height:${Math.round(12 + ratio * 48)}px"><path fill="currentColor" d="M0 40V${40 - steps[0]}${steps.map((h, i) => `H${(i + 1) * 4}V${40 - steps[(i + 1) % 24]}`).join('')}V40Z"/></svg>`;
-  return `<button class="crt ${ev.left < 0 ? 'over' : ''} ${dropped ? 'blip' : ''}" data-act="crt" aria-label="今天还剩 ${ev.left} 元，已花 ${ev.d.extra} 元，共 ${ev.daily} 元">
+  const streak = streakDays();
+  return `<button class="crt ${ev.left < 0 ? 'over' : ''} ${dropped ? 'blip' : ''}" data-act="crt" aria-label="今天还剩 ${ev.left} 元，已花 ${ev.d.extra} 元，共 ${ev.daily} 元，今晚预计 ${ev.score} 分，连续守住 ${streak} 天">
     <span class="crt-in">
       <span class="crt-scr">
-        <span class="crt-ttl">${ev.left < 0 ? 'OVER' : 'LEFT TODAY'}</span>
+        <span class="crt-top"><span class="crt-ttl">${ev.left < 0 ? '今天已超' : '今日还能花'}</span><span class="crt-streak ${streak ? 'on' : ''}"><svg width="10" height="12" viewBox="0 0 12 14" aria-hidden="true"><path d="M6 0c1 3 5 4.500 5 8.500A5 5 0 011 8.500C1 6.500 2.500 5.500 3 4c1 .8 1.200 1.800 1 2.800C5.500 6 6.200 3 6 0z" fill="currentColor"/></svg>连续 ${streak} 天</span></span>
         <span class="crt-money">${money(ev.left)}</span>
-        <span class="crt-sub"><i>▶</i> 已花 ¥${ev.d.extra} / ¥${ev.daily}</span>
+        <span class="crt-sub"><i>▶</i> 已花 ¥${ev.d.extra} / ¥${ev.daily}${S.debt ? ` · 透支 ¥${Math.min(S.debt, dailyBudget())}` : ''}</span>
         <span class="crt-ghosts">${ghosts}</span>
         ${wave}
         <span class="crt-glare"></span>
       </span>
     </span>
-    <span class="crt-base"><i class="slot"></i><i class="slot w"></i><i class="vents"></i><i class="kb o"></i><i class="kb"></i></span>
+    <span class="crt-base"><span class="lcd"><b>今晚预计 ${ev.score} 分</b><i>${ev.base} × ${ev.mult}</i></span><i class="kb o"></i><i class="kb"></i></span>
   </button>`;
 }
 function weekInfo() {
@@ -1304,11 +1320,7 @@ function homeHTML() {
       ${bellHTML(ev)}
       <button class="cookie" data-act="star" aria-label="星星 ${S.stars}，点一下看说明和设置"><span class="n">${S.stars}</span><span class="l">★ 星星</span></button>
     </div>
-    <div class="cap orange hero ${ev.left < 0 ? 'over' : ''}"><div class="top">
-      <div class="row"><span style="font-weight:900;font-size:14px;display:flex;align-items:center;gap:8px">${ev.left < 0 ? '今天已超' : '今日还能花'}<span class="streak ${streakDays() ? 'on' : ''}"><svg width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><path d="M6 0c1 3 5 4.500 5 8.500A5 5 0 011 8.500C1 6.500 2.500 5.500 3 4c1 .8 1.200 1.800 1 2.800C5.500 6 6.200 3 6 0z" fill="currentColor"/></svg>连续 ${streakDays()} 天</span></span><span class="px" style="font-size:13px">${S.debt ? `¥${dailyBudget()} − 透支 ¥${Math.min(S.debt, dailyBudget())}` : `每天 ¥${ev.daily}`}</span></div>
-      ${crtHTML(ev)}
-      <div class="row"><span style="font-weight:900;font-size:15px">今晚预计 ${ev.score} 分</span><span class="px" style="font-size:13px">${ev.base} × ${ev.mult}</span></div>
-    </div></div>
+    <div class="hero herocrt ${ev.left < 0 ? 'over' : ''}">${crtHTML(ev)}</div>
     ${S.held.length ? holdHTML(ev) : `<button class="rulebar" data-act="draw"><div class="rtext" style="grid-column:1/-1"><small>本周的牌</small><b>还没抽</b><span>点这里抽 5 张，留 3 张</span></div></button>`}
     <div class="wkrow">
       <div class="cap meter wkmini"><div class="top">
