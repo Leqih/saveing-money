@@ -740,16 +740,17 @@ const dailyBudget = () => Math.round(S.base / 7);
 // money spent past today's allowance comes out of tomorrow's, so every yuan still counts after a blown day
 const todayBudget = () => Math.max(0, dailyBudget() - S.debt);
 const weekDays = () => 7 - S.weekStart;
-// roughly: keep half the day's money with about two cards holding, every day
+// calibrated by simulating spenders on a ¥50/day allowance: someone spending ~80% of it on extras passes about half
+// the time, ~45% splits between two and three stars, ~20% always gets three, and overspending never passes
 // stakes raise the bar after a pass, the way Balatro moves from white to black stake
 const STAKES = [{ name: '白注', k: 1, bg: '#FFFFFF', fg: '#111' }, { name: '红注', k: 1.25, bg: '#FF4D6A', fg: '#FFF' }, { name: '蓝注', k: 1.5, bg: '#2E8BFF', fg: '#FFF' }, { name: '黑注', k: 1.8, bg: '#111', fg: '#E4FF1A' }];
 // each graduation adds a permanent +1, so the bar rises a quarter per graduated card to keep the week a challenge
 const gradK = () => 1 + 0.25 * (S.baseMult - 1);
-const weekTarget = () => Math.round(dailyBudget() * weekDays() * 2.4 * STAKES[S.stake].k * gradK() / 10) * 10;
+const weekTarget = () => Math.round(dailyBudget() * weekDays() * 1.5 * STAKES[S.stake].k * gradK() / 10) * 10;
 const scorePrior = () => weekHist().reduce((a, h) => a + h.score, 0);
 const moneyWeek = () => Math.round(S.base * weekDays() / 7);
 const spentWeek = () => weekHist().reduce((a, h) => a + h.extra, 0) + extraOf(S.today);
-const starsFrom = (score, target) => score >= target * 1.6 ? 3 : score >= target * 1.3 ? 2 : score >= target ? 1 : 0;
+const starsFrom = (score, target) => score >= target * 2.6 ? 3 : score >= target * 1.7 ? 2 : score >= target ? 1 : 0;
 
 /* ---------- views ---------- */
 const app = document.getElementById('app');
@@ -791,7 +792,7 @@ function homeHTML() {
     const ess = !!cat(x.cat).ess, b = br[i];
     return `<button class="chip ${ess ? 'ess' : b ? 'hit' : 'hot'}" data-edit="${i}" aria-label="${entryName(x)} ${x.amt} 元，点一下修改">${entryName(x)}${ess ? ' · 必需' : ''}${b ? ` · 碎了${b.join('、')}` : ''} <b>¥${x.amt}</b></button>`;
   }).join('') || '<span class="note">今天还没花钱。</span>';
-  const hint = need <= 0 ? `已经够目标了！多攒的分让星星更多：1.3 倍拿 ★★，1.6 倍拿 ★★★。`
+  const hint = need <= 0 ? `已经够目标了！多攒的分让星星更多：1.7 倍拿 ★★，2.6 倍拿 ★★★。`
     : `还差 <b>${need}</b> 分，剩 ${daysLeft} 天，平均每天 <b>${Math.ceil(need / daysLeft)}</b> 分就够。`;
   return `
     <div class="head">
@@ -1119,7 +1120,7 @@ function renderLog() {
   const c = cat(draft.cat);
   const base = editing ? S.today.filter((_, i) => i !== draft.edit) : S.today;
   const before = evaluate(S.today);
-  const after = evaluate([...base, { cat: draft.cat, amt, night: !!draft.night, fromWish: draft.fromWish }]);
+  const after = evaluate([...base, { cat: logCat(), amt, night: !!draft.night, fromWish: draft.fromWish }]);
   const broke = after.cards.filter((x, k) => x.state === 'broken' && before.cards[k].state !== 'broken').map(x => CARDS[x.no].name);
   const woke = after.cards.filter((x, k) => x.state === 'on' && before.cards[k].state === 'pending').map(x => CARDS[x.no].name);
   const near = after.cards.map(x => x.near).filter(Boolean)[0];
@@ -1138,13 +1139,14 @@ function renderLog() {
   sheet(editing ? '改一笔' : '记一笔', `
     <div class="bar-top"><h1>${editing ? '改一笔' : '记一笔'}</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
     ${editing ? '' : `<div class="lbl">常用 · 点一下填好，按住直接记下</div><div class="quick">${quicks}</div>`}
-    <div class="amount"><b>¥${amt}</b><span class="px" style="color:#4A4390;font-size:12px;text-align:right">周${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(draft.cat).name}</span></div>
+    <div class="amount"><b>¥${amt}</b><span class="px" style="color:#4A4390;font-size:12px;text-align:right">周${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
     <div class="cats">${cats}</div>
     ${draft.adding ? `<div class="newcat">
       <div class="field"><input class="in" id="newcat" maxlength="5" value="${esc(draft.newName || '')}" placeholder="名字，比如 游戏充值" aria-label="新类别名字"><button class="mini" data-act="addcat">添加</button></div>
       <div class="toggle"><button aria-pressed="${!draft.newEss}" data-newess="0">额度外的</button><button aria-pressed="${!!draft.newEss}" data-newess="1">必需的</button></div>
     </div>` : ''}
     <div class="field"><input class="in" id="note" maxlength="12" value="${esc(draft.note || '')}" placeholder="买了什么（可不填）" aria-label="备注">
+      ${draft.cat === 'meal' ? `<button class="mini ${draft.delivery ? 'on' : ''}" data-delivery="${draft.delivery ? 0 : 1}" aria-pressed="${!!draft.delivery}">外卖送的</button>` : ''}
       <button class="mini ${draft.night ? 'on' : ''}" data-night="${draft.night ? 0 : 1}" aria-pressed="${!!draft.night}">22 点后</button>
       <button class="mini" data-act="savequick" ${amt ? '' : 'disabled'}>存常用</button></div>
     <div class="pad">${pad}</div>
@@ -1169,6 +1171,8 @@ function quickSave(i) {
   renderTable(); verdict(before, evaluate(S.today));
 }
 const refreshLog = () => replaceSheet(lastSheet(), renderLog);
+// a delivered meal is takeout, not a meal: it doesn't hide inside the meal allowance or dodge 外卖克星
+const logCat = () => draft.cat === 'meal' && draft.delivery ? 'takeout' : draft.cat;
 // the moment right after saving: a cracked card, a waking card, or a quick all-clear
 function verdict(before, after) {
   const broke = after.cards.filter((x, k) => x.state === 'broken' && before.cards[k].state !== 'broken');
@@ -1643,7 +1647,7 @@ function renderWeek() {
     <div class="impact">
       <div class="r"><span>本周分数</span><span class="${R.pass ? 'good' : 'hot'}">${R.total} / ${R.target}</span></div>
       <div class="r"><span>星星</span><span>${R.got ? `+${starStr(R.got)}　共 ${S.stars}` : `这周没拿到　共 ${R.before}`}</span></div>
-      <div class="r"><span>星星怎么算</span><span>够目标 ★ · 1.3 倍 ★★ · 1.6 倍 ★★★${S.stake ? ` · ${st.name} +${S.stake}` : ''}</span></div>
+      <div class="r"><span>星星怎么算</span><span>够目标 ★ · 1.7 倍 ★★ · 2.6 倍 ★★★${S.stake ? ` · ${st.name} +${S.stake}` : ''}</span></div>
     </div>
     ${R.grads.map(no => `<div class="gradcard"><div class="gimg">${scaled(CARDS[no], 0.3)}<span class="cv-grad">毕业</span></div><div><b>「${CARDS[no].name}」毕业了！</b><p>连续 ${GRAD_WEEKS} 周守住 6/7 天以上，这个习惯算是改掉了。它离开发牌池，换来永久的底倍率 +1：以后倍率从 <b>${S.baseMult}</b> 开始，每周的目标分也提高 25%。</p></div></div>`).join('')}
     <h2>三张牌守得怎么样 <small>连续 ${GRAD_WEEKS} 周守住 6/7 天就毕业</small></h2>
@@ -1672,6 +1676,7 @@ function renderMonday() {
       <div class="r"><span>续留</span><span>${S.carry ? CARDS[S.carry].name : '没有'}</span></div>
       <div class="r"><span>这周发牌</span><span>发 ${DEALN()} 张，留 ${HOLDN()} 张</span></div>
       <div class="r"><span>钱包</span><span>★ ${S.stars} 星星</span></div>
+      ${S.debt ? `<div class="r"><span>周日透支 ¥${S.debt}，今天先扣</span><span>−¥${Math.min(S.debt, dailyBudget())}</span></div>` : ''}
     </div>
     <p class="note left">新的一周从挑牌开始。抽牌前可以先去商店：提前解锁牌、指定这周一定发某张、加牌槽、买胶水。商店只在周一早上开。</p>
     <button class="cap lime bigbtn" data-act="shop"><div class="top">先逛商店 · ★ ${S.stars}</div></button>
@@ -1748,7 +1753,8 @@ function startWeek() {
   S.lastWeek = DAYS.map((_, i) => (weekHist().find(h => h.day === i) || { entries: [] }).entries.map(x => ({ ...x })));
   S.lastDays = weekDays();
   S.autoEnded = false; S.clock = 8.5;
-  S.stake = S.nextStake; S.debt = 0;
+  // an overspent Sunday still comes out of Monday's allowance, so the week boundary is no free night out
+  S.stake = S.nextStake;
   S.week += 1; S.day = 0; S.weekStart = 0; S.held = []; S.teaWeek = 0; S.firstDraw = false; S.estimated = false;
   draft = {};
   renderTable(); renderDraw();
@@ -1815,7 +1821,7 @@ app.addEventListener('click', e => {
   if (act === 'settings-save') { S.base = weeklyFrom(S.setup); replaceSheet(top, renderSettings); toast(`每周额度改成 ¥${S.base}，每天 ¥${dailyBudget()}`); return; }
   if (act === 'coach-reset') { S.coach = 0; S.view = 'home'; top.remove(); renderTable(); return; }
   if (act === 'restart') { location.reload(); return; }
-  if (act === 'star') { toast('星星：周分数够目标拿 ★，1.3 倍拿 ★★，1.6 倍拿 ★★★。攒够会解锁新牌。'); return; }
+  if (act === 'star') { toast('星星：周分数够目标拿 ★，1.7 倍拿 ★★，2.6 倍拿 ★★★。攒够会解锁新牌。'); return; }
   // settings can change what home shows, so redraw it on the way out
   if (act === 'close') { const lbl = top.getAttribute('aria-label'); top.remove(); if (lbl === '设置') { renderTable(); } return; }
   if (act === 'draw') { draft = {}; renderDraw(); return; }
@@ -1866,6 +1872,7 @@ app.addEventListener('click', e => {
   if (t.dataset.quick) { const q = S.quicks[+t.dataset.quick]; Object.assign(draft, { amt: String(q.amt), cat: q.cat, note: q.label === cat(q.cat).name ? '' : q.label }); refreshLog(); return; }
   if (t.dataset.cat) { draft.cat = t.dataset.cat; refreshLog(); return; }
   if (t.dataset.night) { draft.night = t.dataset.night === '1'; refreshLog(); return; }
+  if (t.dataset.delivery) { draft.delivery = t.dataset.delivery === '1'; refreshLog(); return; }
   if (t.dataset.newess) { draft.newEss = t.dataset.newess === '1'; refreshLog(); return; }
   if (t.dataset.key) { const k = t.dataset.key; draft.amt = k === 'C' ? '' : k === '⌫' ? draft.amt.slice(0, -1) : (draft.amt + k).replace(/^0+/, '').slice(0, 4); refreshLog(); return; }
   if (act === 'newcat') { draft.adding = !draft.adding; refreshLog(); return; }
@@ -1877,18 +1884,18 @@ app.addEventListener('click', e => {
     refreshLog(); toast(`加好了：${cat(id).name}`); return;
   }
   if (act === 'savequick') {
-    const label = draft.note || cat(draft.cat).name, amt = parseInt(draft.amt, 10);
-    if (!S.quicks.some(q => q.label === label && q.amt === amt && q.cat === draft.cat)) { S.quicks.unshift({ label, cat: draft.cat, amt }); S.quicks = S.quicks.slice(0, 8); }
+    const label = draft.note || cat(logCat()).name, amt = parseInt(draft.amt, 10);
+    if (!S.quicks.some(q => q.label === label && q.amt === amt && q.cat === logCat())) { S.quicks.unshift({ label, cat: logCat(), amt }); S.quicks = S.quicks.slice(0, 8); }
     refreshLog(); toast(`存好了：${label} ¥${amt}，下次一按就填好`); return;
   }
   if (act === 'save') {
-    const entry = { cat: draft.cat, amt: parseInt(draft.amt, 10), night: !!draft.night, note: draft.note, fromWish: draft.fromWish };
+    const entry = { cat: logCat(), amt: parseInt(draft.amt, 10), night: !!draft.night, note: draft.note, fromWish: draft.fromWish };
     const before = evaluate(S.today);
     if (draft.edit != null) S.today[draft.edit] = entry; else S.today.push(entry);
     renderTable(); verdict(before, evaluate(S.today)); return;
   }
   if (act === 'del') { const before = evaluate(S.today); S.today.splice(draft.edit, 1); renderTable(); const after = evaluate(S.today); toast(after.mult > before.mult ? `删掉了 · 倍率回到 ×${after.mult}` : '删掉了'); return; }
-  if (act === 'wish') { S.wish.push({ cat: draft.cat, amt: parseInt(draft.amt, 10), note: draft.note }); renderTable(); toast('放进待买清单，明天再问你 · 牌没碎'); return; }
+  if (act === 'wish') { S.wish.push({ cat: logCat(), amt: parseInt(draft.amt, 10), note: draft.note }); renderTable(); toast('放进待买清单，明天再问你 · 牌没碎'); return; }
   if (act === 'wish-buy') { const x = S.revisit.shift(); const before = evaluate(S.today); S.today.push({ ...x, night: false, fromWish: true }); renderTable(); verdict(before, evaluate(S.today)); return; }
   if (act === 'wish-skip') { const x = S.revisit.shift(); renderTable(); toast(`省下 ¥${x.amt}`); return; }
   if (act === 'end') { if (!S.held.length) { toast('先抽这周的牌'); return; } renderEnd(); return; }
