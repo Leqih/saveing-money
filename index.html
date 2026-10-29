@@ -288,19 +288,17 @@ button.chip:active { transform: translateY(2px); }
 
 
 /* ---- ported from the canvas screens (ToyTable nav, ToyFeed, ToyBill, ToyCats, ToyDeck, ToySetup, ToyPick) ---- */
-.cv-nav { position: absolute; left: 16px; right: 16px; bottom: 20px; z-index: 5; height: 76px; border-radius: 38px; padding: 8px; display: flex; gap: 8px; align-items: stretch; background: #FF4444; }
-/* puffy candy tiles: pastel fill, a soft white glow inside the edge, a different squircle each */
-.cv-nav > button[data-tab] { position: relative; width: 60px; flex-shrink: 0; border: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; color: #111; font-size: 10px; font-weight: 900; line-height: 1; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.35), inset 0 0 12px 4px rgba(255,255,255,0.85); transition: transform 0.35s cubic-bezier(.3,1.7,.5,1), filter 0.2s; }
-.cv-nav > button[data-tab="home"] { border-radius: 24px 24px 8px 24px; }
-.cv-nav > button[data-tab="bill"] { border-radius: 26px; }
-.cv-nav > button[data-tab="deck"] { border-radius: 22px 34px 8px 22px; }
-.cv-nav > button[data-tab] span { height: 0; opacity: 0; overflow: hidden; transition: height 0.2s, opacity 0.2s; }
-.cv-nav > button.on span { height: 11px; margin-top: 3px; opacity: 1; }
-.cv-nav > button.on { transform: translateY(-3px) scale(1.07); }
-.cv-nav > button:not(.on) { filter: saturate(0.85); }
-.cv-nav > button:active { transform: scale(0.94); }
-.cv-log { flex-grow: 1; border: 0; border-radius: 30px; background: #111; color: #E4FF1A; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--f-px); font-weight: 600; font-size: 17px; letter-spacing: 2px; transition: transform 0.2s cubic-bezier(.3,1.7,.5,1); }
-.cv-log:active { transform: scale(0.95); }
+/* a keyboard: a red case with key caps (raised, with a thick lower edge); the current page is the key held down */
+.cv-nav { position: absolute; left: 14px; right: 14px; bottom: 18px; z-index: 5; height: 86px; border-radius: 26px; padding: 10px 10px 16px; display: flex; gap: 9px; align-items: stretch; background: #FF4444; box-shadow: inset 0 0 0 3px #D12E2E, inset 0 6px 0 rgba(0,0,0,0.12); }
+.cv-nav > button[data-tab], .cv-log { position: relative; border: 0; padding: 0; color: #111; font-weight: 900; border-radius: 15px; box-shadow: 0 7px 0 var(--edge, #BBB), inset 0 0 0 2px rgba(255,255,255,0.55); transition: transform 0.12s ease-out, box-shadow 0.12s ease-out; }
+.cv-nav > button[data-tab]::before, .cv-log::before { content: ''; position: absolute; inset: 6px 5px 8px; border-radius: 11px; pointer-events: none; background: rgba(255,255,255,0.28); box-shadow: inset 0 2px 5px rgba(0,0,0,0.14), inset 0 -2px 0 rgba(255,255,255,0.5); }
+.cv-nav > button[data-tab] { width: 58px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; font-size: 10px; line-height: 1; }
+.cv-nav > button[data-tab] > * { position: relative; }
+.cv-nav > button[data-tab] span { height: 0; opacity: 0; overflow: hidden; transition: height 0.15s, opacity 0.15s; }
+.cv-nav > button.on span { height: 11px; margin-top: 2px; opacity: 1; }
+.cv-nav > button.on, .cv-nav > button:active, .cv-log:active { transform: translateY(6px); box-shadow: 0 1px 0 var(--edge, #BBB), inset 0 0 0 2px rgba(255,255,255,0.55); }
+.cv-log { flex-grow: 1; --edge: #B8D000; background: #E4FF1A; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--f-px); font-weight: 600; font-size: 17px; letter-spacing: 2px; color: #111; }
+.cv-log > * { position: relative; }
 .cv-tab { height: 30px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font-weight: 900; font-size: 15px; color: #B5B5BC; white-space: nowrap; }
 .cv-tab.on { padding: 0 14px; background: #E4FF1A; box-shadow: 0 0 0 3px #F4FF9E; color: #111; }
 /* 流水 ledger: category filter chips, then one white card per day with a row per expense */
@@ -1061,13 +1059,13 @@ function homeHTML() {
 /* ---------- tab pages, ported from the canvas screens ---------- */
 const CHECK = 'background-color:#E4E4EA;background-image:linear-gradient(45deg,#D4D4DB 25%,transparent 25%,transparent 75%,#D4D4DB 75%),linear-gradient(45deg,#D4D4DB 25%,transparent 25%,transparent 75%,#D4D4DB 75%);background-size:12px 12px;background-position:0 0,6px 6px';
 const NAV = [
-  { id: 'home', name: '首页', bg: 'radial-gradient(circle at 50% 30%,#FFF0F5 0%,#FFB3CC 100%)', icon: '<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path fill="#FF4B7A" d="M13 3.5l9.5 7.8V22a1.5 1.5 0 01-1.5 1.5h-5.5v-6.5h-5v6.5H5A1.5 1.5 0 013.5 22V11.3z"/><circle cx="13" cy="11" r="2" fill="#FFF0F5"/></svg>' },
-  { id: 'bill', name: '账单', bg: 'radial-gradient(circle at 50% 30%,#E6F3FF 0%,#7FC0FF 100%)', icon: '<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path fill="#2E8BFF" d="M6 2.5h14v21l-3.5-2.4-3.5 2.4-3.5-2.4L6 23.5z"/><path d="M9.5 8.5h7M9.5 12.5h7M9.5 16.5h4" stroke="#E6F3FF" stroke-width="2" stroke-linecap="round"/></svg>' },
-  { id: 'deck', name: '牌库', bg: 'radial-gradient(circle at 50% 30%,#FBFFC2 0%,#E4FF1A 100%)', icon: '<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="3" y="6" width="13" height="17" rx="3" fill="#FF9F2E" transform="rotate(-12 9.5 14.5)"/><rect x="9" y="3.5" width="13" height="17" rx="3" fill="#FF4B4B" transform="rotate(8 15.5 12)"/><circle cx="15.5" cy="12" r="2.5" fill="#FBFFC2"/></svg>' }
+  { id: 'home', name: '首页', edge: '#E0709A', bg: 'radial-gradient(circle at 50% 30%,#FFF0F5 0%,#FFB3CC 100%)', icon: '<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path fill="#FF4B7A" d="M13 3.5l9.5 7.8V22a1.5 1.5 0 01-1.5 1.5h-5.5v-6.5h-5v6.5H5A1.5 1.5 0 013.5 22V11.3z"/><circle cx="13" cy="11" r="2" fill="#FFF0F5"/></svg>' },
+  { id: 'bill', name: '账单', edge: '#4A9BE0', bg: 'radial-gradient(circle at 50% 30%,#E6F3FF 0%,#7FC0FF 100%)', icon: '<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path fill="#2E8BFF" d="M6 2.5h14v21l-3.5-2.4-3.5 2.4-3.5-2.4L6 23.5z"/><path d="M9.5 8.5h7M9.5 12.5h7M9.5 16.5h4" stroke="#E6F3FF" stroke-width="2" stroke-linecap="round"/></svg>' },
+  { id: 'deck', name: '牌库', edge: '#C4D400', bg: 'radial-gradient(circle at 50% 30%,#FBFFC2 0%,#E4FF1A 100%)', icon: '<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="3" y="6" width="13" height="17" rx="3" fill="#FF9F2E" transform="rotate(-12 9.5 14.5)"/><rect x="9" y="3.5" width="13" height="17" rx="3" fill="#FF4B4B" transform="rotate(8 15.5 12)"/><circle cx="15.5" cy="12" r="2.5" fill="#FBFFC2"/></svg>' }
 ];
 function navHTML() {
   const on = S.view === 'flow' ? 'bill' : S.view;
-  return `<nav class="cv-nav" aria-label="主导航">${NAV.map(n => `<button data-tab="${n.id}" class="${on === n.id ? 'on' : ''}" style="background:${n.bg}" aria-label="${n.name}" ${on === n.id ? 'aria-current="page"' : ''}>${n.icon}<span>${n.name}</span></button>`).join('')}<button class="cv-log" data-act="log"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M8 2v12M2 8h12"/></svg>记一笔</button></nav>`;
+  return `<nav class="cv-nav" aria-label="主导航">${NAV.map(n => `<button data-tab="${n.id}" class="${on === n.id ? 'on' : ''}" style="background:${n.bg};--edge:${n.edge}" aria-label="${n.name}" ${on === n.id ? 'aria-current="page"' : ''}>${n.icon}<span>${n.name}</span></button>`).join('')}<button class="cv-log" data-act="log"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M8 2v12M2 8h12"/></svg>记一笔</button></nav>`;
 }
 function renderTable() {
   const body = { home: homeHTML, bill: billHTML, deck: deckHTML }[S.view]();
