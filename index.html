@@ -754,6 +754,24 @@ button.hcard:active > div { transform: translateY(2px); }
 .screen:has(> .head) { gap: 10px; padding-bottom: 100px; }
 .screen:has(> .head) .hero > .top { min-height: 122px; }
 .screen:has(> .head) .quick { padding-bottom: 0; }
+
+/* layout only: a quiet home — one focus (what's left), one action (quick add), then small status */
+.screen:has(> .head) { gap: 14px; padding-bottom: 110px; }
+.screen:has(> .head) .head .dots { display: none; }
+.screen:has(> .head) .daypill { flex-direction: row; align-items: center; height: 56px; padding: 0 14px; border-radius: 28px; }
+.screen:has(> .head) .daypill > span:first-child { flex: 1; }
+.screen:has(> .head) .head { justify-content: flex-start; gap: 10px; }
+.screen:has(> .head) .hero > .top { min-height: 150px; }
+.wkrow { display: grid; grid-template-columns: 1fr 112px; gap: 12px; align-items: stretch; }
+.wkmini { width: auto; text-align: left; }
+.wkmini > .top { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; }
+.wkmini .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 900; font-size: 14px; }
+.wkmini .bar { margin-top: 2px; }
+.wkgo { font-size: 12px; color: var(--sub); }
+.wkrow .endbtn { width: auto; } .wkrow .endbtn > .top { padding: 0 6px; height: 100%; display: flex; align-items: center; justify-content: center; }
+.screen:has(> .head) { gap: 18px; }
+.screen:has(> .head) .hero > .top { min-height: 210px; justify-content: space-between; }
+.screen:has(> .head) .hero .money { font-size: 84px; }
 </style>
 
 <div class="device">
@@ -1068,23 +1086,34 @@ function holdHTML(ev) {
   }).join('');
   return `<div class="hold" style="grid-template-columns:repeat(${ev.cards.length}, ${ev.cards.length > 3 ? 65 : 79}px) 1fr">${cards}<div class="multc" aria-label="倍率 ${ev.mult}"><small>倍率</small><b>×${ev.mult}</b></div></div>`;
 }
-function homeHTML() {
-  const ev = evaluate(S.today);
+function weekInfo() {
   const prior = scorePrior(), target = weekTarget(), need = target - prior, daysLeft = 7 - S.day;
-  const dots = DAYS.map((d, i) => `<b class="${i === S.day ? 'now' : ''}">${d}</b>`).join('');
-  const br = breakers(S.today);
-  const list = S.today.map((x, i) => {
-    const ess = !!cat(x.cat).ess, b = br[i];
-    return `<button class="chip ${ess ? 'ess' : b ? 'hit' : 'hot'}" data-edit="${i}" aria-label="${entryName(x)} ${x.amt} 元，点一下修改">${entryName(x)}${ess ? ' · 必需' : ''}${b ? ` · 碎了${b.join('、')}` : ''} <b>¥${x.amt}</b></button>`;
-  }).join('') || '<span class="note">今天还没花钱。</span>';
   const hint = need <= 0 ? `已经够目标了！多攒的分让星星更多：1.7 倍拿 ★★，2.6 倍拿 ★★★。`
     : `还差 <b>${need}</b> 分，剩 ${daysLeft} 天，平均每天 <b>${Math.ceil(need / daysLeft)}</b> 分就够。`;
+  return { prior, target, need, daysLeft, hint, pct: Math.min(100, Math.round(prior / target * 100)) };
+}
+// the full week view lives one tap away: the home only shows the number
+function renderWeekSheet() {
+  const w = weekInfo();
+  sheet('本周', `<div class="bar-top"><h1>本周分数</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
+    <div class="cap meter"><div class="top">
+      <div class="row"><span>第 ${S.week} 周 <span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></span><span class="px">${w.prior} / ${w.target}</span></div>
+      <div class="bar"><i style="width:${w.pct}%"></i></div>
+      <p class="hint">${w.hint} 真实的钱这周还剩 ${money(moneyWeek() - spentWeek())}。</p>
+      ${tilesHTML()}
+    </div></div>
+    <button class="cap lime bigbtn" data-act="goflow"><div class="top">看今天和这周的流水</div></button>`);
+}
+// home keeps only what you use every time you open the app: what's left today, quick add, today's rules;
+// the week score and ending the day are small, and everything else (history, stars, details) lives in its own page
+function homeHTML() {
+  const ev = evaluate(S.today), w = weekInfo();
+  const dots = '';
   return `
     <div class="head">
       <button class="daypill" data-act="clock" aria-label="第 ${S.week} 周周${DAYS[S.day]}，现在 ${fmtClock(S.clock)}，点一下切换演示时间"><span class="px" style="font-size:13px;display:flex;justify-content:space-between">第 ${S.week} 周 · 周${DAYS[S.day]}<span class="clock">${fmtClock(S.clock)} ▾</span></span><span class="dots" aria-hidden="true">${dots}</span></button>
       ${bellHTML(ev)}
       <button class="help" data-act="settings" aria-label="设置"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#FFF" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="3"/><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3M4 4l2.1 2.1M13.9 13.9L16 16M4 16l2.1-2.1M13.9 6.1L16 4"/></svg></button>
-      <button class="cookie" data-act="star" aria-label="星星 ${S.stars}，点一下看说明"><span class="n">${S.stars}</span><span class="l">★ 星星</span></button>
     </div>
     <div class="cap orange hero ${ev.left < 0 ? 'over' : ''}"><div class="top">
       <div class="row"><span style="font-weight:900;font-size:14px">${ev.left < 0 ? '今天已超' : '今日还能花'}</span><span class="px" style="font-size:13px">${S.debt ? `¥${dailyBudget()} − 透支 ¥${Math.min(S.debt, dailyBudget())}` : `每天 ¥${ev.daily}`}</span></div>
@@ -1094,14 +1123,12 @@ function homeHTML() {
     <div class="lbl">常用 · 点一下选好是什么，再填金额</div>
     <div class="quick">${S.quicks.map((q, i) => `<button class="chip qchip" data-hquick="${i}">${esc(q.label)}</button>`).join("")}</div>
     ${S.held.length ? holdHTML(ev) : `<button class="rulebar" data-act="draw"><div class="rtext" style="grid-column:1/-1"><small>本周的牌</small><b>还没抽</b><span>点这里抽 5 张，留 3 张</span></div></button>`}
-    <div class="cap meter"><div class="top">
-      <div class="row"><span>本周分数 <span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></span><span class="px">${prior} / ${target}</span></div>
-      <div class="bar"><i style="width:${Math.min(100, Math.round(prior / target * 100))}%"></i></div>
-      <p class="hint">${hint} 真实的钱这周还剩 ${money(moneyWeek() - spentWeek())}。</p>
-      ${tilesHTML()}
-    </div></div>
-    <div class="duo">
-      <div class="duo-l"><h2>今天记的账 <button class="linkbtn" data-act="goflow" style="font-size:13px;color:#5B4FC8;padding:0">全部流水 →</button></h2><div class="keys">${list}</div></div>
+    <div class="wkrow">
+      <button class="cap meter wkmini" data-act="week" aria-label="本周分数 ${w.prior} / ${w.target}，点一下看详情"><div class="top">
+        <div class="row"><span>本周分数</span><span class="px">${w.prior} / ${w.target}</span></div>
+        <div class="bar"><i style="width:${w.pct}%"></i></div>
+        <small class="wkgo">剩 ${w.daysLeft} 天 · 看详情 ›</small>
+      </div></button>
       <button class="cap lime bigbtn endbtn" data-act="end"><div class="top">结束今天</div></button>
     </div>`;
 }
@@ -2344,6 +2371,7 @@ app.addEventListener('click', e => {
   if (act === 'to-top') { app.querySelector('.screen').scrollTo({ top: 0, behavior: 'smooth' }); return; }
   if (act === 'coach-next') { S.coach += 1; clearCoach(); showCoach(); return; }
   if (act === 'coach-skip') { S.coach = COACH.length; clearCoach(); return; }
+  if (act === 'week') { renderWeekSheet(); return; }
   if (act === 'goflow') { S.view = 'bill'; S.billTab = 'flow'; renderTable(); return; }
   if (t.dataset.tab) { switchTab(t.dataset.tab); return; }
   if (t.dataset.bill) { S.billTab = t.dataset.bill; renderTable(); return; }
