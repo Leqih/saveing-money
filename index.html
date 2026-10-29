@@ -942,6 +942,26 @@ button.hcard:active > div { transform: translateY(2px); }
 .gh.g1 { animation-delay: -0.9s; margin-top: -8px; } .gh.g2 { animation-delay: -1.8s; margin-top: 4px; }
 @keyframes coinSpin { 0%, 100% { transform: translateY(0) scaleX(1); } 25% { transform: translateY(-4px) scaleX(0.35); } 50% { transform: translateY(0) scaleX(1); } 75% { transform: translateY(-2px) scaleX(0.7); } }
 .gh.poof { fill: #FFF8CC; }
+
+/* fewer rectangles: the rack is a console shell with a tab and a cut corner, each card sits in its own arched window, the end button is a round key */
+.rack { position: relative; border-radius: 46px 18px 46px 18px; margin-top: 12px; }
+.rack::before { content: ''; position: absolute; left: 50%; top: -12px; width: 96px; height: 18px; margin-left: -48px; border-radius: 12px 12px 0 0; background: linear-gradient(180deg, #F2EEE6, #D8D1C3); box-shadow: inset 0 2px 0 rgba(255,255,255,0.7), 0 0 0 2px #CFC7B8; z-index: -1; }
+.rack-top { padding-left: 14px; }
+.rack .hold { background: none; box-shadow: none; padding: 4px 0 2px; gap: 8px; }
+.rack .hold .hcard { padding: 12px 8px 8px; border-radius: 80px 80px 14px 14px; background: #1B1612; box-shadow: inset 0 6px 10px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.7); gap: 8px; }
+.rack .hold .hcard > span { margin-bottom: 2px; }
+.rack .hold .hcard:nth-child(2) { margin-top: -4px; }
+.duo-end, .wkrow .endbtn { }
+.wkrow { grid-template-columns: 1fr 120px; align-items: center; }
+.wkrow .endbtn { width: 120px; height: 120px; padding: 0; border-radius: 50%; justify-self: end; }
+.wkrow .endbtn > .top { height: 100%; width: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1.25; text-align: center; font-size: 17px; }
+.wkrow .wkmini > .top { border-radius: 26px 26px 6px 26px; }
+.rack .hold .hcard:nth-child(2) { margin-top: 0; }
+.rack .hold { align-items: start; }
+.wkrow { grid-template-columns: 1fr 104px; }
+.wkrow .endbtn { width: 104px; height: 104px; }
+.rack-top { padding-bottom: 4px; }
+.screen:has(> .head) { gap: 16px; padding-bottom: 120px; }
 </style>
 
 <div class="device">
@@ -1353,7 +1373,7 @@ function homeHTML() {
         <div class="keys">${list}</div>
         <button class="linkbtn wkgo" data-act="goflow">${S.today.length > 3 ? `还有 ${S.today.length - 3} 笔 · ` : ''}全部流水 ›</button>
       </div></div>
-      <button class="cap lime bigbtn endbtn" data-act="end"><div class="top">结束今天</div></button>
+      <button class="cap lime bigbtn endbtn" data-act="end"><div class="top">结束<br>今天</div></button>
     </div>`;
 }
 
