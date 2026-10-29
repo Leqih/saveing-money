@@ -1093,6 +1093,13 @@ function weekInfo() {
   return { prior, target, need, daysLeft, hint, pct: Math.min(100, Math.round(prior / target * 100)) };
 }
 // the full week view lives one tap away: the home only shows the number
+// the star badge is the home's one entry to the long-term side: how stars work, and the settings
+function renderStarSheet() {
+  sheet('星星', `<div class="bar-top"><h1>我的星星</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
+    <div class="cookie" style="width:120px;height:120px;align-self:center;position:relative"><span class="n" style="font-size:38px">${S.stars}</span><span class="l" style="font-size:13px">★ 星星</span></div>
+    <p class="note" style="text-align:center">周分数够目标拿 ★，1.7 倍拿 ★★，2.6 倍拿 ★★★。攒够会解锁新牌，也能在商店里花掉。</p>
+    <button class="cap bigbtn" data-act="settings"><div class="top">设置</div></button>`);
+}
 function renderWeekSheet() {
   const w = weekInfo();
   sheet('本周', `<div class="bar-top"><h1>本周分数</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
@@ -1113,7 +1120,7 @@ function homeHTML() {
     <div class="head">
       <button class="daypill" data-act="clock" aria-label="第 ${S.week} 周周${DAYS[S.day]}，现在 ${fmtClock(S.clock)}，点一下切换演示时间"><span class="px" style="font-size:13px;display:flex;justify-content:space-between">第 ${S.week} 周 · 周${DAYS[S.day]}<span class="clock">${fmtClock(S.clock)} ▾</span></span><span class="dots" aria-hidden="true">${dots}</span></button>
       ${bellHTML(ev)}
-      <button class="help" data-act="settings" aria-label="设置"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#FFF" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="3"/><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3M4 4l2.1 2.1M13.9 13.9L16 16M4 16l2.1-2.1M13.9 6.1L16 4"/></svg></button>
+      <button class="cookie" data-act="star" aria-label="星星 ${S.stars}，点一下看说明和设置"><span class="n">${S.stars}</span><span class="l">★ 星星</span></button>
     </div>
     <div class="cap orange hero ${ev.left < 0 ? 'over' : ''}"><div class="top">
       <div class="row"><span style="font-weight:900;font-size:14px">${ev.left < 0 ? '今天已超' : '今日还能花'}</span><span class="px" style="font-size:13px">${S.debt ? `¥${dailyBudget()} − 透支 ¥${Math.min(S.debt, dailyBudget())}` : `每天 ¥${ev.daily}`}</span></div>
@@ -2379,14 +2386,14 @@ app.addEventListener('click', e => {
   if (t.dataset.cal) { const [w, d] = t.dataset.cal.split('-').map(Number); renderDay(d, w); return; }
   if (t.dataset.info) { renderRule(t.dataset.info); return; }
   if (act === 'help') { renderGuide(); return; }
-  if (act === 'settings') { renderSettings(); return; }
+  if (act === 'settings') { if (top.getAttribute('aria-label') === '星星') top.remove(); renderSettings(); return; }
   if (act === 'inbox') { app.querySelectorAll('.push').forEach(n => n.remove()); renderInbox(); return; }
   if (t.dataset.pref) { S.prefs[t.dataset.pref] = !S.prefs[t.dataset.pref]; replaceSheet(top, renderSettings); return; }
   if (t.dataset.evat) { S.prefs.eveningAt = +t.dataset.evat; replaceSheet(top, renderSettings); return; }
   if (act === 'settings-save') { S.base = weeklyFrom(S.setup); replaceSheet(top, renderSettings); toast(`每周额度改成 ¥${S.base}，每天 ¥${dailyBudget()}`); return; }
   if (act === 'coach-reset') { S.coach = 0; S.view = 'home'; top.remove(); renderTable(); return; }
   if (act === 'restart') { location.reload(); return; }
-  if (act === 'star') { toast('星星：周分数够目标拿 ★，1.7 倍拿 ★★，2.6 倍拿 ★★★。攒够会解锁新牌。'); return; }
+  if (act === 'star') { renderStarSheet(); return; }
   // settings can change what home shows, so redraw it on the way out
   if (act === 'close') { const lbl = top.getAttribute('aria-label'); top.remove(); if (lbl === '设置') { renderTable(); } return; }
   if (act === 'draw') { draft = {}; renderDraw(); return; }
