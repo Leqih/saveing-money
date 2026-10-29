@@ -836,6 +836,12 @@ button.hcard:active > div { transform: translateY(2px); }
 .rs-tag { left: 196px; top: 10px; padding: 4px 12px 5px; background: #3FA83A; border: 2px solid #111; border-radius: 4px; color: #FFF; text-align: center; }
 .rs-tag small { display: block; font-family: var(--f-mono); font-size: 9px; letter-spacing: 1px; } .rs-tag b { display: block; font-family: var(--f-display); font-weight: 400; font-size: 24px; line-height: 1; }
 .rs-say { right: -4px; top: 44px; padding: 5px 14px; background: #FFD92E; border: 2px solid #111; border-radius: 50%; font-weight: 900; font-size: 13px; color: #111; white-space: nowrap; }
+
+/* confirm buttons: one place on every sheet, the same as the launch screen */
+.sfoot { position: sticky; bottom: -24px; z-index: 4; margin: auto -18px -24px; padding: 14px 24px 75px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(180deg, rgba(255,255,255,0), #FFF 22%); }
+.sfoot:has(.linkbtn) { padding-bottom: 34px; }
+.sfoot .cap.bigbtn, .sfoot .go { width: 100%; margin: 0 !important; }
+.sfoot .linkbtn { align-self: center; }
 </style>
 
 <div class="device">
@@ -1126,7 +1132,18 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const entryName = x => `${cat(x.cat).name}${x.note && x.note !== cat(x.cat).name ? ' · ' + esc(x.note) : ''}`;
 const starStr = n => '★'.repeat(n);
 function toast(msg) { app.querySelectorAll('.toast').forEach(t => t.remove()); const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; app.appendChild(t); setTimeout(() => t.remove(), 2600); }
-function sheet(label, html) { app.insertAdjacentHTML('beforeend', `<div class="sheet" role="dialog" aria-label="${label}">${html}</div>`); return app.lastElementChild; }
+// every confirm button sits in the same place as the launch screen's: pinned at the bottom, 24px in from the sides
+function pinFoot(sh) {
+  if (sh.classList.contains('launch') || sh.querySelector('.drawfoot')) return;
+  const isBtn = el => el.matches('.actions, .go, .cap.bigbtn') && !el.hidden;
+  const kids = [...sh.children], tail = [];
+  for (let i = kids.length - 1; i >= 0; i--) { if (kids[i].matches('.linkbtn')) { tail.unshift(kids[i]); continue; } if (isBtn(kids[i]) || (kids[i].hidden && tail.length)) tail.unshift(kids[i]); else break; }
+  while (tail.length && !tail.some(isBtn)) tail.length = 0;
+  if (!tail.length) return;
+  const foot = document.createElement('div'); foot.className = 'sfoot';
+  tail[0].before(foot); tail.forEach(el => foot.appendChild(el));
+}
+function sheet(label, html) { app.insertAdjacentHTML('beforeend', `<div class="sheet" role="dialog" aria-label="${label}">${html}</div>`); pinFoot(app.lastElementChild); return app.lastElementChild; }
 function replaceSheet(old, fn) { const top = old.scrollTop; old.remove(); fn(); const n = app.lastElementChild; n.style.animation = 'none'; n.scrollTop = top; }
 const lastSheet = () => [...app.querySelectorAll('.sheet')].pop();
 
