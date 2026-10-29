@@ -438,6 +438,11 @@ button.hcard:active > div { transform: translateY(2px); }
 .bag-strip { transition: transform 0.45s cubic-bezier(.3,1.7,.5,1); }
 /* the bag: closed it stands tall in the middle; opened it sits low and open with the cards fanned out of it */
 .bag { position: absolute; z-index: 20; left: 50%; top: 40px; width: 200px; height: 262px; margin-left: -100px; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform 0.7s cubic-bezier(.3,1.7,.5,1); filter: drop-shadow(0 18px 18px rgba(20,20,30,0.25)); }
+.bag.closed:not(.tilt):not(.tearing-drag) { animation: bagFloat 3.2s ease-in-out infinite; }
+@keyframes bagFloat { 50% { margin-top: -8px; } }
+.bag.closed::before { content: ''; position: absolute; left: 50%; top: 52%; width: 240px; height: 240px; margin: -120px 0 0 -120px; z-index: -1; border-radius: 50%; background: radial-gradient(circle, rgba(228,255,26,0.55), transparent 65%); animation: halo 3.2s ease-in-out infinite; }
+@keyframes halo { 50% { transform: scale(1.12); opacity: 0.7; } }
+.bag-foil { position: absolute; left: 0; right: 0; top: 49px; bottom: 8px; pointer-events: none; opacity: 0.35; background: repeating-linear-gradient(115deg, transparent 0 14px, rgba(255,255,255,0.7) 14px 16px, transparent 16px 34px); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); mix-blend-mode: soft-light; }
 .bag.tilt { transition: transform 0.12s ease-out; }
 .bag svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .bag-strip { transform-origin: 96% 16%; }
@@ -458,6 +463,9 @@ button.hcard:active > div { transform: translateY(2px); }
 .hand.tearing .bag { animation: squish 0.46s ease; }
 @keyframes squish { 25% { transform: scale(1.06, 0.92); } 55% { transform: scale(0.96, 1.05); } 100% { transform: none; } }
 .hand.tearing .pk-tear { opacity: 0; transition: opacity 0.15s; }
+.hand.tearing .bag::after { content: ''; position: absolute; inset: -30px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(228,255,26,0.5) 40%, transparent 70%); opacity: 0; animation: flash 0.5s ease-out; pointer-events: none; }
+@keyframes flash { 30% { opacity: 1; } 100% { opacity: 0; } }
+.hand.dealing .stack::before { content: ''; position: absolute; left: 50%; top: 150px; width: 260px; height: 260px; margin: -130px 0 0 -130px; border-radius: 50%; background: radial-gradient(circle, rgba(228,255,26,0.7), transparent 65%); animation: flash 0.9s ease-out forwards; pointer-events: none; }
 /* open: the bag drops low; a dark mouth sits behind the cards so they look tucked inside */
 .burst { position: absolute; left: 50%; top: 150px; z-index: 25; pointer-events: none; }
 .cf { position: absolute; left: 0; top: 0; opacity: 0; animation: confetti 1.15s cubic-bezier(.15,.7,.4,1) forwards; animation-delay: var(--cd); }
@@ -471,10 +479,18 @@ button.hcard:active > div { transform: translateY(2px); }
 .sc2:not(.front) .sc2-face { filter: brightness(0.9); }
 .sc2:not(.front) { pointer-events: none; }
 .sc2.front .sc2-face { filter: drop-shadow(0 16px 18px rgba(20,20,30,0.28)); }
+.sc2:not(.front) .carry-tag, .sc2:not(.front) .sc2-rec { display: none; }
+.sc2.front { animation: hover 3s ease-in-out infinite; }
+@keyframes hover { 50% { margin-top: -5px; } }
+.sc2.front:active .sc2-face { filter: drop-shadow(0 6px 8px rgba(20,20,30,0.3)); }
+.sc2.flying { transition: transform 0.46s cubic-bezier(.55,0,.25,1), opacity 0.46s ease-in; animation: none; z-index: 90 !important; }
+.sc2.flying .sc2-face { filter: drop-shadow(0 4px 6px rgba(20,20,30,0.3)); }
+.sc2-pickhint { position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%); z-index: 3; padding: 3px 14px; border-radius: 14px; background: #111; color: var(--lime); font-size: 12px; font-weight: 900; white-space: nowrap; pointer-events: none; animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: translateX(-50%) scale(1.07); } }
 .sc2 .carry-tag { left: 4px; top: -6px; }
 .sc2-rec { right: -6px; top: -8px; font-size: 11px; padding: 1px 8px; }
 .dsum-rec { height: 30px; padding: 0 12px; border-radius: 15px; border: 2px solid var(--ink); background: var(--lime); font-size: 12px; font-weight: 900; white-space: nowrap; }
-.sdots { position: absolute; left: 0; right: 0; top: 314px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--mute); }
+.sdots { position: absolute; left: 0; right: 0; top: 330px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--mute); }
 .sd { display: flex; gap: 6px; } .sd i { width: 7px; height: 7px; border-radius: 4px; background: #D6D6DC; transition: width 0.2s; } .sd i.on { width: 22px; }
 .hand.dealing .sc2 { animation: dealIn 0.95s cubic-bezier(.25,.8,.35,1) backwards; animation-delay: var(--d); }
 @keyframes dealIn { 0% { transform: translate(0, 60px) rotate(0) scale(0.3); opacity: 0; } 12% { opacity: 1; } 45% { transform: translate(var(--bx), var(--by)) rotate(var(--br)) scale(0.9); } }
@@ -482,7 +498,7 @@ button.hcard:active > div { transform: translateY(2px); }
 @keyframes dealOut { to { transform: translate(0, 220px) rotate(0) scale(0.6); opacity: 0; } }
 .dslot { padding: 0; }
 .dslot.land { animation: land 0.5s cubic-bezier(.2,.9,.3,1.2); }
-@keyframes land { from { transform: translateY(-150px) scale(2.4) rotate(-14deg); opacity: 0.2; } 70% { transform: translateY(3px) scale(0.94); } }
+@keyframes land { 0% { transform: scale(0.3) rotate(-18deg); box-shadow: 0 0 0 0 rgba(228,255,26,0.9); } 55% { transform: scale(1.25) rotate(4deg); box-shadow: 0 0 0 9px rgba(228,255,26,0); } 100% { transform: none; } }
 /* verdict after saving an entry */
 .fb { position: absolute; inset: 0; z-index: 35; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(17,17,17,0.55); animation: up 0.2s ease; cursor: pointer; }
 .fb-card { width: 100%; border-radius: 28px; background: #FFF; padding: 20px 18px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.35); }
@@ -1267,7 +1283,7 @@ function renderDraw() {
     const tag = no === S.carry && !S.firstDraw ? '续留' : clashIn(no, sel) ? '重叠' : '';
     return `<button class="sc2" data-pick="${no}" data-i="${i}" aria-label="${CARDS[no].name} +${CARDS[no].plus}${i === ci ? '，点一下留下' : '，点一下翻到前面'}"
       style="--d:${i * 70}ms;--bx:${Math.round(Math.random() * 220 - 110)}px;--by:${Math.round(-40 - Math.random() * 60)}px;--br:${Math.round(Math.random() * 70 - 35)}deg">
-      <div class="sc2-face">${cardHTML(CARDS[no])}</div>${tag ? `<span class="carry-tag">${tag}</span>` : ''}${rec.includes(no) ? '<span class="sticker sc2-rec">推荐</span>' : ''}</button>`;
+      <div class="sc2-face">${cardHTML(CARDS[no])}</div>${i === ci && !sel.length ? '<span class="sc2-pickhint">点一下留下</span>' : ''}${tag ? `<span class="carry-tag">${tag}</span>` : ''}${rec.includes(no) ? '<span class="sticker sc2-rec">推荐</span>' : ''}</button>`;
   }).join('');
   const dots = inHand.map((no, i) => `<i class="${i === ci ? 'on' : ''}" style="${i === ci ? `background:${coreOf(no)}` : ''}"></i>`).join('');
   // the week's cards come in a crimped foil bag: it tilts toward your finger and tears open when you drag along the top
@@ -1275,15 +1291,15 @@ function renderDraw() {
   const pack = draft.opened ? '' : `<div class="bag closed" role="button" tabindex="0" aria-label="撕开这周的卡包：按住顶部往右拖">
       <svg class="bag-body" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bagG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F6FF9A"/><stop offset=".5" stop-color="#E4FF1A"/><stop offset="1" stop-color="#C6E000"/></linearGradient></defs><path d="${BAG_BODY}" fill="url(#bagG)" stroke="#111" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>
       <svg class="bag-strip" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><path d="${BAG_STRIP}" fill="#F2FF7A" stroke="#111" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M14 46H186" stroke="#111" stroke-width="2" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"/></svg>
-      <span class="bag-sheen" aria-hidden="true"></span>
+      <span class="bag-foil" aria-hidden="true"></span><span class="bag-sheen" aria-hidden="true"></span>
       <span class="bag-eyes" aria-hidden="true"><i></i><i></i></span>
       <span class="pk-week px">WEEK ${String(S.week).padStart(2, '0')}</span>
       <b class="pk-title">抽 ${DEALN()} 留 ${HOLDN()}</b>
       <span class="pk-count px">${draft.hand.length} 张规则卡</span>
     </div>
-    <span class="pk-tear sticker" aria-hidden="true">按住顶部 → 往右拖开</span>`;
+    <span class="pk-tear sticker" aria-hidden="true">按住顶部 → 往右拖开，或点一下</span>`;
   const stage = draft.opened ? `<div class="stack">${cards}</div>
-    <div class="sdots"><span class="sd">${dots}</span><span>左右滑开换下一张 · 点最上面那张留下</span></div>${burst ? `<span class="burst" aria-hidden="true">${burst}</span>` : ''}` : pack;
+    <div class="sdots"><span class="sd">${dots}</span><span>左右滑开换下一张</span></div>${burst ? `<span class="burst" aria-hidden="true">${burst}</span>` : ''}` : pack;
   let info = '';
   if (focus) {
     const c = CARDS[focus];
@@ -1314,7 +1330,7 @@ function renderDraw() {
   draft.dealIn = false; draft.landed = null;
 }
 // each card's place in the pile depends on how far behind the front card it is; only the top four show
-const PILE = [[0, 0, 0, 1], [24, -14, 7, 0.95], [-24, -26, -7, 0.9], [12, -40, 4, 0.85]];
+const PILE = [[0, 0, 0, 1], [46, -6, 9, 0.94], [-46, -6, -9, 0.94], [84, -14, 16, 0.86]];
 function layoutStack(stack, at) {
   const els = [...stack.querySelectorAll('.sc2')], n = els.length;
   els.forEach(el => {
@@ -1372,7 +1388,7 @@ app.addEventListener('pointermove', e => {
     const t = tear; tear = null; t.b.classList.remove('tearing-drag');
     if (t.p > 0.5 && type === 'pointerup') { openPack(lastSheet()); return; }
     t.strip.style.transform = '';
-    if (t.p < 0.04) { const hint = lastSheet().querySelector('.pk-tear'); if (hint) { hint.classList.remove('shake'); void hint.offsetWidth; hint.classList.add('shake'); } }
+    if (t.p < 0.04 && type === 'pointerup') { openPack(lastSheet()); return; }
     return;
   }
   if (swipe) {
@@ -2137,7 +2153,18 @@ app.addEventListener('click', e => {
     if (i !== draft.ci) { draft.ci = i; layoutStack(top.querySelector('.stack'), i); setTimeout(() => replaceSheet(top, renderDraw), 340); return; }
     const other = clashIn(no, draft.sel);
     if (other) toast(`「${CARDS[no].name}」和「${CARDS[other].name}」重叠，不能一起留`);
-    else if (draft.sel.length < keepN(draft.hand)) { draft.sel.push(no); draft.landed = no; }
+    else if (draft.sel.length < keepN(draft.hand)) {
+      draft.sel.push(no); draft.landed = no;
+      // the card shrinks and flies into the next empty slot, then the sheet redraws with the slot popping
+      const slot = top.querySelector('.dslot.empty'), card = t.closest('.sc2');
+      if (slot && card && !reducedMotion()) {
+        const a = card.getBoundingClientRect(), b = slot.getBoundingClientRect();
+        card.classList.add('flying');
+        card.style.transform = `translate(${(b.left + b.width / 2 - a.left - a.width / 2).toFixed(0)}px, ${(b.top + b.height / 2 - a.top - a.height / 2).toFixed(0)}px) scale(0.12) rotate(-10deg)`;
+        card.style.opacity = '0.3';
+        setTimeout(() => replaceSheet(top, renderDraw), 440); return;
+      }
+    }
     else toast(`最多留 ${HOLDN()} 张，先点一下牌槽里的放回来`);
     replaceSheet(top, renderDraw); return;
   }
