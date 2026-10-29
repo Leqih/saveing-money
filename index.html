@@ -918,6 +918,11 @@ button.hcard:active > div { transform: translateY(2px); }
 .hero .crt-base { box-shadow: inset 0 2px 0 rgba(255,255,255,0.5), inset 0 -3px 0 rgba(120, 100, 70, 0.35), 0 7px 0 #A89E8C, 0 14px 18px -8px rgba(60, 40, 20, 0.45); }
 .hero .crt-in { box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6), inset 0 -4px 6px rgba(120, 100, 70, 0.35), 0 0 0 2px #CFC7B8; }
 .hero.herocrt.over .crt-in { box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6), inset 0 -4px 6px rgba(120, 100, 70, 0.35), 0 0 0 2px #E6A0B4; }
+
+/* the multiplier already sits on the CRT's control strip, so the rule cards get the whole row */
+.screen:has(> .head) .hold { justify-items: center; gap: 10px; }
+.screen:has(> .head) { gap: 24px; }
+.screen:has(> .head) .hold .hcard > span { margin-top: 4px; }
 </style>
 
 <div class="device">
@@ -1239,9 +1244,9 @@ function holdHTML(ev) {
   const cards = ev.cards.map(c => {
     const card = CARDS[c.no];
     const label = c.state === 'on' ? `+${card.plus} 守住` : c.state === 'pending' ? '睡着' : brokenLabel(c);
-    return `<button class="hcard ${c.state}" data-info="${c.no}" aria-label="${card.name}，${label}${c.why ? '：' + c.why : ''}">${scaled(card, ev.cards.length > 3 ? 0.3 : 0.36, c.state)}<span>${label}</span></button>`;
+    return `<button class="hcard ${c.state}" data-info="${c.no}" aria-label="${card.name}，${label}${c.why ? '：' + c.why : ''}">${scaled(card, ev.cards.length > 3 ? 0.34 : 0.44, c.state)}<span>${label}</span></button>`;
   }).join('');
-  return `<div class="hold" style="grid-template-columns:repeat(${ev.cards.length}, ${ev.cards.length > 3 ? 74 : 87}px) 1fr">${cards}<div class="multc" aria-label="倍率 ${ev.mult}"><small>倍率</small><b>×${ev.mult}</b></div></div>`;
+  return `<div class="hold" style="grid-template-columns:repeat(${ev.cards.length}, 1fr)">${cards}</div>`;
 }
 // consecutive finished days where every held card held
 function streakDays() { let n = 0; for (let i = S.history.length - 1; i >= 0; i--) { const h = S.history[i]; if (h.unlogged || !h.cards.length || !h.cards.every(c => c.state === 'on')) break; n++; } return n; }
