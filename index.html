@@ -532,6 +532,9 @@ const ART = {
   '06': { b: ci(110, 112, 120), cut: ci(172, 76, 98), a: star4(196, 176, 16) + star4(220, 132, 9) + star4(170, 210, 8), e: [52, 132, 80, 144] },
   '07': { bs: 'M-10 40H38L68 156H196L224 66H52', bw: 20, b: ci(92, 196, 20) + ci(182, 196, 20), e: [118, 108, 146, 108], ec: 'body' },
   '10': { b: 'M48 -10H192V204L174 190L156 204L138 190L120 204L102 190L84 204L66 190L48 204Z', as: 'M78 128L108 158L166 96', aw: 16, e: [100, 58, 140, 58] },
+  '15': { b: rr(26, 48, 188, 150, 24), cut: rr(128, 98, 100, 52, 16), a: ci(162, 124, 13), e: [70, 118, 100, 118] },
+  '16': { b: 'M100 18H152V206H100V84L64 102V58Z', a: ci(188, 182, 18), e: [116, 60, 136, 60] },
+  '17': { b: rr(24, 96, 192, 112, 22) + rr(36, 66, 168, 34, 14), as: 'M120 110V196', aw: 8, e: [66, 152, 88, 152] },
   '13': { b: el(116, 138, 112, 78) + rr(40, 188, 30, 44, 8) + rr(150, 188, 30, 44, 8) + 'M58 76L84 30L110 68Z' + ci(224, 136, 26), cut: rr(94, 62, 52, 10, 5), a: ci(120, 28, 22), e: [154, 118, 180, 118] }
 };
 const coreOf = no => TYPES[CARDS[no].plus].core;
@@ -602,6 +605,16 @@ const CARDS = {
     pending: d => d.count === 0, why: () => '今天还没记账' },
   '07': { no: '07', name: '冷静期', plus: 2, diff: 2, unlock: 3, cond: '网购先进待买清单，等满 24 小时再买', eg: '当场下单这张就碎；从待买清单里等过 24 小时再买，不算。',
     broken: d => d.directOnline, why: d => `当场网购 ¥${d.sum('online')}` },
+  // a week-long allowance: half the week's money outside meals and commute; past it, each ¥20 more costs a point that day
+  '15': { no: '15', name: '周预算', plus: 2, diff: 2, weekly: true, cond: '本周额度外合计不超过一周额度的一半', eg: '平时省着花、周末出去玩都行，只看一周加起来。超了碎到周日，之后每再花 ¥20 当天倍率 −1。',
+    broken: d => d.weekExtra > d.weekCap, why: d => `本周额度外已经 ¥${d.weekExtra}（上限 ¥${d.weekCap}）`,
+    near: d => d.weekExtra > d.weekCap * 0.75 ? `本周额度外已经 ¥${d.weekExtra}，再花 ¥${d.weekCap - d.weekExtra + 1} 周预算就碎` : null,
+    penalty: d => d.weekBefore > d.weekCap ? Math.ceil(d.extra / 20) : 0 },
+  // 零元日 already allows no extra entry at all, so the two overlap
+  '16': { no: '16', name: '一笔为限', plus: 2, diff: 2, unlock: 9, clash: ['05'], cond: '今天额度外最多花一笔', eg: '一杯奶茶没事；再来一份外卖就碎。逼自己把想买的攒成一次。',
+    broken: d => d.extraCount > 1, why: d => `今天额度外已经 ${d.extraCount} 笔`, near: d => d.extraCount === 1 ? '今天额度外已经一笔了，再来一笔一笔为限就碎' : null },
+  '17': { no: '17', name: '带饭族', plus: 1, diff: 1, unlock: 12, cond: '今天吃饭不超过 ¥30', eg: '自己带饭、食堂都守得住；中午吃一顿 ¥40 的就碎。外卖送的不算吃饭，归外卖克星管。',
+    broken: d => d.sum('meal') > 30, why: d => `今天吃饭 ¥${d.sum('meal')}`, near: d => d.sum('meal') > 20 && d.sum('meal') <= 30 ? `今天吃饭已经 ¥${d.sum('meal')}，再花 ¥${31 - d.sum('meal')} 带饭族就碎` : null },
   '13': { no: '13', name: '存钱罐', plus: 2, diff: 2, unlock: 6, cond: '今天额度外花的不超过 ¥20', eg: '一杯奶茶没事，再加一份外卖就碎。',
     broken: d => d.extra > 20, why: d => `额度外花了 ¥${d.extra}`, near: d => d.extra > 10 && d.extra <= 20 ? `今天额度外已经 ¥${d.extra}，再花 ¥${21 - d.extra} 存钱罐就碎` : null }
 };
@@ -624,16 +637,20 @@ const overOf = list => Math.max(0, essOf(list) - essQuota);
 const extraOf = list => list.filter(x => !cat(x.cat).ess).reduce((a, x) => a + x.amt, 0) + overOf(list);
 const teaOf = list => list.filter(x => x.cat === 'tea').length;
 
-function facts(list, teaBefore, assumeLogged) {
+function facts(list, teaBefore, assumeLogged, weekBefore = 0) {
+  const extra = extraOf(list);
   return {
-    count: assumeLogged ? Math.max(1, list.length) : list.length, extra: extraOf(list),
+    weekBefore, weekExtra: weekBefore + extra, weekCap: Math.round(moneyWeek() / 2), extraCount: list.filter(x => !cat(x.cat).ess).length,
+    count: assumeLogged ? Math.max(1, list.length) : list.length, extra,
     night: list.some(x => x.night), nightSum: list.filter(x => x.night).reduce((a, x) => a + x.amt, 0),
     teaBefore, weekTea: teaBefore + teaOf(list), directOnline: list.some(x => x.cat === 'online' && !x.fromWish),
     has: id => list.some(x => x.cat === id), sum: id => list.filter(x => x.cat === id).reduce((a, x) => a + x.amt, 0)
   };
 }
-function evaluate(list, held = S.held, teaBefore = S.teaWeek, assumeLogged = false, daily = todayBudget()) {
-  const d = facts(list, teaBefore, assumeLogged);
+// weekBefore: money spent outside the allowance earlier this week, for cards that look at the whole week
+const weekExtraSoFar = () => weekHist().reduce((a, h) => a + h.extra, 0);
+function evaluate(list, held = S.held, teaBefore = S.teaWeek, assumeLogged = false, daily = todayBudget(), weekBefore = weekExtraSoFar()) {
+  const d = facts(list, teaBefore, assumeLogged, weekBefore);
   const cards = held.map(no => {
     const c = CARDS[no];
     let state = c.pending && c.pending(d) ? 'pending' : c.broken && c.broken(d) ? 'broken' : 'on';
@@ -644,7 +661,7 @@ function evaluate(list, held = S.held, teaBefore = S.teaWeek, assumeLogged = fal
     let gain = state === 'on' ? c.plus : 0, saved = false;
     if (state === 'broken' && c.weekly && c.penalty) gain = -c.penalty(d);
     else if (state === 'broken' && Math.floor(c.plus / 2) > 0) {
-      const at = list.findIndex((_, i) => c.broken(facts(list.slice(0, i + 1), teaBefore, assumeLogged)));
+      const at = list.findIndex((_, i) => c.broken(facts(list.slice(0, i + 1), teaBefore, assumeLogged, weekBefore)));
       saved = at >= 0 && extraOf(list) === extraOf(list.slice(0, at + 1));
       if (saved) gain = Math.floor(c.plus / 2);
     }
@@ -662,11 +679,11 @@ const brokenLabel = c => c.saved ? `止损 +${c.gain}` : c.gain < 0 ? `碎了 ${
 const slipped = (before, after) => after.cards.filter((x, k) => x.state === 'broken' && before.cards[k].state === 'broken' && x.gain < before.cards[k].gain);
 const slipWhy = x => x.gain < 0 ? `${CARDS[x.no].name}又超一杯` : `${CARDS[x.no].name}的止损没了`;
 // which entry first cracked each card, so lists can point at the culprit
-function breakers(list, held = S.held, teaBefore = S.teaWeek) {
+function breakers(list, held = S.held, teaBefore = S.teaWeek, weekBefore = weekExtraSoFar()) {
   const out = {};
-  let prev = evaluate([], held, teaBefore, true);
+  let prev = evaluate([], held, teaBefore, true, undefined, weekBefore);
   list.forEach((x, i) => {
-    const now = evaluate(list.slice(0, i + 1), held, teaBefore, true);
+    const now = evaluate(list.slice(0, i + 1), held, teaBefore, true, undefined, weekBefore);
     now.cards.forEach((c, k) => { if (c.state === 'broken' && prev.cards[k].state !== 'broken') (out[i] = out[i] || []).push(CARDS[c.no].name); });
     prev = now;
   });
@@ -674,12 +691,12 @@ function breakers(list, held = S.held, teaBefore = S.teaWeek) {
 }
 // run a week of receipts through a set of held cards: total score and how many days each card would have held
 function simulate(held, days, start) {
-  let tea = 0, total = 0;
+  let tea = 0, spent = 0, total = 0;
   const per = {}; held.forEach(n => { per[n] = 0; });
   const list = days.slice(start);
   list.forEach(day => {
-    const ev = evaluate(day, held, tea, true, dailyBudget());
-    tea += teaOf(day); total += ev.score;
+    const ev = evaluate(day, held, tea, true, dailyBudget(), spent);
+    tea += teaOf(day); spent += ev.d.extra; total += ev.score;
     ev.cards.forEach(c => { if (c.state === 'on') per[c.no]++; });
   });
   return { total, per, days: list.length };
@@ -691,7 +708,7 @@ const NOW = new Date();
 const JOIN = (NOW.getDay() + 6) % 7;
 const START = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - JOIN);
 let S = {
-  week: 1, day: JOIN, weekStart: JOIN, held: [], stars: 0, unlocked: ['01', '06', '03', '04', '05', '10'], lastWeek: [], estimated: false, firstDraw: true,
+  week: 1, day: JOIN, weekStart: JOIN, held: [], stars: 0, unlocked: ['01', '06', '03', '04', '05', '10', '15'], lastWeek: [], estimated: false, firstDraw: true,
   base: BASE, setup: { income: 6000, fixed: 2500, save: 2000 }, weak: [], freq: {}, coach: 0, view: 'home', billTab: 'flow', cardLog: {},
   baseMult: 1, grad: [], stake: 0, nextStake: 0, carry: null, debt: 0, starsTotal: 0, slots: 3, glue: 0, glued: null, pinned: [],
   prefs: { evening: true, eveningAt: 21.5, ruleAlerts: true, morning: true },
@@ -731,7 +748,7 @@ const WEAK = [
   { id: 'online', name: '网购', card: '07', bg: '#2E8BFF', svg: '<rect x="6" y="16" width="48" height="28" rx="8" fill="#111"/><ellipse cx="24" cy="30" rx="2.6" ry="4.5" fill="#FFF"/><ellipse cx="36" cy="30" rx="2.6" ry="4.5" fill="#FFF"/>' },
   { id: 'taxi', name: '打车', card: '04', bg: '#2FD15C', svg: '<path d="M24 4h12v8h8v8h8v20h-8v8h-8v8H24v-8h-8v-8H8V20h8v-8h8z" fill="#111"/><rect x="23" y="24" width="5" height="10" fill="#FFF"/><rect x="33" y="24" width="5" height="10" fill="#FFF"/>' },
   { id: 'night', name: '深夜', card: '06', bg: '#FF4D6A', svg: `<path d="M30 2C33 22 38 27 58 30C38 33 33 38 30 58C27 38 22 33 2 30C22 27 27 22 30 2Z" fill="#111"/>${EYES}` },
-  { id: 'weekend', name: '周末', card: '13', bg: '#A55BFF', svg: '<path d="M6 12H54L30 54Z" fill="#111" stroke="#111" stroke-width="6" stroke-linejoin="round"/><ellipse cx="25" cy="24" rx="2.6" ry="4.5" fill="#FFF"/><ellipse cx="35" cy="24" rx="2.6" ry="4.5" fill="#FFF"/>' }
+  { id: 'weekend', name: '周末', card: '15', bg: '#A55BFF', svg: '<path d="M6 12H54L30 54Z" fill="#111" stroke="#111" stroke-width="6" stroke-linejoin="round"/><ellipse cx="25" cy="24" rx="2.6" ry="4.5" fill="#FFF"/><ellipse cx="35" cy="24" rx="2.6" ry="4.5" fill="#FFF"/>' }
 ];
 const weeklyFrom = s => Math.round((s.income - s.fixed - s.save) / 4.3);
 
@@ -739,14 +756,21 @@ const weekHist = () => S.history.filter(h => h.week === S.week);
 const dailyBudget = () => Math.round(S.base / 7);
 // money spent past today's allowance comes out of tomorrow's, so every yuan still counts after a blown day
 const todayBudget = () => Math.max(0, dailyBudget() - S.debt);
+// tomorrow gives up at most half its allowance, so one blown day can't zero out the rest of the week
+const debtCap = () => Math.round(dailyBudget() / 2);
 const weekDays = () => 7 - S.weekStart;
 // calibrated by simulating spenders on a ¥50/day allowance: someone spending ~80% of it on extras passes about half
 // the time, ~45% splits between two and three stars, ~20% always gets three, and overspending never passes
 // stakes raise the bar after a pass, the way Balatro moves from white to black stake
-const STAKES = [{ name: '白注', k: 1, bg: '#FFFFFF', fg: '#111' }, { name: '红注', k: 1.25, bg: '#FF4D6A', fg: '#FFF' }, { name: '蓝注', k: 1.5, bg: '#2E8BFF', fg: '#FFF' }, { name: '黑注', k: 1.8, bg: '#111', fg: '#E4FF1A' }];
+// star: what a pass's stars are multiplied by on this stake (rounded), rather than a flat bonus per stake
+const STAKES = [{ name: '白注', k: 1, star: 1, bg: '#FFFFFF', fg: '#111' }, { name: '红注', k: 1.25, star: 1.25, bg: '#FF4D6A', fg: '#FFF' }, { name: '蓝注', k: 1.5, star: 1.5, bg: '#2E8BFF', fg: '#FFF' }, { name: '黑注', k: 1.8, star: 2, bg: '#111', fg: '#E4FF1A' }];
 // each graduation adds a permanent +1, so the bar rises a quarter per graduated card to keep the week a challenge
 const gradK = () => 1 + 0.25 * (S.baseMult - 1);
-const weekTarget = () => Math.round(dailyBudget() * weekDays() * 1.5 * STAKES[S.stake].k * gradK() / 10) * 10;
+// a fourth slot adds roughly another card's multiplier every day, so it raises the bar a quarter too
+const slotK = () => S.slots > 3 ? 1.25 : 1;
+// overspending past what tomorrow can absorb raises this week's bar instead (see endDay)
+const OVERFLOW_PTS = 3;
+const weekTarget = () => Math.round((dailyBudget() * weekDays() * 1.5 * STAKES[S.stake].k * gradK() * slotK() + (S.overflow || 0) * OVERFLOW_PTS) / 10) * 10;
 const scorePrior = () => weekHist().reduce((a, h) => a + h.score, 0);
 const moneyWeek = () => Math.round(S.base * weekDays() / 7);
 const spentWeek = () => weekHist().reduce((a, h) => a + h.extra, 0) + extraOf(S.today);
@@ -1198,7 +1222,7 @@ function verdict(before, after) {
 
 /* ---------- receipts, end of day, info sheets ---------- */
 function receiptHTML(h, preview) {
-  const br = breakers(h.entries, h.held, h.teaBefore);
+  const br = breakers(h.entries, h.held, h.teaBefore, h.weekBefore || 0);
   const rows = h.entries.map((x, i) => {
     const ess = !!cat(x.cat).ess;
     return `<div class="r ${ess ? 'off' : br[i] ? 'hitc' : ''}"><span>${entryName(x)}${ess ? '<i>必需</i>' : ''}${x.night ? '<i>22 点后</i>' : ''}${br[i] ? `<i class="hit">碎 ${br[i].join('、')}</i>` : ''}</span><span>¥${x.amt}</span></div>`;
@@ -1215,13 +1239,13 @@ function receiptHTML(h, preview) {
     <div class="r"><span>剩下的钱 = 底分</span><span>${h.base}</span></div>
     <hr><div class="r"><span>倍率从 ${h.baseMult || 1} 开始${(h.baseMult || 1) > 1 ? `（毕业 ${h.baseMult - 1} 张）` : ""}</span><span>${h.baseMult || 1}</span></div>${cards}<hr>
     <div class="tot"><span class="px">${h.base} × ${h.mult}</span><b>${h.score} 分</b></div>
-    ${h.extra > h.daily ? `<p class="note left" style="margin:4px 0 0">超出 ¥${h.extra - h.daily}，从明天的额度里扣。</p>` : ""}
+    ${h.extra > h.daily ? `<p class="note left" style="margin:4px 0 0">超出 ¥${h.extra - h.daily}，明天最多扣 ¥${debtCap()}${h.extra - h.daily > debtCap() ? `，多的 ¥${h.extra - h.daily - debtCap()} 每块让本周目标分 +${OVERFLOW_PTS}` : ''}。</p>` : ""}
     ${preview ? '' : ''}
   </div>`;
 }
 function dayRecord() {
   const ev = evaluate(S.today);
-  const h = { week: S.week, day: S.day, baseMult: S.baseMult, held: S.held.slice(), teaBefore: S.teaWeek, debtIn: S.debt, entries: S.today.map(x => ({ ...x })), extra: ev.d.extra, daily: ev.daily, base: ev.base, mult: ev.mult, score: ev.score, cards: ev.cards };
+  const h = { week: S.week, day: S.day, baseMult: S.baseMult, held: S.held.slice(), teaBefore: S.teaWeek, weekBefore: weekExtraSoFar(), debtIn: S.debt, entries: S.today.map(x => ({ ...x })), extra: ev.d.extra, daily: ev.daily, base: ev.base, mult: ev.mult, score: ev.score, cards: ev.cards };
   // a day with nothing logged is not a perfect day: it scores 0 until the user confirms next morning that nothing was spent
   if (!S.today.length) {
     // confirming "spent nothing" only restores the money: an unlogged day can't prove any card held, so no card adds multiplier
@@ -1585,7 +1609,7 @@ function renderMorning() {
     <div class="bar-top"><h1>周${DAYS[S.day]} · 早上好</h1><span class="px" style="color:var(--mute)">${fmtClock(S.clock)}</span></div>
     ${(() => { const y = S.history[S.history.length - 1]; return y && y.unlogged && !y.resolved ? `<div class="unlogged"><b>昨天一笔都没记</b><span>真的一分没花吗？没记账的那天先按 0 分算。真的没花的话，按零花费补上 ${y.potential.score} 分（只算底倍率，没记账的一天牌不加倍率）。</span><div class="ibtns"><button class="rvbtn lime" data-act="unlogged-yes">真的没花</button><button class="rvbtn" data-act="unlogged-no">忘了记</button></div></div>` : ''; })()}
     ${S.autoEnded ? '<div class="callout">昨晚你没点"结束今天"，零点自动帮你结束了，小票照样留着。</div>' : ''}
-    ${S.debt ? `<div class="callout">昨天透支了 <b>¥${S.debt}</b>，今天能花 ¥${dailyBudget()} − ¥${Math.min(S.debt, dailyBudget())} = <b>¥${todayBudget()}</b>。${S.debt > dailyBudget() ? `还剩 ¥${S.debt - dailyBudget()} 会接着从明天扣。` : ""}</div>` : ""}
+    ${S.debt ? `<div class="callout">昨天透支了 <b>¥${S.debt}</b>，今天能花 ¥${dailyBudget()} − ¥${Math.min(S.debt, dailyBudget())} = <b>¥${todayBudget()}</b>。${(() => { const y = S.history[S.history.length - 1]; return y && y.overflow ? `超出的另外 ¥${y.overflow} 不再往后扣，改成本周目标分 +${y.overflow * OVERFLOW_PTS}。` : ''; })()}</div>` : ""}
     <div class="cap"><div class="top" style="display:flex;flex-direction:column;gap:8px">
       <div style="display:flex;justify-content:space-between;align-items:baseline"><b>昨天 · 周${DAYS[y.day]}</b><button class="linkbtn" data-day="${y.day}" style="padding:0;color:#5B4FC8;font-size:13px">看小票 →</button></div>
       <div class="ystat"><div><small>得分</small><b>${y.score}</b></div><div><small>倍率</small><b>×${y.mult}</b></div><div><small>守住</small><b>${kept}/${y.cards.length}</b></div></div>
@@ -1607,7 +1631,7 @@ function renderMorning() {
 const GRAD_RATIO = 0.85, GRAD_WEEKS = 2;
 function settleWeek() {
   const total = scorePrior(), target = weekTarget(), pass = total >= target;
-  const got = pass ? starsFrom(total, target) + S.stake : 0, before = S.stars;
+  const got = pass ? Math.round(starsFrom(total, target) * STAKES[S.stake].star) : 0, before = S.stars;
   S.stars += got; S.starsTotal += got;
   const hist = weekHist();
   const perCard = S.held.map(no => ({ no, held: hist.filter(h => h.cards.find(c => c.no === no && c.state === 'on')).length, days: hist.length }));
@@ -1632,13 +1656,13 @@ function settleWeek() {
   const carryable = perCard.filter(p => !S.grad.includes(p.no));
   S.carry = carryable.length ? carryable.slice().sort((a, b) => b.held / Math.max(1, b.days) - a.held / Math.max(1, a.days))[0].no : null;
   S.nextStake = S.stake;
-  S.weekResult = { total, target, pass, got, before, perCard, grads, fresh, real: moneyWeek(), spent: hist.reduce((a, h) => a + h.extra, 0) };
+  S.weekResult = { total, target, pass, got, before, perCard, grads, fresh, real: moneyWeek(), spent: hist.reduce((a, h) => a + h.extra, 0), logged: hist.reduce((a, h) => a + h.entries.reduce((b, x) => b + x.amt, 0), 0) };
 }
 function renderWeek() {
   const R = S.weekResult, st = STAKES[S.stake];
   const stakeOpts = R.pass && S.stake < STAKES.length - 1 ? [S.stake + 1, S.stake] : !R.pass && S.stake > 0 ? [S.stake, S.stake - 1] : [S.stake];
   const stakeBtn = i => {
-    const s = STAKES[i], tag = i > S.stake ? `目标 ×${s.k}，过关多 +${i} ★` : i < S.stake ? `目标降回 ×${s.k}` : '保持现在的难度';
+    const s = STAKES[i], tag = i > S.stake ? `目标 ×${s.k}，过关星星 ×${s.star}` : i < S.stake ? `目标降回 ×${s.k}` : '保持现在的难度';
     return `<button class="stake ${S.nextStake === i ? 'on' : ''}" data-stake="${i}" aria-pressed="${S.nextStake === i}"><span class="chipk" style="background:${s.bg};color:${s.fg}">${s.name}</span><span>${tag}</span></button>`;
   };
   sheet('周结算', `
@@ -1647,7 +1671,7 @@ function renderWeek() {
     <div class="impact">
       <div class="r"><span>本周分数</span><span class="${R.pass ? 'good' : 'hot'}">${R.total} / ${R.target}</span></div>
       <div class="r"><span>星星</span><span>${R.got ? `+${starStr(R.got)}　共 ${S.stars}` : `这周没拿到　共 ${R.before}`}</span></div>
-      <div class="r"><span>星星怎么算</span><span>够目标 ★ · 1.7 倍 ★★ · 2.6 倍 ★★★${S.stake ? ` · ${st.name} +${S.stake}` : ''}</span></div>
+      <div class="r"><span>星星怎么算</span><span>够目标 ★ · 1.7 倍 ★★ · 2.6 倍 ★★★${S.stake ? ` · ${st.name} 星星 ×${st.star}` : ''}</span></div>
     </div>
     ${R.grads.map(no => `<div class="gradcard"><div class="gimg">${scaled(CARDS[no], 0.3)}<span class="cv-grad">毕业</span></div><div><b>「${CARDS[no].name}」毕业了！</b><p>连续 ${GRAD_WEEKS} 周守住 6/7 天以上，这个习惯算是改掉了。它离开发牌池，换来永久的底倍率 +1：以后倍率从 <b>${S.baseMult}</b> 开始，每周的目标分也提高 25%。</p></div></div>`).join('')}
     <h2>三张牌守得怎么样 <small>连续 ${GRAD_WEEKS} 周守住 6/7 天就毕业</small></h2>
@@ -1661,7 +1685,18 @@ function renderWeek() {
     ${tilesHTML()}
     ${R.fresh.map(x => `<div class="unlock">${scaled(x, 0.3)}<div><b style="font-size:13px">解锁新牌</b><div style="font-weight:900;font-size:20px">${x.name}</div><p class="note left">${x.cond}。以后发牌可能发到它。</p></div></div>`).join('')}
     <p class="note">今晚就到这里，明早（周一）再开商店、抽新牌。<br>${R.pass ? '想挑战就升一注，过关星星更多；不想就保持现在的难度。' : '没过不扣钱，也不用重来。下周可以留几张更守得住的，或者降一注。'}</p>
-    <button class="cap lime bigbtn" data-act="to-monday"><div class="top">好，去周一早上</div></button>`);
+    ${reconHTML(R)}`);
+}
+// before Monday, the week's log is checked against what the payment apps say was really spent; a log missing a lot loses the stars
+const RECON_RATIO = 1.2, RECON_SLACK = 30;
+function reconHTML(R) {
+  const go = '<button class="cap lime bigbtn" data-act="to-monday"><div class="top">好，去周一早上</div></button>';
+  if (!R.got && !R.recon) return go;
+  if (R.recon) return `<div class="callout">${R.recon.voided ? `对账差了 ¥${R.recon.actual - R.logged}：实际 ¥${R.recon.actual}，只记了 ¥${R.logged}。这周的 ${starStr(R.recon.voided)} 不算了，分数照旧。` : R.recon.skipped ? `没对账，这周的星星减半，${R.got ? `只拿 ${starStr(R.got)}` : '一颗也没剩'}。` : `对上了：实际 ¥${R.recon.actual}，记了 ¥${R.logged}。星星照拿 ✓`}</div>${go}`;
+  return `<h2>对一下账 <small>领星星前的最后一步</small></h2>
+    <div class="impact"><p class="note left" style="margin:0">打开微信、支付宝，看看这周一共花了多少（吃饭、通勤也算）。这周记下的一共是 <b>¥${R.logged}</b>。实际比记的多出两成以上，这周的星星就不算。</p>
+      <div class="field"><input class="in" id="recon" inputmode="numeric" maxlength="6" placeholder="这周实际一共花了多少" aria-label="这周实际一共花了多少"><button class="mini" data-act="recon">核对</button></div></div>
+    <button class="cap bigbtn" data-act="recon-skip"><div class="top">不对账（星星减半）</div></button>`;
 }
 
 // Monday morning opens the new week: a glance back, then the shop (optional) and the deal.
@@ -1670,7 +1705,7 @@ function renderMonday() {
   const R = S.weekResult, next = dateOf(S.week + 1, 0);
   sheet('周一早上好', `
     <div class="bar-top"><h1>第 ${S.week + 1} 周 · 周一早上好</h1><span class="px" style="color:var(--mute)">${next.getMonth() + 1}/${next.getDate()} 08:30</span></div>
-    <div class="mhero ${R.pass ? '' : 'over'}"><span class="px">上周 · ${STAKES[S.stake].name}</span><b>${R.total} 分</b><small>${R.pass ? `过关，拿到 ${starStr(R.got)}` : `差 ${R.target - R.total} 分没过，不扣钱`}　·　真实${R.real - R.spent >= 0 ? `省下 ¥${R.real - R.spent}` : `超了 ¥${R.spent - R.real}`}</small></div>
+    <div class="mhero ${R.pass ? '' : 'over'}"><span class="px">上周 · ${STAKES[S.stake].name}</span><b>${R.total} 分</b><small>${R.pass ? (R.got ? `过关，拿到 ${starStr(R.got)}` : '过关，星星没拿到') : `差 ${R.target - R.total} 分没过，不扣钱`}　·　真实${R.real - R.spent >= 0 ? `省下 ¥${R.real - R.spent}` : `超了 ¥${R.spent - R.real}`}</small></div>
     <div class="impact">
       <div class="r"><span>这周难度</span><span>${STAKES[S.nextStake].name}</span></div>
       <div class="r"><span>续留</span><span>${S.carry ? CARDS[S.carry].name : '没有'}</span></div>
@@ -1723,7 +1758,7 @@ function renderShop() {
       <div class="px sdeal"><span>限时</span><span>本周</span><svg width="16" height="20" viewBox="0 0 14 18" fill="#FF8A3D" aria-hidden="true"><path d="M8 0L0 10h5l-1 8 8-10H7z"/></svg></div>
       <div class="sbtns">
         <button data-act="reroll" ${can(PRICE.reroll) ? '' : 'disabled'}><span class="px">换一组</span><span class="px sub">★ ${PRICE.reroll}</span></button>
-        <button class="lime" data-act="slot" ${S.slots < 4 && can(PRICE.slot) ? '' : 'disabled'}><span class="px">${S.slots < 4 ? '加第 4 个牌槽' : '已经 4 个牌槽'}</span><span class="px sub">${S.slots < 4 ? `<s>${PRICE.slotWas}</s> ★ ${PRICE.slot}` : '每周留 4 张'}</span></button>
+        <button class="lime" data-act="slot" ${S.slots < 4 && can(PRICE.slot) ? '' : 'disabled'}><span class="px">${S.slots < 4 ? '加第 4 个牌槽' : '已经 4 个牌槽'}</span><span class="px sub">${S.slots < 4 ? `<s>${PRICE.slotWas}</s> ★ ${PRICE.slot} · 目标 +25%` : '每周留 4 张'}</span></button>
       </div>
     </div>
     <div class="sglue"><div><b>胶水 × ${S.glue}</b><small>碎了的牌点开就能粘回去，只管当天。最多存 3 瓶。</small></div><button class="cap lime" data-act="glue-buy" ${S.glue < 3 && can(PRICE.glue) ? '' : 'disabled'}><div class="top">★ ${PRICE.glue} 买一瓶</div></button></div>
@@ -1738,7 +1773,10 @@ function renderShop() {
 function endDay() {
   const h = dayRecord();
   S.history.push(h);
-  S.debt = Math.max(0, h.extra + S.debt - dailyBudget());
+  const owed = Math.max(0, h.extra + S.debt - dailyBudget());
+  S.debt = Math.min(debtCap(), owed);
+  // whatever tomorrow can't absorb raises this week's target: every yuan still has to be won back by saving
+  h.overflow = owed - S.debt; S.overflow = (S.overflow || 0) + h.overflow;
   S.teaWeek += teaOf(S.today);
   S.revisit = S.wish; S.wish = [];
   S.today = [];
@@ -1754,7 +1792,7 @@ function startWeek() {
   S.lastDays = weekDays();
   S.autoEnded = false; S.clock = 8.5;
   // an overspent Sunday still comes out of Monday's allowance, so the week boundary is no free night out
-  S.stake = S.nextStake;
+  S.stake = S.nextStake; S.overflow = 0;
   S.week += 1; S.day = 0; S.weekStart = 0; S.held = []; S.teaWeek = 0; S.firstDraw = false; S.estimated = false;
   draft = {};
   renderTable(); renderDraw();
@@ -1909,6 +1947,15 @@ app.addEventListener('click', e => {
     toast(act === 'unlogged-yes' ? `补上了 ${y.score} 分` : '那天按 0 分算。以后花了钱随手记一笔');
     return;
   }
+  if (act === 'recon' || act === 'recon-skip') {
+    const R = S.weekResult, actual = parseInt((top.querySelector('#recon') || {}).value, 10);
+    if (act === 'recon' && !(actual >= 0)) { toast('先填这周实际花了多少'); return; }
+    const voided = act === 'recon' && actual > R.logged * RECON_RATIO && actual - R.logged > RECON_SLACK ? R.got : 0;
+    const lost = act === 'recon-skip' ? R.got - Math.floor(R.got / 2) : voided;
+    S.stars -= lost; S.starsTotal -= lost; R.got -= lost; S.weeks[S.weeks.length - 1].stars = R.got; S.lastResult.stars = R.got;
+    R.recon = { actual, voided, skipped: act === 'recon-skip' };
+    replaceSheet(top, renderWeek); return;
+  }
   if (act === 'to-monday') { top.remove(); S.clock = 8.5; renderMonday(); return; }
   if (act === 'shop') { rollShop(); top.remove(); renderShop(); return; }
   if (act === 'draw-now') { top.remove(); startWeek(); return; }
@@ -1919,7 +1966,7 @@ app.addEventListener('click', e => {
     replaceSheet(top, renderShop); toast(o.kind === 'unlock' ? `解锁了「${CARDS[o.no].name}」` : `下周一定会发「${CARDS[o.no].name}」`); return;
   }
   if (act === 'reroll') { S.stars -= PRICE.reroll; rollShop(); replaceSheet(top, renderShop); return; }
-  if (act === 'slot') { S.stars -= PRICE.slot; S.slots = 4; replaceSheet(top, renderShop); toast('下周起发 6 张，留 4 张'); return; }
+  if (act === 'slot') { S.stars -= PRICE.slot; S.slots = 4; replaceSheet(top, renderShop); toast('下周起发 6 张，留 4 张，目标分 +25%'); return; }
   if (act === 'glue-buy') { S.stars -= PRICE.glue; S.glue += 1; replaceSheet(top, renderShop); toast('买了一瓶胶水，碎了的牌点开就能用'); return; }
   if (act === 'shop-done') { startWeek(); S.pinned = []; return; }
   if (act === 'glue') {
