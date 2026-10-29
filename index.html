@@ -1905,9 +1905,8 @@ async function playStage(sh) {
 function renderEnd() {
   sheet('结束今天', `
     <div class="bar-top"><h1>周${DAYS[S.day]} · 结束今天</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
-    <div class="prt" aria-hidden="true"><div class="prt-plate"><i class="led"></i>RECEIPT PRINTING<br><small>今天的小票从这里出来 ↓</small></div><div class="prt-slot"><i class="prt-lip"></i></div></div>
+    <div class="prt" aria-hidden="true"><div class="prt-plate"><i class="led"></i>RECEIPT PRINTING</div><div class="prt-slot"><i class="prt-lip"></i></div></div>
     <div class="rcpt-win print">${receiptHTML(dayRecord(), true)}</div>
-    <p class="note">结束后今天就不能再记了，有漏记的先补上。<br>忘了点也没关系，零点会自动帮你结束。</p>
     <div class="actions"><button class="cap" data-act="close"><div class="top">还要补记</div></button><button class="go" data-act="end-ok">出牌，结束今天</button></div>`);
 }
 function renderDay(i, week = S.week) {
