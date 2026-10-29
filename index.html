@@ -772,6 +772,9 @@ button.hcard:active > div { transform: translateY(2px); }
 .screen:has(> .head) { gap: 18px; }
 .screen:has(> .head) .hero > .top { min-height: 210px; justify-content: space-between; }
 .screen:has(> .head) .hero .money { font-size: 84px; }
+.wkgo { align-self: flex-start; font-size: 12px; padding: 0; color: #5B4FC8; }
+.wkmini .keys { gap: 6px; }
+.wkmini .chip { height: 30px; font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 </style>
 
 <div class="device">
@@ -1095,9 +1098,16 @@ function weekInfo() {
 // the full week view lives one tap away: the home only shows the number
 // the star badge is the home's one entry to the long-term side: how stars work, and the settings
 function renderStarSheet() {
-  sheet('星星', `<div class="bar-top"><h1>我的星星</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
-    <div class="cookie" style="width:120px;height:120px;align-self:center;position:relative"><span class="n" style="font-size:38px">${S.stars}</span><span class="l" style="font-size:13px">★ 星星</span></div>
+  const w = weekInfo();
+  sheet('星星', `<div class="bar-top"><h1>星星和本周</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
+    <div class="cookie" style="width:104px;height:104px;align-self:center;position:relative"><span class="n" style="font-size:34px">${S.stars}</span><span class="l" style="font-size:12px">★ 星星</span></div>
     <p class="note" style="text-align:center">周分数够目标拿 ★，1.7 倍拿 ★★，2.6 倍拿 ★★★。攒够会解锁新牌，也能在商店里花掉。</p>
+    <div class="cap meter"><div class="top">
+      <div class="row"><span>本周分数 <span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></span><span class="px">${w.prior} / ${w.target}</span></div>
+      <div class="bar"><i style="width:${w.pct}%"></i></div>
+      <p class="hint">${w.hint} 真实的钱这周还剩 ${money(moneyWeek() - spentWeek())}。</p>
+      ${tilesHTML()}
+    </div></div>
     <button class="cap bigbtn" data-act="settings"><div class="top">设置</div></button>`);
 }
 function renderWeekSheet() {
@@ -1116,6 +1126,11 @@ function renderWeekSheet() {
 function homeHTML() {
   const ev = evaluate(S.today), w = weekInfo();
   const dots = '';
+  const br = breakers(S.today), sumToday = S.today.reduce((a, x) => a + x.amt, 0);
+  const list = S.today.map((x, i) => ({ x, i })).slice(-3).map(({ x, i }) => {
+    const ess = !!cat(x.cat).ess, b = br[i];
+    return `<button class="chip ${ess ? 'ess' : b ? 'hit' : 'hot'}" data-edit="${i}" aria-label="${entryName(x)} ${x.amt} 元，点一下修改">${entryName(x)}${ess ? ' · 必需' : ''}${b ? ` · 碎了${b.join('、')}` : ''} <b>¥${x.amt}</b></button>`;
+  }).join('') || '<span class="note">今天还没花钱。</span>';
   return `
     <div class="head">
       <button class="daypill" data-act="clock" aria-label="第 ${S.week} 周周${DAYS[S.day]}，现在 ${fmtClock(S.clock)}，点一下切换演示时间"><span class="px" style="font-size:13px;display:flex;justify-content:space-between">第 ${S.week} 周 · 周${DAYS[S.day]}<span class="clock">${fmtClock(S.clock)} ▾</span></span><span class="dots" aria-hidden="true">${dots}</span></button>
@@ -1131,11 +1146,11 @@ function homeHTML() {
     <div class="quick">${S.quicks.map((q, i) => `<button class="chip qchip" data-hquick="${i}">${esc(q.label)}</button>`).join("")}</div>
     ${S.held.length ? holdHTML(ev) : `<button class="rulebar" data-act="draw"><div class="rtext" style="grid-column:1/-1"><small>本周的牌</small><b>还没抽</b><span>点这里抽 5 张，留 3 张</span></div></button>`}
     <div class="wkrow">
-      <button class="cap meter wkmini" data-act="week" aria-label="本周分数 ${w.prior} / ${w.target}，点一下看详情"><div class="top">
-        <div class="row"><span>本周分数</span><span class="px">${w.prior} / ${w.target}</span></div>
-        <div class="bar"><i style="width:${w.pct}%"></i></div>
-        <small class="wkgo">剩 ${w.daysLeft} 天 · 看详情 ›</small>
-      </div></button>
+      <div class="cap meter wkmini"><div class="top">
+        <div class="row"><span>今天记的账</span><span class="px">${money(sumToday)}</span></div>
+        <div class="keys">${list}</div>
+        <button class="linkbtn wkgo" data-act="goflow">${S.today.length > 3 ? `还有 ${S.today.length - 3} 笔 · ` : ''}全部流水 ›</button>
+      </div></div>
       <button class="cap lime bigbtn endbtn" data-act="end"><div class="top">结束今天</div></button>
     </div>`;
 }
