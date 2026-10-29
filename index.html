@@ -762,6 +762,45 @@ button.hcard:active > div { transform: translateY(2px); }
 .cap.endbtn { background: none; box-shadow: none; padding: 0; transition: transform 0.25s cubic-bezier(.3,1.8,.5,1); }
 .cap.endbtn:active { transform: scale(0.97); }
 .cap.endbtn > .top { border-radius: 26px; background: radial-gradient(circle at 50% 28%, #FBFFC2 0%, #E4FF1A 100%); box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.4), inset 0 0 12px 4px rgba(255, 255, 255, 0.85), 0 12px 16px -10px rgba(150, 170, 0, 0.7); padding: 16px; font-size: 17px; }
+
+/* bento home */
+.hd2 { gap: 8px; }
+.dp2 { flex-direction: row; align-items: center; justify-content: space-between; height: 44px; padding: 0 14px; border-radius: 22px; }
+.dp2 .px { font-size: 13px; }
+.starpill { height: 44px; padding: 0 14px; border-radius: 22px; border: 0; display: flex; align-items: center; gap: 5px; background: radial-gradient(circle at 50% 28%, #FBFFC2 0%, #E4FF1A 100%); color: #111; font-weight: 900; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.35), inset 0 0 10px 3px rgba(255,255,255,0.85); }
+.starpill b { font-family: var(--f-px); font-weight: 600; font-size: 18px; }
+.bento { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.bt { position: relative; border: 0; padding: 14px 16px; border-radius: 28px; text-align: left; color: #111; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; min-width: 0; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.35), inset 0 0 12px 4px rgba(255,255,255,0.85); transition: transform 0.3s cubic-bezier(.3,1.8,.5,1); }
+button.bt:active { transform: scale(0.96); }
+.bt small { font-size: 12px; font-weight: 900; opacity: 0.7; }
+.bt b { font-size: 20px; font-weight: 900; line-height: 1.1; }
+.bt .bgo { font-size: 12px; font-weight: 900; opacity: 0.8; }
+.bt-hero { grid-column: 1 / -1; min-height: 176px; background: radial-gradient(circle at 50% 28%, #FFB0B0 0%, #FF4B4B 100%); padding: 16px 20px; }
+.bt-hero.over { background: radial-gradient(circle at 50% 28%, #FFD0F2 0%, #FF52D9 100%); }
+.bt-hero .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.bt-hero .money { font-family: var(--f-display); font-size: 64px; line-height: 0.95; }
+.bt-rules { min-height: 150px; background: radial-gradient(circle at 50% 28%, #FFF0F5 0%, #FFB3CC 100%); }
+.rts { display: flex; gap: 6px; flex-wrap: wrap; }
+.rt { position: relative; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 14px; background: var(--c); display: flex; align-items: center; justify-content: center; }
+.rt.sm { width: 34px; height: 34px; border-radius: 12px; }
+.rt i { position: absolute; right: -5px; bottom: -6px; min-width: 20px; padding: 0 4px; border-radius: 9px; background: #E4FF1A; color: #111; font-style: normal; font-size: 11px; font-weight: 900; line-height: 18px; text-align: center; border: 2px solid #FFF; }
+.rt.pending { opacity: 0.55; } .rt.pending i { background: #fff; }
+.rt.broken { filter: grayscale(0.7); } .rt.broken i { background: #FF3B5C; color: #fff; } .rt.broken svg { animation: crack 0.5s ease; }
+.rmult { display: flex; align-items: baseline; gap: 4px; } .rmult b { font-family: var(--f-display); font-weight: 400; font-size: 26px; } .rmult small { font-size: 11px; }
+.nodraw { font-size: 22px; }
+.bt-week { min-height: 150px; background: radial-gradient(circle at 50% 12%, #FFFFFF 0%, #DDD8FF 100%); }
+.bt-week b { font-size: 30px; font-weight: 400; } .bt-week b i { font-style: normal; font-size: 14px; opacity: 0.6; }
+.bt-week .bar { height: 14px; margin-top: 0; }
+.bt-add { grid-column: 1 / -1; background: radial-gradient(circle at 50% 12%, #F1F8FF 0%, #B6D8FF 100%); padding: 12px 0 12px 16px; gap: 8px; }
+.rail2 { display: flex; gap: 8px; overflow-x: auto; padding: 2px 16px 4px 0; scrollbar-width: none; }
+.rail2::-webkit-scrollbar { display: none; }
+.rail2 .qchip { flex: 0 0 auto; height: 42px; padding: 0 18px; border: 0; border-radius: 21px; font-size: 15px; font-weight: 900; color: #111; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.35), inset 0 0 10px 3px rgba(255,255,255,0.85); transition: transform 0.25s cubic-bezier(.3,1.8,.5,1); }
+.rail2 .qchip:active { transform: scale(0.92); }
+.rail2 .qplus { width: 42px; padding: 0; background: #111; color: #E4FF1A; font-size: 22px; box-shadow: none; }
+.bt-today { min-height: 112px; background: radial-gradient(circle at 50% 28%, #FFF1D6 0%, #FFB955 100%); }
+.bt-today b { font-size: 28px; font-weight: 400; } .bt-today b i { font-style: normal; font-size: 14px; }
+.bt-end { min-height: 112px; background: radial-gradient(circle at 50% 28%, #FBFFC2 0%, #E4FF1A 100%); }
+.bt-end b { font-size: 22px; }
 </style>
 
 <div class="device">
@@ -1076,41 +1115,52 @@ function holdHTML(ev) {
   }).join('');
   return `<div class="hold" style="grid-template-columns:repeat(${ev.cards.length}, 65px) 1fr">${cards}<div class="multc" aria-label="倍率 ${ev.mult}"><small>倍率</small><b>×${ev.mult}</b></div></div>`;
 }
-function homeHTML() {
-  const ev = evaluate(S.today);
+// the week summary shared by the home tile and the week sheet
+function weekInfo() {
   const prior = scorePrior(), target = weekTarget(), need = target - prior, daysLeft = 7 - S.day;
-  const dots = DAYS.map((d, i) => `<b class="${i === S.day ? 'now' : ''}">${d}</b>`).join('');
-  const br = breakers(S.today);
-  const list = S.today.map((x, i) => {
-    const ess = !!cat(x.cat).ess, b = br[i];
-    return `<button class="chip ${ess ? 'ess' : b ? 'hit' : 'hot'}" data-edit="${i}" aria-label="${entryName(x)} ${x.amt} 元，点一下修改">${entryName(x)}${ess ? ' · 必需' : ''}${b ? ` · 碎了${b.join('、')}` : ''} <b>¥${x.amt}</b></button>`;
-  }).join('') || '<span class="note">今天还没花钱。</span>';
   const hint = need <= 0 ? `已经够目标了！多攒的分让星星更多：1.7 倍拿 ★★，2.6 倍拿 ★★★。`
     : `还差 <b>${need}</b> 分，剩 ${daysLeft} 天，平均每天 <b>${Math.ceil(need / daysLeft)}</b> 分就够。`;
+  return { prior, target, need, daysLeft, hint, pct: Math.min(100, Math.round(prior / target * 100)) };
+}
+function renderWeekSheet() {
+  const w = weekInfo();
+  sheet('本周', `<div class="bar-top"><h1>本周分数</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
+    <div class="cap meter"><div class="top">
+      <div class="row"><span>第 ${S.week} 周 <span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></span><span class="px">${w.prior} / ${w.target}</span></div>
+      <div class="bar"><i style="width:${w.pct}%"></i></div>
+      <p class="hint">${w.hint} 真实的钱这周还剩 ${money(moneyWeek() - spentWeek())}。</p>
+      ${tilesHTML()}
+    </div></div>`);
+}
+// home as a bento: one job per tile — what's left today, the rules, the week, quick add, today's spending, end the day
+function homeHTML() {
+  const ev = evaluate(S.today), w = weekInfo();
+  const sumToday = S.today.reduce((a, x) => a + x.amt, 0);
+  const ruleTiles = S.held.length ? ev.cards.map(c => {
+    const card = CARDS[c.no], t = c.state === 'on' ? `+${card.plus}` : c.state === 'pending' ? '睡' : '碎';
+    return `<button class="rt ${c.state} ${ev.cards.length > 3 ? 'sm' : ''}" data-info="${c.no}" style="--c:${coreOf(c.no)}" aria-label="${card.name}，${c.state === 'on' ? '守住' : c.state === 'pending' ? '睡着' : '碎了'}">${artIcon(c.no, ev.cards.length > 3 ? 26 : 32)}<i>${t}</i></button>`;
+  }).join('') : '';
   return `
-    <div class="head">
-      <button class="daypill" data-act="clock" aria-label="第 ${S.week} 周周${DAYS[S.day]}，现在 ${fmtClock(S.clock)}，点一下切换演示时间"><span class="px" style="font-size:13px;display:flex;justify-content:space-between">第 ${S.week} 周 · 周${DAYS[S.day]}<span class="clock">${fmtClock(S.clock)} ▾</span></span><span class="dots" aria-hidden="true">${dots}</span></button>
+    <div class="head hd2">
+      <button class="daypill dp2" data-act="clock" aria-label="第 ${S.week} 周周${DAYS[S.day]}，现在 ${fmtClock(S.clock)}，点一下切换演示时间"><span class="px">第 ${S.week} 周 · 周${DAYS[S.day]}</span><span class="clock">${fmtClock(S.clock)} ▾</span></button>
       ${bellHTML(ev)}
       <button class="help" data-act="settings" aria-label="设置"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#FFF" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="3"/><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3M4 4l2.1 2.1M13.9 13.9L16 16M4 16l2.1-2.1M13.9 6.1L16 4"/></svg></button>
-      <button class="cookie" data-act="star" aria-label="星星 ${S.stars}，点一下看说明"><span class="n">${S.stars}</span><span class="l">★ 星星</span></button>
+      <button class="starpill" data-act="star" aria-label="星星 ${S.stars}，点一下看说明"><span>★</span><b>${S.stars}</b></button>
     </div>
-    <div class="cap orange hero ${ev.left < 0 ? 'over' : ''}"><div class="top">
-      <div class="row"><span style="font-weight:900;font-size:14px">${ev.left < 0 ? '今天已超' : '今日还能花'}</span><span class="px" style="font-size:13px">${S.debt ? `¥${dailyBudget()} − 透支 ¥${Math.min(S.debt, dailyBudget())}` : `每天 ¥${ev.daily}`}</span></div>
-      <span class="money">${money(ev.left)}</span>
-      <div class="row"><span style="font-weight:900;font-size:15px">今晚预计 ${ev.score} 分</span><span class="px" style="font-size:13px">${ev.base} × ${ev.mult}</span></div>
-    </div></div>
-    <div class="lbl railbl">快速记一笔 · 点一下选好是什么，再填金额</div>
-    <div class="quick rail">${S.quicks.map((q, k) => `<button class="chip qchip qc${k % 4}" data-hquick="${k}">${esc(q.label)}</button>`).join("")}</div>
-    ${S.held.length ? holdHTML(ev) : `<button class="rulebar" data-act="draw"><div class="rtext" style="grid-column:1/-1"><small>本周的牌</small><b>还没抽</b><span>点这里抽 5 张，留 3 张</span></div></button>`}
-    <div class="cap meter"><div class="top">
-      <div class="row"><span>本周分数 <span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></span><span class="px">${prior} / ${target}</span></div>
-      <div class="bar"><i style="width:${Math.min(100, Math.round(prior / target * 100))}%"></i></div>
-      <p class="hint">${hint} 真实的钱这周还剩 ${money(moneyWeek() - spentWeek())}。</p>
-      ${tilesHTML()}
-    </div></div>
-    <h2>今天记的账 <button class="linkbtn" data-act="goflow" style="font-size:13px;color:#5B4FC8;padding:0">全部流水 →</button></h2>
-    <div class="keys">${list}</div>
-    <button class="cap lime bigbtn endbtn" data-act="end"><div class="top">结束今天</div></button>`;
+    <div class="bento">
+      <div class="bt bt-hero hero ${ev.left < 0 ? 'over' : ''}">
+        <div class="row"><span style="font-weight:900;font-size:14px">${ev.left < 0 ? '今天已超' : '今日还能花'}</span><span class="px" style="font-size:13px">${S.debt ? `¥${dailyBudget()} − 透支 ¥${Math.min(S.debt, dailyBudget())}` : `每天 ¥${ev.daily}`}</span></div>
+        <span class="money">${money(ev.left)}</span>
+        <div class="row"><span style="font-weight:900;font-size:15px">今晚预计 ${ev.score} 分</span><span class="px" style="font-size:13px">${ev.base} × ${ev.mult}</span></div>
+      </div>
+      ${S.held.length
+        ? `<div class="bt bt-rules"><small>本周规则</small><div class="rts">${ruleTiles}</div><div class="rmult"><b>×${ev.mult}</b><small>倍率</small></div></div>`
+        : `<button class="bt bt-rules" data-act="draw"><small>本周规则</small><b class="nodraw">还没抽</b><span class="bgo">点这里抽 5 留 3 ›</span></button>`}
+      <button class="bt bt-week" data-act="week" aria-label="本周分数 ${w.prior} / ${w.target}，点一下看详情"><small>本周分数</small><b class="px">${w.prior}<i> / ${w.target}</i></b><div class="bar"><i style="width:${w.pct}%"></i></div><span class="bgo">剩 ${w.daysLeft} 天 ›</span></button>
+      <div class="bt bt-add"><small>快速记一笔</small><div class="rail2"><button class="qchip qplus" data-act="log" aria-label="记一笔">＋</button>${S.quicks.map((q, k) => `<button class="qchip qc${k % 4}" data-hquick="${k}">${esc(q.label)}</button>`).join('')}</div></div>
+      <button class="bt bt-today" data-act="goflow"><small>今天花了</small><b class="px">${S.today.length} <i>笔</i></b><span class="bgo">${money(sumToday)} ›</span></button>
+      <button class="bt bt-end" data-act="end"><small>晚上了就</small><b>结束今天</b><span class="bgo">看今天的分 ›</span></button>
+    </div>`;
 }
 
 /* ---------- tab pages, ported from the canvas screens ---------- */
@@ -2351,6 +2401,7 @@ app.addEventListener('click', e => {
   if (act === 'to-top') { app.querySelector('.screen').scrollTo({ top: 0, behavior: 'smooth' }); return; }
   if (act === 'coach-next') { S.coach += 1; clearCoach(); showCoach(); return; }
   if (act === 'coach-skip') { S.coach = COACH.length; clearCoach(); return; }
+  if (act === 'week') { renderWeekSheet(); return; }
   if (act === 'goflow') { S.view = 'bill'; S.billTab = 'flow'; renderTable(); return; }
   if (t.dataset.tab) { switchTab(t.dataset.tab); return; }
   if (t.dataset.bill) { S.billTab = t.dataset.bill; renderTable(); return; }
