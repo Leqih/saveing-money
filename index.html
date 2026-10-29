@@ -444,18 +444,19 @@ button.hcard:active > div { transform: translateY(2px); }
 .bag.tilt { transition: transform 0.12s ease-out; }
 .bag svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .bag-strip { transform-origin: 96% 16%; }
-.pk-mascot { position: relative; z-index: 1; display: block; width: 92px; height: 76px; }
-.pk-mascot svg { display: block; }
-.bag-eyes { position: absolute; left: 0; right: 0; top: 24px; z-index: 1; display: flex; justify-content: center; gap: 17px; transform: translate(var(--ex, 0px), var(--ey, 0px)); transition: transform 0.2s; }
-.bag-eyes i { width: 9px; height: 17px; border-radius: 50%; background: #FFF; animation: blink 4.2s infinite; }
 @keyframes blink { 0%, 92%, 100% { transform: none; } 95% { transform: scaleY(0.1); } }
-.pk-week { position: relative; z-index: 1; padding: 1px 10px; border-radius: 10px; border: 2px solid #111; background: #E4FF1A; color: #111; font-size: 12px; transform: rotate(-6deg); order: -1; }
-.pk-title { position: relative; z-index: 1; font-weight: 900; font-size: 28px; letter-spacing: 1px; line-height: 1; transform: rotate(-3deg); color: var(--ink); }
-.pk-count { position: relative; z-index: 1; font-size: 12px; color: var(--sub); }
-.pk-tear { left: 50%; top: 390px; transform: translateX(-50%) rotate(-3deg); animation: nudge 1.6s ease-in-out infinite; font-size: 13px; padding: 4px 14px; pointer-events: none; }
-@keyframes nudge { 0%, 100% { transform: translateX(-50%) rotate(-3deg); } 50% { transform: translateX(calc(-50% + 10px)) rotate(-3deg); } }
+@keyframes nudge { 0%, 100% { transform: translateX(-50%); } 50% { transform: translateX(calc(-50% + 10px)); } }
+.bag .pk-arrow { inset: auto; left: 22px; top: 74px; width: 30px; height: 30px; z-index: 1; }
+.pk-badge { position: absolute; right: -14px; top: 30px; z-index: 4; width: 76px; height: 76px; border-radius: 50%; background: #3DCBFF; display: flex; align-items: center; justify-content: center; }
+.bag .pk-badge svg { position: static; width: 62px; height: 62px; display: block; }
+.pk-face { transform: translate(var(--ex, 0px), var(--ey, 0px)); transition: transform 0.2s; }
+.pk-labs { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; align-self: stretch; gap: 0; padding: 0 0 0 22px; margin-top: 54px; font-family: var(--f-mono); }
+.pk-lab { display: inline-block; background: #FFF; color: #111; padding: 2px 9px; font-size: 12px; line-height: 1.35; }
+.pk-lab:nth-child(2) { margin-left: 12px; } .pk-lab:nth-child(3) { margin-left: 4px; }
+.pk-title { font-family: var(--f-body); font-weight: 900; font-size: 26px; line-height: 1.2; letter-spacing: 1px; }
+.pk-tear { position: absolute; z-index: 2; left: 50%; top: 390px; padding: 3px 14px; background: #A4FF2E; color: #111; font-family: var(--f-mono); font-size: 12px; font-weight: 500; white-space: nowrap; transform: translateX(-50%); animation: nudge 1.6s ease-in-out infinite; pointer-events: none; }
 .pk-tear.shake { animation: hintShake 0.4s ease; }
-@keyframes hintShake { 25% { transform: translateX(calc(-50% - 8px)) rotate(-6deg); } 75% { transform: translateX(calc(-50% + 8px)) rotate(3deg); } }
+@keyframes hintShake { 25% { transform: translateX(calc(-50% - 8px)); } 75% { transform: translateX(calc(-50% + 8px)); } }
 /* tearing: the strip peels off and flies, the bag squishes */
 .hand.tearing .bag-strip { animation: peel 0.5s cubic-bezier(.5,0,.7,1) forwards; }
 @keyframes peel { 30% { transform: rotate(-9deg) translate(-4px, -8px); } 100% { transform: translate(170px, -190px) rotate(75deg); opacity: 0; } }
@@ -1336,15 +1337,14 @@ function renderDraw() {
   }).join('');
   // the week's cards come in a crimped foil bag: it tilts toward your finger and tears open when you drag along the top
   const burst = draft.dealIn ? Array.from({ length: 28 }, (_, i) => `<i class="cf" style="--cx:${Math.round(Math.random() * 340 - 170)}px;--cy:${Math.round(-60 - Math.random() * 170)}px;--cr:${Math.round(Math.random() * 720 - 360)}deg;--cd:${Math.round(Math.random() * 120)}ms;width:${6 + (i % 4) * 2}px;height:${6 + (i % 3) * 3}px;background:${['var(--lime)', 'var(--pink)', 'var(--blue)', 'var(--orange)', '#C9C3FF', '#111'][i % 6]};border-radius:${i % 2 ? '50%' : '2px'}"></i>`).join('') : '';
-  const pack = draft.opened ? '' : `<div class="bag closed" role="button" tabindex="0" aria-label="撕开这周的卡包：按住顶部往右拖">
-      <svg class="bag-body" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="bagR" width="5" height="10" patternUnits="userSpaceOnUse"><rect width="2" height="10" fill="#C9C6BC"/></pattern></defs><path d="${BAG_BODY}" fill="#ECEAE3" stroke="#111" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="0" y="52" width="200" height="12" fill="url(#bagR)"/><rect x="0" y="228" width="200" height="12" fill="url(#bagR)"/><path d="M0 204C34 190 62 218 100 204S166 192 200 204V228H0Z" fill="#2E8BFF"/><path d="M0 204C34 190 62 218 100 204S166 192 200 204" fill="none" stroke="#111" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>
-      <svg class="bag-strip" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><path d="${BAG_STRIP}" fill="#E4FF1A" stroke="#111" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="M14 27H186" stroke="#111" stroke-width="2" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"/></svg>
-      <span class="pk-mascot" aria-hidden="true"><svg width="92" height="76" viewBox="0 0 92 76"><path d="M4 76C0 34 22 4 46 4s50 30 42 72Z" fill="#111"/><circle cx="26" cy="60" r="7" fill="#FF4D6A"/><circle cx="68" cy="62" r="5" fill="#FF4D6A"/></svg><span class="bag-eyes"><i></i><i></i></span></span>
-      <span class="pk-week px">WEEK ${String(S.week).padStart(2, '0')}</span>
-      <b class="pk-title">抽 ${DEALN()} 留 ${HOLDN()}</b>
-      <span class="pk-count px">${draft.hand.length} 张规则卡</span>
+  const pack = draft.opened ? '' : `<div class="bag closed" role="button" tabindex="0" aria-label="撕开这周的卡包：按住顶部往右拖，或点一下">
+      <svg class="bag-body" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bagG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF3D00"/><stop offset="1" stop-color="#FF6B3A"/></linearGradient><clipPath id="bagC"><path d="${BAG_BODY}"/></clipPath></defs><path d="${BAG_BODY}" fill="url(#bagG)"/><g clip-path="url(#bagC)"><path d="M-10 214C14 186 62 186 90 222C112 196 160 196 214 226V256H-10Z" fill="#3DCBFF"/></g></svg>
+      <svg class="bag-strip" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><path d="${BAG_STRIP}" fill="#3DCBFF"/><path d="M12 28H188" stroke="#FFF" stroke-width="2" stroke-dasharray="6 6" vector-effect="non-scaling-stroke" opacity=".9"/></svg>
+      <svg class="pk-arrow" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M5 5L21 21M24 8v16H8" fill="none" stroke="#FFE600" stroke-width="7" stroke-linecap="square"/></svg>
+      <span class="pk-badge" aria-hidden="true"><svg width="62" height="62" viewBox="0 0 62 62"><circle cx="31" cy="31" r="28" fill="#FFF" stroke="#111" stroke-width="3"/><g class="pk-face" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"><path d="M17 22h9M36 22h9M31 14v14"/><path d="M19 37c4 9 20 9 24 0"/></g></svg></span>
+      <span class="pk-labs"><span class="pk-lab px">WEEK ${String(S.week).padStart(2, '0')}</span><b class="pk-lab pk-title">抽 ${DEALN()} 留 ${HOLDN()}</b><span class="pk-lab pk-count">${draft.hand.length} 张规则卡 · 守住加倍率</span></span>
     </div>
-    <span class="pk-tear sticker" aria-hidden="true">按住顶部 → 往右拖开，或点一下</span>`;
+    <span class="pk-tear" aria-hidden="true">按住顶部 → 往右拖开，或点一下</span>`;
   const stage = draft.opened ? `<div class="stack ${draft.slide ? 'slide' + draft.slide : ''}">${cards}</div>
     ${burst ? `<span class="burst" aria-hidden="true">${burst}</span>` : ''}` : pack;
   const info = ''; const _unused = focus ? (st => `<div class="pickline"><span class="pill ${st[0]}">${st[1]}</span>${clashNames(focus).length ? `<span class="pickclash">不能和${clashNames(focus).join('、')}一起留</span>` : ''}</div>`)(pillOf(focus)) : '';
@@ -1388,9 +1388,9 @@ function placeStack(stack, at, dx = 0) {
   });
 }
 const layoutStack = placeStack;
-const BAG_TEAR = Array.from({ length: 21 }, (_, i) => `L${i * 10} ${i % 2 ? 44 : 49}`).join('');
-const BAG_BODY = `M0 49${BAG_TEAR.slice(BAG_TEAR.indexOf('L', 1))}L200 242${Array.from({ length: 21 }, (_, i) => `L${200 - i * 10} ${i % 2 ? 250 : 242}`).join('')}Z`;
-const BAG_STRIP = `M0 8${Array.from({ length: 21 }, (_, i) => `L${i * 10} ${i % 2 ? 0 : 8}`).join('')}${Array.from({ length: 21 }, (_, i) => `L${200 - i * 10} ${(20 - i) % 2 ? 44 : 49}`).join('')}Z`;
+// flat chamfered panels: the strip on top tears off the body along a slightly slanted line
+const BAG_BODY = 'M0 52L200 46V240L188 250H8L0 242Z';
+const BAG_STRIP = 'M10 0H190L200 10V46L0 52V10Z';
 // the sealed bag leans toward the pointer and its eyes follow; letting go springs it back.
 // pressing on it and dragging right peels the top strip; let go past halfway and it tears, otherwise it springs back
 let tear = null, swipe = null;
