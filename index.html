@@ -299,9 +299,10 @@ button.chip:active { transform: translateY(2px); }
 .fan2 > * { position: absolute; top: 6px; box-shadow: none !important; }
 .fan2 > *:nth-child(1) { left: 0; transform: rotate(-12deg); } .fan2 > *:nth-child(2) { left: 24px; top: 0; transform: rotate(-2deg); } .fan2 > *:nth-child(3) { left: 48px; transform: rotate(10deg); }
 .fan2 * { box-shadow: none !important; }
-.ball { right: 14px; top: 462px; width: 128px; height: 124px; z-index: 6; transform: rotate(9deg); filter: drop-shadow(0 12px 10px rgba(140, 0, 70, 0.28)); animation: ballIn 0.9s cubic-bezier(.2,1.6,.4,1) both var(--d, 0ms), ballBob 3.6s ease-in-out infinite 1.8s; transition: scale 0.25s cubic-bezier(.3,1.9,.5,1); }
+.ball { right: 14px; top: 462px; width: 128px; height: 124px; z-index: 6; transform: rotate(9deg); animation: ballIn 0.9s cubic-bezier(.2,1.6,.4,1) both var(--d, 0ms), ballBob 3.6s ease-in-out infinite 1.8s; transition: scale 0.25s cubic-bezier(.3,1.9,.5,1); }
 .ball:active { scale: 1.12 0.88; }
-.ball svg { display: block; overflow: visible; }
+.ball svg { display: block; overflow: visible; transform-origin: 50% 88%; animation: jig 3.4s ease-in-out infinite 2.2s; }
+@keyframes jig { 0%, 40%, 100% { transform: none; } 8% { transform: scale(1.07, 0.9); } 16% { transform: scale(0.95, 1.07); } 24% { transform: scale(1.03, 0.97); } 32% { transform: scale(0.99, 1.01); } }
 @keyframes bubIn { from { opacity: 0; transform: translateY(36px) scale(0.5) rotate(-4deg); } }
 @keyframes bubFloat { 50% { translate: 0 -7px; } }
 @keyframes ballIn { from { opacity: 0; transform: scale(0.2) rotate(-40deg); } }
@@ -1817,20 +1818,22 @@ function renderLaunch() {
     <div class="l-abs bub b1" style="--d:80ms;--f:5.2s"><span>这周的钱<br>花哪了？</span></div>
     <div class="l-abs bub b2" style="--d:280ms;--f:6s"><span>今天又点<br>外卖了？</span></div>
     <div class="l-abs bub b3" style="--d:520ms;--f:5.4s"><span>抽 5 张规则卡，<br>留 3 张管住自己</span></div>
-    <div class="l-abs ball" style="--d:820ms" aria-label="倍率 ×6"><svg width="128" height="124" viewBox="0 0 120 116" aria-hidden="true"><defs>
-      <radialGradient id="ballB" cx=".34" cy=".26" r=".95"><stop offset="0" stop-color="#FFE0F2"/><stop offset=".3" stop-color="#FF86CF"/><stop offset=".72" stop-color="#F0299F"/><stop offset="1" stop-color="#B80E72"/></radialGradient>
-      <radialGradient id="ballD" cx=".72" cy=".86" r=".7"><stop offset="0" stop-color="#7A0046" stop-opacity=".55"/><stop offset="1" stop-color="#7A0046" stop-opacity="0"/></radialGradient>
-      <radialGradient id="ballL" cx=".22" cy=".9" r=".5"><stop offset="0" stop-color="#FFB3E4" stop-opacity=".75"/><stop offset="1" stop-color="#FFB3E4" stop-opacity="0"/></radialGradient>
-      <linearGradient id="ballR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF" stop-opacity=".9"/><stop offset=".5" stop-color="#FFF" stop-opacity="0"/><stop offset="1" stop-color="#FFC8EC" stop-opacity=".6"/></linearGradient>
-      <linearGradient id="ballT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FFC6E8"/></linearGradient>
-      <filter id="ballBl"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
-      <path d="M24 22C42 8 78 8 96 22C112 38 113 78 97 94C79 109 41 109 23 94C7 78 8 38 24 22Z" fill="url(#ballB)"/><path d="M24 22C42 8 78 8 96 22C112 38 113 78 97 94C79 109 41 109 23 94C7 78 8 38 24 22Z" fill="url(#ballD)"/><path d="M24 22C42 8 78 8 96 22C112 38 113 78 97 94C79 109 41 109 23 94C7 78 8 38 24 22Z" fill="url(#ballL)"/>
-      <path d="M24 22C42 8 78 8 96 22C112 38 113 78 97 94C79 109 41 109 23 94C7 78 8 38 24 22Z" fill="none" stroke="url(#ballR)" stroke-width="2.600"/>
-      <g fill="none" stroke-linecap="round"><path d="M22 28q7 3 10 11M98 28q-7 3-10 11M22 90q7-3 10-11M98 90q-7-3-10-11" stroke="#FFF" stroke-opacity=".38" stroke-width="2.200"/><path d="M24 31q6 3 9 10M96 31q-6 3-9 10M24 93q6-3 9-10M96 93q-6-3-9-10" stroke="#8A0050" stroke-opacity=".28" stroke-width="2"/></g>
-      <ellipse cx="38" cy="26" rx="17" ry="7.500" fill="#FFF" opacity=".92" transform="rotate(-24 38 26)" filter="url(#ballBl)"/><ellipse cx="88" cy="36" rx="3.200" ry="6" fill="#FFF" opacity=".7" transform="rotate(-20 88 36)" filter="url(#ballBl)"/>
-      <g font-family="Archivo Black, Arial Black, sans-serif" font-size="42" text-anchor="middle"><text x="62" y="68" fill="none" stroke="#8A0050" stroke-opacity=".4" stroke-width="9" stroke-linejoin="round">×6</text><text x="60" y="65" fill="none" stroke="#FFDDF1" stroke-width="7" stroke-linejoin="round">×6</text><text x="60" y="65" fill="url(#ballT)" stroke="#FFF" stroke-width="3" stroke-linejoin="round">×6</text></g>
-      <ellipse cx="46" cy="49" rx="6" ry="2.600" fill="#FFF" opacity=".85" transform="rotate(-20 46 49)" filter="url(#ballBl)"/>
-      <text x="60" y="88" font-family="Noto Sans SC, sans-serif" font-size="11" font-weight="900" fill="#FFF" text-anchor="middle" letter-spacing="1">倍率</text></svg></div>
+    <div class="l-abs ball" style="--d:820ms" aria-label="倍率 ×6"><svg width="132" height="128" viewBox="0 0 120 116" aria-hidden="true"><defs>
+      <radialGradient id="jB" cx=".5" cy=".62" r=".72"><stop offset="0" stop-color="#FFD0EE"/><stop offset=".45" stop-color="#FF6CC4"/><stop offset=".85" stop-color="#F0189A"/><stop offset="1" stop-color="#C80C7A"/></radialGradient>
+      <radialGradient id="jC" cx=".5" cy=".95" r=".5"><stop offset="0" stop-color="#FFE9F7" stop-opacity=".9"/><stop offset="1" stop-color="#FFE9F7" stop-opacity="0"/></radialGradient>
+      <linearGradient id="jG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF" stop-opacity=".95"/><stop offset="1" stop-color="#FFF" stop-opacity=".05"/></linearGradient>
+      <linearGradient id="jE" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF" stop-opacity=".95"/><stop offset=".45" stop-color="#FFF" stop-opacity=".1"/><stop offset="1" stop-color="#FF9AD8" stop-opacity=".7"/></linearGradient>
+      <clipPath id="jK"><path d="M34 10H86C104 10 112 18 112 36V80C112 98 104 106 86 106H34C16 106 8 98 8 80V36C8 18 16 10 34 10Z"/></clipPath>
+      <filter id="jBl"><feGaussianBlur stdDeviation="1.4"/></filter><filter id="jBl2"><feGaussianBlur stdDeviation="4"/></filter>
+      <filter id="jT" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="1.2" flood-color="#9C0A5E" flood-opacity=".55"/></filter></defs>
+      <ellipse cx="60" cy="110" rx="40" ry="5" fill="#FF7FD0" opacity=".55" filter="url(#jBl2)"/>
+      <path d="M34 10H86C104 10 112 18 112 36V80C112 98 104 106 86 106H34C16 106 8 98 8 80V36C8 18 16 10 34 10Z" fill="url(#jB)"/>
+      <g clip-path="url(#jK)"><path d="M34 10H86C104 10 112 18 112 36V80C112 98 104 106 86 106H34C16 106 8 98 8 80V36C8 18 16 10 34 10Z" fill="none" stroke="#B30A6C" stroke-opacity=".55" stroke-width="9" filter="url(#jBl)"/><ellipse cx="60" cy="104" rx="40" ry="16" fill="url(#jC)"/></g>
+      <path d="M22 17C36 11 84 11 98 17C103 20 104 26 100 31C84 24 36 24 20 31C16 26 17 20 22 17Z" fill="url(#jG)"/>
+      <path d="M34 10H86C104 10 112 18 112 36V80C112 98 104 106 86 106H34C16 106 8 98 8 80V36C8 18 16 10 34 10Z" fill="none" stroke="url(#jE)" stroke-width="2.200"/>
+      <ellipse cx="17" cy="50" rx="2.400" ry="9" fill="#FFF" opacity=".75" filter="url(#jBl)"/><circle cx="98" cy="40" r="2.600" fill="#FFF" opacity=".85"/><circle cx="92" cy="49" r="1.300" fill="#FFF" opacity=".7"/>
+      <text x="60" y="66" font-family="Archivo Black, Arial Black, sans-serif" font-size="40" text-anchor="middle" fill="#FFF" stroke="#FFF" stroke-width="1.500" stroke-linejoin="round" filter="url(#jT)">×6</text>
+      <text x="60" y="87" font-family="Noto Sans SC, sans-serif" font-size="11" font-weight="900" fill="#FFF" fill-opacity=".92" text-anchor="middle" letter-spacing="1">倍率</text></svg></div>
     <div class="l-abs stk pill30" style="--r:-7deg;--d:900ms;--f:5.8s;left:128px;top:36px">¥30 <small>/周</small></div>
     <div class="l-abs stk ring" style="--r:12deg;--d:1000ms;right:20px;top:20px" aria-hidden="true"><svg width="74" height="74" viewBox="0 0 96 96"><defs><path id="launch-ring" d="M48 48m-36 0a36 36 0 1 1 72 0a36 36 0 1 1-72 0"/></defs><circle cx="48" cy="48" r="46" fill="#FFF"/><circle cx="48" cy="48" r="25" fill="#111"/><path d="M48 31C50 43 53 46 65 48C53 50 50 53 48 65C46 53 43 50 31 48C43 46 46 43 48 31Z" fill="#FF4D6A"/><text font-family="Noto Sans SC, sans-serif" font-size="9.5" font-weight="900" fill="#8A8A92" letter-spacing="2"><textPath href="#launch-ring">ORIGINAL · 省钱小局 · 第 1 周 ·</textPath></text></svg></div>
     <div class="l-abs stk cbub" style="--r:8deg;--d:760ms;--f:4.8s;left:252px;top:66px" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="#FFF"/><circle cx="15" cy="15" r="9.500" fill="none" stroke="#A855F7" stroke-width="2.200"/><path d="M11.500 10.500L15 15.500M18.500 10.500L15 15.500M15 15.500V21M11.500 17.500h7M11.500 14h7" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round"/></svg></div>
