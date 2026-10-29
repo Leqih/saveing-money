@@ -423,7 +423,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .hold-lbl { font-size: 12px; font-weight: 900; color: var(--sub); margin-bottom: -4px; }
 /* deal of five: two rows, picked cards lift and get a number */
 .draw-lead { margin: -4px 0 0; font-size: 14px; font-weight: 900; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.drawfoot { position: sticky; bottom: -24px; z-index: 3; margin: auto -18px -24px; padding: 12px 18px 22px; background: #FFF; border-radius: 22px 22px 0 0; box-shadow: 0 -10px 24px rgba(20,20,30,0.1); display: flex; flex-direction: column; gap: 10px; }
+.drawfoot { position: sticky; bottom: -24px; z-index: 3; margin: auto -18px -24px; padding: 14px 18px 22px; background: #FFF; border-radius: 28px 28px 0 0; box-shadow: 0 -10px 24px rgba(20,20,30,0.1); display: flex; flex-direction: column; gap: 10px; }
 .dsum { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--sub); }
 .dsum b { font-family: var(--f-display); font-weight: 400; font-size: 18px; color: var(--ink); }
 .dslots { display: flex; gap: 6px; }
@@ -431,8 +431,9 @@ button.hcard:active > div { transform: translateY(2px); }
 .dslot.empty { border: 2px dashed #C4C4CC; background: #F6F6F8; }
 /* draw: a sealed pack tears open and the cards fan out of it like a hand */
 .hand { flex: 1 0 auto; display: flex; align-items: center; justify-content: center; min-height: 372px; margin: 0 -18px; overflow: hidden; }
+.hand:has(.stack.dragging), .hand:has(.sc2.flying) { overflow: visible; position: relative; z-index: 10; }
 .hand-in { position: relative; flex-shrink: 0; width: 100%; height: 372px; }
-.hand.open { min-height: 352px; } .hand.open .hand-in { height: 352px; }
+.hand.open { min-height: 396px; } .hand.open .hand-in { height: 396px; }
 .bag.closed { cursor: grab; touch-action: none; } .bag.tearing-drag { cursor: grabbing; }
 .bag.tearing-drag .bag-strip { transition: none; }
 .bag-strip { transition: transform 0.45s cubic-bezier(.3,1.7,.5,1); }
@@ -471,12 +472,14 @@ button.hcard:active > div { transform: translateY(2px); }
 .cf { position: absolute; left: 0; top: 0; opacity: 0; animation: confetti 1.15s cubic-bezier(.15,.7,.4,1) forwards; animation-delay: var(--cd); }
 @keyframes confetti { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 45% { opacity: 1; transform: translate(var(--cx), var(--cy)) rotate(var(--cr)); } 100% { opacity: 0; transform: translate(calc(var(--cx) * 1.25), calc(var(--cy) + 280px)) rotate(calc(var(--cr) * 2)); } }
 /* the stack: positions come from layoutStack(), CSS only animates between them */
-.stack { position: absolute; left: 0; right: 0; top: 0; height: 306px; overflow: visible; touch-action: pan-y; cursor: grab; }
+.stack { position: absolute; left: 0; right: 0; top: 0; height: 340px; overflow: visible; touch-action: none; cursor: grab; }
 .stack.dragging { cursor: grabbing; }
-.sc2 { position: absolute; left: 50%; top: 44px; width: 180px; height: 255px; margin-left: -90px; border: 0; padding: 0; background: none; transition: transform 0.38s cubic-bezier(.25,1.3,.5,1), opacity 0.2s; }
+.sc2 { position: absolute; left: 50%; top: 10px; width: 216px; height: 306px; margin-left: -108px; border: 0; padding: 0; background: none; transition: transform 0.38s cubic-bezier(.25,1.3,.5,1), opacity 0.2s; }
 .stack.dragging .sc2 { transition: none; }
-.sc2-face { width: 240px; height: 340px; transform: scale(0.75); transform-origin: 0 0; pointer-events: none; }
-.sc2:not(.front) .sc2-face { filter: brightness(0.9); }
+.sc2-face { width: 240px; height: 340px; transform: scale(0.9); transform-origin: 0 0; pointer-events: none; }
+.sc2-edge { position: absolute; inset: 0; border-radius: 22px; pointer-events: none; opacity: 1; transition: opacity 0.3s; box-shadow: inset 0 -10px 0 rgba(0,0,0,0.12); }
+.sc2.front .sc2-edge { opacity: 0; }
+
 .sc2:not(.front) { pointer-events: none; }
 .sc2.front .sc2-face { filter: drop-shadow(0 16px 18px rgba(20,20,30,0.28)); }
 .sc2:not(.front) .carry-tag, .sc2:not(.front) .sc2-rec { display: none; }
@@ -485,13 +488,16 @@ button.hcard:active > div { transform: translateY(2px); }
 .sc2.front:active .sc2-face { filter: drop-shadow(0 6px 8px rgba(20,20,30,0.3)); }
 .sc2.flying { transition: transform 0.46s cubic-bezier(.55,0,.25,1), opacity 0.46s ease-in; animation: none; z-index: 90 !important; }
 .sc2.flying .sc2-face { filter: drop-shadow(0 4px 6px rgba(20,20,30,0.3)); }
-.sc2-pickhint { position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%); z-index: 3; padding: 3px 14px; border-radius: 14px; background: #111; color: var(--lime); font-size: 12px; font-weight: 900; white-space: nowrap; pointer-events: none; animation: pulse 1.4s ease-in-out infinite; }
+.sc2-pickhint { position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%); z-index: 3; padding: 3px 14px; border-radius: 14px; background: #111; color: var(--lime); font-size: 12px; font-weight: 900; white-space: nowrap; pointer-events: none; animation: pulse 1.4s ease-in-out infinite; }
 @keyframes pulse { 50% { transform: translateX(-50%) scale(1.07); } }
 .sc2 .carry-tag { left: 4px; top: -6px; }
 .sc2-rec { right: -6px; top: -8px; font-size: 11px; padding: 1px 8px; }
 .dsum-rec { height: 30px; padding: 0 12px; border-radius: 15px; border: 2px solid var(--ink); background: var(--lime); font-size: 12px; font-weight: 900; white-space: nowrap; }
-.sdots { position: absolute; left: 0; right: 0; top: 330px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--mute); }
-.sd { display: flex; gap: 6px; } .sd i { width: 7px; height: 7px; border-radius: 4px; background: #D6D6DC; transition: width 0.2s; } .sd i.on { width: 22px; }
+.sdots { position: absolute; left: 0; right: 0; top: 352px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--mute); }
+.sd { display: flex; gap: 8px; }
+.thumb { width: 36px; height: 36px; padding: 0; border-radius: 12px; border: 2px solid transparent; display: flex; align-items: center; justify-content: center; opacity: 0.55; transform: scale(0.88); transition: transform 0.25s cubic-bezier(.3,1.7,.5,1), opacity 0.2s; }
+.thumb.on { opacity: 1; transform: scale(1.12); border-color: #111; box-shadow: 0 4px 0 #111; }
+.sheet.tint { transition: background 0.4s; }
 .hand.dealing .sc2 { animation: dealIn 0.95s cubic-bezier(.25,.8,.35,1) backwards; animation-delay: var(--d); }
 @keyframes dealIn { 0% { transform: translate(0, 60px) rotate(0) scale(0.3); opacity: 0; } 12% { opacity: 1; } 45% { transform: translate(var(--bx), var(--by)) rotate(var(--br)) scale(0.9); } }
 .hand.returning .sc2 { animation: dealOut 0.45s ease-in forwards; animation-delay: calc(var(--d) / 2); }
@@ -1283,9 +1289,9 @@ function renderDraw() {
     const tag = no === S.carry && !S.firstDraw ? '续留' : clashIn(no, sel) ? '重叠' : '';
     return `<button class="sc2" data-pick="${no}" data-i="${i}" aria-label="${CARDS[no].name} +${CARDS[no].plus}${i === ci ? '，点一下留下' : '，点一下翻到前面'}"
       style="--d:${i * 70}ms;--bx:${Math.round(Math.random() * 220 - 110)}px;--by:${Math.round(-40 - Math.random() * 60)}px;--br:${Math.round(Math.random() * 70 - 35)}deg">
-      <div class="sc2-face">${cardHTML(CARDS[no])}</div>${i === ci && !sel.length ? '<span class="sc2-pickhint">点一下留下</span>' : ''}${tag ? `<span class="carry-tag">${tag}</span>` : ''}${rec.includes(no) ? '<span class="sticker sc2-rec">推荐</span>' : ''}</button>`;
+      <div class="sc2-face">${cardHTML(CARDS[no])}</div><i class="sc2-edge" style="background:${coreOf(no)}"></i>${i === ci && !sel.length ? '<span class="sc2-pickhint">往下滑 · 放进牌槽</span>' : ''}${tag ? `<span class="carry-tag">${tag}</span>` : ''}${rec.includes(no) ? '<span class="sticker sc2-rec">推荐</span>' : ''}</button>`;
   }).join('');
-  const dots = inHand.map((no, i) => `<i class="${i === ci ? 'on' : ''}" style="${i === ci ? `background:${coreOf(no)}` : ''}"></i>`).join('');
+  const dots = inHand.map((no, i) => `<button class="thumb ${i === ci ? 'on' : ''}" data-goto="${i}" style="background:${coreOf(no)}" aria-label="看${CARDS[no].name}">${artIcon(no, 20)}</button>`).join('');
   // the week's cards come in a crimped foil bag: it tilts toward your finger and tears open when you drag along the top
   const burst = draft.dealIn ? Array.from({ length: 28 }, (_, i) => `<i class="cf" style="--cx:${Math.round(Math.random() * 340 - 170)}px;--cy:${Math.round(-60 - Math.random() * 170)}px;--cr:${Math.round(Math.random() * 720 - 360)}deg;--cd:${Math.round(Math.random() * 120)}ms;width:${6 + (i % 4) * 2}px;height:${6 + (i % 3) * 3}px;background:${['var(--lime)', 'var(--pink)', 'var(--blue)', 'var(--orange)', '#C9C3FF', '#111'][i % 6]};border-radius:${i % 2 ? '50%' : '2px'}"></i>`).join('') : '';
   const pack = draft.opened ? '' : `<div class="bag closed" role="button" tabindex="0" aria-label="撕开这周的卡包：按住顶部往右拖">
@@ -1299,7 +1305,7 @@ function renderDraw() {
     </div>
     <span class="pk-tear sticker" aria-hidden="true">按住顶部 → 往右拖开，或点一下</span>`;
   const stage = draft.opened ? `<div class="stack">${cards}</div>
-    <div class="sdots"><span class="sd">${dots}</span><span>左右滑开换下一张</span></div>${burst ? `<span class="burst" aria-hidden="true">${burst}</span>` : ''}` : pack;
+    <div class="sdots"><span class="sd">${dots}</span><span>左右滑换牌 · 或点下面的小图</span></div>${burst ? `<span class="burst" aria-hidden="true">${burst}</span>` : ''}` : pack;
   let info = '';
   if (focus) {
     const c = CARDS[focus];
@@ -1326,11 +1332,13 @@ function renderDraw() {
       <button class="go" data-act="choose" ${sel.length === need ? '' : 'disabled'}>${sel.length === need ? `就留这 ${need} 张` : combosOf(draft.hand, need).some(c => sel.every(x => c.includes(x))) ? `再选 ${need - sel.length} 张` : `有重叠，凑不满 ${need} 张，换掉一张`}</button>
     </div>`);
   const st = lastSheet().querySelector('.stack'); if (st) layoutStack(st, ci);
+  // the whole sheet takes on the colour of the card in front
+  if (focus) { const sh = lastSheet(); sh.classList.add('tint'); sh.style.background = `color-mix(in srgb, ${coreOf(focus)} 18%, #FFF)`; }
   // one-shot animations only play on the render that triggered them
   draft.dealIn = false; draft.landed = null;
 }
 // each card's place in the pile depends on how far behind the front card it is; only the top four show
-const PILE = [[0, 0, 0, 1], [46, -6, 9, 0.94], [-46, -6, -9, 0.94], [84, -14, 16, 0.86]];
+const PILE = [[0, 0, 0, 1], [32, 0, 0, 0.94], [-32, 0, 0, 0.94], [45, 0, 0, 0.88]];
 function layoutStack(stack, at) {
   const els = [...stack.querySelectorAll('.sc2')], n = els.length;
   els.forEach(el => {
@@ -1347,6 +1355,21 @@ const BAG_STRIP = `M0 8${Array.from({ length: 21 }, (_, i) => `L${i * 10} ${i % 
 // the sealed bag leans toward the pointer and its eyes follow; letting go springs it back.
 // pressing on it and dragging right peels the top strip; let go past halfway and it tears, otherwise it springs back
 let tear = null, swipe = null;
+// keep the front card: it shrinks and flies into the next empty slot, then the sheet redraws with the slot popping
+function keepFront(top, card, base) {
+  const no = card.dataset.pick, other = clashIn(no, draft.sel);
+  if (other) { toast(`「${CARDS[no].name}」和「${CARDS[other].name}」重叠，不能一起留`); return false; }
+  if (draft.sel.length >= keepN(draft.hand)) { toast(`最多留 ${HOLDN()} 张，先点一下牌槽里的放回来`); return false; }
+  draft.sel.push(no); draft.landed = no;
+  const slot = top.querySelector('.dslot.empty');
+  if (!slot || reducedMotion()) { replaceSheet(top, renderDraw); return true; }
+  const a = base || card.getBoundingClientRect(), b = slot.getBoundingClientRect();
+  card.classList.add('flying');
+  card.style.transform = `translate(${(b.left + b.width / 2 - a.left - a.width / 2).toFixed(0)}px, ${(b.top + b.height / 2 - a.top - a.height / 2).toFixed(0)}px) scale(0.12)`;
+  card.style.opacity = '0.3';
+  setTimeout(() => replaceSheet(top, renderDraw), 440);
+  return true;
+}
 const TEAR_PX = 150, SWIPE_PX = 110;
 // capture can fail if the pointer already went away (or for synthetic events); the gesture still works without it
 const capture = (el, id) => { try { el.setPointerCapture(id); } catch (err) { /* keep going uncaptured */ } };
@@ -1359,7 +1382,8 @@ app.addEventListener('pointerdown', e => {
   const b = e.target.closest && e.target.closest('.bag.closed');
   if (b) { tear = { b, strip: b.querySelector('.bag-strip'), x: e.clientX, p: 0 }; capture(b, e.pointerId); b.classList.add('tearing-drag'); return; }
   const st = e.target.closest && e.target.closest('.stack');
-  if (st) { swipe = { st, x: e.clientX, y: e.clientY, dx: 0, n: st.querySelectorAll('.sc2').length, front: st.querySelector('.sc2.front'), moved: false, id: e.pointerId }; }
+  if (st) { swipe = { st, x: e.clientX, y: e.clientY, dx: 0, n: st.querySelectorAll('.sc2').length, front: st.querySelector('.sc2.front'), moved: false, id: e.pointerId, mode: 'side', dy: 0 };
+    if (swipe.front) swipe.rect = swipe.front.getBoundingClientRect(); }
 });
 app.addEventListener('pointermove', e => {
   if (tear) {
@@ -1368,10 +1392,12 @@ app.addEventListener('pointermove', e => {
     return;
   }
   if (swipe) {
-    const dx = e.clientX - swipe.x;
-    // capture only once it's really a swipe, so a plain tap still lands on the card button
-    if (Math.abs(dx) > 6 && !swipe.moved) { swipe.moved = true; swipe.st.classList.add('dragging'); capture(swipe.st, swipe.id); }
+    const dx = e.clientX - swipe.x, dyy = e.clientY - swipe.y;
+    // capture only once it's really a drag, so a plain tap still lands on the card button
+    if ((Math.abs(dx) > 6 || Math.abs(dyy) > 6) && !swipe.moved) { swipe.moved = true; swipe.mode = Math.abs(dyy) > Math.abs(dx) && dyy > 0 ? 'down' : 'side'; swipe.st.classList.add('dragging'); capture(swipe.st, swipe.id); }
     if (!swipe.moved || !swipe.front) return;
+    // pulling straight down drops the card toward the slots
+    if (swipe.mode === 'down') { swipe.dy = Math.max(0, dyy); swipe.front.style.transform = `translate(${(dx * 0.2).toFixed(0)}px, ${swipe.dy.toFixed(0)}px) scale(${(1 - swipe.dy / 1400).toFixed(3)})`; return; }
     // the front card follows the finger and tilts the way it's being pulled
     swipe.dx = dx;
     swipe.front.style.transform = `translate(${dx.toFixed(0)}px, ${((e.clientY - swipe.y) * 0.25).toFixed(0)}px) rotate(${(dx / 14).toFixed(1)}deg)`;
@@ -1396,6 +1422,7 @@ app.addEventListener('pointermove', e => {
     if (!w.moved) return;
     // the click that follows a swipe shouldn't also count as a tap on a card
     draft.swiped = true; setTimeout(() => { draft.swiped = false; }, 0);
+    if (w.mode === 'down') { if (w.dy < 80 || !keepFront(lastSheet(), w.front, w.rect)) layoutStack(w.st, draft.ci); return; }
     if (Math.abs(w.dx) < SWIPE_PX * 0.6 || w.n < 2) { layoutStack(w.st, draft.ci); return; }
     // past the threshold the card is thrown off that side, then the next one (or the previous, swiping right) comes up
     const dir = Math.sign(w.dx);
@@ -2151,23 +2178,10 @@ app.addEventListener('click', e => {
     const no = t.dataset.pick, inHand = draft.hand.filter(x => !draft.sel.includes(x)), i = inHand.indexOf(no);
     // a side card comes to the front first; the front card is the one you keep
     if (i !== draft.ci) { draft.ci = i; layoutStack(top.querySelector('.stack'), i); setTimeout(() => replaceSheet(top, renderDraw), 340); return; }
-    const other = clashIn(no, draft.sel);
-    if (other) toast(`「${CARDS[no].name}」和「${CARDS[other].name}」重叠，不能一起留`);
-    else if (draft.sel.length < keepN(draft.hand)) {
-      draft.sel.push(no); draft.landed = no;
-      // the card shrinks and flies into the next empty slot, then the sheet redraws with the slot popping
-      const slot = top.querySelector('.dslot.empty'), card = t.closest('.sc2');
-      if (slot && card && !reducedMotion()) {
-        const a = card.getBoundingClientRect(), b = slot.getBoundingClientRect();
-        card.classList.add('flying');
-        card.style.transform = `translate(${(b.left + b.width / 2 - a.left - a.width / 2).toFixed(0)}px, ${(b.top + b.height / 2 - a.top - a.height / 2).toFixed(0)}px) scale(0.12) rotate(-10deg)`;
-        card.style.opacity = '0.3';
-        setTimeout(() => replaceSheet(top, renderDraw), 440); return;
-      }
-    }
-    else toast(`最多留 ${HOLDN()} 张，先点一下牌槽里的放回来`);
-    replaceSheet(top, renderDraw); return;
+    if (!keepFront(top, t.closest('.sc2'))) replaceSheet(top, renderDraw);
+    return;
   }
+  if (t.dataset.goto) { draft.ci = +t.dataset.goto; layoutStack(top.querySelector('.stack'), draft.ci); setTimeout(() => replaceSheet(top, renderDraw), 340); return; }
   if (t.dataset.unpick) { const no = t.dataset.unpick; draft.sel = draft.sel.filter(x => x !== no); draft.ci = draft.hand.filter(x => !draft.sel.includes(x)).indexOf(no); replaceSheet(top, renderDraw); return; }
   if (act === 'use-rec') { draft.sel = draft.rec.slice(); draft.ci = 0; draft.landed = 'all'; draft.opened = true; replaceSheet(top, renderDraw); return; }
   if (act === 'choose') { keepHand(top); return; }
