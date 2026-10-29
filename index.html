@@ -40,6 +40,11 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--cobalt); ou
 .device::before { content: ""; position: absolute; inset: 4px; border-radius: 66px; background: #050506; }
 .dbtn { position: absolute; width: 5px; border-radius: 3px; background: linear-gradient(90deg, #7A766F, #C9C5BD 55%, #8E8A82); }
 .dbtn.l { left: -3px; } .dbtn.r { right: -3px; }
+/* the side keys are shortcuts for reviewing the UI: the first press skips setup, later presses flip through the pages */
+.dbtn.k { cursor: pointer; transition: filter 0.15s, transform 0.15s; }
+.dbtn.k::after { content: ''; position: absolute; top: -6px; bottom: -6px; left: -9px; right: -9px; }
+.dbtn.k:hover { filter: brightness(1.35) saturate(1.4); }
+.dbtn.l.k:active { transform: translateX(2px); } .dbtn.r.k:active { transform: translateX(-2px); }
 .dbtn.action { top: 168px; height: 36px; } .dbtn.vup { top: 232px; height: 64px; } .dbtn.vdown { top: 310px; height: 64px; }
 .dbtn.power { top: 248px; height: 100px; }
 .dbtn.cam { top: 560px; height: 62px; right: -2px; width: 4px; background: linear-gradient(90deg, #5E5A54, #A8A49C); }
@@ -707,8 +712,8 @@ button.hcard:active > div { transform: translateY(2px); }
 </style>
 
 <div class="device">
-  <span class="dbtn l action" aria-hidden="true"></span><span class="dbtn l vup" aria-hidden="true"></span><span class="dbtn l vdown" aria-hidden="true"></span>
-  <span class="dbtn r power" aria-hidden="true"></span><span class="dbtn r cam" aria-hidden="true"></span>
+  <span class="dbtn l action k" role="button" tabindex="0" title="跳过引导，直接看主页；再按切换页面" aria-label="跳过引导，直接看主页；再按切换页面"></span><span class="dbtn l vup k" role="button" tabindex="0" title="跳过引导，直接看主页；再按切换页面" aria-label="跳过引导，直接看主页；再按切换页面"></span><span class="dbtn l vdown k" role="button" tabindex="0" title="跳过引导，直接看主页；再按切换页面" aria-label="跳过引导，直接看主页；再按切换页面"></span>
+  <span class="dbtn r power k" role="button" tabindex="0" title="跳过引导，直接看主页；再按切换页面" aria-label="跳过引导，直接看主页；再按切换页面"></span><span class="dbtn r cam" aria-hidden="true"></span>
   <div class="phone" id="app" aria-live="polite"></div>
   <div class="statusbar" aria-hidden="true">
     <span>9:41</span><span class="island"></span>
@@ -1454,6 +1459,22 @@ function openPack(top) {
   hand.classList.add('tearing');
   setTimeout(() => { draft.opened = true; draft.dealIn = true; replaceSheet(top, renderDraw); }, reducedMotion() ? 0 : 460);
 }
+// side keys of the mock-up: while still in setup they jump to a ready home screen (default budget, recommended cards held);
+// afterwards each press closes any sheet and flips home → bill → deck
+function quickJump() {
+  const fresh = S.firstDraw && !S.held.length && S.week === 1;
+  if (fresh) {
+    S.base = BASE; app.querySelectorAll('.sheet').forEach(e => e.remove()); renderTable();
+    S.lastWeek = estimateWeek(); S.estimated = S.lastWeek.some(d => d.length); draft = {}; renderDraw();
+    S.held = draft.rec.slice(); app.querySelectorAll('.sheet').forEach(e => e.remove()); draft = {};
+    S.coach = COACH.length; S.view = 'home'; renderTable(); toast('已跳过引导 · 再按侧边键切换页面');
+    return;
+  }
+  app.querySelectorAll('.sheet').forEach(e => e.remove());
+  const order = ['home', 'bill', 'deck']; S.view = order[(order.indexOf(S.view) + 1) % 3]; if (S.view === 'bill') S.billTab = S.billTab || 'flow'; renderTable();
+}
+document.querySelector('.device').addEventListener('click', e => { if (e.target.closest('.dbtn.k')) quickJump(); });
+document.querySelector('.device').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.dbtn.k')) { e.preventDefault(); quickJump(); } });
 app.addEventListener('pointerdown', e => {
   const b = e.target.closest && e.target.closest('.bag.closed');
   if (b) { tear = { b, strip: b.querySelector('.bag-strip'), x: e.clientX, p: 0 }; capture(b, e.pointerId); b.classList.add('tearing-drag'); return; }
