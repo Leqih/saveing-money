@@ -1698,7 +1698,6 @@ function renderLog() {
   const pad = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map(k => `<button class="cap ${/[C⌫]/.test(k) ? 'dark' : ''}" data-key="${k}" aria-label="${k === '⌫' ? '删除一位' : k === 'C' ? '清空' : k}"><div class="top">${k}</div></button>`).join('');
   sheet(editing ? '改一笔' : '记一笔', `
     <div class="bar-top"><h1>${editing ? '改一笔' : '记一笔'}</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
-    ${editing ? '' : `<div class="lbl">常用 · 点一下选好是什么</div><div class="quick">${quicks}</div>`}
     <div class="amount"><b>¥${amt}</b><span class="px" style="color:#4A4390;font-size:12px;text-align:right">周${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
     <div class="cats">${cats}</div>
     ${draft.adding ? `<div class="newcat">
