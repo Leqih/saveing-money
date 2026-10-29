@@ -424,7 +424,7 @@ button.hcard:active > div { transform: translateY(2px); }
 /* deal of five: two rows, picked cards lift and get a number */
 .draw-lead { margin: -4px 0 0; font-size: 14px; font-weight: 900; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .drawfoot { position: sticky; bottom: -24px; z-index: 3; margin: auto -18px -24px; padding: 14px 18px 22px; background: #FFF; border-radius: 28px 28px 0 0; box-shadow: 0 -10px 24px rgba(20,20,30,0.1); display: flex; flex-direction: column; gap: 10px; }
-.dsum { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--sub); }
+.dsum { display: flex; align-items: center; justify-content: space-between; gap: 10px; position: relative; font-size: 13px; color: var(--sub); }
 .dsum b { font-family: var(--f-display); font-weight: 400; font-size: 18px; color: var(--ink); }
 .dslots { display: flex; gap: 6px; }
 .dslot { width: 34px; height: 34px; border-radius: 11px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--ink); }
@@ -433,7 +433,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .hand { flex: 1 0 auto; display: flex; align-items: center; justify-content: center; min-height: 372px; margin: 0 -18px; overflow: hidden; }
 .hand:has(.stack.dragging), .hand:has(.sc2.flying) { overflow: visible; position: relative; z-index: 10; }
 .hand-in { position: relative; flex-shrink: 0; width: 100%; height: 372px; }
-.hand.open { min-height: 396px; } .hand.open .hand-in { height: 396px; }
+.hand.open { min-height: 466px; } .hand.open .hand-in { height: 466px; }
 .bag.closed { cursor: grab; touch-action: none; } .bag.tearing-drag { cursor: grabbing; }
 .bag.tearing-drag .bag-strip { transition: none; }
 .bag-strip { transition: transform 0.45s cubic-bezier(.3,1.7,.5,1); }
@@ -472,26 +472,49 @@ button.hcard:active > div { transform: translateY(2px); }
 .cf { position: absolute; left: 0; top: 0; opacity: 0; animation: confetti 1.15s cubic-bezier(.15,.7,.4,1) forwards; animation-delay: var(--cd); }
 @keyframes confetti { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 45% { opacity: 1; transform: translate(var(--cx), var(--cy)) rotate(var(--cr)); } 100% { opacity: 0; transform: translate(calc(var(--cx) * 1.25), calc(var(--cy) + 280px)) rotate(calc(var(--cr) * 2)); } }
 /* the stack: positions come from layoutStack(), CSS only animates between them */
-.stack { position: absolute; left: 0; right: 0; top: 0; height: 340px; overflow: visible; touch-action: none; cursor: grab; }
+.stack { position: absolute; left: 0; right: 0; top: 0; height: 456px; overflow: visible; touch-action: none; cursor: grab; }
 .stack.dragging { cursor: grabbing; }
-.sc2 { position: absolute; left: 50%; top: 10px; width: 216px; height: 306px; margin-left: -108px; border: 0; padding: 0; background: none; transition: transform 0.38s cubic-bezier(.25,1.3,.5,1), opacity 0.2s; }
+.sc2 { position: absolute; left: 50%; top: 8px; width: 330px; height: 440px; margin-left: -165px; border: 0; padding: 0; background: none; transition: transform 0.38s cubic-bezier(.25,1.3,.5,1), opacity 0.2s; }
 .stack.dragging .sc2 { transition: none; }
-.sc2-face { width: 240px; height: 340px; transform: scale(0.9); transform-origin: 0 0; pointer-events: none; }
-.sc2-edge { position: absolute; inset: 0; border-radius: 22px; pointer-events: none; opacity: 1; transition: opacity 0.3s; box-shadow: inset 0 -10px 0 rgba(0,0,0,0.12); }
+.sc2-face { width: 100%; height: 100%; pointer-events: none; }
+.sc2-edge { position: absolute; inset: 0; border-radius: 30px; pointer-events: none; opacity: 1; transition: opacity 0.3s; box-shadow: inset 0 -10px 0 rgba(0,0,0,0.12); }
 .sc2.front .sc2-edge { opacity: 0; }
 
 .sc2:not(.front) { pointer-events: none; }
-.sc2.front .sc2-face { filter: drop-shadow(0 16px 18px rgba(20,20,30,0.28)); }
+.sc2.front .dkc { box-shadow: 0 22px 30px -8px rgba(0,0,0,0.55); }
 .sc2:not(.front) .carry-tag, .sc2:not(.front) .sc2-rec { display: none; }
 .sc2.front { animation: hover 3s ease-in-out infinite; }
 @keyframes hover { 50% { margin-top: -5px; } }
-.sc2.front:active .sc2-face { filter: drop-shadow(0 6px 8px rgba(20,20,30,0.3)); }
+.sc2.front:active .dkc { box-shadow: 0 8px 12px -4px rgba(0,0,0,0.5); }
 .sc2.flying { transition: transform 0.46s cubic-bezier(.55,0,.25,1), opacity 0.46s ease-in; animation: none; z-index: 90 !important; }
-.sc2.flying .sc2-face { filter: drop-shadow(0 4px 6px rgba(20,20,30,0.3)); }
+
 .sc2-pickhint { position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%); z-index: 3; padding: 3px 14px; border-radius: 14px; background: #111; color: var(--lime); font-size: 12px; font-weight: 900; white-space: nowrap; pointer-events: none; animation: pulse 1.4s ease-in-out infinite; }
 @keyframes pulse { 50% { transform: translateX(-50%) scale(1.07); } }
-.sc2 .carry-tag { left: 4px; top: -6px; }
-.sc2-rec { right: -6px; top: -8px; font-size: 11px; padding: 1px 8px; }
+/* the card itself: a saturated panel with the mascot, name, tags and rule text, like a collectible */
+.dkc { position: relative; width: 100%; height: 100%; border-radius: 30px; padding: 16px 18px 18px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; overflow: hidden; pointer-events: none; }
+.dkc::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(160deg, rgba(255,255,255,0.28), transparent 38%, rgba(0,0,0,0.12)); }
+.dkc-top { width: 100%; display: flex; justify-content: space-between; gap: 8px; }
+.dkc-pill { display: inline-flex; align-items: center; height: 26px; padding: 0 11px; border-radius: 13px; background: rgba(0,0,0,0.2); font-size: 12px; font-weight: 900; white-space: nowrap; }
+.dkc-art { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 0; filter: drop-shadow(0 14px 10px rgba(0,0,0,0.28)); }
+.dkc-name { margin: 0; font-size: 34px; font-weight: 500; letter-spacing: 1px; line-height: 1.1; }
+.dkc-tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.dkc-desc { margin: 0; font-size: 13px; line-height: 1.55; opacity: 0.92; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; min-height: 82px; }
+.dkc-count { margin-left: auto; margin-right: 0; padding: 2px 10px; border-radius: 12px; background: rgba(255,255,255,0.14); font-size: 12px; font-weight: 900; }
+/* the draw screen goes dark and takes on the colour of the card in front */
+.sheet.drawdark { background: var(--tint, #111); color: #FFF; transition: background 0.4s; }
+.drawdark .bar-top { background: var(--tint, #111); transition: background 0.4s; }
+.drawdark .bar-top h1 { color: #FFF; }
+.drawdark .draw-lead { color: rgba(255,255,255,0.78); }
+.drawdark .drawfoot { background: #232327; box-shadow: none; border-radius: 30px 30px 0 0; padding-top: 30px; }
+.drawdark .drawfoot::before { content: ''; position: absolute; left: 50%; top: 0; width: 176px; height: 34px; margin-left: -88px; border-radius: 0 0 88px 88px; background: var(--tint, #111); transition: background 0.4s; }
+.tray-hint { position: absolute; left: 0; right: 0; top: 7px; margin: 0; text-align: center; font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.75); letter-spacing: 1px; }
+.drawdark .dsum { color: #A9A9B2; } .drawdark .dsum b { color: #FFF; }
+.drawdark .dslot { border-color: #FFF; } .drawdark .dslot.empty { border-color: #5A5A62; background: #2E2E33; }
+.dcount { font-family: var(--f-display); font-size: 20px; color: #FFF; margin-right: 10px; display: inline-block; }
+.dcount.bounce { animation: cbounce 0.6s cubic-bezier(.3,1.9,.5,1); }
+@keyframes cbounce { 0% { transform: scale(1); } 35% { transform: scale(1.7) translateY(-4px); } 100% { transform: scale(1); } }
+.sc2 .carry-tag { left: 14px; top: -8px; z-index: 3; }
+.sc2-rec { left: auto; right: auto; left: 50%; top: 14px; transform: translateX(-50%) rotate(-3deg); font-size: 11px; padding: 1px 10px; z-index: 3; }
 .dsum-rec { height: 30px; padding: 0 12px; border-radius: 15px; border: 2px solid var(--ink); background: var(--lime); font-size: 12px; font-weight: 900; white-space: nowrap; }
 .sdots { position: absolute; left: 0; right: 0; top: 352px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--mute); }
 .sd { display: flex; gap: 8px; }
@@ -1285,17 +1308,33 @@ function renderDraw() {
   const rec = draft.rec = draft.rec || bestCombo(draft.hand, need, hasData), recMult = S.baseMult + rec.reduce((a, no) => a + CARDS[no].plus, 0);
   const ci = draft.ci = inHand.length ? ((draft.ci || 0) % inHand.length + inHand.length) % inHand.length : 0;
   const focus = draft.opened ? inHand[ci] : null;
+  const pillOf = no => {
+    const c = CARDS[no], one = hasData ? simulate([no], S.lastWeek, S.weekStart) : null;
+    if (!one) return ['', ['', '好守', '要留意', '最难也最值'][c.diff]];
+    const held = one.per[no], pre = S.estimated ? '按你选的估算' : '按上周';
+    return held >= one.days * 0.7 ? ['ok', `${pre} · 守得住 ${held}/${one.days} 天`] : held >= one.days * 0.4 ? ['mid', `${pre} · 一半一半 ${held}/${one.days} 天`] : ['no', `${pre} · 很难守 ${held}/${one.days} 天`];
+  };
+  const faceOf = no => {
+    const c = CARDS[no], t = TYPES[c.plus], st = pillOf(no), clash = clashNames(no);
+    return `<div class="dkc" style="background:${t.core};color:${t.chipText}">
+      <div class="dkc-top"><span class="dkc-pill">守住 +${c.plus} 倍率</span><span class="dkc-pill">${c.weekly ? '按周算' : '按天算'}</span></div>
+      <div class="dkc-art">${artIcon(no, 190)}</div>
+      <h3 class="dkc-name">${c.name}</h3>
+      <div class="dkc-tags"><span class="dkc-pill">${st[1]}</span></div>
+      <p class="dkc-desc">${c.cond}。${c.eg}${clash.length ? `不能和${clash.join('、')}一起留。` : ''}</p>
+    </div>`;
+  };
   const cards = inHand.map((no, i) => {
     const tag = no === S.carry && !S.firstDraw ? '续留' : clashIn(no, sel) ? '重叠' : '';
-    return `<button class="sc2" data-pick="${no}" data-i="${i}" aria-label="${CARDS[no].name} +${CARDS[no].plus}${i === ci ? '，点一下留下' : '，点一下翻到前面'}"
+    return `<button class="sc2" data-pick="${no}" data-i="${i}" aria-label="${CARDS[no].name} +${CARDS[no].plus}${i === ci ? '，点一下留下，或往下拖' : '，点一下翻到前面'}"
       style="--d:${i * 70}ms;--bx:${Math.round(Math.random() * 220 - 110)}px;--by:${Math.round(-40 - Math.random() * 60)}px;--br:${Math.round(Math.random() * 70 - 35)}deg">
-      <div class="sc2-face">${cardHTML(CARDS[no])}</div><i class="sc2-edge" style="background:${coreOf(no)}"></i>${i === ci && !sel.length ? '<span class="sc2-pickhint">往下滑 · 放进牌槽</span>' : ''}${tag ? `<span class="carry-tag">${tag}</span>` : ''}${rec.includes(no) ? '<span class="sticker sc2-rec">推荐</span>' : ''}</button>`;
+      <div class="sc2-face">${faceOf(no)}</div><i class="sc2-edge" style="background:${coreOf(no)}"></i>${tag ? `<span class="carry-tag">${tag}</span>` : ''}${rec.includes(no) ? '<span class="sticker sc2-rec">推荐</span>' : ''}</button>`;
   }).join('');
   const dots = inHand.map((no, i) => `<button class="thumb ${i === ci ? 'on' : ''}" data-goto="${i}" style="background:${coreOf(no)}" aria-label="看${CARDS[no].name}">${artIcon(no, 20)}</button>`).join('');
   // the week's cards come in a crimped foil bag: it tilts toward your finger and tears open when you drag along the top
   const burst = draft.dealIn ? Array.from({ length: 28 }, (_, i) => `<i class="cf" style="--cx:${Math.round(Math.random() * 340 - 170)}px;--cy:${Math.round(-60 - Math.random() * 170)}px;--cr:${Math.round(Math.random() * 720 - 360)}deg;--cd:${Math.round(Math.random() * 120)}ms;width:${6 + (i % 4) * 2}px;height:${6 + (i % 3) * 3}px;background:${['var(--lime)', 'var(--pink)', 'var(--blue)', 'var(--orange)', '#C9C3FF', '#111'][i % 6]};border-radius:${i % 2 ? '50%' : '2px'}"></i>`).join('') : '';
   const pack = draft.opened ? '' : `<div class="bag closed" role="button" tabindex="0" aria-label="撕开这周的卡包：按住顶部往右拖">
-      <svg class="bag-body" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bagG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2B2B33"/><stop offset=".55" stop-color="#16161B"/><stop offset="1" stop-color="#0B0B0E"/></linearGradient><linearGradient id="bagH" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E4FF1A" stop-opacity=".0"/><stop offset=".35" stop-color="#E4FF1A" stop-opacity=".28"/><stop offset=".6" stop-color="#FF52D9" stop-opacity=".28"/><stop offset=".85" stop-color="#2E8BFF" stop-opacity=".25"/><stop offset="1" stop-color="#2E8BFF" stop-opacity="0"/></linearGradient><pattern id="bagR" width="5" height="10" patternUnits="userSpaceOnUse"><rect width="2" height="10" fill="#FFF" opacity=".16"/></pattern></defs><path d="${BAG_BODY}" fill="url(#bagG)" stroke="#111" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="${BAG_BODY}" fill="url(#bagH)"/><rect x="0" y="50" width="200" height="14" fill="url(#bagR)"/><rect x="0" y="228" width="200" height="14" fill="url(#bagR)"/><path d="M14 80H186V214H14Z" fill="none" stroke="#E4FF1A" stroke-width="1.5" stroke-dasharray="2 5" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".6"/></svg>
+      <svg class="bag-body" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bagG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2B2B33"/><stop offset=".55" stop-color="#16161B"/><stop offset="1" stop-color="#0B0B0E"/></linearGradient><linearGradient id="bagH" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E4FF1A" stop-opacity=".0"/><stop offset=".35" stop-color="#E4FF1A" stop-opacity=".28"/><stop offset=".6" stop-color="#FF52D9" stop-opacity=".28"/><stop offset=".85" stop-color="#2E8BFF" stop-opacity=".25"/><stop offset="1" stop-color="#2E8BFF" stop-opacity="0"/></linearGradient><pattern id="bagR" width="5" height="10" patternUnits="userSpaceOnUse"><rect width="2" height="10" fill="#FFF" opacity=".16"/></pattern></defs><path d="${BAG_BODY}" fill="url(#bagG)" stroke="#E4FF1A" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><path d="${BAG_BODY}" fill="url(#bagH)"/><rect x="0" y="50" width="200" height="14" fill="url(#bagR)"/><rect x="0" y="228" width="200" height="14" fill="url(#bagR)"/><path d="M14 80H186V214H14Z" fill="none" stroke="#E4FF1A" stroke-width="1.5" stroke-dasharray="2 5" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".6"/></svg>
       <svg class="bag-strip" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><path d="${BAG_STRIP}" fill="#E4FF1A" stroke="#111" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><rect x="0" y="10" width="200" height="30" fill="url(#bagR)" opacity=".5"/><path d="M14 27H186" stroke="#111" stroke-width="2" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"/></svg>
       <span class="bag-foil" aria-hidden="true"></span><span class="bag-sheen" aria-hidden="true"></span>
       <span class="bag-eyes" aria-hidden="true"><i></i><i></i></span>
@@ -1305,47 +1344,37 @@ function renderDraw() {
     </div>
     <span class="pk-tear sticker" aria-hidden="true">按住顶部 → 往右拖开，或点一下</span>`;
   const stage = draft.opened ? `<div class="stack">${cards}</div>
-    <div class="sdots"><span class="sd">${dots}</span><span>左右滑换牌 · 或点下面的小图</span></div>${burst ? `<span class="burst" aria-hidden="true">${burst}</span>` : ''}` : pack;
-  let info = '';
-  if (focus) {
-    const c = CARDS[focus];
-    const one = hasData ? simulate([focus], S.lastWeek, S.weekStart) : null;
-    const held = one ? one.per[focus] : 0;
-    const tag = !one ? null : held >= one.days * 0.7 ? ['ok', `守得住：${held}/${one.days} 天`] : held >= one.days * 0.4 ? ['mid', `一半一半：${held}/${one.days} 天`] : ['no', `很难守：${held}/${one.days} 天`];
-    info = `<div class="pickinfo">
-      <h3><span>${c.name}</span><span class="stars" style="color:${coreOf(focus)}">守住 +${c.plus} 倍率</span></h3>
-      <p>${c.cond}。${c.eg}${clashNames(focus).length ? `不能和${clashNames(focus).join('、')}一起留。` : ''}</p>
-      <div class="pillrow">${tag ? `<span class="pill ${tag[0]}">${S.estimated ? '按你选的估算' : '按上周'} · ${tag[1]}</span>` : `<span class="pill ${['', 'ok', 'mid', 'no'][c.diff]}">${['', '好守', '要留意', '最难也最值'][c.diff]}</span>`}</div>
-    </div>`;
-  }
+    ${burst ? `<span class="burst" aria-hidden="true">${burst}</span>` : ''}` : pack;
+  const info = '';
   // the footer keeps the picks, what they add up to and the button on screen however far the cards scroll
   const multSel = S.baseMult + sel.reduce((a, no) => a + CARDS[no].plus, 0);
   const sum = sel.length === need && hasData ? (sim => `约 <b>${sim.total}</b> 分 / 目标 ${weekTarget()}`)(simulate(sel, S.lastWeek, S.weekStart)) : sel.length ? `全守住 <b>×${multSel}</b>` : (draft.opened ? `<button class="dsum-rec" data-act="use-rec">用推荐 ${rec.length} 张 · ×${recMult}</button>` : '撕开卡包看看');
   const slots = Array.from({ length: need }, (_, i) => sel[i] ? `<button class="dslot ${draft.landed === sel[i] || draft.landed === 'all' ? 'land' : ''}" data-unpick="${sel[i]}" style="background:${coreOf(sel[i])}" aria-label="${CARDS[sel[i]].name}，点一下放回手里">${artIcon(sel[i], 22)}</button>` : '<span class="dslot empty"></span>').join('');
   sheet('抽规则卡', `
-    <div class="bar-top"><h1>第 ${S.week} 周 · 抽 ${DEALN()} 留 ${HOLDN()}</h1><span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
+    <div class="bar-top"><h1>第 ${S.week} 周 · 抽 ${DEALN()} 留 ${HOLDN()}</h1>${draft.opened && inHand.length ? `<span class="dkc-count">${ci + 1} / ${inHand.length}</span>` : ''}<span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
     <p class="draw-lead">留下的 ${need} 张这周同时生效，守住就加倍率${S.weekStart > 0 ? `<span class="chipk" style="background:var(--lime)">这周只剩 ${weekDays()} 天</span>` : ''}</p>
     <div class="hand ${draft.opened ? 'open' : ''} ${draft.dealIn ? 'dealing' : ''}"><div class="hand-in">${stage}</div></div>
     ${info}
     <div class="drawfoot">
-      <div class="dsum"><div class="dslots">${slots}</div><span>${sum}</span></div>
+      <p class="tray-hint">${draft.opened ? '↓ 把牌往下滑，放进牌组' : '先撕开卡包'}</p>
+      <div class="dsum"><div style="display:flex;align-items:center"><b class="dcount ${draft.landed ? 'bounce' : ''}">${sel.length}/${need}</b><div class="dslots">${slots}</div></div><span>${sum}</span></div>
       <button class="go" data-act="choose" ${sel.length === need ? '' : 'disabled'}>${sel.length === need ? `就留这 ${need} 张` : combosOf(draft.hand, need).some(c => sel.every(x => c.includes(x))) ? `再选 ${need - sel.length} 张` : `有重叠，凑不满 ${need} 张，换掉一张`}</button>
     </div>`);
   const st = lastSheet().querySelector('.stack'); if (st) layoutStack(st, ci);
-  // the whole sheet takes on the colour of the card in front
-  if (focus) { const sh = lastSheet(); sh.classList.add('tint'); sh.style.background = `color-mix(in srgb, ${coreOf(focus)} 18%, #FFF)`; }
+  // the whole sheet is dark and takes on the colour of the card in front
+  { const sh = lastSheet(); sh.classList.add('drawdark'); sh.style.setProperty('--tint', `color-mix(in srgb, ${focus ? coreOf(focus) : '#E4FF1A'} 26%, #111)`); }
   // one-shot animations only play on the render that triggered them
   draft.dealIn = false; draft.landed = null;
 }
 // each card's place in the pile depends on how far behind the front card it is; only the top four show
-const PILE = [[0, 0, 0, 1], [32, 0, 0, 0.94], [-32, 0, 0, 0.94], [45, 0, 0, 0.88]];
+const PILE = [[0, 0, 0, 1], [26, 0, 0, 0.93], [-26, 0, 0, 0.93], [0, 0, 0, 0.9]];
 function layoutStack(stack, at) {
   const els = [...stack.querySelectorAll('.sc2')], n = els.length;
   els.forEach(el => {
     const k = ((+el.dataset.i - at) % n + n) % n, [x, y, r, sc] = PILE[Math.min(k, 3)];
     el.style.transform = `translate(${x}px, ${y}px) rotate(${r}deg) scale(${sc})`;
     el.style.zIndex = String(50 - k);
-    el.style.opacity = k > 3 ? '0' : '1';
+    el.style.opacity = k > 2 ? '0' : '1';
     el.classList.toggle('front', k === 0);
   });
 }
