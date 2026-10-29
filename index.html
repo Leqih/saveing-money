@@ -842,6 +842,13 @@ button.hcard:active > div { transform: translateY(2px); }
 .sfoot:has(.linkbtn) { padding-bottom: 34px; }
 .sfoot .cap.bigbtn, .sfoot .go { width: 100%; margin: 0 !important; }
 .sfoot .linkbtn { align-self: center; }
+
+/* home: let the hero and the rule cards take the room that is left */
+.screen:has(> .head) { gap: 26px; }
+.screen:has(> .head) .hero > .top { min-height: 240px; }
+.screen:has(> .head) .hero .money { font-size: 96px; }
+.screen:has(> .head) .hold .multc { width: 84px; height: 84px; }
+.screen:has(> .head) .hold .multc b { font-size: 27px; }
 </style>
 
 <div class="device">
@@ -1163,9 +1170,9 @@ function holdHTML(ev) {
   const cards = ev.cards.map(c => {
     const card = CARDS[c.no];
     const label = c.state === 'on' ? `+${card.plus} 守住` : c.state === 'pending' ? '睡着' : brokenLabel(c);
-    return `<button class="hcard ${c.state}" data-info="${c.no}" aria-label="${card.name}，${label}${c.why ? '：' + c.why : ''}">${scaled(card, ev.cards.length > 3 ? 0.27 : 0.33, c.state)}<span>${label}</span></button>`;
+    return `<button class="hcard ${c.state}" data-info="${c.no}" aria-label="${card.name}，${label}${c.why ? '：' + c.why : ''}">${scaled(card, ev.cards.length > 3 ? 0.3 : 0.36, c.state)}<span>${label}</span></button>`;
   }).join('');
-  return `<div class="hold" style="grid-template-columns:repeat(${ev.cards.length}, ${ev.cards.length > 3 ? 65 : 79}px) 1fr">${cards}<div class="multc" aria-label="倍率 ${ev.mult}"><small>倍率</small><b>×${ev.mult}</b></div></div>`;
+  return `<div class="hold" style="grid-template-columns:repeat(${ev.cards.length}, ${ev.cards.length > 3 ? 74 : 87}px) 1fr">${cards}<div class="multc" aria-label="倍率 ${ev.mult}"><small>倍率</small><b>×${ev.mult}</b></div></div>`;
 }
 function weekInfo() {
   const prior = scorePrior(), target = weekTarget(), need = target - prior, daysLeft = 7 - S.day;
