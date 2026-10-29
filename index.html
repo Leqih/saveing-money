@@ -749,6 +749,11 @@ button.hcard:active > div { transform: translateY(2px); }
 .duo-l { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .duo .endbtn { width: auto; }
 .duo .endbtn > .top { padding: 18px 8px; }
+
+/* layout only: tighter rhythm so the whole home fits one screen */
+.screen:has(> .head) { gap: 10px; padding-bottom: 100px; }
+.screen:has(> .head) .hero > .top { min-height: 122px; }
+.screen:has(> .head) .quick { padding-bottom: 0; }
 </style>
 
 <div class="device">
