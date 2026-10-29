@@ -1337,14 +1337,14 @@ function renderDraw() {
   }).join('');
   // the week's cards come in a crimped foil bag: it tilts toward your finger and tears open when you drag along the top
   const burst = draft.dealIn ? Array.from({ length: 28 }, (_, i) => `<i class="cf" style="--cx:${Math.round(Math.random() * 340 - 170)}px;--cy:${Math.round(-60 - Math.random() * 170)}px;--cr:${Math.round(Math.random() * 720 - 360)}deg;--cd:${Math.round(Math.random() * 120)}ms;width:${6 + (i % 4) * 2}px;height:${6 + (i % 3) * 3}px;background:${['var(--lime)', 'var(--pink)', 'var(--blue)', 'var(--orange)', '#C9C3FF', '#111'][i % 6]};border-radius:${i % 2 ? '50%' : '2px'}"></i>`).join('') : '';
-  const pack = draft.opened ? '' : `<div class="bag closed" role="button" tabindex="0" aria-label="撕开这周的卡包：按住顶部往右拖，或点一下">
+  const pack = draft.opened ? '' : `<div class="bag closed" role="button" tabindex="0" aria-label="撕开这周的卡包：按住顶部往右拖">
       <svg class="bag-body" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bagG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF3D00"/><stop offset="1" stop-color="#FF6B3A"/></linearGradient><clipPath id="bagC"><path d="${BAG_BODY}"/></clipPath></defs><path d="${BAG_BODY}" fill="url(#bagG)"/><g clip-path="url(#bagC)"><path d="M-10 214C14 186 62 186 90 222C112 196 160 196 214 226V256H-10Z" fill="#3DCBFF"/></g></svg>
       <svg class="bag-strip" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><path d="${BAG_STRIP}" fill="#3DCBFF"/><path d="M12 28H188" stroke="#FFF" stroke-width="2" stroke-dasharray="6 6" vector-effect="non-scaling-stroke" opacity=".9"/></svg>
       <svg class="pk-arrow" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M5 5L21 21M24 8v16H8" fill="none" stroke="#FFE600" stroke-width="7" stroke-linecap="square"/></svg>
       <span class="pk-badge" aria-hidden="true"><svg width="62" height="62" viewBox="0 0 62 62"><circle cx="31" cy="31" r="28" fill="#FFF" stroke="#111" stroke-width="3"/><g class="pk-face" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"><path d="M17 22h9M36 22h9M31 14v14"/><path d="M19 37c4 9 20 9 24 0"/></g></svg></span>
       <span class="pk-labs"><span class="pk-lab px">WEEK ${String(S.week).padStart(2, '0')}</span><b class="pk-lab pk-title">抽 ${DEALN()} 留 ${HOLDN()}</b><span class="pk-lab pk-count">${draft.hand.length} 张规则卡 · 守住加倍率</span></span>
     </div>
-    <span class="pk-tear" aria-hidden="true">按住顶部 → 往右拖开，或点一下</span>`;
+    <span class="pk-tear" aria-hidden="true">按住顶部 → 往右拖开</span>`;
   const stage = draft.opened ? `<div class="stack ${draft.slide ? 'slide' + draft.slide : ''}">${cards}</div>
     ${burst ? `<span class="burst" aria-hidden="true">${burst}</span>` : ''}` : pack;
   const info = ''; const _unused = focus ? (st => `<div class="pickline"><span class="pill ${st[0]}">${st[1]}</span>${clashNames(focus).length ? `<span class="pickclash">不能和${clashNames(focus).join('、')}一起留</span>` : ''}</div>`)(pillOf(focus)) : '';
@@ -1497,7 +1497,7 @@ app.addEventListener('pointermove', e => {
     const t = tear; tear = null; t.b.classList.remove('tearing-drag');
     if (t.p > 0.5 && type === 'pointerup') { openPack(lastSheet()); return; }
     t.strip.style.transform = '';
-    if (t.p < 0.04 && type === 'pointerup') { openPack(lastSheet()); return; }
+    if (t.p < 0.04) { const hint = lastSheet().querySelector('.pk-tear'); if (hint) { hint.classList.remove('shake'); void hint.offsetWidth; hint.classList.add('shake'); } }
     return;
   }
   if (swipe) {
