@@ -849,6 +849,14 @@ button.hcard:active > div { transform: translateY(2px); }
 .screen:has(> .head) .hero .money { font-size: 96px; }
 .screen:has(> .head) .hold .multc { width: 84px; height: 84px; }
 .screen:has(> .head) .hold .multc b { font-size: 27px; }
+
+.streak { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 9px; border-radius: 11px; background: rgba(255, 255, 255, 0.55); color: rgba(17, 17, 17, 0.55); font-size: 12px; font-weight: 900; }
+.streak.on { background: #E4FF1A; color: #111; }
+.spent { display: flex; align-items: center; gap: 10px; }
+.spent-bar { flex: 1; height: 12px; border-radius: 6px; background: rgba(255, 255, 255, 0.5); overflow: hidden; }
+.spent-bar i { display: block; height: 100%; min-width: 4px; border-radius: 6px; background: #111; transition: width 0.6s cubic-bezier(.3,1.3,.5,1); }
+.spent-bar i.hot { background: #8A0F0F; }
+.spent .px { font-size: 12px; white-space: nowrap; }
 </style>
 
 <div class="device">
@@ -1174,6 +1182,8 @@ function holdHTML(ev) {
   }).join('');
   return `<div class="hold" style="grid-template-columns:repeat(${ev.cards.length}, ${ev.cards.length > 3 ? 74 : 87}px) 1fr">${cards}<div class="multc" aria-label="倍率 ${ev.mult}"><small>倍率</small><b>×${ev.mult}</b></div></div>`;
 }
+// consecutive finished days where every held card held
+function streakDays() { let n = 0; for (let i = S.history.length - 1; i >= 0; i--) { const h = S.history[i]; if (h.unlogged || !h.cards.length || !h.cards.every(c => c.state === 'on')) break; n++; } return n; }
 function weekInfo() {
   const prior = scorePrior(), target = weekTarget(), need = target - prior, daysLeft = 7 - S.day;
   const hint = need <= 0 ? `已经够目标了！多攒的分让星星更多：1.7 倍拿 ★★，2.6 倍拿 ★★★。`
@@ -1223,8 +1233,9 @@ function homeHTML() {
       <button class="cookie" data-act="star" aria-label="星星 ${S.stars}，点一下看说明和设置"><span class="n">${S.stars}</span><span class="l">★ 星星</span></button>
     </div>
     <div class="cap orange hero ${ev.left < 0 ? 'over' : ''}"><div class="top">
-      <div class="row"><span style="font-weight:900;font-size:14px">${ev.left < 0 ? '今天已超' : '今日还能花'}</span><span class="px" style="font-size:13px">${S.debt ? `¥${dailyBudget()} − 透支 ¥${Math.min(S.debt, dailyBudget())}` : `每天 ¥${ev.daily}`}</span></div>
+      <div class="row"><span style="font-weight:900;font-size:14px;display:flex;align-items:center;gap:8px">${ev.left < 0 ? '今天已超' : '今日还能花'}<span class="streak ${streakDays() ? 'on' : ''}"><svg width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><path d="M6 0c1 3 5 4.500 5 8.500A5 5 0 011 8.500C1 6.500 2.500 5.500 3 4c1 .8 1.200 1.800 1 2.800C5.500 6 6.200 3 6 0z" fill="currentColor"/></svg>连续 ${streakDays()} 天</span></span><span class="px" style="font-size:13px">${S.debt ? `¥${dailyBudget()} − 透支 ¥${Math.min(S.debt, dailyBudget())}` : `每天 ¥${ev.daily}`}</span></div>
       <span class="money">${money(ev.left)}</span>
+      <div class="spent" aria-label="今天已花 ${ev.d.extra} 元，共 ${ev.daily} 元"><div class="spent-bar"><i style="width:${Math.min(100, Math.round(ev.d.extra / Math.max(1, ev.daily) * 100))}%" class="${ev.d.extra / Math.max(1, ev.daily) > 0.8 ? 'hot' : ''}"></i></div><span class="px">已花 ¥${ev.d.extra} / ¥${ev.daily}</span></div>
       <div class="row"><span style="font-weight:900;font-size:15px">今晚预计 ${ev.score} 分</span><span class="px" style="font-size:13px">${ev.base} × ${ev.mult}</span></div>
     </div></div>
     ${S.held.length ? holdHTML(ev) : `<button class="rulebar" data-act="draw"><div class="rtext" style="grid-column:1/-1"><small>本周的牌</small><b>还没抽</b><span>点这里抽 5 张，留 3 张</span></div></button>`}
