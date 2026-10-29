@@ -844,7 +844,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .sfoot .linkbtn { align-self: center; }
 
 /* home: let the hero and the rule cards take the room that is left */
-.screen:has(> .head) { gap: 26px; }
+.screen:has(> .head) { gap: 18px; }
 .screen:has(> .head) .hero > .top { min-height: 240px; }
 .screen:has(> .head) .hero .money { font-size: 84px; }
 .screen:has(> .head) .hold .multc { width: 84px; height: 84px; }
@@ -874,6 +874,35 @@ button.hcard:active > div { transform: translateY(2px); }
 @keyframes coinSpit { 0% { transform: translate(0, 24px) scale(0.5); opacity: 0; } 20% { opacity: 1; transform: translate(0, -18px) scale(1); } 60% { transform: translate(60px, -4px) rotate(80deg); } 100% { transform: translate(130px, 110px) rotate(200deg); opacity: 0; } }
 .screen:has(> .head) .hero.over .money { font-size: 62px; }
 .screen:has(> .head) .hero .money { white-space: nowrap; }
+
+/* retro CRT in the spend card */
+.screen:has(> .head) .hero > .top { min-height: 0; gap: 12px; }
+.hero .crt { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; border-radius: 30px 30px 14px 14px; color: inherit; text-align: left; }
+.crt-in { display: block; padding: 14px 14px 10px; border-radius: 30px 30px 6px 6px; background: radial-gradient(circle at 20% 15%, rgba(255,255,255,0.7), transparent 40%), radial-gradient(rgba(150, 110, 70, 0.28) 0.7px, transparent 1px) 0 0 / 7px 7px, linear-gradient(180deg, #F2EEE6, #CFC8BA); box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6), inset 0 -4px 6px rgba(120, 100, 70, 0.35); }
+.crt-scr { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; height: 168px; padding: 10px 10px 0; overflow: hidden; border-radius: 26px / 22px; background: radial-gradient(ellipse at 50% 40%, #2A1220 0%, #12060E 70%, #070308 100%); box-shadow: inset 0 0 0 3px #B8B0A2, inset 0 0 30px 6px rgba(0, 0, 0, 0.9), 0 0 0 2px #9A9284; color: #FF8FB8; }
+.crt-scr::before { content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: repeating-linear-gradient(180deg, rgba(0,0,0,0) 0 2px, rgba(0,0,0,0.22) 2px 3px); }
+.crt-ttl { font-family: var(--f-px); font-size: 12px; letter-spacing: 3px; color: #B35C84; }
+.crt-money { font-family: var(--f-px); font-weight: 600; font-size: 46px; line-height: 1.05; color: #FF9CC4; text-shadow: 0 0 6px #FF4FA0, 0 0 18px rgba(255, 79, 160, 0.8); animation: crtGlow 3s ease-in-out infinite; }
+@keyframes crtGlow { 0%, 100% { opacity: 1; } 50% { opacity: 0.88; } 52% { opacity: 1; } }
+.crt-sub { font-family: var(--f-px); font-size: 13px; color: #FF8FB8; text-shadow: 0 0 6px rgba(255, 79, 160, 0.7); } .crt-sub i { font-style: normal; color: #FF3D8A; margin-right: 4px; }
+.crt-ghosts { position: absolute; left: 0; right: 0; bottom: 26px; display: flex; justify-content: center; gap: 8px; z-index: 1; }
+.gh { fill: #FF8FB8; filter: drop-shadow(0 0 4px rgba(255, 79, 160, 0.7)); animation: ghFloat 2.4s ease-in-out infinite; }
+.gh.g1 { animation-delay: -0.8s; margin-top: -8px; } .gh.g2 { animation-delay: -1.6s; margin-top: 4px; }
+@keyframes ghFloat { 50% { transform: translateY(-4px); } }
+.gh.poof { animation: ghPoof 0.9s ease-out both; fill: #FFF; }
+@keyframes ghPoof { 0% { transform: scale(1); opacity: 1; } 100% { transform: translateY(-34px) scale(1.8); opacity: 0; } }
+.crt-wave { position: absolute; left: 0; bottom: 0; width: 100%; color: #F2578F; z-index: 2; filter: drop-shadow(0 0 6px rgba(255, 79, 160, 0.8)); transition: height 0.7s cubic-bezier(.3,1.3,.5,1); }
+.crt-glare { position: absolute; left: 10%; top: 6%; width: 38%; height: 26%; border-radius: 50%; background: radial-gradient(ellipse, rgba(255, 255, 255, 0.16), transparent 70%); transform: rotate(-12deg); z-index: 4; pointer-events: none; }
+.crt-base { display: flex; align-items: center; gap: 8px; height: 40px; margin: 0; padding: 0 14px; border-radius: 4px 4px 14px 14px; background: linear-gradient(180deg, #D8D1C3, #BDB5A5); box-shadow: inset 0 2px 0 rgba(255,255,255,0.5), inset 0 -3px 0 rgba(120, 100, 70, 0.35), 0 8px 0 rgba(120, 0, 0, 0.22); }
+.crt-base .slot { width: 22px; height: 8px; border-radius: 2px; background: #9C9486; box-shadow: inset 0 1px 0 rgba(0,0,0,0.4); } .crt-base .slot.w { width: 34px; margin-right: auto; }
+.crt-base .vents { width: 72px; height: 12px; background: repeating-linear-gradient(180deg, #9C9486 0 2px, transparent 2px 5px); }
+.crt-base .kb { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #F4F0E8, #A8A092); box-shadow: 0 2px 0 #7C7466; } .crt-base .kb.o { background: radial-gradient(circle at 35% 30%, #FF9A5C, #E8501A); box-shadow: 0 2px 0 #A8340C; }
+.crt.blip .crt-scr { animation: crtBlip 0.5s ease; }
+@keyframes crtBlip { 0% { transform: scaleY(0.06); filter: brightness(3); } 40% { transform: scaleY(1.04); filter: brightness(1.6); } 100% { transform: none; filter: none; } }
+.crt.over .crt-scr { color: #FF6A6A; background: radial-gradient(ellipse at 50% 40%, #3A0C12 0%, #1A0508 70%, #0A0204 100%); }
+.crt.over .crt-money { color: #FF8A8A; text-shadow: 0 0 6px #FF2A2A, 0 0 18px rgba(255, 42, 42, 0.8); animation: crtBad 0.6s steps(2) infinite; }
+@keyframes crtBad { 50% { transform: translateX(2px); opacity: 0.8; } }
+.crt.over .crt-wave { color: #FF3A3A; }
 </style>
 
 <div class="device">
@@ -1201,28 +1230,30 @@ function holdHTML(ev) {
 }
 // consecutive finished days where every held card held
 function streakDays() { let n = 0; for (let i = S.history.length - 1; i >= 0; i--) { const h = S.history[i]; if (h.unlogged || !h.cards.length || !h.cards.every(c => c.state === 'on')) break; n++; } return n; }
-// the spend card's piggy bank: coins beside it are what is left today (up to 8); one drops out when money goes
+// the spend card is a little retro CRT: the money glows on the screen, a pixel ghost for each bit of today's allowance still left,
+// and a pink pixel tide rising from the bottom as money is spent. A ghost pops when money goes.
 let lastHeroLeft = null;
-function piggyHTML(ev) {
-  const n = ev.left <= 0 ? 0 : Math.max(1, Math.min(8, Math.round(ev.left / Math.max(1, ev.daily) * 8)));
+const GHOST = ['...XXXXXX...', '..XXXXXXXX..', '.XXXXXXXXXX.', '.XXXXXXXXXX.', '.XXXXXXXXXX.', '.XXXXXXXXXX.', '.XXXXXXXXXX.', '.XXXXXXXXXX.', '.XXXXXXXXXX.', '.XXXXXXXXXX.', '.XX.XXXX.XX.', '.X...XX...X.'];
+const ghostSVG = (cls = '') => `<svg class="gh ${cls}" width="22" height="22" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true">${GHOST.map((row, y) => [...row].map((c, x) => c === 'X' ? `<rect x="${x}" y="${y}" width="1" height="1"/>` : '').join('')).join('')}<g fill="#17080F"><rect x="3" y="4" width="2" height="3"/><rect x="7" y="4" width="2" height="3"/></g><g fill="#FFF"><rect x="3" y="4" width="1" height="1"/><rect x="7" y="4" width="1" height="1"/></g></svg>`;
+function crtHTML(ev) {
+  const ratio = Math.max(0, Math.min(1, ev.d.extra / Math.max(1, ev.daily)));
+  const n = ev.left <= 0 ? 0 : Math.max(1, Math.min(6, Math.round(ev.left / Math.max(1, ev.daily) * 6)));
   const dropped = lastHeroLeft != null && ev.left < lastHeroLeft; lastHeroLeft = ev.left;
-  const coins = Array.from({ length: n }, (_, i) => `<i class="pc" style="--i:${i};--w:${[-3, 2, -1, 3, -2, 1, -3, 2][i]}px"></i>`).join('');
-  return `<button class="pig ${ev.left < 0 ? 'cracked' : ''} ${dropped ? 'spit' : ''}" data-act="pig" aria-label="存钱罐，今天还剩 ${ev.left} 元，点一下晃一晃">
-    <span class="pig-coins" aria-hidden="true">${coins}</span>
-    ${dropped ? '<i class="pc fly" aria-hidden="true"></i>' : ''}
-    <svg class="pig-body" width="150" height="116" viewBox="0 0 150 116" aria-hidden="true">
-      <ellipse cx="75" cy="112" rx="52" ry="4" fill="rgba(120,0,0,0.25)"/>
-      <rect x="38" y="84" width="20" height="26" rx="9" fill="#F08AB4"/><rect x="94" y="84" width="20" height="26" rx="9" fill="#F08AB4"/>
-      <path d="M24 56C20 26 50 10 82 12C112 14 132 32 130 62C128 88 106 98 78 98C48 98 26 84 24 56Z" fill="#FFB3D1"/>
-      <path d="M32 44C44 24 76 18 98 22" stroke="#FFE3EF" stroke-width="5" stroke-linecap="round" fill="none"/>
-      <path d="M44 24L38 4L62 16Z" fill="#F08AB4"/><path d="M108 22L122 6L126 30Z" fill="#F08AB4"/>
-      <ellipse cx="22" cy="62" rx="14" ry="17" fill="#F08AB4"/><ellipse cx="18" cy="62" rx="3.200" ry="5.500" fill="#B8456F"/><ellipse cx="26" cy="62" rx="3.200" ry="5.500" fill="#B8456F"/>
-      <circle cx="46" cy="46" r="5" fill="#111"/><circle cx="47.500" cy="44.500" r="1.600" fill="#FFF"/>
-      <circle cx="40" cy="64" r="7" fill="#FF8FB8" opacity=".75"/>
-      <rect x="66" y="12" width="34" height="7" rx="3.500" fill="#B8456F"/>
-      <path d="M128 52C142 44 146 58 136 62C144 66 138 76 130 72" stroke="#F08AB4" stroke-width="5" stroke-linecap="round" fill="none"/>
-      ${ev.left < 0 ? '<path d="M90 28L82 46L94 54L84 74" stroke="#7A1F44" stroke-width="3.500" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' : ''}
-    </svg>
+  const ghosts = Array.from({ length: n }, (_, i) => ghostSVG(`g${i % 3}`)).join('') + (dropped && n < 6 ? ghostSVG('poof') : '');
+  const steps = Array.from({ length: 24 }, (_, i) => [6, 11, 4, 9, 13, 5, 10, 3][i % 8]);
+  const wave = `<svg class="crt-wave" viewBox="0 0 96 40" preserveAspectRatio="none" shape-rendering="crispEdges" aria-hidden="true" style="height:${Math.round(12 + ratio * 48)}px"><path fill="currentColor" d="M0 40V${40 - steps[0]}${steps.map((h, i) => `H${(i + 1) * 4}V${40 - steps[(i + 1) % 24]}`).join('')}V40Z"/></svg>`;
+  return `<button class="crt ${ev.left < 0 ? 'over' : ''} ${dropped ? 'blip' : ''}" data-act="crt" aria-label="今天还剩 ${ev.left} 元，已花 ${ev.d.extra} 元，共 ${ev.daily} 元">
+    <span class="crt-in">
+      <span class="crt-scr">
+        <span class="crt-ttl">${ev.left < 0 ? 'OVER' : 'LEFT TODAY'}</span>
+        <span class="crt-money">${money(ev.left)}</span>
+        <span class="crt-sub"><i>▶</i> 已花 ¥${ev.d.extra} / ¥${ev.daily}</span>
+        <span class="crt-ghosts">${ghosts}</span>
+        ${wave}
+        <span class="crt-glare"></span>
+      </span>
+    </span>
+    <span class="crt-base"><i class="slot"></i><i class="slot w"></i><i class="vents"></i><i class="kb o"></i><i class="kb"></i></span>
   </button>`;
 }
 function weekInfo() {
@@ -1275,9 +1306,7 @@ function homeHTML() {
     </div>
     <div class="cap orange hero ${ev.left < 0 ? 'over' : ''}"><div class="top">
       <div class="row"><span style="font-weight:900;font-size:14px;display:flex;align-items:center;gap:8px">${ev.left < 0 ? '今天已超' : '今日还能花'}<span class="streak ${streakDays() ? 'on' : ''}"><svg width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><path d="M6 0c1 3 5 4.500 5 8.500A5 5 0 011 8.500C1 6.500 2.500 5.500 3 4c1 .8 1.200 1.800 1 2.800C5.500 6 6.200 3 6 0z" fill="currentColor"/></svg>连续 ${streakDays()} 天</span></span><span class="px" style="font-size:13px">${S.debt ? `¥${dailyBudget()} − 透支 ¥${Math.min(S.debt, dailyBudget())}` : `每天 ¥${ev.daily}`}</span></div>
-      <span class="money">${money(ev.left)}</span>
-      ${piggyHTML(ev)}
-      <div class="spent" aria-label="今天已花 ${ev.d.extra} 元，共 ${ev.daily} 元"><div class="spent-bar"><i style="width:${Math.min(100, Math.round(ev.d.extra / Math.max(1, ev.daily) * 100))}%" class="${ev.d.extra / Math.max(1, ev.daily) > 0.8 ? 'hot' : ''}"></i></div><span class="px">已花 ¥${ev.d.extra} / ¥${ev.daily}</span></div>
+      ${crtHTML(ev)}
       <div class="row"><span style="font-weight:900;font-size:15px">今晚预计 ${ev.score} 分</span><span class="px" style="font-size:13px">${ev.base} × ${ev.mult}</span></div>
     </div></div>
     ${S.held.length ? holdHTML(ev) : `<button class="rulebar" data-act="draw"><div class="rtext" style="grid-column:1/-1"><small>本周的牌</small><b>还没抽</b><span>点这里抽 5 张，留 3 张</span></div></button>`}
@@ -2540,7 +2569,7 @@ app.addEventListener('click', e => {
   if (act === 'to-top') { app.querySelector('.screen').scrollTo({ top: 0, behavior: 'smooth' }); return; }
   if (act === 'coach-next') { S.coach += 1; clearCoach(); showCoach(); return; }
   if (act === 'coach-skip') { S.coach = COACH.length; clearCoach(); return; }
-  if (act === 'pig') { const pg = t.closest('.pig'); pg.classList.remove('wob'); void pg.offsetWidth; pg.classList.add('wob'); return; }
+  if (act === 'crt') { const c = t.closest('.crt'); c.classList.remove('blip'); void c.offsetWidth; c.classList.add('blip'); return; }
   if (act === 'week') { renderWeekSheet(); return; }
   if (act === 'goflow') { S.view = 'bill'; S.billTab = 'flow'; renderTable(); return; }
   if (t.dataset.tab) { switchTab(t.dataset.tab); return; }
