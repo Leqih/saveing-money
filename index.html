@@ -846,7 +846,7 @@ button.hcard:active > div { transform: translateY(2px); }
 /* home: let the hero and the rule cards take the room that is left */
 .screen:has(> .head) { gap: 26px; }
 .screen:has(> .head) .hero > .top { min-height: 240px; }
-.screen:has(> .head) .hero .money { font-size: 96px; }
+.screen:has(> .head) .hero .money { font-size: 84px; }
 .screen:has(> .head) .hold .multc { width: 84px; height: 84px; }
 .screen:has(> .head) .hold .multc b { font-size: 27px; }
 
@@ -857,6 +857,23 @@ button.hcard:active > div { transform: translateY(2px); }
 .spent-bar i { display: block; height: 100%; min-width: 4px; border-radius: 6px; background: #111; transition: width 0.6s cubic-bezier(.3,1.3,.5,1); }
 .spent-bar i.hot { background: #8A0F0F; }
 .spent .px { font-size: 12px; white-space: nowrap; }
+
+/* piggy bank in the spend card */
+.hero > .top { overflow: hidden; }
+.pig { position: absolute; right: 64px; top: 44px; width: 120px; height: 112px; padding: 0; border: 0; background: none; z-index: 2; }
+.pig-body { position: absolute; right: 0; bottom: 0; width: 120px; height: auto; transform-origin: 50% 90%; animation: pigIdle 3.6s ease-in-out infinite; }
+@keyframes pigIdle { 0%, 100% { transform: none; } 50% { transform: translateY(-3px) rotate(-1.2deg); } }
+.pig.wob .pig-body { animation: pigWob 0.7s cubic-bezier(.3,1.6,.5,1); }
+@keyframes pigWob { 0% { transform: scale(1.1, 0.88); } 30% { transform: scale(0.94, 1.08) rotate(-6deg); } 60% { transform: scale(1.03, 0.98) rotate(4deg); } 100% { transform: none; } }
+.pig.cracked .pig-body { filter: saturate(0.6); animation: pigShake 0.5s ease 2; }
+@keyframes pigShake { 25% { transform: translateX(-4px) rotate(-3deg); } 75% { transform: translateX(4px) rotate(3deg); } }
+.pig-coins { position: absolute; left: 118px; bottom: 6px; width: 50px; height: 120px; display: flex; flex-direction: column-reverse; align-items: center; pointer-events: none; }
+.pc { display: block; width: 44px; height: 12px; margin-top: -3px; border-radius: 50%; background: radial-gradient(ellipse at 40% 35%, #FFF3A0, #FFC81E 60%, #D9961A); box-shadow: 0 2px 0 #B87812, inset 0 0 0 1.5px rgba(255, 255, 255, 0.5); transform: translateX(var(--w, 0)); animation: coinIn 0.5s cubic-bezier(.3,1.7,.5,1) both calc(var(--i, 0) * 60ms); }
+@keyframes coinIn { from { transform: translateY(-40px) scale(0.6); opacity: 0; } }
+.pc.fly { position: absolute; left: 44px; top: 0; animation: coinSpit 0.9s cubic-bezier(.4,0,.6,1) both; z-index: 3; }
+@keyframes coinSpit { 0% { transform: translate(0, 24px) scale(0.5); opacity: 0; } 20% { opacity: 1; transform: translate(0, -18px) scale(1); } 60% { transform: translate(60px, -4px) rotate(80deg); } 100% { transform: translate(130px, 110px) rotate(200deg); opacity: 0; } }
+.screen:has(> .head) .hero.over .money { font-size: 62px; }
+.screen:has(> .head) .hero .money { white-space: nowrap; }
 </style>
 
 <div class="device">
@@ -1184,6 +1201,30 @@ function holdHTML(ev) {
 }
 // consecutive finished days where every held card held
 function streakDays() { let n = 0; for (let i = S.history.length - 1; i >= 0; i--) { const h = S.history[i]; if (h.unlogged || !h.cards.length || !h.cards.every(c => c.state === 'on')) break; n++; } return n; }
+// the spend card's piggy bank: coins beside it are what is left today (up to 8); one drops out when money goes
+let lastHeroLeft = null;
+function piggyHTML(ev) {
+  const n = ev.left <= 0 ? 0 : Math.max(1, Math.min(8, Math.round(ev.left / Math.max(1, ev.daily) * 8)));
+  const dropped = lastHeroLeft != null && ev.left < lastHeroLeft; lastHeroLeft = ev.left;
+  const coins = Array.from({ length: n }, (_, i) => `<i class="pc" style="--i:${i};--w:${[-3, 2, -1, 3, -2, 1, -3, 2][i]}px"></i>`).join('');
+  return `<button class="pig ${ev.left < 0 ? 'cracked' : ''} ${dropped ? 'spit' : ''}" data-act="pig" aria-label="存钱罐，今天还剩 ${ev.left} 元，点一下晃一晃">
+    <span class="pig-coins" aria-hidden="true">${coins}</span>
+    ${dropped ? '<i class="pc fly" aria-hidden="true"></i>' : ''}
+    <svg class="pig-body" width="150" height="116" viewBox="0 0 150 116" aria-hidden="true">
+      <ellipse cx="75" cy="112" rx="52" ry="4" fill="rgba(120,0,0,0.25)"/>
+      <rect x="38" y="84" width="20" height="26" rx="9" fill="#F08AB4"/><rect x="94" y="84" width="20" height="26" rx="9" fill="#F08AB4"/>
+      <path d="M24 56C20 26 50 10 82 12C112 14 132 32 130 62C128 88 106 98 78 98C48 98 26 84 24 56Z" fill="#FFB3D1"/>
+      <path d="M32 44C44 24 76 18 98 22" stroke="#FFE3EF" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <path d="M44 24L38 4L62 16Z" fill="#F08AB4"/><path d="M108 22L122 6L126 30Z" fill="#F08AB4"/>
+      <ellipse cx="22" cy="62" rx="14" ry="17" fill="#F08AB4"/><ellipse cx="18" cy="62" rx="3.200" ry="5.500" fill="#B8456F"/><ellipse cx="26" cy="62" rx="3.200" ry="5.500" fill="#B8456F"/>
+      <circle cx="46" cy="46" r="5" fill="#111"/><circle cx="47.500" cy="44.500" r="1.600" fill="#FFF"/>
+      <circle cx="40" cy="64" r="7" fill="#FF8FB8" opacity=".75"/>
+      <rect x="66" y="12" width="34" height="7" rx="3.500" fill="#B8456F"/>
+      <path d="M128 52C142 44 146 58 136 62C144 66 138 76 130 72" stroke="#F08AB4" stroke-width="5" stroke-linecap="round" fill="none"/>
+      ${ev.left < 0 ? '<path d="M90 28L82 46L94 54L84 74" stroke="#7A1F44" stroke-width="3.500" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' : ''}
+    </svg>
+  </button>`;
+}
 function weekInfo() {
   const prior = scorePrior(), target = weekTarget(), need = target - prior, daysLeft = 7 - S.day;
   const hint = need <= 0 ? `已经够目标了！多攒的分让星星更多：1.7 倍拿 ★★，2.6 倍拿 ★★★。`
@@ -1235,6 +1276,7 @@ function homeHTML() {
     <div class="cap orange hero ${ev.left < 0 ? 'over' : ''}"><div class="top">
       <div class="row"><span style="font-weight:900;font-size:14px;display:flex;align-items:center;gap:8px">${ev.left < 0 ? '今天已超' : '今日还能花'}<span class="streak ${streakDays() ? 'on' : ''}"><svg width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><path d="M6 0c1 3 5 4.500 5 8.500A5 5 0 011 8.500C1 6.500 2.500 5.500 3 4c1 .8 1.200 1.800 1 2.800C5.500 6 6.200 3 6 0z" fill="currentColor"/></svg>连续 ${streakDays()} 天</span></span><span class="px" style="font-size:13px">${S.debt ? `¥${dailyBudget()} − 透支 ¥${Math.min(S.debt, dailyBudget())}` : `每天 ¥${ev.daily}`}</span></div>
       <span class="money">${money(ev.left)}</span>
+      ${piggyHTML(ev)}
       <div class="spent" aria-label="今天已花 ${ev.d.extra} 元，共 ${ev.daily} 元"><div class="spent-bar"><i style="width:${Math.min(100, Math.round(ev.d.extra / Math.max(1, ev.daily) * 100))}%" class="${ev.d.extra / Math.max(1, ev.daily) > 0.8 ? 'hot' : ''}"></i></div><span class="px">已花 ¥${ev.d.extra} / ¥${ev.daily}</span></div>
       <div class="row"><span style="font-weight:900;font-size:15px">今晚预计 ${ev.score} 分</span><span class="px" style="font-size:13px">${ev.base} × ${ev.mult}</span></div>
     </div></div>
@@ -2498,6 +2540,7 @@ app.addEventListener('click', e => {
   if (act === 'to-top') { app.querySelector('.screen').scrollTo({ top: 0, behavior: 'smooth' }); return; }
   if (act === 'coach-next') { S.coach += 1; clearCoach(); showCoach(); return; }
   if (act === 'coach-skip') { S.coach = COACH.length; clearCoach(); return; }
+  if (act === 'pig') { const pg = t.closest('.pig'); pg.classList.remove('wob'); void pg.offsetWidth; pg.classList.add('wob'); return; }
   if (act === 'week') { renderWeekSheet(); return; }
   if (act === 'goflow') { S.view = 'bill'; S.billTab = 'flow'; renderTable(); return; }
   if (t.dataset.tab) { switchTab(t.dataset.tab); return; }
