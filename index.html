@@ -8,10 +8,10 @@
 <style>
 /* layout: one phone-sized app column on an orange grid desk; sheets slide over the table */
 :root {
-  --desk: #FF5A1F; --desk-line: rgba(0,0,0,0.14);
+  --desk: #FF4444; --desk-line: rgba(0,0,0,0.14);
   --paper: #FFFFFF; --ink: #111111; --sub: #5E5B54; --mute: #8A8A92; --rule: #E2E2E8;
   --cap: #EDEDF1; --cap-edge: #CFCFD6;
-  --orange: #FF6A1F; --orange-edge: #D94F0C; --lime: #E4FF1A; --lime-edge: #B8D000;
+  --orange: #FF4B4B; --orange-edge: #D12E2E; --lime: #E4FF1A; --lime-edge: #B8D000;
   --pink: #FF4D6A; --purple: #A55BFF; --blue: #2E8BFF; --gold: #FFD000; --cobalt: #1F6BFF; --red: #FF3B1F; --yellow: #FFD54A; --lav: #DCD8FF;
   --receipt: #F5F3EC;
   --f-display: 'Archivo Black', 'Arial Black', sans-serif;
@@ -70,7 +70,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--cobalt); ou
 .cap { border: 0; border-radius: 16px; padding: 4px 4px 10px; background: var(--cap-edge); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(0,0,0,0.18), 0 14px 18px -8px rgba(20,20,30,0.32); transition: transform 0.08s ease; display: block; width: 100%; text-align: left; }
 .cap > .top { position: relative; height: 100%; border-radius: 12px; background: linear-gradient(180deg, #FAFAFC 0%, var(--cap) 100%); box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.75), inset 0 -3px 5px rgba(0,0,0,0.08); padding: 10px 14px; }
 button.cap:active { transform: translateY(3px); }
-.cap.orange { background: var(--orange-edge); } .cap.orange > .top { background: linear-gradient(180deg, #FF8A4A 0%, var(--orange) 100%); }
+.cap.orange { background: var(--orange-edge); } .cap.orange > .top { background: linear-gradient(180deg, #FF7A7A 0%, var(--orange) 100%); }
 .cap.lime { background: var(--lime-edge); } .cap.lime > .top { background: linear-gradient(180deg, #F2FF7A 0%, var(--lime) 100%); }
 .cap.dark { background: #47474B; } .cap.dark > .top { background: linear-gradient(180deg, #6A6A70 0%, #5B5B60 100%); color: #F4F4F4; }
 .cap[disabled] { opacity: 0.45; cursor: not-allowed; }
@@ -171,7 +171,7 @@ button.chip:active { transform: translateY(2px); }
 .impact .r { display: flex; justify-content: space-between; gap: 10px; }
 .impact .r span:first-child { color: rgba(255,255,255,0.7); white-space: nowrap; }
 .impact .r span:last-child { text-align: right; }
-.impact .hot { color: #FF8A4A; }
+.impact .hot { color: #FF7A7A; }
 .impact .good { color: var(--lime); }
 .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .pad .cap { height: 54px; padding: 3px 3px 8px; }
@@ -288,7 +288,7 @@ button.chip:active { transform: translateY(2px); }
 
 
 /* ---- ported from the canvas screens (ToyTable nav, ToyFeed, ToyBill, ToyCats, ToyDeck, ToySetup, ToyPick) ---- */
-.cv-nav { position: absolute; left: 16px; right: 16px; bottom: 20px; z-index: 5; height: 76px; border-radius: 38px; padding: 8px; display: flex; gap: 8px; align-items: stretch; background: #E4FF1A; }
+.cv-nav { position: absolute; left: 16px; right: 16px; bottom: 20px; z-index: 5; height: 76px; border-radius: 38px; padding: 8px; display: flex; gap: 8px; align-items: stretch; background: #FF4444; }
 /* puffy candy tiles: pastel fill, a soft white glow inside the edge, a different squircle each */
 .cv-nav > button[data-tab] { position: relative; width: 60px; flex-shrink: 0; border: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; color: #111; font-size: 10px; font-weight: 900; line-height: 1; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.35), inset 0 0 12px 4px rgba(255,255,255,0.85); transition: transform 0.35s cubic-bezier(.3,1.7,.5,1), filter 0.2s; }
 .cv-nav > button[data-tab="home"] { border-radius: 24px 24px 8px 24px; }
@@ -1061,9 +1061,9 @@ function homeHTML() {
 /* ---------- tab pages, ported from the canvas screens ---------- */
 const CHECK = 'background-color:#E4E4EA;background-image:linear-gradient(45deg,#D4D4DB 25%,transparent 25%,transparent 75%,#D4D4DB 75%),linear-gradient(45deg,#D4D4DB 25%,transparent 25%,transparent 75%,#D4D4DB 75%);background-size:12px 12px;background-position:0 0,6px 6px';
 const NAV = [
-  { id: 'home', name: '首页', bg: 'radial-gradient(circle at 50% 30%,#EAF3FF 0%,#9CCBFF 100%)', icon: '<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path fill="#2E8BFF" d="M13 3.5l9.5 7.8V22a1.5 1.5 0 01-1.5 1.5h-5.5v-6.5h-5v6.5H5A1.5 1.5 0 013.5 22V11.3z"/><circle cx="13" cy="11" r="2" fill="#EAF3FF"/></svg>' },
-  { id: 'bill', name: '账单', bg: 'radial-gradient(circle at 50% 30%,#FFE9EE 0%,#FFA9BC 100%)', icon: '<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path fill="#FF4D6A" d="M6 2.5h14v21l-3.5-2.4-3.5 2.4-3.5-2.4L6 23.5z"/><path d="M9.5 8.5h7M9.5 12.5h7M9.5 16.5h4" stroke="#FFE9EE" stroke-width="2" stroke-linecap="round"/></svg>' },
-  { id: 'deck', name: '牌库', bg: 'radial-gradient(circle at 50% 30%,#F1E6FF 0%,#C4A2FF 100%)', icon: '<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="3" y="6" width="13" height="17" rx="3" fill="#B98CFF" transform="rotate(-12 9.5 14.5)"/><rect x="9" y="3.5" width="13" height="17" rx="3" fill="#8A3DFF" transform="rotate(8 15.5 12)"/><circle cx="15.5" cy="12" r="2.5" fill="#F1E6FF"/></svg>' }
+  { id: 'home', name: '首页', bg: 'radial-gradient(circle at 50% 30%,#FFF0F5 0%,#FFB3CC 100%)', icon: '<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path fill="#FF4B7A" d="M13 3.5l9.5 7.8V22a1.5 1.5 0 01-1.5 1.5h-5.5v-6.5h-5v6.5H5A1.5 1.5 0 013.5 22V11.3z"/><circle cx="13" cy="11" r="2" fill="#FFF0F5"/></svg>' },
+  { id: 'bill', name: '账单', bg: 'radial-gradient(circle at 50% 30%,#E6F3FF 0%,#7FC0FF 100%)', icon: '<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path fill="#2E8BFF" d="M6 2.5h14v21l-3.5-2.4-3.5 2.4-3.5-2.4L6 23.5z"/><path d="M9.5 8.5h7M9.5 12.5h7M9.5 16.5h4" stroke="#E6F3FF" stroke-width="2" stroke-linecap="round"/></svg>' },
+  { id: 'deck', name: '牌库', bg: 'radial-gradient(circle at 50% 30%,#FBFFC2 0%,#E4FF1A 100%)', icon: '<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="3" y="6" width="13" height="17" rx="3" fill="#FF9F2E" transform="rotate(-12 9.5 14.5)"/><rect x="9" y="3.5" width="13" height="17" rx="3" fill="#FF4B4B" transform="rotate(8 15.5 12)"/><circle cx="15.5" cy="12" r="2.5" fill="#FBFFC2"/></svg>' }
 ];
 function navHTML() {
   const on = S.view === 'flow' ? 'bill' : S.view;
@@ -1180,7 +1180,7 @@ function billHTML() {
   if (S.billTab === 'cat') return catsHTML(recs, spent, tabs);
   if (S.billTab === 'review') return `<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-weight:900;font-size:26px">${m + 1} 月回顾</h1><span class="px" style="font-size:12px;color:#6A6A70">到今天为止</span></div>${tabs}${reviewHTML(y, m)}`;
   const avg = dailyBudget();
-  const tone = h => h > 1 ? ['#D43AB4', 'linear-gradient(180deg,#FF7BE3 0%,#FF52D9 100%)'] : h >= 0.8 ? ['#D94F0C', 'linear-gradient(180deg,#FF8A4A 0%,#FF6A1F 100%)'] : h >= 0.4 ? ['#CFCFD6', 'linear-gradient(180deg,#FAFAFC 0%,#EDEDF1 100%)'] : ['#86A1B0', 'linear-gradient(180deg,#C4D8E3 0%,#A9C3D1 100%)'];
+  const tone = h => h > 1 ? ['#D43AB4', 'linear-gradient(180deg,#FF7BE3 0%,#FF52D9 100%)'] : h >= 0.8 ? ['#D12E2E', 'linear-gradient(180deg,#FF7A7A 0%,#FF4B4B 100%)'] : h >= 0.4 ? ['#CFCFD6', 'linear-gradient(180deg,#FAFAFC 0%,#EDEDF1 100%)'] : ['#86A1B0', 'linear-gradient(180deg,#C4D8E3 0%,#A9C3D1 100%)'];
   const cells = [];
   for (let i = 0, lead = (new Date(y, m, 1).getDay() + 6) % 7; i < lead; i++) cells.push('<span class="cv-day blank"></span>');
   for (let d = 1; d <= n; d++) {
@@ -1191,13 +1191,13 @@ function billHTML() {
     cells.push(rec ? `<button class="cv-day" style="background:${outer}" data-cal="${rec.h.week}-${rec.h.day}" aria-label="${m + 1} 月 ${d} 日 花了 ${v} 元">${inner}</button>`
       : `<span class="cv-day now" style="background:${outer}" aria-label="今天，目前花了 ${v} 元">${inner}</span>`);
   }
-  const top3 = monthByCat(recs).slice(0, 3), max = top3.length ? top3[0][1] : 1, stripes = ['#FF6A1F', '#FF52D9', '#A9C3D1'];
+  const top3 = monthByCat(recs).slice(0, 3), max = top3.length ? top3[0][1] : 1, stripes = ['#FF4B4B', '#FF52D9', '#A9C3D1'];
   const capk = (outer, face, label, value) => `<div class="cap" style="height:76px;background:${outer}"><div class="top" style="background:${face};padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between"><span style="font-size:11px;font-weight:900">${label}</span><span class="px" style="font-size:19px;font-weight:600">${value}</span></div></div>`;
   return `<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-weight:900;font-size:26px">${m + 1} 月账单</h1></div>
     ${tabs}
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
       ${capk('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', '可自由支配', `¥${free.toLocaleString()}`)}
-      ${capk('#D94F0C', 'linear-gradient(180deg,#FF8A4A 0%,#FF6A1F 100%)', '已花', `¥${spent.toLocaleString()}`)}
+      ${capk('#D12E2E', 'linear-gradient(180deg,#FF7A7A 0%,#FF4B4B 100%)', '已花', `¥${spent.toLocaleString()}`)}
       ${capk('#B8D000', 'linear-gradient(180deg,#F2FF7A 0%,#E4FF1A 100%)', `还剩 ${daysLeft} 天`, money(free - spent))}
     </div>
     <div style="display:flex;flex-direction:column;gap:6px">
@@ -1206,7 +1206,7 @@ function billHTML() {
       <div class="px" style="display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:#4A4A50;margin-top:4px">
         <span style="display:flex;align-items:center;gap:4px"><i style="width:10px;height:10px;border-radius:3px;background:#A9C3D1"></i>很省</span>
         <span style="display:flex;align-items:center;gap:4px"><i style="width:10px;height:10px;border-radius:3px;background:#E4E4EA;border:1px solid #CFCFD6"></i>正常</span>
-        <span style="display:flex;align-items:center;gap:4px"><i style="width:10px;height:10px;border-radius:3px;background:#FF6A1F"></i>偏多</span>
+        <span style="display:flex;align-items:center;gap:4px"><i style="width:10px;height:10px;border-radius:3px;background:#FF4B4B"></i>偏多</span>
         <span style="display:flex;align-items:center;gap:4px"><i style="width:10px;height:10px;border-radius:3px;background:#FF52D9"></i>超出日预算</span>
       </div>
     </div>
@@ -1222,7 +1222,7 @@ function catsHTML(recs, spent, tabs) {
   const rest = rows.slice(3).reduce((a, r) => a + r[1], 0);
   if (rest) bands.push(['rest', rest]);
   const STY = [
-    { h: 200, bg: '#FF6A1F', sh: '#C2490A', pct: 120, pc: '#111', fs: 26 }, { h: 124, bg: '#FF8CC6', sh: '#D25D9B', pct: 80, pc: '#FFF', fs: 20 },
+    { h: 200, bg: '#FF4B4B', sh: '#B82525', pct: 120, pc: '#111', fs: 26 }, { h: 124, bg: '#FF8CC6', sh: '#D25D9B', pct: 80, pc: '#FFF', fs: 20 },
     { h: 116, bg: '#DCD8FF', sh: '#B7B0F0', pct: 72, pc: '#5B4FC8', fs: 20 }, { h: 100, bg: '#EDEDF1', sh: '#CFCFD6', pct: 60, pc: '#B5B5BC', fs: 18 }
   ];
   const html = bands.map(([id, v], i) => {
@@ -1908,7 +1908,7 @@ function reviewHTML(y, m) {
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
       ${cap('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', '日均额度外', `¥${Math.round(st.spent / st.days)}`)}
       ${cap('#B8D000', 'linear-gradient(180deg,#F2FF7A 0%,#E4FF1A 100%)', '零花费的天', `${st.zero} 天`)}
-      ${cap('#D94F0C', 'linear-gradient(180deg,#FF8A4A 0%,#FF6A1F 100%)', '三张全守住', `${st.allHeld} 天`)}
+      ${cap('#D12E2E', 'linear-gradient(180deg,#FF7A7A 0%,#FF4B4B 100%)', '三张全守住', `${st.allHeld} 天`)}
     </div>
     <div class="impact">
       <div class="r"><span>本月分数</span><span>${st.score} 分</span></div>
