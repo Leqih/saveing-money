@@ -474,19 +474,19 @@ button.hcard:active > div { transform: translateY(2px); }
 /* the stack: positions come from layoutStack(), CSS only animates between them */
 .stack { position: absolute; left: 0; right: 0; top: 0; height: 456px; overflow: visible; touch-action: none; cursor: grab; }
 .stack.dragging { cursor: grabbing; }
-.sc2 { position: absolute; left: 50%; top: 8px; width: 330px; height: 440px; margin-left: -165px; border: 0; padding: 0; background: none; transition: transform 0.38s cubic-bezier(.25,1.3,.5,1), opacity 0.2s; }
+.sc2 { position: absolute; left: 50%; top: 8px; width: 312px; height: 442px; margin-left: -156px; border: 0; padding: 0; background: none; transition: transform 0.38s cubic-bezier(.25,1.3,.5,1), opacity 0.2s; }
 .stack.dragging .sc2 { transition: none; }
-.sc2-face { width: 100%; height: 100%; pointer-events: none; }
-.sc2-edge { position: absolute; inset: 0; border-radius: 30px; pointer-events: none; opacity: 1; transition: opacity 0.3s; box-shadow: inset 0 -10px 0 rgba(0,0,0,0.12); }
+.sc2-face { width: 240px; height: 340px; transform: scale(1.3); transform-origin: 0 0; pointer-events: none; }
+.sc2-edge { position: absolute; inset: 0; border-radius: 31px; pointer-events: none; opacity: 1; transition: opacity 0.3s; box-shadow: inset 0 -10px 0 rgba(0,0,0,0.12); }
 .sc2.front .sc2-edge { opacity: 0; }
 
 .sc2:not(.front) { pointer-events: none; }
-.sc2.front .dkc { box-shadow: 0 22px 30px -8px rgba(0,0,0,0.55); }
+.sc2.front .sc2-face { filter: drop-shadow(0 20px 22px rgba(0,0,0,0.5)); }
 .sc2:not(.front) .carry-tag, .sc2:not(.front) .sc2-rec { display: none; }
 .sc2.front { animation: hover 3s ease-in-out infinite; }
 @keyframes hover { 50% { margin-top: -5px; } }
-.sc2.front:active .dkc { box-shadow: 0 8px 12px -4px rgba(0,0,0,0.5); }
-.sc2.flying { transition: transform 0.46s cubic-bezier(.55,0,.25,1), opacity 0.46s ease-in; animation: none; z-index: 90 !important; }
+.sc2.front:active .sc2-face { filter: drop-shadow(0 6px 8px rgba(0,0,0,0.5)); }
+.sc2.flying { transition: none; animation: none; z-index: 90 !important; }
 
 .sc2-pickhint { position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%); z-index: 3; padding: 3px 14px; border-radius: 14px; background: #111; color: var(--lime); font-size: 12px; font-weight: 900; white-space: nowrap; pointer-events: none; animation: pulse 1.4s ease-in-out infinite; }
 @keyframes pulse { 50% { transform: translateX(-50%) scale(1.07); } }
@@ -510,6 +510,10 @@ button.hcard:active > div { transform: translateY(2px); }
 .tray-hint { position: absolute; left: 0; right: 0; top: 7px; margin: 0; text-align: center; font-size: 12px; font-weight: 900; color: rgba(255,255,255,0.75); letter-spacing: 1px; }
 .drawdark .dsum { color: #A9A9B2; } .drawdark .dsum b { color: #FFF; }
 .drawdark .dslot { border-color: #FFF; } .drawdark .dslot.empty { border-color: #5A5A62; background: #2E2E33; }
+.pickline { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: -6px; }
+.pickclash { font-size: 12px; color: rgba(255,255,255,0.65); }
+.drawfoot.pulse { animation: trayPulse 0.55s cubic-bezier(.3,1.8,.5,1); }
+@keyframes trayPulse { 30% { transform: translateY(7px) scale(1.02, 0.97); } 100% { transform: none; } }
 .dcount { font-family: var(--f-display); font-size: 20px; color: #FFF; margin-right: 10px; display: inline-block; }
 .dcount.bounce { animation: cbounce 0.6s cubic-bezier(.3,1.9,.5,1); }
 @keyframes cbounce { 0% { transform: scale(1); } 35% { transform: scale(1.7) translateY(-4px); } 100% { transform: scale(1); } }
@@ -1328,7 +1332,7 @@ function renderDraw() {
     const tag = no === S.carry && !S.firstDraw ? '续留' : clashIn(no, sel) ? '重叠' : '';
     return `<button class="sc2" data-pick="${no}" data-i="${i}" aria-label="${CARDS[no].name} +${CARDS[no].plus}${i === ci ? '，点一下留下，或往下拖' : '，点一下翻到前面'}"
       style="--d:${i * 70}ms;--bx:${Math.round(Math.random() * 220 - 110)}px;--by:${Math.round(-40 - Math.random() * 60)}px;--br:${Math.round(Math.random() * 70 - 35)}deg">
-      <div class="sc2-face">${faceOf(no)}</div><i class="sc2-edge" style="background:${coreOf(no)}"></i>${tag ? `<span class="carry-tag">${tag}</span>` : ''}${rec.includes(no) ? '<span class="sticker sc2-rec">推荐</span>' : ''}</button>`;
+      <div class="sc2-face">${cardHTML(CARDS[no])}</div><i class="sc2-edge" style="background:${coreOf(no)}"></i>${tag ? `<span class="carry-tag">${tag}</span>` : ''}${rec.includes(no) ? '<span class="sticker sc2-rec">推荐</span>' : ''}</button>`;
   }).join('');
   const dots = inHand.map((no, i) => `<button class="thumb ${i === ci ? 'on' : ''}" data-goto="${i}" style="background:${coreOf(no)}" aria-label="看${CARDS[no].name}">${artIcon(no, 20)}</button>`).join('');
   // the week's cards come in a crimped foil bag: it tilts toward your finger and tears open when you drag along the top
@@ -1345,7 +1349,7 @@ function renderDraw() {
     <span class="pk-tear sticker" aria-hidden="true">按住顶部 → 往右拖开，或点一下</span>`;
   const stage = draft.opened ? `<div class="stack">${cards}</div>
     ${burst ? `<span class="burst" aria-hidden="true">${burst}</span>` : ''}` : pack;
-  const info = '';
+  const info = focus ? (st => `<div class="pickline"><span class="pill ${st[0]}">${st[1]}</span>${clashNames(focus).length ? `<span class="pickclash">不能和${clashNames(focus).join('、')}一起留</span>` : ''}</div>`)(pillOf(focus)) : '';
   // the footer keeps the picks, what they add up to and the button on screen however far the cards scroll
   const multSel = S.baseMult + sel.reduce((a, no) => a + CARDS[no].plus, 0);
   const sum = sel.length === need && hasData ? (sim => `约 <b>${sim.total}</b> 分 / 目标 ${weekTarget()}`)(simulate(sel, S.lastWeek, S.weekStart)) : sel.length ? `全守住 <b>×${multSel}</b>` : (draft.opened ? `<button class="dsum-rec" data-act="use-rec">用推荐 ${rec.length} 张 · ×${recMult}</button>` : '撕开卡包看看');
@@ -1355,19 +1359,20 @@ function renderDraw() {
     <p class="draw-lead">留下的 ${need} 张这周同时生效，守住就加倍率${S.weekStart > 0 ? `<span class="chipk" style="background:var(--lime)">这周只剩 ${weekDays()} 天</span>` : ''}</p>
     <div class="hand ${draft.opened ? 'open' : ''} ${draft.dealIn ? 'dealing' : ''}"><div class="hand-in">${stage}</div></div>
     ${info}
-    <div class="drawfoot">
+    <div class="drawfoot ${draft.landed ? 'pulse' : ''}">
       <p class="tray-hint">${draft.opened ? '↓ 把牌往下滑，放进牌组' : '先撕开卡包'}</p>
       <div class="dsum"><div style="display:flex;align-items:center"><b class="dcount ${draft.landed ? 'bounce' : ''}">${sel.length}/${need}</b><div class="dslots">${slots}</div></div><span>${sum}</span></div>
       <button class="go" data-act="choose" ${sel.length === need ? '' : 'disabled'}>${sel.length === need ? `就留这 ${need} 张` : combosOf(draft.hand, need).some(c => sel.every(x => c.includes(x))) ? `再选 ${need - sel.length} 张` : `有重叠，凑不满 ${need} 张，换掉一张`}</button>
     </div>`);
   const st = lastSheet().querySelector('.stack'); if (st) layoutStack(st, ci);
   // the whole sheet is dark and takes on the colour of the card in front
-  { const sh = lastSheet(); sh.classList.add('drawdark'); sh.style.setProperty('--tint', `color-mix(in srgb, ${focus ? coreOf(focus) : '#E4FF1A'} 26%, #111)`); }
+  { const sh = lastSheet(); sh.classList.add('drawdark'); const col = `color-mix(in srgb, ${focus ? coreOf(focus) : '#E4FF1A'} 26%, #111)`;
+    sh.style.setProperty('--tint', draft.tint || col); void sh.offsetWidth; requestAnimationFrame(() => sh.style.setProperty('--tint', col)); draft.tint = col; }
   // one-shot animations only play on the render that triggered them
   draft.dealIn = false; draft.landed = null;
 }
 // each card's place in the pile depends on how far behind the front card it is; only the top four show
-const PILE = [[0, 0, 0, 1], [26, 0, 0, 0.93], [-26, 0, 0, 0.93], [0, 0, 0, 0.9]];
+const PILE = [[0, 0, 0, 1], [25, 0, 0, 0.93], [-25, 0, 0, 0.93], [0, 0, 0, 0.9]];
 function layoutStack(stack, at) {
   const els = [...stack.querySelectorAll('.sc2')], n = els.length;
   els.forEach(el => {
@@ -1375,6 +1380,7 @@ function layoutStack(stack, at) {
     el.style.transform = `translate(${x}px, ${y}px) rotate(${r}deg) scale(${sc})`;
     el.style.zIndex = String(50 - k);
     el.style.opacity = k > 2 ? '0' : '1';
+    el.dataset.k = k;
     el.classList.toggle('front', k === 0);
   });
 }
@@ -1384,8 +1390,22 @@ const BAG_STRIP = `M0 8${Array.from({ length: 21 }, (_, i) => `L${i * 10} ${i % 
 // the sealed bag leans toward the pointer and its eyes follow; letting go springs it back.
 // pressing on it and dragging right peels the top strip; let go past halfway and it tears, otherwise it springs back
 let tear = null, swipe = null;
-// keep the front card: it shrinks and flies into the next empty slot, then the sheet redraws with the slot popping
-function keepFront(top, card, base) {
+// a small damped spring: the card eases toward its target and overshoots a little, like the reference
+function spring(el, from, to, done, k = 190, c = 17) {
+  const st = { ...from }, v = { x: 0, y: 0, s: 0 }; let last = performance.now(); const t0 = last, fin = () => { el.style.transform = `translate(${to.x}px, ${to.y}px) scale(${to.s})`; done && done(); };
+  el.style.transition = 'none';
+  const step = t => {
+    const dt = Math.min(0.032, (t - last) / 1000); last = t;
+    for (const key of ['x', 'y', 's']) { v[key] += (-k * (st[key] - to[key]) - c * v[key]) * dt; st[key] += v[key] * dt; }
+    st.s = Math.max(0.05, st.s);
+    el.style.transform = `translate(${st.x.toFixed(1)}px, ${st.y.toFixed(1)}px) scale(${st.s.toFixed(3)})`;
+    if (t - t0 > 800 || (Math.abs(v.x) + Math.abs(v.y) < 3 && Math.abs(st.x - to.x) + Math.abs(st.y - to.y) < 1.5 && Math.abs(st.s - to.s) < 0.01)) return fin();
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+// keep the front card: it shrinks into the next empty slot on a spring, then the tray and counter bounce
+function keepFront(top, card, base, cur) {
   const no = card.dataset.pick, other = clashIn(no, draft.sel);
   if (other) { toast(`「${CARDS[no].name}」和「${CARDS[other].name}」重叠，不能一起留`); return false; }
   if (draft.sel.length >= keepN(draft.hand)) { toast(`最多留 ${HOLDN()} 张，先点一下牌槽里的放回来`); return false; }
@@ -1394,9 +1414,10 @@ function keepFront(top, card, base) {
   if (!slot || reducedMotion()) { replaceSheet(top, renderDraw); return true; }
   const a = base || card.getBoundingClientRect(), b = slot.getBoundingClientRect();
   card.classList.add('flying');
-  card.style.transform = `translate(${(b.left + b.width / 2 - a.left - a.width / 2).toFixed(0)}px, ${(b.top + b.height / 2 - a.top - a.height / 2).toFixed(0)}px) scale(0.12)`;
-  card.style.opacity = '0.3';
-  setTimeout(() => replaceSheet(top, renderDraw), 440);
+  // the next card rises into the front spot as this one drops
+  const nx = card.parentElement.querySelector('[data-k="1"]');
+  if (nx) { nx.style.transform = 'translate(0px, 0px) rotate(0deg) scale(1)'; const eg = nx.querySelector('.sc2-edge'); if (eg) eg.style.opacity = '0'; }
+  spring(card, cur || { x: 0, y: 0, s: 1 }, { x: Math.round(b.left + b.width / 2 - a.left - a.width / 2), y: Math.round(b.top + b.height / 2 - a.top - a.height / 2), s: 0.12 }, () => replaceSheet(top, renderDraw), 230, 21);
   return true;
 }
 const TEAR_PX = 150, SWIPE_PX = 110;
@@ -1426,7 +1447,14 @@ app.addEventListener('pointermove', e => {
     if ((Math.abs(dx) > 6 || Math.abs(dyy) > 6) && !swipe.moved) { swipe.moved = true; swipe.mode = Math.abs(dyy) > Math.abs(dx) && dyy > 0 ? 'down' : 'side'; swipe.st.classList.add('dragging'); capture(swipe.st, swipe.id); }
     if (!swipe.moved || !swipe.front) return;
     // pulling straight down drops the card toward the slots
-    if (swipe.mode === 'down') { swipe.dy = Math.max(0, dyy); swipe.front.style.transform = `translate(${(dx * 0.2).toFixed(0)}px, ${swipe.dy.toFixed(0)}px) scale(${(1 - swipe.dy / 1400).toFixed(3)})`; return; }
+    if (swipe.mode === 'down') {
+      swipe.dy = Math.max(0, dyy); swipe.dxx = dx * 0.2; swipe.sc = 1 - swipe.dy / 1400;
+      swipe.front.style.transform = `translate(${swipe.dxx.toFixed(0)}px, ${swipe.dy.toFixed(0)}px) scale(${swipe.sc.toFixed(3)})`;
+      // the next card rises to take the front as this one drops
+      const nx = swipe.st.querySelector('[data-k="1"]');
+      if (nx) { const p = Math.min(1, swipe.dy / 220); nx.style.transform = `translate(${(PILE[1][0] * (1 - p)).toFixed(1)}px, 0) scale(${(PILE[1][3] + (1 - PILE[1][3]) * p).toFixed(3)})`; const eg = nx.querySelector('.sc2-edge'); if (eg) eg.style.opacity = String(1 - p); }
+      return;
+    }
     // the front card follows the finger and tilts the way it's being pulled
     swipe.dx = dx;
     swipe.front.style.transform = `translate(${dx.toFixed(0)}px, ${((e.clientY - swipe.y) * 0.25).toFixed(0)}px) rotate(${(dx / 14).toFixed(1)}deg)`;
@@ -1451,7 +1479,14 @@ app.addEventListener('pointermove', e => {
     if (!w.moved) return;
     // the click that follows a swipe shouldn't also count as a tap on a card
     draft.swiped = true; setTimeout(() => { draft.swiped = false; }, 0);
-    if (w.mode === 'down') { if (w.dy < 80 || !keepFront(lastSheet(), w.front, w.rect)) layoutStack(w.st, draft.ci); return; }
+    if (w.mode === 'down') {
+      const cur = { x: w.dxx || 0, y: w.dy, s: w.sc || 1 };
+      if (w.dy >= 80 && keepFront(lastSheet(), w.front, w.rect, cur)) return;
+      // not far enough: the card springs back and the next one settles behind it
+      w.st.querySelectorAll('.sc2-edge').forEach(e => { e.style.opacity = ''; });
+      spring(w.front, cur, { x: 0, y: 0, s: 1 }, () => layoutStack(w.st, draft.ci), 260, 20); layoutStack(w.st, draft.ci); w.front.style.transition = 'none';
+      return;
+    }
     if (Math.abs(w.dx) < SWIPE_PX * 0.6 || w.n < 2) { layoutStack(w.st, draft.ci); return; }
     // past the threshold the card is thrown off that side, then the next one (or the previous, swiping right) comes up
     const dir = Math.sign(w.dx);
