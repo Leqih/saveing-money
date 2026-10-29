@@ -578,7 +578,7 @@ button.hcard:active > div { transform: translateY(2px); }
 /* verdict after saving an entry */
 .fb { position: absolute; inset: 0; z-index: 35; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(17,17,17,0.55); animation: up 0.2s ease; cursor: pointer; }
 .fb-card { width: 100%; border-radius: 28px; background: #FFF; padding: 20px 18px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.35); }
-.fb.bad .fb-card { background: #FFE6EA; }
+.fb.bad .fb-card { background: conic-gradient(#FF4444 25%, #FF9CC8 0 50%, #FF4444 0 75%, #FF9CC8 0) 0 0 / 22px 22px; }
 .fb.good .fb-card { background: #F4FFC2; }
 .fb-cards { display: flex; gap: 10px; justify-content: center; margin-bottom: 4px; }
 .fb-card b { font-size: 22px; font-weight: 900; }
@@ -776,12 +776,26 @@ button.hcard:active > div { transform: translateY(2px); }
 .wkmini .keys { gap: 6px; }
 .wkmini .chip { height: 30px; font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 
-/* the verdict is a hang tag: a rope from the top of the screen, a punched eyelet, cut corners, and it swings in */
+/* the verdict is a lanyard badge: a strap from the top of the screen with a clip, a checkerboard frame, a stat sticker pair */
 .fb-tag { position: relative; width: 100%; transform-origin: 50% -190px; animation: tagSwing 1.4s cubic-bezier(.3,.6,.4,1) both; }
-.fb-tag::before { content: ''; position: absolute; left: 50%; bottom: calc(100% - 28px); width: 4px; height: 560px; margin-left: -2px; border-radius: 2px; background: repeating-linear-gradient(180deg, #FFF 0 6px, #D8D8DE 6px 10px); }
-.fb-card { position: relative; padding: 56px 18px 16px; border-radius: 0 0 30px 30px; clip-path: polygon(15% 0, 85% 0, 100% 9%, 100% 100%, 0 100%, 0 9%); -webkit-mask: radial-gradient(circle 11px at 50% 28px, transparent 10px, #000 10.5px); mask: radial-gradient(circle 11px at 50% 28px, transparent 10px, #000 10.5px); box-shadow: none; }
-.fb-card::before { content: ''; position: absolute; left: 50%; top: 14px; width: 28px; height: 28px; margin-left: -14px; border-radius: 50%; border: 4px solid #111; box-sizing: border-box; pointer-events: none; }
-.fb-card::after { content: ''; position: absolute; left: 14px; right: 14px; top: 47px; border-top: 2px dashed rgba(17, 17, 17, 0.25); pointer-events: none; }
+.fb-tag::before { content: ''; position: absolute; left: 50%; bottom: calc(100% - 6px); width: 38px; height: 560px; margin-left: -19px; background: linear-gradient(90deg, #8A8A92 0 8%, #A4A4AC 8% 92%, #8A8A92 92%); }
+.fb-clip { position: absolute; left: 50%; top: -22px; width: 34px; height: 26px; margin-left: -17px; border-radius: 5px; background: linear-gradient(180deg, #7A7A82, #5C5C64); z-index: 3; }
+.fb-clip::after { content: ''; position: absolute; left: 50%; bottom: -9px; width: 24px; height: 12px; margin-left: -12px; border-radius: 0 0 8px 8px; background: #4FA3FF; border: 3px solid #2E7FE0; border-top: 0; box-sizing: border-box; }
+.fb-card { position: relative; padding: 14px; border-radius: 30px; box-shadow: none; background: conic-gradient(#FF4444 25%, #FF9CC8 0 50%, #FF4444 0 75%, #FF9CC8 0) 0 0 / 22px 22px; }
+.fb.good .fb-card { background: conic-gradient(#3FA83A 25%, #B5EE72 0 50%, #3FA83A 0 75%, #B5EE72 0) 0 0 / 22px 22px; }
+.fb-in { border-radius: 20px; padding: 14px 14px 14px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; background: #FFD3E2; }
+.fb.good .fb-in { background: #EEFFC9; }
+.fb-since { font-family: var(--f-mono); font-size: 11px; letter-spacing: 1px; color: #F0709E; }
+.fb.good .fb-since { color: #4A9A2E; }
+.fb-in b { font-family: var(--f-px); font-weight: 600; font-size: 25px; letter-spacing: 1px; }
+.fb-sts { position: relative; width: 100%; height: 108px; margin: 2px 0 0; }
+.fb-sts span { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 4px solid #FFF; }
+.fb-sts i { font-style: normal; font-family: var(--f-mono); font-size: 11px; color: rgba(17, 17, 17, 0.7); }
+.st-g { left: 4px; top: 6px; width: 62%; height: 92px; border-radius: 50% / 46%; background: #5CC83A; transform: rotate(-5deg); }
+.st-g b { font-family: var(--f-display); font-weight: 400; font-size: 26px; color: #111; line-height: 1; }
+.st-b { right: 2px; top: 0; width: 44%; height: 104px; border-radius: 20px; background: #8FD4FF; transform: rotate(5deg); }
+.st-b b { font-family: var(--f-px); font-weight: 600; font-size: 22px; color: #1F7BFF; line-height: 1.1; }
+.fb-in small { font-size: 12px; color: var(--sub); line-height: 1.5; }
 @keyframes tagSwing { 0% { transform: rotate(-16deg); opacity: 0; } 12% { opacity: 1; } 30% { transform: rotate(10deg); } 52% { transform: rotate(-6deg); } 72% { transform: rotate(3deg); } 88% { transform: rotate(-1deg); } 100% { transform: none; } }
 </style>
 
@@ -1738,13 +1752,14 @@ function verdict(before, after) {
   }
   const shown = broke.length ? broke : woke;
   app.insertAdjacentHTML('beforeend', `<div class="fb ${broke.length ? 'bad' : 'good'}" role="alert" data-act="fb-close">
-    <div class="fb-tag"><div class="fb-card">
+    <div class="fb-tag"><i class="fb-clip" aria-hidden="true"></i><div class="fb-card"><div class="fb-in">
+      <span class="fb-since">周${DAYS[S.day]} · ${fmtClock(S.clock)}</span>
       <div class="fb-cards">${shown.map(x => `<div class="${broke.length ? 'shake' : 'pop'}">${scaled(CARDS[x.no], 0.5, broke.length ? 'broken' : 'on')}</div>`).join('')}</div>
       <b>${broke.length ? `${shown.map(x => CARDS[x.no].name).join('、')} 碎了！` : `${shown.map(x => CARDS[x.no].name).join('、')} 醒了 ✓`}</b>
-      <span class="px">倍率 ×${before.mult} → ×${after.mult} · 今晚预计 ${before.score} → ${after.score} 分</span>
+      <div class="fb-sts" aria-label="倍率 ×${before.mult} 变成 ×${after.mult}，今晚预计 ${before.score} 变成 ${after.score} 分"><span class="st-g"><i>倍率</i><b>×${before.mult}→×${after.mult}</b></span><span class="st-b"><b>${before.score}→${after.score}</b><i>今晚预计分</i></span></div>
       <small>${broke.length ? (after.cards.every(x => x.state !== "on") ? (after.left > 0 ? `三张都碎了，倍率 ×${after.mult}。剩下的钱还算分：今晚守住 ${money(after.left)} 就是 ${after.score} 分。` : `三张都碎了，今天的钱也花完了。`) : shown.some(x => CARDS[x.no].weekly) ? "按周算的牌会碎到周日，之后每多一杯，当天倍率再 −1。" : shown.some(x => x.saved) ? `止损：今天不再花额度外的钱，碎掉的牌今晚拿回一半倍率。明天零点恢复。` : "明天零点恢复。今天剩下的牌还能守住。") : "今天守住的牌越多，分越高。"}${after.left < 0 ? ` 今天已经超了 ¥${-after.left}，会从明天的额度里扣。` : ""}</small>
       <button class="ok" data-act="fb-close">知道了</button>
-    </div></div>
+    </div></div></div>
   </div>`);
 }
 
