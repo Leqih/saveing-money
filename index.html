@@ -299,9 +299,12 @@ button.chip:active { transform: translateY(2px); }
 .cv-nav > button[data-tab] span { height: 0; opacity: 0; overflow: hidden; transition: height 0.2s, opacity 0.2s; }
 .cv-nav > button.on span { height: 11px; margin-top: 3px; opacity: 1; }
 .cv-nav > button.on { transform: translateY(-3px) scale(1.07); }
-.cv-nav > button:not(.on) { filter: saturate(0.85); }
+.cv-nav > button.on svg { animation: iconPop 0.5s cubic-bezier(.3,1.8,.5,1); }
+@keyframes iconPop { 0% { transform: scale(0.6) rotate(-14deg); } 100% { transform: none; } }
+.screen.enter { animation: tabIn 0.34s cubic-bezier(.2,1,.3,1); }
+@keyframes tabIn { from { opacity: 0; transform: translateY(14px); } }
 .cv-nav > button:active { transform: scale(0.94); }
-.cv-log { flex-grow: 1; border: 0; border-radius: 16px; background: #111; color: #E4FF1A; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--f-px); font-weight: 600; font-size: 17px; letter-spacing: 2px; transition: transform 0.2s cubic-bezier(.3,1.7,.5,1); }
+.cv-log { flex-grow: 1; border: 0; border-radius: 16px; background: linear-gradient(180deg, #3FA0FF 0%, #0A6CFF 100%); color: #FFF; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.3), inset 0 0 12px 3px rgba(255,255,255,0.45); display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--f-px); font-weight: 600; font-size: 17px; letter-spacing: 2px; transition: transform 0.2s cubic-bezier(.3,1.7,.5,1); }
 .cv-log:active { transform: scale(0.95); }
 .cv-tab { height: 30px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font-weight: 900; font-size: 15px; color: #B5B5BC; white-space: nowrap; }
 .cv-tab.on { padding: 0 14px; background: #E4FF1A; box-shadow: 0 0 0 3px #F4FF9E; color: #111; }
@@ -1077,6 +1080,18 @@ function renderTable() {
   app.classList.remove('scrolled');
   showCoach();
 }
+// switching pages keeps the nav bar in place so the keys can animate, and only swaps the screen underneath
+function switchTab(v) {
+  const nav = app.querySelector('.cv-nav');
+  if (!nav || v === S.view) { S.view = v; renderTable(); return; }
+  S.view = v;
+  nav.querySelectorAll('button[data-tab]').forEach(b => { const on = b.dataset.tab === v; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  const old = app.querySelector('.screen'), scr = document.createElement('div');
+  scr.className = 'screen' + (reducedMotion() ? '' : ' enter'); scr.innerHTML = { home: homeHTML, bill: billHTML, deck: deckHTML }[v]();
+  old.replaceWith(scr);
+  const mb = app.querySelector('.minibar'); if (mb) mb.outerHTML = minibarHTML();
+  app.classList.remove('scrolled'); showCoach();
+}
 function minibarHTML() {
   const title = { home: `第 ${S.week} 周 · 周${DAYS[S.day]}`, bill: '账单', deck: '牌库' }[S.view];
   const mult = S.held.length ? `<span class="mm">×${evaluate(S.today).mult}</span>` : '';
@@ -1471,7 +1486,7 @@ function quickJump() {
     return;
   }
   app.querySelectorAll('.sheet').forEach(e => e.remove());
-  const order = ['home', 'bill', 'deck']; S.view = order[(order.indexOf(S.view) + 1) % 3]; if (S.view === 'bill') S.billTab = S.billTab || 'flow'; renderTable();
+  const order = ['home', 'bill', 'deck']; const nv = order[(order.indexOf(S.view) + 1) % 3]; if (nv === 'bill') S.billTab = S.billTab || 'flow'; switchTab(nv);
 }
 document.querySelector('.device').addEventListener('click', e => { if (e.target.closest('.dbtn.k')) quickJump(); });
 document.querySelector('.device').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.dbtn.k')) { e.preventDefault(); quickJump(); } });
@@ -2267,7 +2282,7 @@ app.addEventListener('click', e => {
   if (act === 'coach-next') { S.coach += 1; clearCoach(); showCoach(); return; }
   if (act === 'coach-skip') { S.coach = COACH.length; clearCoach(); return; }
   if (act === 'goflow') { S.view = 'bill'; S.billTab = 'flow'; renderTable(); return; }
-  if (t.dataset.tab) { S.view = t.dataset.tab; renderTable(); return; }
+  if (t.dataset.tab) { switchTab(t.dataset.tab); return; }
   if (t.dataset.bill) { S.billTab = t.dataset.bill; renderTable(); return; }
   if (t.dataset.flowcat) { S.flowCat = t.dataset.flowcat; const top0 = app.querySelector('.screen').scrollTop; renderTable(); app.querySelector('.screen').scrollTop = top0; return; }
   if (t.dataset.cal) { const [w, d] = t.dataset.cal.split('-').map(Number); renderDay(d, w); return; }
