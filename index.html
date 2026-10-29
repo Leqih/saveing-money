@@ -1,0 +1,1886 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta charset="utf-8">
+<title>省钱小局</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@500&family=Noto+Sans+SC:wght@500;900&family=Pixelify+Sans:wght@400;600&display=swap">
+<style>
+/* layout: one phone-sized app column on an orange grid desk; sheets slide over the table */
+:root {
+  --desk: #FF5A1F; --desk-line: rgba(0,0,0,0.14);
+  --paper: #FFFFFF; --ink: #111111; --sub: #5E5B54; --mute: #8A8A92; --rule: #E2E2E8;
+  --cap: #EDEDF1; --cap-edge: #CFCFD6;
+  --orange: #FF6A1F; --orange-edge: #D94F0C; --lime: #E4FF1A; --lime-edge: #B8D000;
+  --pink: #FF4D6A; --purple: #A55BFF; --blue: #2E8BFF; --gold: #FFD000; --cobalt: #1F6BFF; --red: #FF3B1F; --yellow: #FFD54A; --lav: #DCD8FF;
+  --receipt: #F5F3EC;
+  --f-display: 'Archivo Black', 'Arial Black', sans-serif;
+  --f-body: 'Noto Sans SC', 'PingFang SC', system-ui, sans-serif;
+  --f-px: 'Pixelify Sans', 'IBM Plex Mono', monospace;
+  --f-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body {
+  background: var(--desk);
+  background-image: linear-gradient(var(--desk-line) 1px, transparent 1px), linear-gradient(90deg, var(--desk-line) 1px, transparent 1px);
+  background-size: 120px 120px;
+  color: var(--ink); font-family: var(--f-body);
+  display: flex; justify-content: center; align-items: flex-start;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px;
+  box-sizing: border-box;
+}
+* { box-sizing: border-box; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 2px; }
+.px { font-family: var(--f-px); }
+.phone { position: relative; width: 100%; max-width: 400px; height: 820px; background: var(--paper); border-radius: 40px; overflow: hidden; box-shadow: 0 30px 60px -20px rgba(0,0,0,0.45), 0 0 0 10px #111; }
+.screen { height: 100%; overflow-y: auto; padding: 22px 18px 110px; display: flex; flex-direction: column; gap: 14px; }
+.screen > * { flex-shrink: 0; }
+
+/* keycap */
+.cap { border: 0; border-radius: 16px; padding: 4px 4px 10px; background: var(--cap-edge); box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(0,0,0,0.18), 0 14px 18px -8px rgba(20,20,30,0.32); transition: transform 0.08s ease; display: block; width: 100%; text-align: left; }
+.cap > .top { position: relative; height: 100%; border-radius: 12px; background: linear-gradient(180deg, #FAFAFC 0%, var(--cap) 100%); box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.75), inset 0 -3px 5px rgba(0,0,0,0.08); padding: 10px 14px; }
+button.cap:active { transform: translateY(3px); }
+.cap.orange { background: var(--orange-edge); } .cap.orange > .top { background: linear-gradient(180deg, #FF8A4A 0%, var(--orange) 100%); }
+.cap.lime { background: var(--lime-edge); } .cap.lime > .top { background: linear-gradient(180deg, #F2FF7A 0%, var(--lime) 100%); }
+.cap.dark { background: #47474B; } .cap.dark > .top { background: linear-gradient(180deg, #6A6A70 0%, #5B5B60 100%); color: #F4F4F4; }
+.cap[disabled] { opacity: 0.45; cursor: not-allowed; }
+.bigbtn > .top { text-align: center; font-weight: 900; font-size: 16px; padding: 14px; }
+
+/* header */
+.head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.daypill { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border-radius: 18px; background: #26262B; color: #F2F2F5; min-width: 0; flex: 1; }
+.dots { display: flex; justify-content: space-between; font-family: var(--f-px); font-size: 11px; color: #8A8A92; }
+.dots b { font-weight: 400; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+.dots b.now { background: var(--orange); color: #fff; }
+.help { width: 44px; height: 44px; flex-shrink: 0; border-radius: 22px; border: 0; background: #26262B; color: #fff; font-family: var(--f-display); font-size: 18px; box-shadow: inset 0 -3px 0 rgba(0,0,0,0.4); }
+.cookie { width: 66px; height: 66px; flex-shrink: 0; border: 0; padding: 0; background: #C9C3FF; color: #2B2470; display: flex; flex-direction: column; align-items: center; justify-content: center; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
+.cookie .n { font-family: var(--f-px); font-size: 22px; font-weight: 600; line-height: 1; }
+.cookie .l { font-size: 10px; font-weight: 900; }
+
+/* this week's rule: a ticket with punched notches */
+.rulebar { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; width: 100%; border: 0; text-align: left; padding: 12px 18px 12px 14px; border-radius: 22px; background: #26262B; color: #F2F2F5;
+  -webkit-mask: radial-gradient(circle at 0 50%, transparent 9px, #000 9.5px) left / 51% 100% no-repeat, radial-gradient(circle at 100% 50%, transparent 9px, #000 9.5px) right / 51% 100% no-repeat;
+          mask: radial-gradient(circle at 0 50%, transparent 9px, #000 9.5px) left / 51% 100% no-repeat, radial-gradient(circle at 100% 50%, transparent 9px, #000 9.5px) right / 51% 100% no-repeat; }
+.rulebar:active { transform: translateY(2px); }
+.rmini { width: 72px; height: 102px; }
+
+.rtext { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.rtext small { font-family: var(--f-px); font-size: 12px; color: var(--lime); }
+.rtext b { font-size: 22px; font-weight: 900; line-height: 1.15; }
+.rtext span { font-size: 13px; line-height: 1.45; color: rgba(242,242,245,0.8); }
+.rtext em { font-style: normal; font-family: var(--f-px); font-size: 13px; color: #FF9A6A; }
+.rtext em.good { color: var(--lime); }
+
+.meter .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 900; font-size: 15px; }
+.bar { height: 12px; margin-top: 8px; border-radius: 3px; background: repeating-linear-gradient(90deg, #D8D8DE 0 15px, transparent 15px 18px); position: relative; overflow: hidden; }
+.bar i { position: absolute; inset: 0 auto 0 0; background: repeating-linear-gradient(90deg, #5B4FC8 0 15px, transparent 15px 18px); transition: width 0.6s ease; }
+.bar.over i { background: repeating-linear-gradient(90deg, var(--red) 0 15px, transparent 15px 18px); }
+.hint { margin: 8px 0 0; font-size: 12px; line-height: 1.55; color: var(--sub); font-weight: 500; }
+.hint b { color: var(--ink); }
+.tiles { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-top: 10px; }
+.tile { height: 42px; border-radius: 9px; border: 0; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font-family: var(--f-px); font-size: 10px; background: #fff; box-shadow: inset 0 -3px 0 #D8D8DE; color: var(--ink); }
+.tile b { font-weight: 400; font-size: 11px; }
+button.tile:active { transform: translateY(2px); }
+.tile.now { background: var(--orange); color: #fff; box-shadow: inset 0 -3px 0 var(--orange-edge); }
+.tile.future { background: transparent; box-shadow: none; border: 1.5px dashed var(--cap-edge); color: var(--mute); }
+.tile.hit { box-shadow: inset 0 -3px 0 #FFB3A6; }
+.tile.zero { box-shadow: inset 0 -3px 0 var(--lime-edge); }
+
+.hero > .top { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-height: 140px; }
+.hero .money { font-family: var(--f-display); font-size: 64px; line-height: 0.95; }
+.hero .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.hero.over > .top { background: linear-gradient(180deg, #FF7BE3 0%, #FF52D9 100%); }
+.hero.over { background: #D43AB4; }
+
+h2 { margin: 0; font-weight: 900; font-size: 15px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+h2 small { font-weight: 500; font-size: 12px; color: var(--mute); }
+.keys { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 12px; border: 2px solid var(--rule); font-size: 13px; background: #fff; white-space: nowrap; }
+.chip b { font-family: var(--f-px); font-weight: 400; }
+.chip.ess { color: var(--mute); }
+.chip.hot { border-color: var(--orange); }
+.chip.hit { border-color: var(--pink); background: #FFF0F2; }
+.chip.hit b { color: #C8102E; }
+button.chip:active { transform: translateY(2px); }
+
+.wish { border-radius: 24px; background: var(--cobalt); color: #fff; padding: 14px 16px; box-shadow: 0 8px 0 #1546B0; display: flex; flex-direction: column; gap: 10px; }
+.wish .two { display: grid; grid-template-columns: 1fr 1.2fr; gap: 8px; }
+.wish .cap > .top { color: var(--ink); text-align: center; font-weight: 900; font-size: 14px; padding: 12px 8px; }
+
+.dock { position: absolute; left: 14px; right: 14px; bottom: 16px; display: grid; grid-template-columns: 1fr 1.3fr; gap: 10px; z-index: 5; }
+.dock .cap > .top { text-align: center; font-weight: 900; font-size: 16px; padding: 14px; }
+.dock .log { border: 0; border-radius: 32px; background: var(--cobalt); color: #fff; font-weight: 900; font-size: 16px; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2), 0 10px 18px -6px rgba(31,107,255,0.5); }
+
+/* sheets */
+.sheet { position: absolute; inset: 0; background: var(--paper); z-index: 10; overflow-y: auto; padding: 22px 18px 24px; display: flex; flex-direction: column; gap: 12px; animation: up 0.25s ease; }
+@keyframes up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+.sheet .bar-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.sheet h1 { margin: 0; font-weight: 900; font-size: 22px; }
+.x { width: 44px; height: 44px; flex-shrink: 0; border-radius: 22px; border: 2px solid var(--ink); background: #fff; font-size: 18px; }
+.lbl { font-size: 12px; font-weight: 900; color: var(--sub); margin-bottom: -4px; }
+.quick { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+.amount { border-radius: 28px 60px 60px 28px; background: var(--lav); padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; }
+.amount b { font-family: var(--f-display); font-weight: 400; font-size: 52px; color: #2B2470; line-height: 1; }
+.field { display: flex; gap: 6px; }
+.in { flex: 1; min-width: 0; height: 44px; border-radius: 14px; border: 2px solid var(--rule); padding: 0 14px; font: inherit; font-size: 14px; background: #fff; color: var(--ink); }
+.in:focus { outline: none; border-color: var(--cobalt); }
+.mini { height: 44px; padding: 0 12px; border-radius: 14px; border: 2px solid var(--ink); background: #fff; font-weight: 900; font-size: 12px; white-space: nowrap; }
+.mini[disabled] { opacity: 0.35; cursor: not-allowed; }
+.cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.cats .cap > .top { text-align: center; font-weight: 900; font-size: 12px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 44px; }
+.cats .cap[aria-pressed="true"] { outline: 3px solid var(--ink); outline-offset: 2px; }
+.cats .cap small { font-weight: 500; font-size: 10px; color: var(--sub); }
+.newcat { border-radius: 18px; background: #F3F3F6; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.toggle { display: flex; gap: 6px; }
+.toggle button { flex: 1; height: 38px; border-radius: 19px; border: 2px solid var(--rule); background: #fff; font-weight: 900; font-size: 13px; }
+.toggle button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.impact { border-radius: 22px; background: var(--ink); color: #fff; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font-family: var(--f-px); font-size: 14px; }
+.impact .r { display: flex; justify-content: space-between; gap: 10px; }
+.impact .r span:first-child { color: rgba(255,255,255,0.7); white-space: nowrap; }
+.impact .r span:last-child { text-align: right; }
+.impact .hot { color: #FF8A4A; }
+.impact .good { color: var(--lime); }
+.pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.pad .cap { height: 54px; padding: 3px 3px 8px; }
+.pad .cap > .top { display: flex; align-items: center; justify-content: center; font-family: var(--f-px); font-size: 22px; padding: 0; }
+.actions { display: grid; grid-template-columns: 1fr 1.3fr; gap: 8px; }
+.actions .cap > .top { text-align: center; font-weight: 900; font-size: 14px; padding: 14px 6px; }
+.go { border: 0; border-radius: 30px; background: var(--cobalt); color: #fff; font-weight: 900; font-size: 16px; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2); min-height: 52px; }
+.go[disabled] { opacity: 0.4; cursor: not-allowed; }
+.note { font-size: 12px; line-height: 1.6; color: var(--sub); text-align: center; margin: 0; }
+.note.left { text-align: left; }
+.pillrow { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 10px; border-radius: 12px; border: 2px solid var(--rule); font-size: 13px; font-weight: 900; color: var(--sub); background: #fff; }
+.pill.ok { background: var(--lime); border-color: var(--lime); color: var(--ink); }
+.pill.mid { background: #FFF3C2; border-color: #FFE07A; color: #6A4A00; }
+.pill.no { background: #FFE1E1; border-color: #FFC2C2; color: #A10F0F; }
+.stars { font-family: var(--f-mono); letter-spacing: 1px; }
+
+/* draw: three face-down cards flip over, one gets picked */
+.fan { display: flex; justify-content: center; gap: 8px; padding: 22px 0 4px; }
+.pick { width: 108px; height: 153px; flex-shrink: 0; border: 0; background: none; padding: 0; perspective: 700px; transition: transform 0.2s ease; }
+.pick:nth-child(1) { transform: rotate(-6deg) translateY(8px); }
+.pick:nth-child(3) { transform: rotate(6deg) translateY(8px); }
+.pick.sel { transform: translateY(-14px) scale(1.04); }
+.pick.sel .face { outline: 4px solid var(--ink); outline-offset: 3px; border-radius: 12px; }
+.flip { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.5s ease; }
+.flip.down { transform: rotateY(180deg); }
+.face, .back { position: absolute; inset: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.face .scale { width: 240px; height: 340px; transform: scale(0.45); transform-origin: 0 0; }
+.back { transform: rotateY(180deg); border-radius: 12px; background-color: #111; background-image: linear-gradient(rgba(228,255,26,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(228,255,26,0.25) 1px, transparent 1px); background-size: 12px 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 16px -8px rgba(0,0,0,0.5); }
+.back span { width: 44px; height: 44px; border-radius: 50%; background: var(--lime); color: var(--ink); font-family: var(--f-display); font-size: 22px; display: flex; align-items: center; justify-content: center; transform: rotate(-8deg); }
+.pickinfo { border-radius: 24px; background: #F3F3F6; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.pickinfo h3 { margin: 0; font-size: 20px; font-weight: 900; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.pickinfo p { margin: 0; font-size: 14px; line-height: 1.55; }
+
+/* receipt */
+.receipt { position: relative; background: var(--receipt); border-radius: 18px 18px 0 0; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; margin-bottom: 12px; }
+.receipt::after { content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 10px; background: linear-gradient(135deg, var(--receipt) 50%, transparent 50%) 0 0 / 14px 10px repeat-x, linear-gradient(-135deg, var(--receipt) 50%, transparent 50%) 0 0 / 14px 10px repeat-x; }
+.receipt .r { display: flex; justify-content: space-between; gap: 10px; }
+.receipt .r span:last-child { font-family: var(--f-px); white-space: nowrap; }
+.receipt .r i { font-style: normal; font-size: 10px; padding: 1px 5px; border-radius: 5px; background: #E2E0D8; color: var(--sub); margin-left: 4px; }
+.receipt .r i.hit { background: var(--pink); color: #fff; }
+.receipt .off { color: var(--mute); }
+.receipt .hitc { color: #C8102E; }
+.receipt hr { border: 0; border-top: 2px dashed #CFCCC2; margin: 6px 0; width: 100%; }
+.receipt .cap-t { font-family: var(--f-mono); font-size: 11px; color: var(--sub); padding-right: 90px; }
+.receipt .tot { display: flex; justify-content: space-between; align-items: baseline; }
+.receipt .tot b { font-family: var(--f-display); font-weight: 400; font-size: 30px; }
+.stamp { position: absolute; right: 14px; top: 12px; transform: rotate(8deg); padding: 4px 10px; border: 3px solid var(--ink); border-radius: 10px; font-weight: 900; font-size: 13px; background: var(--lime); }
+.stamp.hit { background: #FFD0D8; }
+.stamp.no { background: #FFE1E1; }
+.bigstamp { align-self: center; padding: 10px 26px; border: 4px solid var(--ink); border-radius: 18px; font-weight: 900; font-size: 34px; transform: rotate(-5deg); background: var(--lime); box-shadow: 0 8px 0 rgba(0,0,0,0.12); }
+.bigstamp.no { background: #FFE1E1; }
+
+.bigcard { align-self: center; }
+.kv { border-radius: 18px; background: #F3F3F6; padding: 12px 14px; }
+.kv small { display: block; font-size: 11px; font-weight: 900; color: var(--sub); margin-bottom: 2px; }
+.kv p { margin: 0; font-size: 14px; line-height: 1.55; }
+.unlock { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; border-radius: 22px; background: var(--lime); padding: 12px 14px; }
+
+/* beginner guide: slanted stacked cards */
+.gstack { display: flex; flex-direction: column; gap: 14px; padding: 8px 6px 6px; }
+.gcard { position: relative; border-radius: 26px; padding: 18px; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; box-shadow: 0 8px 0 rgba(0,0,0,0.14), 0 18px 24px -14px rgba(0,0,0,0.35); }
+.gcard:nth-child(odd) { transform: rotate(-2deg); }
+.gcard:nth-child(even) { transform: rotate(1.6deg); }
+.gcard h3 { margin: 0 0 4px; font-size: 18px; font-weight: 900; }
+.gcard p { margin: 0; font-size: 13px; line-height: 1.6; }
+.gcard .n { position: absolute; left: -6px; top: -12px; width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: #fff; font-family: var(--f-display); font-size: 15px; display: flex; align-items: center; justify-content: center; transform: rotate(-8deg); }
+.g-orange { background: var(--orange); color: #fff; } .g-lav { background: var(--lav); color: #2B2470; } .g-lime { background: var(--lime); }
+.gv { font-family: var(--f-display); font-size: 26px; white-space: nowrap; }
+
+/* launch: sticker collage from the canvas start screen, retold for the weekly rule card */
+.sheet.launch { padding: 0; display: block; overflow-x: hidden; }
+.l-wrap { position: relative; min-height: 820px; height: 100%; }
+.launch .l-abs { position: absolute; }
+.l-blob { left: 22px; top: 72px; width: 296px; max-width: calc(100% - 60px); height: 132px; border-radius: 48% 52% 44% 56% / 58% 46% 54% 42%; background: #111; color: #fff; transform: rotate(-6deg); display: flex; align-items: center; justify-content: center; gap: 2px; box-shadow: 0 10px 18px rgba(20,20,30,0.22); }
+.l-blob span { font-weight: 900; font-size: 46px; }
+.l-blob span:nth-child(1) { transform: rotate(-12deg) translateY(6px); } .l-blob span:nth-child(2) { transform: rotate(8deg) translateY(-8px); }
+.l-blob span:nth-child(3) { transform: rotate(-4deg) translateY(4px); } .l-blob span:nth-child(4) { transform: rotate(14deg) translateY(-4px); }
+.l-tag { left: 34px; top: 58px; padding: 2px 12px; border-radius: 14px; border: 2px solid #111; background: #fff; font-family: var(--f-px); font-size: 13px; transform: rotate(-10deg); z-index: 1; }
+.l-cookie { right: 22px; top: 196px; width: 104px; height: 104px; background: #C9C3FF; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #2B2470; filter: drop-shadow(0 6px 8px rgba(20,20,30,0.18)); clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
+.l-cookie b { font-family: var(--f-px); font-size: 30px; font-weight: 600; line-height: 1; }
+.l-cookie small { font-size: 11px; font-weight: 900; }
+.l-fan { left: 18px; top: 238px; width: 230px; height: 170px; }
+.l-fan > div { position: absolute; top: 0; }
+.l-fan > div:nth-child(1) { left: 0; transform: rotate(-11deg); }
+.l-fan > div:nth-child(2) { left: 62px; top: -10px; transform: rotate(-1deg); z-index: 1; }
+.l-fan > div:nth-child(3) { left: 124px; transform: rotate(10deg); }
+.l-draw { right: 26px; top: 336px; width: 130px; height: 74px; transform: rotate(5deg); }
+.l-draw .top { display: flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--f-display); font-size: 18px; }
+.l-pill { left: 32px; top: 430px; width: 220px; height: 72px; border-radius: 36px; background: var(--yellow); transform: rotate(-7deg); display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 8px 14px rgba(20,20,30,0.16); font-family: var(--f-display); font-size: 30px; color: #2A2205; }
+.l-pill i { font-style: normal; color: #7A6410; }
+.l-ring { right: 20px; top: 420px; width: 96px; height: 96px; transform: rotate(12deg); }
+.l-foot { left: 24px; right: 24px; bottom: 34px; display: flex; flex-direction: column; gap: 12px; }
+.l-foot h1 { margin: 0; font-weight: 900; font-size: 32px; line-height: 1.2; }
+.l-foot p { margin: 0; font-size: 14px; line-height: 1.6; color: #4A4A50; }
+
+
+/* ---- ported from the canvas screens (ToyTable nav, ToyFeed, ToyBill, ToyCats, ToyDeck, ToySetup, ToyPick) ---- */
+.cv-nav { position: absolute; left: 16px; right: 16px; bottom: 20px; z-index: 5; height: 76px; border-radius: 38px; padding: 8px; display: flex; gap: 6px; align-items: stretch; background: linear-gradient(180deg, #232327 0%, #0B0B0D 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 2px rgba(20,20,30,0.2), 0 18px 26px -10px rgba(20,20,30,0.45); }
+.cv-nav > button[data-tab] { position: relative; width: 60px; flex-shrink: 0; border: 0; border-radius: 22px; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.12); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #111; font-size: 11px; padding: 0; }
+.cv-nav > button[data-tab]::after { content: ""; position: absolute; left: 4px; right: 4px; top: 3px; height: 42%; border-radius: inherit; pointer-events: none; background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0)); }
+.cv-nav > button.on { font-weight: 900; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.12), 0 0 0 3px #FFFFFF; }
+.cv-nav > button:active { transform: translateY(2px); }
+.cv-log { flex-grow: 1; border: 0; border-radius: 30px; background: #1F6BFF; color: #FFF; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 900; font-size: 15px; }
+.cv-tab { height: 30px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; font-weight: 900; font-size: 15px; color: #B5B5BC; white-space: nowrap; }
+.cv-tab.on { padding: 0 14px; background: #E4FF1A; box-shadow: 0 0 0 3px #F4FF9E; color: #111; }
+.cv-slab { position: relative; display: block; width: 100%; height: 150px; border: 0; padding: 0; background: none; text-align: left; color: inherit; flex-shrink: 0; }
+.cv-slab > .sb, .cv-slab > .sf { position: absolute; left: 0; right: 0; top: 0; height: 150px; border-radius: 28px; }
+.cv-slab > .sb { top: 9px; }
+.cv-slab > .sf { padding: 0 22px; display: flex; align-items: center; }
+.cv-slab .si { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+button.cv-slab:active { transform: translateY(2px); }
+.cv-big { font-weight: 900; line-height: 1; letter-spacing: -2px; white-space: nowrap; }
+.cv-meta { display: flex; flex-direction: column; gap: 6px; white-space: nowrap; }
+.cv-cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.cv-day { height: 46px; border: 0; border-radius: 10px; padding: 2px 2px 6px; box-shadow: 0 4px 8px rgba(20,20,30,0.16); display: block; text-align: left; }
+.cv-day > span { display: flex; flex-direction: column; justify-content: space-between; height: 100%; border-radius: 8px; padding: 3px 5px; font-family: var(--f-px); font-size: 11px; color: #111; }
+.cv-day > span b { font-weight: 400; font-size: 10px; align-self: flex-end; }
+.cv-day.now { outline: 3px solid #111; outline-offset: 2px; }
+.cv-day.future { background: #F2F2F5; box-shadow: none; }
+.cv-day.future > span { background: repeating-linear-gradient(45deg, #F2F2F5 0 4px, #E6E6EB 4px 8px); color: #9A9AA2; }
+.cv-day.blank { background: none; box-shadow: none; }
+button.cv-day:active { transform: translateY(2px); }
+.cv-band { position: relative; overflow: hidden; border-radius: 28px; padding: 16px 20px; flex-shrink: 0; }
+.cv-pct { position: absolute; right: -6px; bottom: -0.22em; font-family: var(--f-display); line-height: 1; letter-spacing: -4px; }
+.cv-lbl { position: relative; display: flex; flex-direction: column; gap: 4px; }
+.cv-cell { display: flex; flex-direction: column; align-items: center; gap: 6px; border: 0; background: none; padding: 0; }
+.cv-icon { position: relative; width: 72px; height: 72px; border-radius: 18px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), inset 0 -6px 0 rgba(0,0,0,0.14), 0 6px 10px -4px rgba(20,20,30,0.25); }
+button.cv-cell:active .cv-icon { transform: translateY(2px); }
+.cv-name { font-size: 12px; font-weight: 900; text-align: center; }
+.cv-lock { background-color: #EFEFF2; background-image: linear-gradient(45deg, #DCDCE2 25%, transparent 25%, transparent 75%, #DCDCE2 75%), linear-gradient(45deg, #DCDCE2 25%, transparent 25%, transparent 75%, #DCDCE2 75%); background-size: 12px 12px; background-position: 0 0, 6px 6px; box-shadow: none; }
+.cv-grad { position: absolute; right: -8px; top: -8px; padding: 1px 6px; font-family: var(--f-px); font-size: 11px; color: #2F8A00; white-space: nowrap; background-color: #C9FF4A; background-image: linear-gradient(45deg, #A8F000 25%, transparent 25%, transparent 75%, #A8F000 75%), linear-gradient(45deg, #A8F000 25%, transparent 25%, transparent 75%, #A8F000 75%); background-size: 8px 8px; background-position: 0 0, 4px 4px; transform: rotate(8deg); }
+.cv-own { position: absolute; left: -4px; bottom: -4px; width: 20px; height: 20px; border-radius: 50%; background: #111; border: 2px solid #FFF; display: flex; align-items: center; justify-content: center; }
+.cv-pill { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 12px; background: #FFF; border: 2px solid #E2E2E8; font-family: var(--f-px); font-size: 14px; color: #8A8A92; }
+.cv-prog { display: flex; align-items: center; gap: 10px; }
+.cv-prog i { flex-grow: 1; height: 10px; border-radius: 3px; }
+.cv-field { display: flex; height: 66px; border-radius: 16px; padding: 4px 4px 10px; background: #CFCFD6; box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(0,0,0,0.18), 0 12px 16px -8px rgba(20,20,30,0.3); }
+.cv-field > div { flex-grow: 1; border-radius: 12px; padding: 0 14px; background: linear-gradient(180deg, #FAFAFC 0%, #EDEDF1 100%); box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.75); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.cv-field label { font-size: 13px; font-weight: 900; }
+.cv-field label small { display: block; font-weight: 500; font-size: 11px; color: #6A6A70; }
+.cv-field input { width: 120px; border: 0; background: transparent; text-align: right; font-family: var(--f-px); font-size: 24px; color: #111; outline: none; }
+.cv-field:focus-within > div { box-shadow: inset 0 0 0 2px var(--cobalt); }
+.cv-mini { width: 44px; height: 44px; border: 0; border-radius: 12px; padding: 2px 2px 6px; background: #47474B; }
+.cv-mini span { display: flex; align-items: center; justify-content: center; height: 100%; border-radius: 10px; background: linear-gradient(180deg, #6A6A70 0%, #5B5B60 100%); color: #FFF; font-family: var(--f-px); font-size: 20px; }
+.cv-mini:active { transform: translateY(2px); }
+.cv-opt { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 104px; padding: 8px 6px; border: 0; border-radius: 20px; background: #F2F2F5; font-weight: 900; font-size: 13px; color: #111; }
+.cv-opt[aria-pressed="true"] { background: #FFF; outline: 3px solid #111; outline-offset: -3px; }
+.cv-tile { display: flex; align-items: center; justify-content: center; width: 58px; height: 58px; border-radius: 16px; flex-shrink: 0; }
+.cv-tick { position: absolute; right: 8px; top: 8px; width: 20px; height: 20px; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; }
+.cv-ticket { position: relative; display: flex; align-items: center; gap: 14px; border-radius: 22px; padding: 8px 14px 8px 8px; color: #FFF; background: linear-gradient(180deg, #1E1E22 0%, #0E0E11 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 16px 22px -10px rgba(20,20,30,0.45); }
+.cv-glow { font-family: var(--f-px); color: #FFF46B; text-shadow: 0 0 4px #FFC800, 0 0 10px #FFC800, 0 0 18px #FFB000; }
+.freqs { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 20px; background: #F2F2F5; }
+.freq { display: grid; grid-template-columns: 64px 1fr; gap: 8px; align-items: center; font-size: 13px; }
+.freq > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.freq button { height: 32px; border-radius: 10px; border: 2px solid #E2E2E8; background: #FFF; font-size: 12px; font-weight: 900; color: #55555C; padding: 0 2px; white-space: nowrap; }
+.freq button[aria-pressed="true"] { background: #111; border-color: #111; color: #FFF; }
+/* first-time home tips: a bubble pointing at one element, with the rest dimmed */
+.coach-dim { position: absolute; inset: 0; z-index: 6; background: rgba(17,17,17,0.45); }
+.coach-on { position: relative; z-index: 7; box-shadow: 0 0 0 4px var(--lime), 0 0 0 8px rgba(228,255,26,0.35); border-radius: 18px; }
+.coach { position: absolute; left: 18px; right: 18px; z-index: 8; background: #111; color: #FFF; border-radius: 18px; padding: 12px 14px; font-size: 14px; line-height: 1.5; box-shadow: 0 14px 24px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 8px; animation: up 0.2s ease; }
+.coach::before { content: ""; position: absolute; left: 44px; top: -8px; border: 8px solid transparent; border-top: 0; border-bottom-color: #111; }
+.coach.above::before { top: auto; bottom: -8px; border-bottom: 0; border-top: 8px solid #111; }
+.coach .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.coach .ok { height: 36px; padding: 0 14px; border-radius: 12px; border: 0; background: var(--lime); color: #111; font-weight: 900; font-size: 13px; }
+.coach .skip { border: 0; background: none; color: rgba(255,255,255,0.6); font-size: 12px; padding: 6px; }
+button.daypill { border: 0; text-align: left; width: auto; }
+.daypill .clock { padding: 0 6px; border-radius: 8px; background: rgba(255,255,255,0.14); color: var(--lime); }
+.alert { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 20px; background: #FFD54A; box-shadow: 0 6px 0 #D9A900; }
+.alert .bell { width: 36px; height: 36px; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; }
+.alert p { margin: 0; font-size: 13px; line-height: 1.5; font-weight: 500; color: #2A2205; }
+.alert .tag { position: absolute; right: 12px; top: -10px; padding: 1px 8px; border-radius: 8px; background: #111; color: #E4FF1A; font-family: var(--f-px); font-size: 11px; transform: rotate(4deg); }
+.evening { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 14px 14px 14px 16px; border-radius: 22px; background: #2B2470; color: #FFF; }
+.evening b { display: block; font-size: 15px; }
+.evening span { font-size: 12px; line-height: 1.5; color: rgba(255,255,255,0.8); }
+.evening .cap { width: 96px; height: 52px; align-self: center; } .evening .cap > .top { display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; padding: 0 4px; color: #111; }
+.push { position: absolute; left: 10px; right: 10px; top: 10px; z-index: 40; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; padding: 12px; border-radius: 22px; background: #FAFAFC; border: 1px solid #E2E2E8; box-shadow: 0 16px 30px rgba(0,0,0,0.28); animation: drop 0.3s ease; }
+@keyframes drop { from { transform: translateY(-30px); opacity: 0; } to { transform: none; opacity: 1; } }
+.push .appicon { width: 38px; height: 38px; border-radius: 10px; background: var(--orange); color: #FFF; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+.push small { display: block; font-size: 11px; color: var(--mute); }
+.push b { display: block; font-size: 14px; }
+.push span { font-size: 13px; line-height: 1.45; color: #33333A; }
+.push .x { width: 30px; height: 30px; border-width: 0; background: #EDEDF1; font-size: 13px; }
+.clocks { display: flex; flex-direction: column; gap: 8px; }
+.clocks .cap > .top { display: flex; align-items: center; gap: 14px; padding: 12px 16px; }
+.clocks .cap b { font-size: 22px; font-weight: 400; min-width: 64px; }
+.clocks .cap span { font-size: 13px; font-weight: 900; }
+.ystat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ystat div { border-radius: 12px; background: #fff; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+.ystat small { font-size: 11px; font-weight: 900; color: var(--sub); }
+.ystat b { font-family: var(--f-px); font-weight: 400; font-size: 18px; }
+.rv { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 14px; background: rgba(255,255,255,0.14); font-size: 14px; }
+.rv > span:last-child { display: flex; gap: 6px; flex-shrink: 0; }
+.rvbtn { height: 34px; padding: 0 12px; border: 0; border-radius: 12px; background: #fff; color: #111; font-weight: 900; font-size: 12px; }
+.rvbtn.lime { background: var(--lime); }
+/* held cards on home: three small cards and the multiplier they add up to */
+.hold { display: grid; gap: 8px; align-items: center; }
+.hcard { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: none; padding: 0; font-size: 11px; font-weight: 900; color: var(--ink); }
+.hcard > span { padding: 1px 8px; border-radius: 8px; background: #EDEDF1; white-space: nowrap; }
+.hcard.on > span { background: var(--lime); }
+.hcard.broken > span { background: #FFD0D8; color: #A10F2E; }
+.hcard.broken > div { animation: crack 0.5s ease; }
+.hcard.glow > div { animation: glow 0.9s ease; }
+@keyframes crack { 0%, 100% { transform: none; } 20% { transform: rotate(-6deg); } 40% { transform: rotate(5deg); } 60% { transform: rotate(-3deg); } }
+@keyframes glow { 0% { filter: none; } 40% { filter: drop-shadow(0 0 10px #E4FF1A) brightness(1.08); } 100% { filter: none; } }
+button.hcard:active > div { transform: translateY(2px); }
+.multc { justify-self: center; width: 84px; height: 84px; background: #C9C3FF; color: #2B2470; display: flex; flex-direction: column; align-items: center; justify-content: center; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
+.multc small { font-size: 11px; font-weight: 900; }
+.multc b { font-family: var(--f-display); font-weight: 400; font-size: 28px; line-height: 1; }
+.hold-lbl { font-size: 12px; font-weight: 900; color: var(--sub); margin-bottom: -4px; }
+/* deal of five: two rows, picked cards lift and get a number */
+.deal { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 10px; padding: 12px 0 4px; }
+.deal .pick, .deal .pick:nth-child(1), .deal .pick:nth-child(3) { position: relative; transform: none; }
+.deal .pick.sel { transform: translateY(-8px); }
+.pick-n { position: absolute; right: -6px; top: -8px; z-index: 2; width: 26px; height: 26px; border-radius: 50%; background: var(--lime); border: 2px solid var(--ink); font-family: var(--f-display); font-size: 13px; display: flex; align-items: center; justify-content: center; }
+/* verdict after saving an entry */
+.fb { position: absolute; inset: 0; z-index: 35; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(17,17,17,0.55); animation: up 0.2s ease; cursor: pointer; }
+.fb-card { width: 100%; border-radius: 28px; background: #FFF; padding: 20px 18px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.35); }
+.fb.bad .fb-card { background: #FFE6EA; }
+.fb.good .fb-card { background: #F4FFC2; }
+.fb-cards { display: flex; gap: 10px; justify-content: center; margin-bottom: 4px; }
+.fb-card b { font-size: 22px; font-weight: 900; }
+.fb-card .px { font-size: 15px; }
+.fb-card small { font-size: 12px; color: var(--sub); }
+.fb-card .ok { margin-top: 4px; height: 44px; padding: 0 24px; border-radius: 22px; border: 0; background: #111; color: #FFF; font-weight: 900; }
+.shake { animation: shake 0.6s ease; }
+@keyframes shake { 0%, 100% { transform: none; } 15% { transform: translateX(-8px) rotate(-4deg); } 30% { transform: translateX(8px) rotate(4deg); } 45% { transform: translateX(-6px) rotate(-2deg); } 60% { transform: translateX(4px); } }
+.pop { animation: pop2 0.5s ease; }
+@keyframes pop2 { 0% { transform: scale(0.8); } 60% { transform: scale(1.08); } 100% { transform: none; } }
+.chipk { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 9px; border: 2px solid #111; font-size: 12px; font-weight: 900; white-space: nowrap; vertical-align: middle; }
+.stakes { display: flex; flex-direction: column; gap: 6px; }
+.stake { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 12px; border-radius: 16px; border: 2px solid #E2E2E8; background: #FFF; font-size: 13px; font-weight: 900; text-align: left; }
+.stake.on { border-color: #111; background: #F4FFC2; }
+.carry { display: flex; gap: 10px; }
+.hcard.off > div { opacity: 0.55; }
+.carry-tag { position: absolute; left: -6px; top: -8px; z-index: 2; padding: 1px 8px; border-radius: 8px; background: #111; color: var(--lime); font-size: 11px; font-weight: 900; transform: rotate(-6deg); }
+.gradcard { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 22px; background: #C9FF4A; background-image: linear-gradient(45deg, #B6F02A 25%, transparent 25%, transparent 75%, #B6F02A 75%), linear-gradient(45deg, #B6F02A 25%, transparent 25%, transparent 75%, #B6F02A 75%); background-size: 16px 16px; background-position: 0 0, 8px 8px; }
+.gradcard > div:last-child { background: #FFF; border-radius: 14px; padding: 10px 12px; }
+.gradcard b { font-size: 16px; }
+.gradcard p { margin: 4px 0 0; font-size: 12px; line-height: 1.55; color: var(--sub); }
+.gimg { position: relative; }
+.stoploss { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 22px; background: #111; color: #FFF; }
+.stoploss > b { font-size: 16px; }
+.stoploss p { margin: 0; font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.8); }
+.stoploss p b { color: var(--lime); }
+.stoploss .tag { position: absolute; right: 12px; top: -10px; padding: 1px 8px; border-radius: 8px; background: var(--lime); color: #111; font-family: var(--f-px); font-size: 11px; transform: rotate(4deg); }
+.stoploss .cap { width: auto; align-self: flex-start; margin-top: 2px; }
+.stoploss .cap > .top { padding: 8px 14px; font-weight: 900; font-size: 13px; color: #111; }
+.set-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px; background: #F3F3F6; }
+.set-row b { display: block; font-size: 14px; }
+.set-row small { display: block; font-size: 11px; color: var(--sub); margin-top: 2px; }
+.sw { position: relative; flex-shrink: 0; width: 52px; height: 30px; border: 0; border-radius: 15px; background: #CFCFD6; padding: 0; transition: background 0.15s; }
+.sw i { position: absolute; left: 3px; top: 3px; width: 24px; height: 24px; border-radius: 50%; background: #FFF; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.15s; }
+.sw[aria-pressed="true"] { background: #111; }
+.sw[aria-pressed="true"] i { transform: translateX(22px); background: var(--lime); }
+.seg3 { display: flex; gap: 4px; }
+.seg3 button { height: 32px; padding: 0 8px; border-radius: 10px; border: 2px solid #E2E2E8; background: #FFF; font-family: var(--f-px); font-size: 13px; }
+.seg3 button[aria-pressed="true"] { background: #111; border-color: #111; color: #FFF; }
+.mhero { display: flex; flex-direction: column; gap: 4px; padding: 18px 20px; border-radius: 28px; background: var(--lime); box-shadow: 0 9px 0 var(--lime-edge); transform: rotate(-1.5deg); }
+.mhero.over { background: #FF8CC6; box-shadow: 0 9px 0 #D25D9B; }
+.mhero b { font-family: var(--f-display); font-weight: 400; font-size: 44px; line-height: 1.05; }
+.mhero small { font-size: 12px; color: #3A3A10; }
+.trend { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 16px; background: #F3F3F6; font-size: 13px; }
+.trend em { font-style: normal; font-weight: 900; font-size: 12px; padding: 2px 8px; border-radius: 8px; background: #E2E2E8; }
+.trend.down em { background: var(--lime); }
+.trend.up em { background: #FFD0D8; color: #A10F2E; }
+.hrows { display: flex; flex-direction: column; gap: 8px; }
+.hrow { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; font-size: 13px; }
+.hrow .hico { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.hrow > span:nth-child(2) { display: flex; flex-direction: column; gap: 4px; }
+.hrow i { display: block; height: 10px; border-radius: 5px; min-width: 4px; }
+.sunday { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 22px; background: var(--cobalt); color: #FFF; box-shadow: 0 8px 0 #1546B0; }
+.sunday b { font-size: 16px; }
+.sunday span { font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.85); }
+.sunday .cap { margin-top: 4px; } .sunday .cap > .top { text-align: center; font-weight: 900; font-size: 14px; padding: 12px; color: #111; }
+/* notices: a bell with an unseen count in the header, the list in its own sheet */
+.bell { position: relative; display: flex; align-items: center; justify-content: center; }
+.bell .badge { position: absolute; right: -4px; top: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--pink); border: 2px solid #FFF; color: #FFF; font-family: var(--f-px); font-size: 11px; display: flex; align-items: center; justify-content: center; }
+.bell.ring svg { animation: ring 1.2s ease 2; transform-origin: 50% 10%; }
+@keyframes ring { 0%, 60%, 100% { transform: none; } 10% { transform: rotate(16deg); } 20% { transform: rotate(-14deg); } 30% { transform: rotate(10deg); } 40% { transform: rotate(-6deg); } }
+.push { cursor: pointer; }
+.ibox { display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: start; padding: 12px 14px; border-radius: 20px; background: #F3F3F6; }
+.ibox b { display: block; font-size: 14px; }
+.ibox p { margin: 3px 0 0; font-size: 13px; line-height: 1.55; color: var(--sub); }
+.iic { width: 36px; height: 36px; border-radius: 12px; background: #111; color: var(--lime); font-weight: 900; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+.ibox.wish, .ibox.sunday { background: var(--cobalt); color: #FFF; } .ibox.wish p, .ibox.sunday p { color: rgba(255,255,255,0.85); }
+.ibox.evening { background: #2B2470; color: #FFF; } .ibox.evening p { color: rgba(255,255,255,0.8); }
+.ibox.stop { background: #111; color: #FFF; } .ibox.stop p { color: rgba(255,255,255,0.8); } .ibox.stop .iic { background: var(--lime); color: #111; }
+.ibox.alert { background: #FFD54A; } .ibox.alert p { color: #2A2205; }
+.ibtns { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+/* shop, ported from the canvas ToyShop screen */
+.spill { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 14px; background: #FF3FAE; border: 3px solid #FF8AD0; color: #FFF; font-family: var(--f-px); font-size: 17px; font-weight: 600; text-shadow: 0 2px 0 #B0006A; white-space: nowrap; }
+.stickets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.sticket { position: relative; display: flex; flex-direction: column; gap: 1px; border: 0; border-radius: 18px; background: #111; padding: 6px 6px 10px; color: #FFF; text-align: left; box-shadow: 0 8px 14px rgba(20,20,30,0.2); }
+.sticket.rec { outline: 4px solid #FF7BD5; }
+.sticket[disabled] { opacity: 0.5; cursor: not-allowed; }
+.sticket b { display: block; margin: 0 4px; font-size: 14px; font-weight: 900; }
+.sticket b.px { font-weight: 400; font-size: 14px; } .sticket b.lime { color: var(--lime); }
+.sticket small { margin: 2px 4px 4px; font-size: 11px; color: rgba(255,255,255,0.75); }
+.stile { display: flex; align-items: center; justify-content: center; height: 76px; border-radius: 12px; margin-bottom: 6px; }
+.rec-tag { position: absolute !important; left: 50%; top: -14px; transform: translateX(-50%) rotate(-4deg); margin: 0 !important; padding: 1px 10px; border-radius: 10px; background: #FFE04A; border: 3px solid #FFC800; font-size: 13px !important; white-space: nowrap; }
+.sband { position: relative; padding-top: 18px; transform: rotate(-2deg); margin-top: 4px; }
+.sdeal { position: absolute; left: 50%; top: 0; transform: translateX(-50%); z-index: 1; display: flex; gap: 4px; white-space: nowrap; }
+.sdeal span { padding: 2px 8px; border-radius: 8px; background: #FF8A3D; color: #FFF; font-size: 16px; box-shadow: 0 0 12px rgba(255,138,61,0.6); }
+.sbtns { display: grid; grid-template-columns: 1fr 1.25fr; gap: 6px; padding: 7px; border-radius: 40px; background: #FF8A3D; box-shadow: 0 0 22px rgba(255,138,61,0.35); }
+.sbtns button { height: 62px; border: 0; border-radius: 32px; background: #FFF; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #111; font-size: 15px; }
+.sbtns button.lime { background: var(--lime); }
+.sbtns button[disabled] { opacity: 0.5; cursor: not-allowed; }
+.sbtns .sub { font-size: 13px; color: #6B7A00; } .sbtns .sub s { color: #A9B84A; }
+.sglue { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 20px; background: #F3F3F6; }
+.sglue b { display: block; font-size: 14px; } .sglue small { display: block; font-size: 11px; color: var(--sub); margin-top: 2px; }
+.sglue .cap { width: auto; flex-shrink: 0; } .sglue .cap > .top { padding: 8px 12px; font-weight: 900; font-size: 13px; white-space: nowrap; }
+.smine { display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 18px 0 26px; border-radius: 32px; border: 2px solid #E2E2E8; }
+.sring { width: 44px; height: 44px; border-radius: 50%; border: 5px solid; background: #111; display: flex; align-items: center; justify-content: center; margin-left: -12px; box-shadow: 0 0 0 2px #FFF; }
+.sring.add { border-color: #D8D8DE; border-style: dashed; background: #F2F2F5; color: #8A8A92; font-size: 16px; }
+.sbubble { position: relative; height: 122px; margin-top: 6px; }
+.sbubble svg { position: absolute; left: 0; top: 0; }
+.sstar { position: absolute; right: 2px; top: -12px; width: 70px; height: 70px; background: #00C2FF; clip-path: polygon(50% 0%,58% 22%,79% 9%,74% 33%,98% 32%,80% 49%,98% 66%,74% 66%,79% 91%,58% 78%,50% 100%,42% 78%,21% 91%,26% 66%,2% 66%,20% 49%,2% 32%,26% 33%,21% 9%,42% 22%); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; }
+.stext { position: absolute; left: 28px; right: 70px; top: 22px; display: flex; flex-direction: column; gap: 4px; }
+.stext b { font-size: 17px; font-weight: 900; } .stext span { font-size: 12px; line-height: 1.45; color: #3A1020; }
+/* end-of-day scoring stage */
+.stage-orbs { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.blob { position: relative; width: 120px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #FFF; text-align: center; }
+.blob::before { content: ""; position: absolute; inset: 0; border-radius: 46% 54% 40% 60% / 52% 44% 56% 48%; background-color: #2E8BFF; background-image: radial-gradient(rgba(255,255,255,0.6) 0.8px, transparent 1px); background-size: 5px 5px; box-shadow: 0 0 30px rgba(46,139,255,0.5); }
+.blob.m::before { background-color: #FF4FA0; border-radius: 36% 64% 58% 42% / 40% 50% 50% 60%; box-shadow: 0 0 30px rgba(255,79,160,0.5); }
+.blob b { position: relative; font-family: var(--f-display); font-weight: 400; font-size: 38px; line-height: 1.05; }
+.blob span { position: relative; font-size: 11px; font-weight: 900; padding: 0 10px; }
+.stage-x { font-family: var(--f-display); font-size: 26px; }
+.stage-cards { display: flex; justify-content: center; gap: 10px; }
+.stage-cards .dim { opacity: 0.55; }
+.stage-cards .pop { animation: pop2 0.5s ease; filter: drop-shadow(0 0 10px #E4FF1A); }
+.lines:empty { display: none; }
+.lines .r { animation: up 0.2s ease; font-size: 13px; }
+.impact .r.off span { color: rgba(255,255,255,0.45); }
+.impact .r.sum { margin-top: 4px; padding-top: 8px; border-top: 1.5px dashed rgba(255,255,255,0.25); }
+.impact .r.sum span { color: var(--lime); }
+.score-oval { align-self: center; min-width: 230px; height: 104px; padding: 0 24px; border-radius: 52px; background: var(--yellow); display: flex; align-items: center; justify-content: center; transform: rotate(-6deg); font-family: var(--f-display); font-size: 60px; color: #2A2205; box-shadow: 0 12px 22px rgba(20,20,30,0.18); margin: 4px 0; }
+.unlogged { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 22px; background: #111; color: #FFF; }
+.unlogged b { font-size: 16px; } .unlogged span { font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.8); }
+/* log sheet: verdict and save pinned to the bottom */
+.logfoot { position: sticky; bottom: -24px; z-index: 2; margin: 4px -18px -24px; padding: 12px 18px 22px; background: #FFF; border-radius: 22px 22px 0 0; box-shadow: 0 -10px 24px rgba(20,20,30,0.1); display: flex; flex-direction: column; gap: 10px; }
+.vline { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border-radius: 16px; background: #F3F3F6; }
+.vline b { font-size: 16px; font-weight: 900; }
+.vline span { font-size: 12px; color: var(--sub); }
+.vline small { font-size: 12px; font-weight: 900; color: #A10F2E; }
+.vline.bad { background: #FFE1E6; } .vline.bad b { color: #C8102E; }
+.vline.good { background: #F1FFB0; } .vline.good small { color: #4D6A00; }
+.mini.on { background: #111; color: #FFF; }
+/* favorites fill up while held, so a long press reads as "saving" */
+.qchip { background-image: linear-gradient(var(--lime), var(--lime)); background-repeat: no-repeat; background-size: 0% 100%; transition: background-size 0.5s linear; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.qchip.pressing { background-size: 100% 100%; }
+/* recommended set on the draw page */
+.recbox { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 22px; background: #F1FFB0; border: 2px solid var(--lime-edge); }
+.rhead b { display: block; font-size: 15px; font-weight: 900; }
+.rhead span { font-size: 12px; color: #3E5A00; }
+.ricons { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 6px; }
+.ricons > span { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 900; text-align: center; }
+.ricons i { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+.ricons em { font-style: normal; font-family: var(--f-px); font-weight: 400; color: var(--sub); }
+.recbox .cap > .top { text-align: center; font-weight: 900; font-size: 14px; padding: 10px; }
+.linkbtn { border: 0; background: none; font-family: var(--f-px); font-size: 12px; color: #6A6A70; padding: 6px; }
+
+.toast { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); z-index: 30; max-width: calc(100% - 32px); padding: 8px 14px; border-radius: 14px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 900; box-shadow: 0 10px 20px rgba(0,0,0,0.25); text-align: center; }
+.sample { font-family: var(--f-mono); font-size: 11px; color: var(--mute); text-align: center; margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+@media (max-width: 440px) { body { padding-block: 0; padding-left: 0; padding-right: 0; } .phone { border-radius: 0; box-shadow: none; max-width: none; height: 100vh; height: 100dvh; } }
+</style>
+
+<div class="phone" id="app" aria-live="polite"></div>
+
+<script>
+/* ---------- card art (same library as the canvas card component) ---------- */
+const PAPER = '#ECEAE3', INK = '#111111';
+// a card's colour says how much multiplier it is worth while it holds
+const TYPES = {
+  1: { label: '+1 倍率', core: '#2E8BFF', chipText: '#FFFFFF', dark: false },
+  2: { label: '+2 倍率', core: '#FF4D6A', chipText: '#FFFFFF', dark: false },
+  3: { label: '+3 倍率', core: '#A55BFF', chipText: '#FFFFFF', dark: true }
+};
+const rr = (x, y, w, h, r) => `M${x + r} ${y}H${x + w - r}A${r} ${r} 0 0 1 ${x + w} ${y + r}V${y + h - r}A${r} ${r} 0 0 1 ${x + w - r} ${y + h}H${x + r}A${r} ${r} 0 0 1 ${x} ${y + h - r}V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z`;
+const ci = (x, y, r) => `M${x - r} ${y}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
+const el = (x, y, a, b) => `M${x - a} ${y}a${a} ${b} 0 1 0 ${2 * a} 0a${a} ${b} 0 1 0 ${-2 * a} 0Z`;
+const star4 = (x, y, s) => `M${x} ${y - s}L${x + s * 0.3} ${y - s * 0.3}L${x + s} ${y}L${x + s * 0.3} ${y + s * 0.3}L${x} ${y + s}L${x - s * 0.3} ${y + s * 0.3}L${x - s} ${y}L${x - s * 0.3} ${y - s * 0.3}Z`;
+const ART = {
+  '01': { b: 'M-20 100H260C260 176 200 230 120 230C40 230 -20 176 -20 100Z' + rr(-30, 86, 300, 24, 12), bs: 'M150 84L214 -10M178 86L244 0', bw: 12, as: 'M78 40L162 124M162 40L78 124', aw: 18, e: [100, 168, 140, 168] },
+  '03': { b: 'M48 82H192L174 240H66Z' + rr(34, 56, 172, 30, 12), bs: 'M140 58L172 -14', bw: 14, a: ci(94, 204, 13) + ci(120, 212, 13) + ci(146, 204, 13), e: [104, 130, 136, 130] },
+  '04': { b: el(120, 154, 66, 90) + ci(70, 54, 20) + ci(102, 32, 22) + ci(140, 28, 22) + ci(176, 42, 20) + ci(202, 74, 16), as: 'M-10 216Q120 192 250 216', aw: 10, e: [100, 150, 140, 150] },
+  '05': { b: ci(120, 112, 116) + ci(120, 112, 54), rule: 'evenodd', a: ci(120, 112, 40), e: [108, 112, 132, 112] },
+  '06': { b: ci(110, 112, 120), cut: ci(172, 76, 98), a: star4(196, 176, 16) + star4(220, 132, 9) + star4(170, 210, 8), e: [52, 132, 80, 144] },
+  '07': { bs: 'M-10 40H38L68 156H196L224 66H52', bw: 20, b: ci(92, 196, 20) + ci(182, 196, 20), e: [118, 108, 146, 108], ec: 'body' },
+  '10': { b: 'M48 -10H192V204L174 190L156 204L138 190L120 204L102 190L84 204L66 190L48 204Z', as: 'M78 128L108 158L166 96', aw: 16, e: [100, 58, 140, 58] },
+  '13': { b: el(116, 138, 112, 78) + rr(40, 188, 30, 44, 8) + rr(150, 188, 30, 44, 8) + 'M58 76L84 30L110 68Z' + ci(224, 136, 26), cut: rr(94, 62, 52, 10, 5), a: ci(120, 28, 22), e: [154, 118, 180, 118] }
+};
+const coreOf = no => TYPES[CARDS[no].plus].core;
+// state: 'on' holds, 'broken' cracked for today (or the week), 'pending' asleep until something is done
+function cardHTML(c, state = 'on') {
+  const t = TYPES[c.plus], art = ART[c.no], off = state !== 'on';
+  const face = t.dark ? INK : PAPER, ink = t.dark ? PAPER : INK;
+  const shape = off ? (t.dark ? '#5A5A5E' : '#B9B6AD') : ink;
+  const core = off ? '#CFCCC2' : t.core;
+  const eye = art.ec === 'body' ? shape : face;
+  const sub = t.dark ? 'rgba(236,234,227,0.7)' : '#5E5B54';
+  const dot = n => (c.diff >= n ? ink : (t.dark ? 'rgba(236,234,227,0.25)' : '#CFCCC2'));
+  const ry = off ? 1.4 : 8;
+  const sticker = state === 'broken' ? (c.weekly ? '碎了 · 碎到周日' : '碎了 · 明天恢复') : state === 'pending' ? '睡着 · 记一笔就醒' : '';
+  return `<div style="width:240px;height:340px;border-radius:24px;padding:0 0 8px;background:${t.dark ? '#000' : '#C9C6BC'};box-shadow:0 18px 24px -10px rgba(20,20,30,0.45);color:${ink};font-family:var(--f-body)">
+  <div style="position:relative;height:100%;border-radius:22px;background:${face};overflow:hidden">
+   <svg width="240" height="224" viewBox="0 0 240 224" aria-hidden="true" style="position:absolute;left:0;top:0">
+    <path d="${art.b || ''}" fill="${shape}" fill-rule="${art.rule || 'nonzero'}"/>
+    <path d="${art.bs || ''}" fill="none" stroke="${shape}" stroke-width="${art.bw || 0}" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${art.cut || ''}" fill="${face}"/>
+    <path d="${art.a || ''}" fill="${core}"/>
+    <path d="${art.as || ''}" fill="none" stroke="${core}" stroke-width="${art.aw || 0}" stroke-linecap="round" stroke-linejoin="round"/>
+    <ellipse cx="${art.e[0]}" cy="${art.e[1]}" rx="4.5" ry="${ry}" fill="${eye}"/><ellipse cx="${art.e[2]}" cy="${art.e[3]}" rx="4.5" ry="${ry}" fill="${eye}"/>
+    ${state === 'broken' ? `<path d="M30 0L96 70L72 104L150 168L128 224" fill="none" stroke="${face}" stroke-width="9" stroke-linejoin="bevel"/><path d="M96 70L132 52M150 168L198 150" fill="none" stroke="${face}" stroke-width="6"/>` : ''}
+   </svg>
+   <div style="position:absolute;left:12px;top:12px;display:flex;flex-direction:column;align-items:flex-start;gap:4px">
+    <span style="padding:2px 7px;border-radius:6px;background:${face};font-family:var(--f-mono);font-size:11px">No.${c.no}</span>
+    <span style="padding:2px 7px;border-radius:6px;background:${off ? '#8A8A92' : t.core};color:${t.chipText};font-size:11px;font-weight:900">${t.label}</span>
+   </div>
+   <span style="position:absolute;left:12px;top:200px;padding:1px 6px;border-radius:4px;background:${face};font-family:var(--f-mono);font-size:9px;opacity:0.85">MULT +${c.plus} · ${c.weekly ? 'WEEK' : 'DAY'}</span>
+   <span style="position:absolute;right:12px;top:12px;width:20px;height:20px;border-radius:50%;border:1.5px solid ${ink};background:${face};display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:11px">©</span>
+   <div style="position:absolute;left:0;right:0;top:224px;bottom:0;padding:8px 14px 12px;display:flex;flex-direction:column;gap:4px;border-top:1.5px solid ${t.dark ? 'rgba(236,234,227,0.25)' : 'rgba(17,17,17,0.18)'};background:${face}">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-weight:900;font-size:18px;white-space:nowrap">${c.name}</span><span style="white-space:nowrap"><b style="font-family:var(--f-display);font-weight:400;font-size:26px">+${c.plus}</b> <i style="font-style:normal;font-size:10px;font-weight:900;color:${sub}">倍率</i></span></div>
+    <div style="font-size:11px;line-height:1.35;height:30px;overflow:hidden;color:${sub}">${c.cond}</div>
+    <div style="margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-family:var(--f-mono);font-size:11px"><span>${c.weekly ? '按周算' : '按天算'}</span><span style="display:inline-flex;gap:4px"><i style="width:7px;height:7px;border-radius:50%;background:${dot(1)}"></i><i style="width:7px;height:7px;border-radius:50%;background:${dot(2)}"></i><i style="width:7px;height:7px;border-radius:50%;background:${dot(3)}"></i></span></div>
+   </div>
+   ${sticker ? `<span style="position:absolute;right:10px;top:188px;padding:3px 9px;border-radius:8px;background:#111;color:${state === 'broken' ? '#FF8A9B' : '#ECEAE3'};font-family:var(--f-mono);font-size:11px;transform:rotate(-4deg)">${sticker}</span>` : ''}
+  </div></div>`;
+}
+const scaled = (c, s, state) => `<div style="width:${240 * s}px;height:${340 * s}px" aria-hidden="true"><div style="width:240px;height:340px;transform:scale(${s});transform-origin:0 0">${cardHTML(c, state)}</div></div>`;
+// a card's art as a small icon on its colour, used where the canvas had mascot tiles
+function artIcon(no, size) {
+  const art = ART[no];
+  return `<svg width="${size}" height="${Math.round(size * 224 / 240)}" viewBox="0 0 240 224" aria-hidden="true">
+    <path d="${art.b || ''}" fill="#111" fill-rule="${art.rule || 'nonzero'}"/><path d="${art.bs || ''}" fill="none" stroke="#111" stroke-width="${art.bw || 0}" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${art.cut || ''}" fill="${coreOf(no)}"/><path d="${art.a || ''}" fill="#FFF"/><path d="${art.as || ''}" fill="none" stroke="#FFF" stroke-width="${art.aw || 0}" stroke-linecap="round"/>
+    <ellipse cx="${art.e[0]}" cy="${art.e[1]}" rx="5" ry="9" fill="${art.ec === 'body' ? '#111' : '#FFF'}"/><ellipse cx="${art.e[2]}" cy="${art.e[3]}" rx="5" ry="9" fill="${art.ec === 'body' ? '#111' : '#FFF'}"/></svg>`;
+}
+
+/* ---------- rules ---------- */
+// today's score = money left today × multiplier; the multiplier starts at 1 and every card still holding adds its +n
+const CARDS = {
+  '01': { no: '01', name: '外卖克星', plus: 2, diff: 2, cond: '今天不点外卖', eg: '今天点了一份外卖，这张当天就碎，倍率少 2。明天零点恢复。',
+    broken: d => d.has('takeout'), why: d => `今天点了外卖 ¥${d.sum('takeout')}` },
+  '06': { no: '06', name: '夜猫', plus: 2, diff: 2, cond: '晚上 10 点后一分不花', eg: '23 点下单一杯奶茶，这张当天就碎。白天花的不影响它。',
+    broken: d => d.night, why: d => `22 点后花了 ¥${d.nightSum}` },
+  '03': { no: '03', name: '奶茶配额', plus: 1, diff: 1, weekly: true, cond: '本周奶茶咖啡不超过 3 杯', eg: '前 3 杯都没事；第 4 杯这张就碎，一直碎到周日。',
+    broken: d => d.weekTea > 3, why: d => `本周已经喝了 ${d.weekTea} 杯`, near: d => d.weekTea === 3 ? '本周已经 3 杯了，再来一杯奶茶配额就碎，碎到周日' : null },
+  '04': { no: '04', name: '步行者', plus: 1, diff: 1, cond: '今天不打车', eg: '打一次车这张当天就碎。坐地铁、公交算通勤，不受影响。',
+    broken: d => d.has('taxi'), why: d => `今天打车 ¥${d.sum('taxi')}` },
+  '05': { no: '05', name: '零元日', plus: 3, diff: 3, cond: '今天额度外一分不花', eg: '只花吃饭、通勤就守得住；买一杯奶茶就碎。最难，也最值钱。',
+    broken: d => d.extra > 0, why: d => `额度外花了 ¥${d.extra}` },
+  '10': { no: '10', name: '对账员', plus: 1, diff: 1, cond: '今天至少记一笔账', eg: '一笔没记的时候它睡着，记下第一笔就醒。吃饭、通勤也算。',
+    pending: d => d.count === 0, why: () => '今天还没记账' },
+  '07': { no: '07', name: '冷静期', plus: 2, diff: 2, unlock: 3, cond: '网购先进待买清单，等满 24 小时再买', eg: '当场下单这张就碎；从待买清单里等过 24 小时再买，不算。',
+    broken: d => d.directOnline, why: d => `当场网购 ¥${d.sum('online')}` },
+  '13': { no: '13', name: '存钱罐', plus: 2, diff: 2, unlock: 6, cond: '今天额度外花的不超过 ¥20', eg: '一杯奶茶没事，再加一份外卖就碎。',
+    broken: d => d.extra > 20, why: d => `额度外花了 ¥${d.extra}`, near: d => d.extra > 10 && d.extra <= 20 ? `今天额度外已经 ¥${d.extra}，再花 ¥${21 - d.extra} 存钱罐就碎` : null }
+};
+const BASE = 350;
+// slots can grow to four in the shop; the deal is always two more than you keep
+const HOLDN = () => S.slots, DEALN = () => S.slots + 2;
+const DAYS = ['一', '二', '三', '四', '五', '六', '日'];
+const CATS = [
+  { id: 'takeout', name: '外卖' }, { id: 'tea', name: '奶茶咖啡' }, { id: 'online', name: '网购' }, { id: 'taxi', name: '打车' },
+  { id: 'meal', name: '吃饭', ess: true }, { id: 'commute', name: '通勤', ess: true }, { id: 'other', name: '其他' }
+];
+const cat = id => CATS.find(c => c.id === id) || { name: '其他' };
+// meals and commute up to the daily allowance (set on the budget step) don't count; anything above it does
+let essQuota = 45;
+const essOf = list => list.filter(x => cat(x.cat).ess).reduce((a, x) => a + x.amt, 0);
+const overOf = list => Math.max(0, essOf(list) - essQuota);
+const extraOf = list => list.filter(x => !cat(x.cat).ess).reduce((a, x) => a + x.amt, 0) + overOf(list);
+const teaOf = list => list.filter(x => x.cat === 'tea').length;
+
+function facts(list, teaBefore, assumeLogged) {
+  return {
+    count: assumeLogged ? Math.max(1, list.length) : list.length, extra: extraOf(list),
+    night: list.some(x => x.night), nightSum: list.filter(x => x.night).reduce((a, x) => a + x.amt, 0),
+    weekTea: teaBefore + teaOf(list), directOnline: list.some(x => x.cat === 'online' && !x.fromWish),
+    has: id => list.some(x => x.cat === id), sum: id => list.filter(x => x.cat === id).reduce((a, x) => a + x.amt, 0)
+  };
+}
+function evaluate(list, held = S.held, teaBefore = S.teaWeek, assumeLogged = false, daily = todayBudget()) {
+  const d = facts(list, teaBefore, assumeLogged);
+  const cards = held.map(no => {
+    const c = CARDS[no];
+    let state = c.pending && c.pending(d) ? 'pending' : c.broken && c.broken(d) ? 'broken' : 'on';
+    // glue from the shop mends one cracked card for the rest of today
+    if (state === 'broken' && held === S.held && S.glued && S.glued.week === S.week && S.glued.day === S.day && S.glued.no === no) state = 'on';
+    return { no, state, why: state === 'on' ? '' : c.why(d), near: state === 'on' && c.near ? c.near(d) : null };
+  });
+  const mult = S.baseMult + cards.filter(x => x.state === 'on').reduce((a, x) => a + CARDS[x.no].plus, 0);
+  const base = Math.max(0, daily - d.extra);
+  return { d, cards, mult, base, daily, left: daily - d.extra, score: base * mult };
+}
+// which entry first cracked each card, so lists can point at the culprit
+function breakers(list, held = S.held, teaBefore = S.teaWeek) {
+  const out = {};
+  let prev = evaluate([], held, teaBefore, true);
+  list.forEach((x, i) => {
+    const now = evaluate(list.slice(0, i + 1), held, teaBefore, true);
+    now.cards.forEach((c, k) => { if (c.state === 'broken' && prev.cards[k].state !== 'broken') (out[i] = out[i] || []).push(CARDS[c.no].name); });
+    prev = now;
+  });
+  return out;
+}
+// run a week of receipts through a set of held cards: total score and how many days each card would have held
+function simulate(held, days, start) {
+  let tea = 0, total = 0;
+  const per = {}; held.forEach(n => { per[n] = 0; });
+  const list = days.slice(start);
+  list.forEach(day => {
+    const ev = evaluate(day, held, tea, true, dailyBudget());
+    tea += teaOf(day); total += ev.score;
+    ev.cards.forEach(c => { if (c.state === 'on') per[c.no]++; });
+  });
+  return { total, per, days: list.length };
+}
+
+/* ---------- state ---------- */
+// a new user joins on whatever weekday today is; week 1 runs from that day to Sunday as a short week
+const NOW = new Date();
+const JOIN = (NOW.getDay() + 6) % 7;
+const START = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - JOIN);
+let S = {
+  week: 1, day: JOIN, weekStart: JOIN, held: [], stars: 0, unlocked: ['01', '06', '03', '04', '05', '10'], lastWeek: [], estimated: false, firstDraw: true,
+  base: BASE, setup: { income: 6000, fixed: 2500, save: 2000 }, weak: [], freq: {}, coach: 0, view: 'home', billTab: 'flow', cardLog: {},
+  baseMult: 1, grad: [], stake: 0, nextStake: 0, carry: null, debt: 0, starsTotal: 0, slots: 3, glue: 0, glued: null, pinned: [],
+  prefs: { evening: true, eveningAt: 21.5, ruleAlerts: true, morning: true },
+  history: [], today: [{ cat: 'meal', amt: 8, note: '早餐' }], teaWeek: 0, wish: [], revisit: [],
+  quicks: [{ label: '早餐', cat: 'meal', amt: 8 }, { label: '地铁', cat: 'commute', amt: 4 }, { label: '瑞幸', cat: 'tea', amt: 15 }, { label: '麦当劳', cat: 'takeout', amt: 32 }]
+};
+let draft = {};
+S.seen = new Set();
+// time of day drives the evening reminder, rule alerts and the 22:00 default; the demo lets you jump between moments
+// before 6am the demo starts at a morning commute rather than the middle of the night
+S.clock = NOW.getHours() < 6 ? 8.5 : NOW.getHours() + NOW.getMinutes() / 60;
+const TIMES = [{ c: 8.5, name: '早上通勤' }, { c: 12 + 1 / 6, name: '午饭' }, { c: 18.5, name: '晚饭' }, { c: 21.5, name: '晚上' }, { c: 22 + 2 / 3, name: '深夜' }];
+const fmtClock = c => `${String(Math.floor(c)).padStart(2, '0')}:${String(Math.round((c % 1) * 60)).padStart(2, '0')}`;
+// with no receipts yet, "how often" answers on the weak-spot step stand in for last week
+const FREQ = [{ label: '1–2 次', n: 2 }, { label: '3–5 次', n: 4 }, { label: '几乎每天', n: 7 }];
+const TYPICAL = {
+  takeout: { cat: 'takeout', amt: 30, note: '外卖' }, tea: { cat: 'tea', amt: 16, note: '奶茶' }, online: { cat: 'online', amt: 60, note: '网购' },
+  taxi: { cat: 'taxi', amt: 22, note: '打车' }, night: { cat: 'other', amt: 40, note: '深夜下单', night: true }, weekend: { cat: 'other', amt: 80, note: '周末出去玩', weekend: true }
+};
+function estimateWeek() {
+  const days = DAYS.map(() => []);
+  S.weak.forEach(id => {
+    const t = TYPICAL[id], f = S.freq[id] ?? 1, n = FREQ[f].n;
+    // weekends only have two days, so the answer scales how much is spent rather than how often
+    if (t.weekend) { [5, 6].forEach(d => days[d].push({ cat: t.cat, amt: [50, 80, 120][f], note: t.note })); return; }
+    for (let i = 0; i < n; i++) days[Math.floor(i * 7 / n)].push({ cat: t.cat, amt: t.amt, note: t.note, night: !!t.night });
+  });
+  return days;
+}
+const START_DAY = (w, d) => { const x = new Date(START); x.setDate(x.getDate() + (w - 1) * 7 + d); return x; };
+const dateOf = START_DAY;
+// the six weak spots and mascot tiles from the canvas pick screen, each pointing at the card that targets it
+const EYES = '<ellipse cx="25" cy="30" rx="2.6" ry="4.5" fill="#FFF"/><ellipse cx="35" cy="30" rx="2.6" ry="4.5" fill="#FFF"/>';
+const WEAK = [
+  { id: 'takeout', name: '外卖', card: '01', bg: '#FFD000', svg: `<polygon points="58,30 48.5,37.7 49.8,49.8 37.7,48.5 30,58 22.3,48.5 10.2,49.8 11.5,37.7 2,30 11.5,22.3 10.2,10.2 22.3,11.5 30,2 37.7,11.5 49.8,10.2 48.5,22.3" fill="#111"/>${EYES}` },
+  { id: 'tea', name: '奶茶咖啡', card: '03', bg: '#FF7BD5', svg: `<circle cx="30" cy="30" r="22" fill="#111"/>${EYES}` },
+  { id: 'online', name: '网购', card: '07', bg: '#2E8BFF', svg: '<rect x="6" y="16" width="48" height="28" rx="8" fill="#111"/><ellipse cx="24" cy="30" rx="2.6" ry="4.5" fill="#FFF"/><ellipse cx="36" cy="30" rx="2.6" ry="4.5" fill="#FFF"/>' },
+  { id: 'taxi', name: '打车', card: '04', bg: '#2FD15C', svg: '<path d="M24 4h12v8h8v8h8v20h-8v8h-8v8H24v-8h-8v-8H8V20h8v-8h8z" fill="#111"/><rect x="23" y="24" width="5" height="10" fill="#FFF"/><rect x="33" y="24" width="5" height="10" fill="#FFF"/>' },
+  { id: 'night', name: '深夜', card: '06', bg: '#FF4D6A', svg: `<path d="M30 2C33 22 38 27 58 30C38 33 33 38 30 58C27 38 22 33 2 30C22 27 27 22 30 2Z" fill="#111"/>${EYES}` },
+  { id: 'weekend', name: '周末', card: '13', bg: '#A55BFF', svg: '<path d="M6 12H54L30 54Z" fill="#111" stroke="#111" stroke-width="6" stroke-linejoin="round"/><ellipse cx="25" cy="24" rx="2.6" ry="4.5" fill="#FFF"/><ellipse cx="35" cy="24" rx="2.6" ry="4.5" fill="#FFF"/>' }
+];
+const weeklyFrom = s => Math.round((s.income - s.fixed - s.save) / 4.3);
+
+const weekHist = () => S.history.filter(h => h.week === S.week);
+const dailyBudget = () => Math.round(S.base / 7);
+// money spent past today's allowance comes out of tomorrow's, so every yuan still counts after a blown day
+const todayBudget = () => Math.max(0, dailyBudget() - S.debt);
+const weekDays = () => 7 - S.weekStart;
+// roughly: keep half the day's money with about two cards holding, every day
+// stakes raise the bar after a pass, the way Balatro moves from white to black stake
+const STAKES = [{ name: '白注', k: 1, bg: '#FFFFFF', fg: '#111' }, { name: '红注', k: 1.25, bg: '#FF4D6A', fg: '#FFF' }, { name: '蓝注', k: 1.5, bg: '#2E8BFF', fg: '#FFF' }, { name: '黑注', k: 1.8, bg: '#111', fg: '#E4FF1A' }];
+const weekTarget = () => Math.round(dailyBudget() * weekDays() * 2.4 * STAKES[S.stake].k / 10) * 10;
+const scorePrior = () => weekHist().reduce((a, h) => a + h.score, 0);
+const moneyWeek = () => Math.round(S.base * weekDays() / 7);
+const spentWeek = () => weekHist().reduce((a, h) => a + h.extra, 0) + extraOf(S.today);
+const starsFrom = (score, target) => score >= target * 1.6 ? 3 : score >= target * 1.3 ? 2 : score >= target ? 1 : 0;
+
+/* ---------- views ---------- */
+const app = document.getElementById('app');
+const money = n => (n < 0 ? '−¥' + Math.abs(n) : '¥' + n);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const entryName = x => `${cat(x.cat).name}${x.note && x.note !== cat(x.cat).name ? ' · ' + esc(x.note) : ''}`;
+const starStr = n => '★'.repeat(n);
+function toast(msg) { app.querySelectorAll('.toast').forEach(t => t.remove()); const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; app.appendChild(t); setTimeout(() => t.remove(), 2600); }
+function sheet(label, html) { app.insertAdjacentHTML('beforeend', `<div class="sheet" role="dialog" aria-label="${label}">${html}</div>`); return app.lastElementChild; }
+function replaceSheet(old, fn) { const top = old.scrollTop; old.remove(); fn(); const n = app.lastElementChild; n.style.animation = 'none'; n.scrollTop = top; }
+const lastSheet = () => [...app.querySelectorAll('.sheet')].pop();
+
+function tilesHTML() {
+  return `<div class="tiles">${DAYS.map((d, i) => {
+    const h = weekHist().find(x => x.day === i);
+    if (h) {
+      const all = h.cards.every(c => c.state === 'on'), hit = h.cards.some(c => c.state === 'broken');
+      return `<button class="tile ${hit ? 'hit' : ''} ${all ? 'zero' : ''}" data-day="${i}" aria-label="周${d} ${h.score} 分，看小票"><span>${d}</span><b>${h.unlogged ? "未记" : h.score}</b></button>`;
+    }
+    if (i === S.day) return `<span class="tile now"><span>${d}</span><b>今天</b></span>`;
+    if (i < S.weekStart) return `<span class="tile future"><span>${d}</span><b>未加入</b></span>`;
+    return `<span class="tile future"><span>${d}</span><b>—</b></span>`;
+  }).join('')}</div>`;
+}
+function holdHTML(ev) {
+  const cards = ev.cards.map(c => {
+    const card = CARDS[c.no];
+    const label = c.state === 'on' ? `+${card.plus} 守住` : c.state === 'pending' ? '睡着' : '碎了';
+    return `<button class="hcard ${c.state}" data-info="${c.no}" aria-label="${card.name}，${label}${c.why ? '：' + c.why : ''}">${scaled(card, ev.cards.length > 3 ? 0.27 : 0.33, c.state)}<span>${label}</span></button>`;
+  }).join('');
+  return `<div class="hold" style="grid-template-columns:repeat(${ev.cards.length}, ${ev.cards.length > 3 ? 65 : 79}px) 1fr">${cards}<div class="multc" aria-label="倍率 ${ev.mult}"><small>倍率</small><b>×${ev.mult}</b></div></div>`;
+}
+function homeHTML() {
+  const ev = evaluate(S.today);
+  const prior = scorePrior(), target = weekTarget(), need = target - prior, daysLeft = 7 - S.day;
+  const dots = DAYS.map((d, i) => `<b class="${i === S.day ? 'now' : ''}">${d}</b>`).join('');
+  const br = breakers(S.today);
+  const list = S.today.map((x, i) => {
+    const ess = !!cat(x.cat).ess, b = br[i];
+    return `<button class="chip ${ess ? 'ess' : b ? 'hit' : 'hot'}" data-edit="${i}" aria-label="${entryName(x)} ${x.amt} 元，点一下修改">${entryName(x)}${ess ? ' · 必需' : ''}${b ? ` · 碎了${b.join('、')}` : ''} <b>¥${x.amt}</b></button>`;
+  }).join('') || '<span class="note">今天还没花钱。</span>';
+  const hint = need <= 0 ? `已经够目标了！多攒的分让星星更多：1.3 倍拿 ★★，1.6 倍拿 ★★★。`
+    : `还差 <b>${need}</b> 分，剩 ${daysLeft} 天，平均每天 <b>${Math.ceil(need / daysLeft)}</b> 分就够。`;
+  return `
+    <div class="head">
+      <button class="daypill" data-act="clock" aria-label="第 ${S.week} 周周${DAYS[S.day]}，现在 ${fmtClock(S.clock)}，点一下切换演示时间"><span class="px" style="font-size:13px;display:flex;justify-content:space-between">第 ${S.week} 周 · 周${DAYS[S.day]}<span class="clock">${fmtClock(S.clock)} ▾</span></span><span class="dots" aria-hidden="true">${dots}</span></button>
+      ${bellHTML(ev)}
+      <button class="help" data-act="settings" aria-label="设置"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#FFF" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="3"/><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3M4 4l2.1 2.1M13.9 13.9L16 16M4 16l2.1-2.1M13.9 6.1L16 4"/></svg></button>
+      <button class="cookie" data-act="star" aria-label="星星 ${S.stars}，点一下看说明"><span class="n">${S.stars}</span><span class="l">★ 星星</span></button>
+    </div>
+    ${S.held.length ? holdHTML(ev) : `<button class="rulebar" data-act="draw"><div class="rtext" style="grid-column:1/-1"><small>本周的牌</small><b>还没抽</b><span>点这里抽 5 张，留 3 张</span></div></button>`}
+    <div class="cap orange hero ${ev.left < 0 ? 'over' : ''}"><div class="top">
+      <div class="row"><span style="font-weight:900;font-size:14px">${ev.left < 0 ? '今天已超' : '今日还能花'}</span><span class="px" style="font-size:13px">${S.debt ? `¥${dailyBudget()} − 透支 ¥${Math.min(S.debt, dailyBudget())}` : `每天 ¥${ev.daily}`}</span></div>
+      <span class="money">${money(ev.left)}</span>
+      <div class="row"><span style="font-weight:900;font-size:15px">今晚预计 ${ev.score} 分</span><span class="px" style="font-size:13px">${ev.base} × ${ev.mult}</span></div>
+    </div></div>
+    <div class="cap meter"><div class="top">
+      <div class="row"><span>本周分数 <span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></span><span class="px">${prior} / ${target}</span></div>
+      <div class="bar"><i style="width:${Math.min(100, Math.round(prior / target * 100))}%"></i></div>
+      <p class="hint">${hint} 真实的钱这周还剩 ${money(moneyWeek() - spentWeek())}。</p>
+      ${tilesHTML()}
+    </div></div>
+    <h2>今天记的账 <button class="linkbtn" data-act="goflow" style="font-size:13px;color:#5B4FC8;padding:0">全部流水 →</button></h2>
+    <div class="keys">${list}</div>
+    <div class="lbl">常用 · 点一下填好，按住直接记下</div>
+    <div class="quick">${S.quicks.map((q, i) => `<button class="chip qchip" data-hquick="${i}">${esc(q.label)} <b>¥${q.amt}</b></button>`).join("")}</div>
+    <button class="cap lime bigbtn endbtn" data-act="end"><div class="top">结束今天</div></button>
+    <p class="sample">示例数据 · 每天能花 ¥${dailyBudget()} · 吃饭、通勤每天 ¥${essQuota} 以内不算</p>`;
+}
+
+/* ---------- tab pages, ported from the canvas screens ---------- */
+const CHECK = 'background-color:#E4E4EA;background-image:linear-gradient(45deg,#D4D4DB 25%,transparent 25%,transparent 75%,#D4D4DB 75%),linear-gradient(45deg,#D4D4DB 25%,transparent 25%,transparent 75%,#D4D4DB 75%);background-size:12px 12px;background-position:0 0,6px 6px';
+const NAV = [
+  { id: 'home', name: '首页', bg: 'linear-gradient(180deg,#FFFFFF 0%,#FFE1F6 100%)', icon: '<svg width="22" height="22" viewBox="0 0 22 22" fill="#FF52D9" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="12" y="3" width="7" height="7" rx="2"/><rect x="3" y="12" width="7" height="7" rx="2"/><rect x="12" y="12" width="7" height="7" rx="2"/></svg>' },
+  { id: 'bill', name: '账单', bg: 'linear-gradient(180deg,#FFF3B0 0%,#FFE066 100%)', icon: '<svg width="22" height="22" viewBox="0 0 22 22" fill="#FF8A00" aria-hidden="true"><path d="M12 1L4 13h6l-1 8 9-13h-6z"/></svg>' },
+  { id: 'deck', name: '牌库', bg: 'linear-gradient(180deg,#D8FF9E 0%,#A8E05A 100%)', icon: '<svg width="22" height="22" viewBox="0 0 22 22" fill="#3BA51F" aria-hidden="true"><circle cx="11" cy="5.5" r="4.5"/><circle cx="11" cy="16.5" r="4.5"/><circle cx="5.5" cy="11" r="4.5"/><circle cx="16.5" cy="11" r="4.5"/></svg>' }
+];
+function navHTML() {
+  const on = S.view === 'flow' ? 'bill' : S.view;
+  return `<nav class="cv-nav" aria-label="主导航">${NAV.map(n => `<button data-tab="${n.id}" class="${on === n.id ? 'on' : ''}" style="background:${n.bg}" ${on === n.id ? 'aria-current="page"' : ''}>${n.icon}<span>${n.name}</span></button>`).join('')}<button class="cv-log" data-act="log"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M8 2v12M2 8h12"/></svg>记一笔</button></nav>`;
+}
+function renderTable() {
+  const body = { home: homeHTML, bill: billHTML, deck: deckHTML }[S.view]();
+  app.innerHTML = `<div class="screen">${body}</div>${navHTML()}`;
+  showCoach();
+}
+// replaces the old one-minute guide: tips on the real home screen, the first time it opens
+const COACH = [
+  { sel: '.hold', text: '这是你这周留下的 3 张牌。守住一张就加它的倍率，碎了当天就不算，第二天零点恢复。' },
+  { sel: '.bell', text: '提醒都收在铃铛里，不会挤占首页。有新的会标数字：晚上提醒结束今天、饭点提醒外卖克星、待买清单回访都在这。' },
+  { sel: '.hero', text: '今天的分 = 今天剩下的钱 × 倍率。花得越少、守住的牌越多，分越高。' },
+  { sel: '.cv-log', text: '花了钱就按这里记一笔。记下之前就能看到会不会碎牌、倍率怎么变。' },
+  { sel: '.endbtn', text: '晚上记完账点这里，会给你一张今天的小票。忘了也没事，零点会自动结束。' }
+];
+function showCoach() {
+  if (S.view !== 'home' || !S.held.length || S.coach >= COACH.length || lastSheet()) return;
+  const c = COACH[S.coach], scr = app.querySelector('.screen'), el = app.querySelector(c.sel);
+  if (!el) return;
+  if (scr.contains(el)) scr.scrollTop = Math.max(0, el.offsetTop - 160);
+  el.classList.add('coach-on');
+  // the nav is its own stacking layer, so lift it above the dim when the tip points into it
+  const nav = el.closest('.cv-nav');
+  if (nav) nav.style.zIndex = 7;
+  const a = app.getBoundingClientRect(), r = el.getBoundingClientRect();
+  const above = r.bottom - a.top + 140 > a.height;
+  app.insertAdjacentHTML('beforeend', `<div class="coach-dim" aria-hidden="true"></div>
+    <div class="coach ${above ? 'above' : ''}" role="dialog" aria-label="提示" style="${above ? `bottom:${Math.round(a.bottom - r.top + 12)}px` : `top:${Math.round(r.bottom - a.top + 12)}px`}">
+      <span>${c.text}</span>
+      <div class="row"><button class="skip" data-act="coach-skip">跳过提示</button><button class="ok" data-act="coach-next">${S.coach < COACH.length - 1 ? `知道了 ${S.coach + 1}/${COACH.length}` : '开始吧'}</button></div>
+    </div>`);
+}
+function clearCoach() {
+  app.querySelectorAll('.coach, .coach-dim').forEach(n => n.remove());
+  app.querySelectorAll('.coach-on').forEach(n => n.classList.remove('coach-on'));
+  const nav = app.querySelector('.cv-nav'); if (nav) nav.style.zIndex = '';
+}
+const tabsHTML = (items, attr) => `<div role="tablist" style="border-radius:20px;padding:5px;${CHECK}"><div style="display:flex;align-items:center;gap:4px;height:42px;padding:0 6px;border-radius:15px;background:#FFF">
+  ${items.map(t => `<button role="tab" aria-selected="${!!t.on}" class="cv-tab ${t.on ? 'on' : ''}" ${attr}="${t.id}">${t.name}</button>`).join('')}${items.extra || ''}</div></div>`;
+
+// flow: today's entries as tilted slabs (ToyFeed)
+const SLAB = { grey: ['#F2F2F5', '#CFCFD6', '#111', '#8A8A92'], green: ['#1E7A2E', '#12501D', '#FFF', 'rgba(255,255,255,0.8)'], pink: ['#FF8CC6', '#D25D9B', '#111', '#111'], lav: ['#DCD8FF', '#B7B0F0', '#2B2470', '#4A4390'], blue: ['#1F6BFF', '#1546B0', '#FFF', 'rgba(255,255,255,0.85)'] };
+function slabHTML(x, i, opts) {
+  const ess = !!cat(x.cat).ess;
+  const tone = opts.wish ? 'blue' : ess ? (i % 2 ? 'green' : 'grey') : opts.breaks ? 'pink' : 'lav';
+  const [face, back, fg, sub] = SLAB[tone];
+  const title = x.note && x.note.length <= 4 ? esc(x.note) : cat(x.cat).name;
+  const len = title.length, size = len <= 2 ? 68 : len === 3 ? 54 : 44;
+  const sk = i % 2 ? 7 : -7;
+  const tag = opts.wish ? `<span class="px" style="padding:2px 10px;border-radius:10px;background:#E4FF1A;color:#111;font-size:14px">没买 · 明天问你</span>`
+    : opts.breaks ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;background:#111;color:#FFF;font-size:11px;font-weight:900">碎了 ${opts.breaks.join('、')}</span>`
+    : `<span class="px" style="font-size:13px;color:${sub}">${ess ? '必需 · 额度内' : x.fromWish ? '等过 24 小时' : '没碰到规则'}</span>`;
+  const meta = `<div class="cv-meta" style="${i % 2 ? 'align-items:flex-end' : ''}"><span class="px" style="font-size:14px;color:${sub}">${x.night ? '22 点后' : '白天'}</span>${tag}</div>`;
+  const words = `<div style="${i % 2 ? '' : 'text-align:right'}"><div class="cv-big" style="font-size:${size}px;${opts.wish ? 'text-decoration:line-through;text-decoration-thickness:6px;text-decoration-color:#E4FF1A' : ''}">${title}</div><div class="px" style="font-size:${opts.wish ? 15 : 19}px;margin-top:4px;white-space:nowrap">¥${x.amt}${opts.wish ? ' · 进了待买清单' : ''}</div></div>`;
+  const elt = opts.edit != null ? 'button' : 'div';
+  return `<${elt} class="cv-slab" style="z-index:${opts.z};${i ? 'margin-top:-14px' : ''}" ${opts.edit != null ? `data-edit="${opts.edit}" aria-label="${entryName(x)} ${x.amt} 元，点一下修改"` : ''}>
+    <div class="sb" aria-hidden="true" style="background:${back};transform:skewY(${sk}deg)"></div>
+    <div class="sf" style="background:${face};color:${fg};transform:skewY(${sk}deg)"><div class="si" style="transform:skewY(${-sk}deg)">${i % 2 ? words + meta : meta + words}</div></div>
+  </${elt}>`;
+}
+function flowHTML(tabs) {
+  const paid = S.today.reduce((a, x) => a + x.amt, 0), br = breakers(S.today);
+  const items = [...S.today.map((x, i) => ({ x, edit: i, breaks: br[i] })), ...S.wish.map(x => ({ x, wish: true }))];
+  const n = items.length;
+  return `<div style="display:flex;justify-content:space-between;align-items:center;min-height:44px">
+      <h1 style="margin:0;font-weight:900;font-size:26px">今天的流水</h1>
+      <span class="px" style="height:32px;padding:0 12px;border-radius:12px;border:2px solid #E2E2E8;display:inline-flex;align-items:center;font-size:14px;color:#55555C">周${DAYS[S.day]} · 实付 ¥${paid}</span>
+    </div>
+    ${tabs}
+    <div style="display:flex;flex-direction:column;margin-top:18px">${items.map((it, i) => slabHTML(it.x, i, { edit: it.edit, wish: it.wish, breaks: it.breaks, z: n - i })).join('') || '<p class="note">今天还没花钱。按下面的"记一笔"开始。</p>'}</div>
+    <p class="note left" style="margin-top:8px">点一块可以改或删。粉色那块是让牌碎掉的那笔。</p>
+    <h2>本周其他天 <small>点一天看小票</small></h2>
+    <div class="cap"><div class="top">${tilesHTML()}</div></div>`;
+}
+
+// bill: calendar month with keycap day cells (ToyBill) and where it went (ToyCats); always real money
+function monthDays() {
+  const now = dateOf(S.week, S.day), y = now.getFullYear(), m = now.getMonth();
+  const recs = S.history.map(h => ({ h, d: dateOf(h.week, h.day) })).filter(o => o.d.getFullYear() === y && o.d.getMonth() === m);
+  return { now, y, m, recs };
+}
+function monthByCat(recs) {
+  const by = {};
+  [...recs.flatMap(o => o.h.entries), ...S.today].filter(x => !cat(x.cat).ess).forEach(x => { by[x.cat] = (by[x.cat] || 0) + x.amt; });
+  return Object.entries(by).sort((a, b) => b[1] - a[1]);
+}
+const CAT_CARD = { takeout: '01', tea: '03', online: '07', taxi: '04' };
+function billHTML() {
+  const { now, y, m, recs } = monthDays();
+  const todayExtra = extraOf(S.today);
+  const spent = recs.reduce((a, o) => a + o.h.extra, 0) + todayExtra;
+  const free = Math.round(S.base * 4.3), n = new Date(y, m + 1, 0).getDate(), daysLeft = n - now.getDate() + 1;
+  // 流水 lives in the bill tab as its first segment: today's entries, then the month views
+  const tabs = tabsHTML([{ id: 'flow', name: '流水', on: S.billTab === 'flow' }, { id: 'cal', name: '日历', on: S.billTab === 'cal' }, { id: 'cat', name: '分类', on: S.billTab === 'cat' }, { id: 'review', name: '回顾', on: S.billTab === 'review' }], 'data-bill');
+  if (S.billTab === 'flow') return flowHTML(tabs);
+  if (S.billTab === 'cat') return catsHTML(recs, spent, tabs);
+  if (S.billTab === 'review') return `<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-weight:900;font-size:26px">${m + 1} 月回顾</h1><span class="px" style="font-size:12px;color:#6A6A70">到今天为止</span></div>${tabs}${reviewHTML(y, m)}`;
+  const avg = dailyBudget();
+  const tone = h => h > 1 ? ['#D43AB4', 'linear-gradient(180deg,#FF7BE3 0%,#FF52D9 100%)'] : h >= 0.8 ? ['#D94F0C', 'linear-gradient(180deg,#FF8A4A 0%,#FF6A1F 100%)'] : h >= 0.4 ? ['#CFCFD6', 'linear-gradient(180deg,#FAFAFC 0%,#EDEDF1 100%)'] : ['#86A1B0', 'linear-gradient(180deg,#C4D8E3 0%,#A9C3D1 100%)'];
+  const cells = [];
+  for (let i = 0, lead = (new Date(y, m, 1).getDay() + 6) % 7; i < lead; i++) cells.push('<span class="cv-day blank"></span>');
+  for (let d = 1; d <= n; d++) {
+    const rec = recs.find(o => o.d.getDate() === d), isNow = d === now.getDate();
+    if (!rec && !isNow) { cells.push(`<span class="cv-day future"><span>${d}</span></span>`); continue; }
+    const v = rec ? rec.h.extra : todayExtra, [outer, face] = tone(v / avg);
+    const inner = `<span style="background:${face}">${d}<b>¥${v}</b></span>`;
+    cells.push(rec ? `<button class="cv-day" style="background:${outer}" data-cal="${rec.h.week}-${rec.h.day}" aria-label="${m + 1} 月 ${d} 日 花了 ${v} 元">${inner}</button>`
+      : `<span class="cv-day now" style="background:${outer}" aria-label="今天，目前花了 ${v} 元">${inner}</span>`);
+  }
+  const top3 = monthByCat(recs).slice(0, 3), max = top3.length ? top3[0][1] : 1, stripes = ['#FF6A1F', '#FF52D9', '#A9C3D1'];
+  const capk = (outer, face, label, value) => `<div class="cap" style="height:76px;background:${outer}"><div class="top" style="background:${face};padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between"><span style="font-size:11px;font-weight:900">${label}</span><span class="px" style="font-size:19px;font-weight:600">${value}</span></div></div>`;
+  return `<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-weight:900;font-size:26px">${m + 1} 月账单</h1></div>
+    ${tabs}
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+      ${capk('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', '可自由支配', `¥${free.toLocaleString()}`)}
+      ${capk('#D94F0C', 'linear-gradient(180deg,#FF8A4A 0%,#FF6A1F 100%)', '已花', `¥${spent.toLocaleString()}`)}
+      ${capk('#B8D000', 'linear-gradient(180deg,#F2FF7A 0%,#E4FF1A 100%)', `还剩 ${daysLeft} 天`, money(free - spent))}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div class="px" style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;font-size:11px;color:#8A8A92;text-align:center"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+      <div class="cv-cal">${cells.join('')}</div>
+      <div class="px" style="display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:#4A4A50;margin-top:4px">
+        <span style="display:flex;align-items:center;gap:4px"><i style="width:10px;height:10px;border-radius:3px;background:#A9C3D1"></i>很省</span>
+        <span style="display:flex;align-items:center;gap:4px"><i style="width:10px;height:10px;border-radius:3px;background:#E4E4EA;border:1px solid #CFCFD6"></i>正常</span>
+        <span style="display:flex;align-items:center;gap:4px"><i style="width:10px;height:10px;border-radius:3px;background:#FF6A1F"></i>偏多</span>
+        <span style="display:flex;align-items:center;gap:4px"><i style="width:10px;height:10px;border-radius:3px;background:#FF52D9"></i>超出日预算</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <h2>花得最多的三类</h2>
+      ${top3.map(([id, v], i) => `<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:900">${cat(id).name}</span><span class="px">¥${v} · 占 ${Math.round(v / Math.max(1, spent) * 100)}%</span></div><div aria-hidden="true" style="height:12px;width:${Math.round(v / max * 100)}%;border-radius:3px;background:repeating-linear-gradient(90deg,${stripes[i]} 0 12px,transparent 12px 15px)"></div></div>`).join('') || '<p class="note left">这个月还没有额度外的花费。</p>'}
+    </div>
+    <p class="note left">每格是当天额度外的真实花费。点一天看小票。</p>`;
+}
+function catsHTML(recs, spent, tabs) {
+  const rows = monthByCat(recs), total = Math.max(1, rows.reduce((a, r) => a + r[1], 0));
+  const bands = rows.slice(0, 3);
+  const rest = rows.slice(3).reduce((a, r) => a + r[1], 0);
+  if (rest) bands.push(['rest', rest]);
+  const STY = [
+    { h: 200, bg: '#FF6A1F', sh: '#C2490A', pct: 120, pc: '#111', fs: 26 }, { h: 124, bg: '#FF8CC6', sh: '#D25D9B', pct: 80, pc: '#FFF', fs: 20 },
+    { h: 116, bg: '#DCD8FF', sh: '#B7B0F0', pct: 72, pc: '#5B4FC8', fs: 20 }, { h: 100, bg: '#EDEDF1', sh: '#CFCFD6', pct: 60, pc: '#B5B5BC', fs: 18 }
+  ];
+  const html = bands.map(([id, v], i) => {
+    const s = STY[i], name = id === 'rest' ? '其他' : cat(id).name, cardNo = CAT_CARD[id];
+    return `<div class="cv-band" style="height:${s.h}px;z-index:${4 - i};${i ? 'margin-top:-18px;padding-top:32px;' : ''}background:${s.bg};box-shadow:0 9px 0 ${s.sh},0 14px 20px rgba(20,20,30,0.15)">
+      <div class="cv-lbl"><span style="font-weight:900;font-size:${s.fs}px">${name}</span><span class="px" style="font-size:15px">¥${v}</span>
+        ${i === 0 && cardNo ? `<span class="px" style="align-self:flex-start;padding:1px 8px;border-radius:8px;background:#111;color:#E4FF1A;font-size:13px">抽到「${CARDS[cardNo].name}」就留下它</span>` : ''}</div>
+      <span class="cv-pct" style="font-size:${s.pct}px;color:${s.pc}">${Math.round(v / total * 100)}%</span>
+      ${i === 0 && cardNo ? `<div style="position:absolute;right:18px;top:14px;width:54px;height:54px;border-radius:14px;background:${coreOf(cardNo)};display:flex;align-items:center;justify-content:center;transform:rotate(10deg);box-shadow:0 0 0 3px #FFF">${artIcon(cardNo, 42)}</div>` : ''}
+    </div>`;
+  }).join('');
+  return `<div style="display:flex;justify-content:space-between;align-items:center;min-height:44px"><h1 style="margin:0;font-weight:900;font-size:26px">本月花在哪</h1><span class="px" style="font-size:13px;color:#6A6A70">额度外 ¥${spent.toLocaleString()}</span></div>
+    ${tabs}
+    <div style="display:flex;flex-direction:column;margin-top:6px">${html || '<p class="note">这个月还没有额度外的花费。</p>'}</div>
+    <p class="note left" style="margin-top:12px">这里是真实的钱；吃饭、通勤在必需品额度以内的不算在里面。</p>`;
+}
+
+// deck: every card as an icon tile, with filters (ToyDeck)
+function deckHTML() {
+  // keys like '10' sort as integers ahead of '01', so order by card number explicitly
+  const all = Object.values(CARDS).sort((a, b) => a.no.localeCompare(b.no));
+  const open = all.filter(x => S.unlocked.includes(x.no)), locked = all.filter(x => !S.unlocked.includes(x.no) && !S.grad.includes(x.no));
+  const f = S.deckTab || 'all';
+  const gradCards = all.filter(x => S.grad.includes(x.no));
+  const shown = f === 'open' ? open : f === 'grad' ? gradCards : all;
+  const next = locked.slice().sort((a, b) => a.unlock - b.unlock)[0];
+  const dots = open.slice(0, 4).map(x => `<span style="width:34px;height:34px;border-radius:50%;border:4px solid ${coreOf(x.no)};background:#111;margin-left:-10px;box-shadow:0 0 0 2px #FFF;display:flex;align-items:center;justify-content:center">${artIcon(x.no, 18)}</span>`).join('');
+  const cells = shown.map(x => {
+    const isOpen = S.unlocked.includes(x.no) || S.grad.includes(x.no), log = S.cardLog[x.no];
+    const badge = S.grad.includes(x.no) ? '<span class="cv-grad">毕业</span>' : S.held.includes(x.no) ? '<span class="cv-grad">本周</span>' : log && log.streak ? `<span class="cv-grad">毕业 ${log.streak}/${GRAD_WEEKS}</span>` : '';
+    const own = log ? '<span class="cv-own"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 5l2 2 4-4" stroke="#FFF" stroke-width="1.8" fill="none"/></svg></span>' : '';
+    return isOpen
+      ? `<button class="cv-cell" data-info="${x.no}" aria-label="${x.name}，+${x.plus} 倍率${log ? `，守住过 ${log.held}/${log.days} 天` : ''}"><div class="cv-icon" style="background:${coreOf(x.no)}">${artIcon(x.no, 54)}${badge}${own}</div><span class="cv-name">${x.name} <span class="px" style="font-weight:400">+${x.plus}</span></span></button>`
+      : `<div class="cv-cell" aria-label="${x.name}，攒到 ${x.unlock} 颗星解锁"><div class="cv-icon cv-lock"><span class="px" style="font-size:16px;color:#8A8A92">★${x.unlock}</span></div><span class="cv-name" style="color:#8A8A92">${x.name}</span></div>`;
+  }).join('');
+  const last = S.lastResult;
+  const banner = last && last.grads.length
+    ? { no: last.grads[0], title: `「${CARDS[last.grads[0]].name}」毕业了`, sub: `连续 ${GRAD_WEEKS} 周守住 6/7 天以上，这个习惯改掉了。`, tail: `底倍率永久 +1，现在从 ${S.baseMult} 开始` }
+    : last
+    ? { no: last.best, title: `上周${last.pass ? '过关了' : '没过'} · ${last.score} / ${last.target} 分`, sub: last.pass ? `拿到 ${starStr(last.stars)}，现在共 ${S.stars} 颗星。守得最好的是「${CARDS[last.best].name}」` : '没过不扣钱，这周换几张更守得住的牌', tail: last.fresh ? `解锁新牌：${last.fresh}` : next ? `再攒 ${Math.max(0, next.unlock - S.stars)} 颗解锁：${next.name}` : '' }
+    : next ? { no: next.no, title: `下一张：${next.name}`, sub: next.cond, tail: `再攒 ${Math.max(0, next.unlock - S.starsTotal)} 颗星解锁` } : null;
+  return `<div style="display:flex;justify-content:space-between;align-items:center">
+      <div><h1 style="margin:0;font-weight:900;font-size:28px">牌库</h1><p class="px" style="margin:2px 0 0;font-size:12px;color:#6A6A70">第 ${S.week} 周 · ★ ${S.stars}</p></div>
+      <div style="display:flex;align-items:center;height:52px;padding:0 14px 0 22px;border-radius:26px;border:2px solid #E2E2E8">${dots}
+        <span class="px" aria-label="已解锁 ${open.length} / ${all.length}" style="margin-left:10px;display:flex;flex-direction:column;align-items:center;font-size:15px;line-height:1"><b style="font-weight:400">${open.length}</b><i style="width:22px;height:2px;margin:3px 0;background:#111"></i><b style="font-weight:400">${all.length}</b></span></div>
+    </div>
+    ${tabsHTML([{ id: 'all', name: `全部 <span class="px" style="font-weight:400">${all.length}</span>`, on: f === 'all' }, { id: 'open', name: `已解锁 <span class="px" style="font-weight:400">${open.length}</span>`, on: f === 'open' }, { id: 'grad', name: `已毕业 <span class="px" style="font-weight:400">${S.grad.length}</span>`, on: f === 'grad' }], 'data-deck')}
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));row-gap:16px;column-gap:8px;margin-top:6px">${cells || '<p class="note">这里还没有牌。</p>'}</div>
+    ${banner ? `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:22px;background:#111;color:#FFF;margin-top:4px">
+      <div style="width:52px;height:52px;flex-shrink:0;border-radius:14px;background:${coreOf(banner.no)};display:flex;align-items:center;justify-content:center">${artIcon(banner.no, 40)}</div>
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:14px">${banner.title}</span><span style="font-size:12px;color:rgba(255,255,255,0.8)">${banner.sub}</span>${banner.tail ? `<span class="px" style="font-size:12px;color:#E4FF1A">${banner.tail}</span>` : ''}</div>
+    </div>` : ''}
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <span style="font-weight:900;font-size:13px;margin-right:2px">守住加</span>
+      <span class="cv-pill" style="background:#2E8BFF;border-color:#2E8BFF;color:#FFF">+1 好守</span><span class="cv-pill" style="background:#FF4D6A;border-color:#FF4D6A;color:#FFF">+2 要留意</span><span class="cv-pill" style="background:#111;border-color:#111;color:#E4FF1A">+3 最难</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <span style="font-weight:900;font-size:13px;margin-right:2px">难度</span>
+      ${STAKES.map((s, i) => `<span class="cv-pill" style="${i === S.stake ? `background:${s.bg};border-color:${i ? s.bg : "#111"};color:${s.fg}` : ""}">${s.name}${i < S.stake || i <= (S.maxStake || 0) && i !== S.stake ? " ✓" : ""}</span>`).join("")}
+    </div>
+    <p class="note left">每周一从已解锁的牌里发 5 张，你留 3 张。毕业的牌不再发，底倍率 +1（现在从 ${S.baseMult} 开始）。点一张看它怎么算。</p>`;
+}
+
+/* ---------- weekly draw: deal 5, keep 3 ---------- */
+function firstHand() {
+  const picks = [...new Set(S.weak.map(id => WEAK.find(w => w.id === id).card))].filter(no => S.unlocked.includes(no));
+  const rest = S.unlocked.filter(no => !picks.includes(no)).sort(() => Math.random() - 0.5);
+  return [...picks, ...rest].slice(0, DEALN());
+}
+// try every way to keep n of the dealt cards: with receipts (real or estimated) pick the highest simulated week,
+// without any, pick the easiest set. A carried card always stays in the set
+function bestCombo(hand, n, hasData) {
+  const combos = [];
+  const walk = (start, pick) => { if (pick.length === n) { combos.push(pick.slice()); return; } for (let i = start; i < hand.length; i++) { pick.push(hand[i]); walk(i + 1, pick); pick.pop(); } };
+  walk(0, []);
+  const ok = combos.filter(c => !S.carry || !hand.includes(S.carry) || c.includes(S.carry));
+  const value = c => hasData ? simulate(c, S.lastWeek, S.weekStart).total : -c.reduce((a, no) => a + CARDS[no].diff * 10 - CARDS[no].plus, 0);
+  return ok.sort((a, b) => value(b) - value(a))[0] || hand.slice(0, n);
+}
+function recHTML(need, hasData) {
+  draft.rec = draft.rec || bestCombo(draft.hand, need, hasData);
+  const r = draft.rec, mult = S.baseMult + r.reduce((a, no) => a + CARDS[no].plus, 0);
+  const how = hasData ? `${S.estimated ? "按你选的花法" : "按上周的账"}，这周大概 ${simulate(r, S.lastWeek, S.weekStart).total} 分（目标 ${weekTarget()}）` : `都是好守的牌，全守住倍率 ×${mult}`;
+  return `<div class="recbox"><div class="rhead"><b>推荐组合</b><span>${how}</span></div>
+    <div class="ricons">${r.map(no => `<span><i style="background:${coreOf(no)}">${artIcon(no, 30)}</i>${CARDS[no].name}<em>+${CARDS[no].plus}</em></span>`).join("")}</div>
+    <button class="cap lime" data-act="use-rec"><div class="top">就用这 ${r.length} 张</div></button></div>`;
+}
+function renderDraw() {
+  if (!draft.hand) {
+    // a carried card and any pinned in the shop are always dealt; the carried one starts picked, the rest are random
+    const forced = [...new Set([S.carry, ...S.pinned].filter(no => no && S.unlocked.includes(no)))];
+    const others = S.unlocked.filter(no => !forced.includes(no)).sort(() => Math.random() - 0.5);
+    draft.hand = S.firstDraw ? firstHand() : [...forced, ...others].slice(0, Math.max(DEALN(), forced.length));
+    draft.sel = !S.firstDraw && S.carry && draft.hand.includes(S.carry) ? [S.carry] : []; draft.flip = true;
+  }
+  // once enough cards graduate the pool can run short, so never ask for more than were dealt
+  const need = Math.min(HOLDN(), draft.hand.length);
+  const sel = draft.sel, focus = draft.focus;
+  const hasData = S.lastWeek.some(d => d.length);
+  const cards = draft.hand.map(no => `<button class="pick ${sel.includes(no) ? 'sel' : ''}" data-pick="${no}" aria-pressed="${sel.includes(no)}" aria-label="${CARDS[no].name} +${CARDS[no].plus}"><div class="flip ${draft.flip ? 'down' : ''}"><div class="face"><div class="scale">${cardHTML(CARDS[no])}</div></div><div class="back"><span>?</span></div></div>${sel.includes(no) ? `<span class="pick-n">${sel.indexOf(no) + 1}</span>` : ''}${no === S.carry && !S.firstDraw ? '<span class="carry-tag">续留</span>' : ''}</button>`).join('');
+  let info = '<p class="note">点一张牌看它管什么，再点一次放回去。</p>';
+  if (focus) {
+    const c = CARDS[focus];
+    const one = hasData ? simulate([focus], S.lastWeek, S.weekStart) : null;
+    const held = one ? one.per[focus] : 0;
+    const tag = !one ? null : held >= one.days * 0.7 ? ['ok', `守得住：${held}/${one.days} 天`] : held >= one.days * 0.4 ? ['mid', `一半一半：${held}/${one.days} 天`] : ['no', `很难守：${held}/${one.days} 天`];
+    info = `<div class="pickinfo">
+      <h3><span>${c.name}</span><span class="stars" style="color:${coreOf(focus)}">守住 +${c.plus} 倍率</span></h3>
+      <p>${c.cond}。${c.eg}</p>
+      <div class="pillrow">${tag ? `<span class="pill ${tag[0]}">${S.estimated ? '按你选的估算' : '按上周'} · ${tag[1]}</span>` : `<span class="pill ${['', 'ok', 'mid', 'no'][c.diff]}">${['', '好守', '要留意', '最难也最值'][c.diff]}</span>`}</div>
+    </div>`;
+  }
+  let sum = '';
+  if (sel.length === need) {
+    if (hasData) {
+      const sim = simulate(sel, S.lastWeek, S.weekStart), target = weekTarget();
+      sum = `<div class="impact"><div class="r"><span>留这 3 张，${S.estimated ? '按你选的花法估算' : '按上周的账'}</span><span class="${sim.total >= target ? 'good' : 'hot'}">约 ${sim.total} 分</span></div><div class="r"><span>这周目标</span><span>${target} 分</span></div></div>`;
+    } else sum = `<p class="note">三张都守住时，倍率是 ×${S.baseMult + sel.reduce((a, no) => a + CARDS[no].plus, 0)}。</p>`;
+  }
+  const intro = !S.firstDraw ? (S.lastDays < 7 ? `下面用你上周真实的账算，不过上周你只用了 ${S.lastDays} 天，估得会偏少。` : '下面用你上周真实的账算守得住几天。')
+    : hasData ? '你还没有账单，下面按你上一步选的"一周大概几次"估算。' : '你还没有账单，先按难度挑。';
+  sheet('抽规则卡', `
+    <div class="bar-top"><h1>第 ${S.week} 周 · 抽 ${DEALN()} 留 ${HOLDN()}</h1><span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name} · 已选 ${sel.length}/${need}</span></div>
+    ${S.weekStart > 0 ? `<div class="callout">你周${DAYS[S.weekStart]}加入，这周只剩 <b>${weekDays()} 天</b>，目标分也按 ${weekDays()} 天算。下周一开始完整的一周。</div>` : ''}
+    <p class="note left">留下的 ${need} 张这周同时生效：守住一张就加它的倍率，打破了当天就碎。挑你守得住的，也可以挑倍率高的赌一把。${intro}</p>
+    ${recHTML(need, hasData)}
+    <div class="deal">${cards}</div>
+    ${info}${sum}
+    <button class="go" data-act="choose" ${sel.length === need ? '' : 'disabled'}>${sel.length === need ? `就留这 ${need} 张` : `再选 ${need - sel.length} 张`}</button>`);
+  if (draft.flip) {
+    draft.flip = false;
+    lastSheet().querySelectorAll('.flip').forEach((f, i) => setTimeout(() => f.classList.remove('down'), 300 + i * 160));
+  }
+}
+
+/* ---------- log: preview before saving, verdict after ---------- */
+function renderLog() {
+  const editing = draft.edit != null;
+  const amt = parseInt(draft.amt || '0', 10);
+  const c = cat(draft.cat);
+  const base = editing ? S.today.filter((_, i) => i !== draft.edit) : S.today;
+  const before = evaluate(S.today);
+  const after = evaluate([...base, { cat: draft.cat, amt, night: !!draft.night, fromWish: draft.fromWish }]);
+  const broke = after.cards.filter((x, k) => x.state === 'broken' && before.cards[k].state !== 'broken').map(x => CARDS[x.no].name);
+  const woke = after.cards.filter((x, k) => x.state === 'on' && before.cards[k].state === 'pending').map(x => CARDS[x.no].name);
+  const near = after.cards.map(x => x.near).filter(Boolean)[0];
+  // the one line that matters, pinned above the save button so it is never scrolled away
+  const tone = !amt ? '' : broke.length ? 'bad' : 'good';
+  const head = !amt ? '输入金额，马上告诉你会不会碎牌'
+    : broke.length ? `会碎：${broke.join('、')}` : woke.length ? `${woke.join('、')}会醒 ✓` : '没碰到规则 ✓';
+  const sub = !amt ? `今日还能花 ${money(before.left)} · 倍率 ×${before.mult}`
+    : `倍率 ×${before.mult} → ×${after.mult} · 今晚 ${before.score} → ${after.score} 分 · 还能花 ${money(after.left)}`;
+  const extra = amt && after.left < 0 ? `会超出 ¥${-after.left}，从明天的额度里扣` : amt && near ? near : broke.length ? '放进待买清单：今天不算钱，也不会碎牌，明天再决定' : '';
+  const quicks = S.quicks.map((q, i) => `<button class="chip qchip" data-quick="${i}">${esc(q.label)} <b>¥${q.amt}</b></button>`).join('');
+  const cats = CATS.map(k => `<button class="cap ${k.id === draft.cat ? 'orange' : ''}" aria-pressed="${k.id === draft.cat}" data-cat="${k.id}"><div class="top">${esc(k.name)}${k.ess ? '<small>必需</small>' : ''}</div></button>`).join('')
+    + `<button class="cap" data-act="newcat" aria-expanded="${!!draft.adding}"><div class="top">＋ 新类别</div></button>`;
+  const pad = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map(k => `<button class="cap ${/[C⌫]/.test(k) ? 'dark' : ''}" data-key="${k}" aria-label="${k === '⌫' ? '删除一位' : k === 'C' ? '清空' : k}"><div class="top">${k}</div></button>`).join('');
+  sheet(editing ? '改一笔' : '记一笔', `
+    <div class="bar-top"><h1>${editing ? '改一笔' : '记一笔'}</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    ${editing ? '' : `<div class="lbl">常用 · 点一下填好，按住直接记下</div><div class="quick">${quicks}</div>`}
+    <div class="amount"><b>¥${amt}</b><span class="px" style="color:#4A4390;font-size:12px;text-align:right">周${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(draft.cat).name}</span></div>
+    <div class="cats">${cats}</div>
+    ${draft.adding ? `<div class="newcat">
+      <div class="field"><input class="in" id="newcat" maxlength="5" value="${esc(draft.newName || '')}" placeholder="名字，比如 游戏充值" aria-label="新类别名字"><button class="mini" data-act="addcat">添加</button></div>
+      <div class="toggle"><button aria-pressed="${!draft.newEss}" data-newess="0">额度外的</button><button aria-pressed="${!!draft.newEss}" data-newess="1">必需的</button></div>
+    </div>` : ''}
+    <div class="field"><input class="in" id="note" maxlength="12" value="${esc(draft.note || '')}" placeholder="买了什么（可不填）" aria-label="备注">
+      <button class="mini ${draft.night ? 'on' : ''}" data-night="${draft.night ? 0 : 1}" aria-pressed="${!!draft.night}">22 点后</button>
+      <button class="mini" data-act="savequick" ${amt ? '' : 'disabled'}>存常用</button></div>
+    <div class="pad">${pad}</div>
+    <div class="logfoot">
+      <div class="vline ${tone}"><b>${head}</b><span class="px">${sub}</span>${extra ? `<small>${extra}</small>` : ''}</div>
+      ${editing ? `<div class="actions">
+        <button class="cap dark" data-act="del"><div class="top">删掉这笔</div></button>
+        <button class="go" data-act="save" ${amt ? '' : 'disabled'}>保存修改</button>
+      </div>` : `<div class="actions">
+        <button class="cap ${broke.length ? 'lime' : ''}" data-act="wish" ${!amt || c.ess ? 'disabled' : ''}><div class="top">${broke.length ? '先放待买清单' : '待买清单'}</div></button>
+        <button class="go" data-act="save" ${amt ? '' : 'disabled'}>${broke.length ? '仍然记下' : '记下'}</button>
+      </div>`}
+    </div>`);
+}
+// hold a favorite for half a second to log it without opening the keypad
+function quickSave(i) {
+  const q = S.quicks[i];
+  const entry = { cat: q.cat, amt: q.amt, night: S.clock >= 22, note: q.label === cat(q.cat).name ? '' : q.label };
+  const before = evaluate(S.today);
+  S.today.push(entry);
+  app.querySelectorAll('.sheet').forEach(n => { if (['记一笔', '改一笔'].includes(n.getAttribute('aria-label'))) n.remove(); });
+  renderTable(); verdict(before, evaluate(S.today));
+}
+const refreshLog = () => replaceSheet(lastSheet(), renderLog);
+// the moment right after saving: a cracked card, a waking card, or a quick all-clear
+function verdict(before, after) {
+  const broke = after.cards.filter((x, k) => x.state === 'broken' && before.cards[k].state !== 'broken');
+  const woke = after.cards.filter((x, k) => x.state === 'on' && before.cards[k].state === 'pending');
+  if (!broke.length && !woke.length) {
+    const near = after.cards.map(x => x.near).filter(Boolean)[0];
+    toast(after.left < 0 && after.left < before.left ? `记下了 · 透支 ¥${-after.left}，会从明天的额度里扣` : near ? `记下了 · ${near}` : `没碰到规则 ✓ 倍率还是 ×${after.mult}`);
+    app.querySelectorAll('.hcard.on').forEach(n => n.classList.add('glow'));
+    return;
+  }
+  const shown = broke.length ? broke : woke;
+  app.insertAdjacentHTML('beforeend', `<div class="fb ${broke.length ? 'bad' : 'good'}" role="alert" data-act="fb-close">
+    <div class="fb-card">
+      <div class="fb-cards">${shown.map(x => `<div class="${broke.length ? 'shake' : 'pop'}">${scaled(CARDS[x.no], 0.5, broke.length ? 'broken' : 'on')}</div>`).join('')}</div>
+      <b>${broke.length ? `${shown.map(x => CARDS[x.no].name).join('、')} 碎了！` : `${shown.map(x => CARDS[x.no].name).join('、')} 醒了 ✓`}</b>
+      <span class="px">倍率 ×${before.mult} → ×${after.mult} · 今晚预计 ${before.score} → ${after.score} 分</span>
+      <small>${broke.length ? (after.cards.every(x => x.state !== "on") ? (after.left > 0 ? `三张都碎了，倍率 ×${after.mult}。剩下的钱还算分：今晚守住 ${money(after.left)} 就是 ${after.score} 分。` : `三张都碎了，今天的钱也花完了。`) : shown.some(x => CARDS[x.no].weekly) ? "按周算的牌会碎到周日。" : "明天零点恢复。今天剩下的牌还能守住。") : "今天守住的牌越多，分越高。"}${after.left < 0 ? ` 今天已经超了 ¥${-after.left}，会从明天的额度里扣。` : ""}</small>
+      <button class="ok" data-act="fb-close">知道了</button>
+    </div>
+  </div>`);
+}
+
+/* ---------- receipts, end of day, info sheets ---------- */
+function receiptHTML(h, preview) {
+  const br = breakers(h.entries, h.held, h.teaBefore);
+  const rows = h.entries.map((x, i) => {
+    const ess = !!cat(x.cat).ess;
+    return `<div class="r ${ess ? 'off' : br[i] ? 'hitc' : ''}"><span>${entryName(x)}${ess ? '<i>必需</i>' : ''}${x.night ? '<i>22 点后</i>' : ''}${br[i] ? `<i class="hit">碎 ${br[i].join('、')}</i>` : ''}</span><span>¥${x.amt}</span></div>`;
+  }).join('') || '<div class="r off"><span>这天一笔没花</span><span>¥0</span></div>';
+  const cards = h.cards.map(c => `<div class="r ${c.state === 'on' ? '' : 'off'}"><span>${c.state === 'on' ? '' : c.state === 'pending' ? 'zzz ' : '碎 '}${CARDS[c.no].name}${c.why ? ' · ' + c.why : ''}</span><span>${c.state === 'on' ? `+${CARDS[c.no].plus}` : '—'}</span></div>`).join('');
+  const all = h.cards.every(c => c.state === 'on');
+  return `<div class="receipt">${h.unlogged ? `<span class="stamp no">没记账</span>` : all ? `<span class="stamp">全守住</span>` : ""}
+    <span class="cap-t">第 ${h.week} 周 · 周${DAYS[h.day]}</span>
+    <hr>${rows}<hr>
+    ${overOf(h.entries) ? `<div class="r"><span>必需超出每天 ¥${essQuota}</span><span>+¥${overOf(h.entries)}</span></div>` : ''}
+    ${h.debtIn ? `<div class="r hitc"><span>昨天透支</span><span>−¥${Math.min(h.debtIn, dailyBudget())}</span></div>` : ""}
+    <div class="r"><span>今天能花</span><span>¥${h.daily}</span></div>
+    <div class="r"><span>额度外花了</span><span>¥${h.extra}</span></div>
+    <div class="r"><span>剩下的钱 = 底分</span><span>${h.base}</span></div>
+    <hr><div class="r"><span>倍率从 ${h.baseMult || 1} 开始${(h.baseMult || 1) > 1 ? `（毕业 ${h.baseMult - 1} 张）` : ""}</span><span>${h.baseMult || 1}</span></div>${cards}<hr>
+    <div class="tot"><span class="px">${h.base} × ${h.mult}</span><b>${h.score} 分</b></div>
+    ${h.extra > h.daily ? `<p class="note left" style="margin:4px 0 0">超出 ¥${h.extra - h.daily}，从明天的额度里扣。</p>` : ""}
+    ${preview ? '' : ''}
+  </div>`;
+}
+function dayRecord() {
+  const ev = evaluate(S.today);
+  const h = { week: S.week, day: S.day, baseMult: S.baseMult, held: S.held.slice(), teaBefore: S.teaWeek, debtIn: S.debt, entries: S.today.map(x => ({ ...x })), extra: ev.d.extra, daily: ev.daily, base: ev.base, mult: ev.mult, score: ev.score, cards: ev.cards };
+  // a day with nothing logged is not a perfect day: it scores 0 until the user confirms next morning that nothing was spent
+  if (!S.today.length) {
+    // confirming "spent nothing" still leaves 对账员 asleep: nothing was logged that day
+    const pot = ev;
+    Object.assign(h, { unlogged: true, base: 0, score: 0, mult: S.baseMult, cards: ev.cards.map(c => ({ ...c, state: "pending", why: "今天没记账" })), potential: { base: pot.base, mult: pot.mult, score: pot.score, cards: pot.cards } });
+  }
+  return h;
+}
+// the nightly ritual: the money left drops in as the base, each held card lights up and adds its multiplier, then the score
+const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pause = ms => new Promise(r => setTimeout(r, reducedMotion() ? 0 : ms));
+function countTo(el, to, ms) {
+  return new Promise(res => {
+    const from = parseFloat(el.textContent) || 0, t0 = performance.now();
+    if (reducedMotion()) { el.textContent = to; return res(); }
+    // setTimeout rather than rAF so it still finishes when the tab is in the background
+    const step = () => { const k = Math.min(1, (performance.now() - t0) / ms); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3))); k < 1 ? setTimeout(step, 16) : res(); };
+    step();
+  });
+}
+async function playStage(sh) {
+  const h = dayRecord(), prior = scorePrior(), target = weekTarget();
+  const pct = v => Math.min(100, Math.round(v / target * 100));
+  sh.innerHTML = `
+    <div class="bar-top"><h1>周${DAYS[S.day]} · 今晚出牌</h1><span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
+    <div class="stage-orbs"><div class="blob"><b id="pb">0</b><span>底分 = 剩下的钱</span></div><span class="stage-x">×</span><div class="blob m"><b id="pm">${S.baseMult}</b><span>倍率</span></div></div>
+    <div class="stage-cards">${h.cards.map(c => `<div class="sc ${c.state === 'on' ? '' : 'dim'}" data-no="${c.no}">${scaled(CARDS[c.no], h.cards.length > 3 ? 0.26 : 0.3, c.state)}</div>`).join('')}</div>
+    <div class="impact lines" id="pl"></div>
+    <div class="score-oval" id="ps">0</div>
+    <div class="cap meter"><div class="top"><div class="row"><span>本周分数</span><span class="px" id="pw">${prior} / ${target}</span></div><div class="bar"><i id="pwb" style="width:${pct(prior)}%"></i></div></div></div>
+    <button class="go" data-act="play-next" id="pn" hidden>${S.day === 6 ? '看周结算' : '去明天'}</button>`;
+  sh.scrollTop = 0;
+  const $ = id => sh.querySelector('#' + id);
+  const line = (l, r, cls = '') => $('pl').insertAdjacentHTML('beforeend', `<div class="r ${cls}"><span>${l}</span><span>${r}</span></div>`);
+  await pause(300);
+  if (h.unlogged) {
+    line('今天一笔都没记', '底分先记 0');
+    line('明早会问你：是不是真的一分没花', '', 'off');
+  } else {
+    line(`今天能花 ¥${h.daily}，额度外花了 ¥${h.extra}`, `底分 ${h.base}`);
+    await countTo($('pb'), h.base, 600);
+    let mult = S.baseMult;
+    if (S.baseMult > 1) line(`毕业的牌让倍率从 ${S.baseMult} 开始`, `×${S.baseMult}`);
+    for (const c of h.cards) {
+      const card = CARDS[c.no], el = sh.querySelector(`.sc[data-no="${c.no}"]`);
+      await pause(250);
+      if (c.state !== 'on') { line(`${c.state === 'pending' ? 'zzz' : '碎'} ${card.name} · ${c.why}`, '—', 'off'); continue; }
+      el.classList.add('pop'); mult += card.plus;
+      line(`${card.name} 守住`, `+${card.plus}`);
+      await countTo($('pm'), mult, 350);
+    }
+  }
+  line(`${h.base} × ${h.mult}`, `= ${h.score} 分`, 'sum');
+  await countTo($('ps'), h.score, 800);
+  $('pw').textContent = `${prior + h.score} / ${target}`;
+  $('pwb').style.width = pct(prior + h.score) + '%';
+  if (prior < target && prior + h.score >= target) line('这周的目标分够了！', '过关 ✓', 'sum');
+  const n = $('pn'); n.hidden = false; n.focus();
+}
+function renderEnd() {
+  sheet('结束今天', `
+    <div class="bar-top"><h1>周${DAYS[S.day]} · 结束今天</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    ${receiptHTML(dayRecord(), true)}
+    <p class="note">结束后今天就不能再记了，有漏记的先补上。<br>忘了点也没关系，零点会自动帮你结束。</p>
+    <div class="actions"><button class="cap" data-act="close"><div class="top">还要补记</div></button><button class="go" data-act="end-ok">出牌，结束今天</button></div>`);
+}
+function renderDay(i, week = S.week) {
+  const h = S.history.find(x => x.week === week && x.day === i);
+  if (!h) return;
+  const d = dateOf(week, i);
+  sheet(`周${DAYS[i]}小票`, `<div class="bar-top"><h1>${d.getMonth() + 1} 月 ${d.getDate()} 日 · 周${DAYS[i]}</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>${receiptHTML(h)}
+    <p class="note">每天结束都会留一张小票：这周的在首页小格子里，以前的在账单日历里。</p>`);
+}
+function renderRule(no) {
+  const c = CARDS[no], log = S.cardLog[no], heldNow = S.held.includes(no);
+  const cur = heldNow ? evaluate(S.today).cards.find(x => x.no === no) : null;
+  const hasData = S.lastWeek.some(d => d.length), sim = hasData && !heldNow ? simulate([no], S.lastWeek, S.weekStart) : null;
+  const state = cur ? (cur.state === 'on' ? `今天还守着，倍率 +${c.plus}。${cur.near ? cur.near + '。' : ''}` : cur.state === 'pending' ? '还睡着：今天记一笔就醒。' : `今天碎了：${cur.why}。${c.weekly ? '碎到周日。' : '明天零点恢复。'}`) : '';
+  sheet(c.name, `
+    <div class="bar-top"><h1>${c.name}</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    <div class="bigcard">${cardHTML(c, cur ? cur.state : 'on')}</div>
+    <div class="kv"><small>规则</small><p>${c.cond}。守住时倍率 +${c.plus}。</p></div>
+    <div class="kv"><small>举个例子</small><p>${c.eg}</p></div>
+    ${cur ? `<div class="kv"><small>今天</small><p>${state}</p></div>` : ''}
+    ${cur && cur.state === "broken" ? (S.glue ? `<button class="cap lime bigbtn" data-act="glue" data-no="${no}"><div class="top">用胶水粘回去（还剩 ${S.glue} 瓶）</div></button>` : `<p class="note">周一早上的商店里能买胶水，把碎掉的牌当天粘回去。</p>`) : ""}
+    ${sim ? `<div class="kv"><small>${S.estimated ? '按你选的花法估算' : '按上周的账'}</small><p>大概能守住 ${sim.per[no]}/${sim.days} 天。</p></div>` : ''}
+    ${log ? `<div class="kv"><small>以前</small><p>用过 ${log.weeks} 周，一共守住 ${log.held}/${log.days} 天。${S.grad.includes(no) ? '已经毕业，底倍率 +1。' : `毕业进度 ${log.streak || 0}/${GRAD_WEEKS}：连续 ${GRAD_WEEKS} 周守住 6/7 天以上就毕业。`}</p></div>` : `<div class="kv"><small>毕业</small><p>连续 ${GRAD_WEEKS} 周守住 6/7 天以上就毕业：离开发牌池，底倍率永久 +1。</p></div>`}
+    <p class="note">${c.weekly ? '这张按周算：碎了就碎到周日。' : '这张按天算：碎了第二天零点恢复。'}每周一重新抽 5 留 3。</p>`);
+}
+
+/* ---------- first use ---------- */
+function renderLaunch() {
+  const sh = sheet('省钱小局', `<div class="l-wrap">
+    <span class="l-abs l-tag">WEEK 01</span>
+    <div class="l-abs l-blob" aria-hidden="true"><span>抽</span><span>五</span><span>留</span><span>三</span></div>
+    <div class="l-abs l-cookie" aria-hidden="true"><b>×6</b><small>倍率</small></div>
+    <div class="l-abs l-fan" aria-hidden="true">${['04', '01', '05'].map(no => scaled(CARDS[no], 0.38)).join('')}</div>
+    <div class="l-abs l-draw cap orange" aria-hidden="true"><div class="top"><svg width="30" height="18" viewBox="0 0 34 18" fill="#111"><path d="M0 1l8 8-8 8h5l8-8-8-8zM11 1l8 8-8 8h5l8-8-8-8zM22 1l8 8-8 8h5l8-8-8-8z"/></svg>DRAW</div></div>
+    <div class="l-abs l-pill" aria-hidden="true"><span>¥30</span><i>×</i><span>6</span></div>
+    <div class="l-abs l-ring" aria-hidden="true"><svg width="96" height="96" viewBox="0 0 96 96">
+      <defs><path id="launch-ring" d="M48 48m-36 0a36 36 0 1 1 72 0a36 36 0 1 1-72 0"/></defs>
+      <circle cx="48" cy="48" r="46" fill="#F2F2F5" stroke="#CFCFD6" stroke-width="2"/><circle cx="48" cy="48" r="26" fill="#111"/>
+      <path d="M48 30C50 43 53 46 66 48C53 50 50 53 48 66C46 53 43 50 30 48C43 46 46 43 48 30Z" fill="#FF4D6A"/>
+      <ellipse cx="45" cy="48" rx="1.8" ry="3.2" fill="#111"/><ellipse cx="51" cy="48" rx="1.8" ry="3.2" fill="#111"/>
+      <text font-family="Noto Sans SC, sans-serif" font-size="9.5" font-weight="900" fill="#8A8A92" letter-spacing="2"><textPath href="#launch-ring">ORIGINAL · 省钱小局 · 第 1 周 ·</textPath></text>
+    </svg></div>
+    <div class="l-abs l-foot">
+      <h1>剩下的钱 × 守住的牌，<br>就是今天的分。</h1>
+      <p>每周抽 5 张规则卡留 3 张；每记一笔，马上告诉你有没有打破规则；周日看分数过没过关。</p>
+      <button class="cap lime bigbtn" data-act="launch-go"><div class="top">开始第一周</div></button>
+      <p class="px" style="text-align:center;font-size:12px;color:#6A6A70">分数是游戏 · 账单是真的</p>
+    </div>
+  </div>`);
+  sh.classList.add('launch');
+}
+const setupFormula = s => `(${s.income} − ${s.fixed} − ${s.save}) ÷ 4.3`;
+const progHTML = step => `<div class="cv-prog"><span class="px" style="font-size:15px">${step} / 2</span><i aria-hidden="true" style="background:${step === 1
+  ? 'repeating-linear-gradient(90deg,#111 0 26px,transparent 26px 30px) 0 0/50% 100% no-repeat,repeating-linear-gradient(90deg,#E4E4EA 0 26px,transparent 26px 30px)'
+  : 'repeating-linear-gradient(90deg,#111 0 26px,transparent 26px 30px)'}"></i></div>`;
+// first use, step 1: income minus fixed costs minus savings gives the weekly allowance
+function renderSetup() {
+  const s = S.setup, w = weeklyFrom(s);
+  const field = (k, label, sub) => `<div class="cv-field"><div><label for="su-${k}">${label}${sub ? `<small>${sub}</small>` : ''}</label><input id="su-${k}" inputmode="numeric" data-setup="${k}" value="${s[k]}"></div></div>`;
+  sheet('设预算', `
+    ${progHTML(1)}
+    <h1 style="margin:4px 0 0;font-weight:900;font-size:28px;line-height:1.25">先算算，<br>你一周能花多少</h1>
+    <p class="note left" style="color:#6A6A70;font-size:13px">这一步只是帮你定一个起点，之后随时能改。</p>
+    ${field('income', '月收入', '')}${field('fixed', '固定支出', '房租、话费、订阅')}${field('save', '每月想存', '先存再花')}
+    <div style="position:relative;height:128px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <div style="width:300px;max-width:88%;height:104px;border-radius:52px;background:#FFD54A;transform:rotate(-5deg);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 10px 18px rgba(20,20,30,0.15)">
+        <span style="font-size:12px;font-weight:900;color:#2A2205">你的每周额度</span>
+        <span id="setup-week" style="font-family:var(--f-display);font-size:48px;line-height:1.05;color:#2A2205">${money(w)}</span>
+      </div>
+      <span class="px" id="setup-formula" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);white-space:nowrap;padding:2px 10px;border-radius:10px;background:#111;color:#FFF;font-size:12px">${w >= 50 ? setupFormula(s) : '每周至少要有 ¥50'}</span>
+      <svg width="66" height="66" viewBox="0 0 60 64" aria-hidden="true" style="position:absolute;right:-4px;top:-14px;transform:rotate(-125deg)"><path d="M14 34V12a5 5 0 0 1 10 0v16h2v-6a5 5 0 0 1 10 0v6h2v-3a5 5 0 0 1 10 0v15c0 10-7 18-17 18h-4c-7 0-12-4-15-10l-5-11a5 5 0 0 1 8-5z" fill="#FFF" stroke="#1E88E5" stroke-width="4" stroke-linejoin="round"/></svg>
+      <div aria-hidden="true" style="position:absolute;left:0;top:-6px;width:62px;height:62px;background:#6CFF2E;clip-path:polygon(50% 0%,61% 18%,82% 10%,80% 32%,100% 42%,85% 58%,95% 79%,72% 80%,62% 100%,50% 84%,38% 100%,28% 80%,5% 79%,15% 58%,0% 42%,20% 32%,18% 10%,39% 18%);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg)"><span style="font-size:12px;font-weight:900;color:#0F4A00">可改</span></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:76px;padding:0 12px 0 18px;border-radius:22px;background:#E3F7D5">
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:14px">必需品额度</span><span style="font-size:11px;color:#3F5F2A">每天三餐和通勤在这个数以内不算进额度</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="减少"><span>−</span></button><span class="px" style="font-size:22px;min-width:48px;text-align:center">¥${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="增加"><span>+</span></button></div>
+    </div>
+    <button class="cap lime bigbtn" data-act="setup-next" ${w >= 50 ? '' : 'disabled'}><div class="top">下一步：找出钱溜去哪</div></button>
+    <button class="linkbtn" data-act="setup-skip">先跳过，用默认的 ¥${BASE}</button>`);
+}
+// step 2: weak spots decide which cards the first deal puts in front of you
+function renderWeak() {
+  const picks = WEAK.filter(w => S.weak.includes(w.id));
+  const first = picks.length ? CARDS[picks[0].card] : CARDS['04'];
+  sheet('选弱点', `
+    ${progHTML(2)}
+    <h1 style="margin:4px 0 0;font-weight:900;font-size:28px;line-height:1.25">你的钱，最容易<br>从哪里溜走？</h1>
+    <p class="note left" style="color:#6A6A70;font-size:13px">可以多选。第一次发牌时，会优先发管这些地方的牌。</p>
+    <div role="group" aria-label="最容易花钱的地方" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+      ${WEAK.map(w => `<button class="cv-opt" aria-pressed="${S.weak.includes(w.id)}" data-weak="${w.id}"><span class="cv-tile" style="background:${w.bg}"><svg width="40" height="40" viewBox="0 0 60 60" aria-hidden="true">${w.svg}</svg></span>${w.name}${S.weak.includes(w.id) ? '<span class="cv-tick" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" stroke="#FFF" stroke-width="1.8" fill="none"/></svg></span>' : ''}</button>`).join('')}
+    </div>
+    ${picks.length ? `<div class="freqs"><span class="lbl" style="margin:0">${picks.some(w => w.id !== 'weekend') ? '一周大概几次？用来估算你的第一周' : '周末大概花多少？用来估算你的第一周'}</span>
+      ${picks.map(w => `<div class="freq"><b>${w.name}</b><div role="group" aria-label="${w.name}${w.id === 'weekend' ? '花多少' : '一周几次'}">${(w.id === 'weekend' ? ['¥50 左右', '¥80 左右', '¥120+'] : FREQ.map(f => f.label)).map((l, i) => `<button data-freq="${w.id}:${i}" aria-pressed="${(S.freq[w.id] ?? 1) === i}">${l}</button>`).join('')}</div></div>`).join('')}
+    </div>` : ''}
+    <h2 style="margin-top:4px">${picks.length ? '第一次发牌会优先发' : '还没选？先给你一张好守的'}</h2>
+    <div class="cv-ticket">
+      <span class="cv-tile" style="width:96px;height:96px;border-radius:16px;background:${coreOf(first.no)}">${artIcon(first.no, 72)}</span>
+      <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+        <span style="font-weight:900;font-size:20px">${first.name}</span>
+        <span class="px" style="font-size:16px;color:#E4FF1A">守住 +${first.plus} 倍率</span>
+        <span style="font-size:12px;color:rgba(255,255,255,0.75)">${first.cond}${picks.length > 1 ? `；还有 ${picks.slice(1).map(w => CARDS[w.card].name).join('、')}` : ''}</span>
+      </div>
+      <span class="cv-glow" style="position:absolute;right:10px;top:-12px;padding:1px 10px;border-radius:10px;background:#FFE04A;border:3px solid #FFC800;font-size:13px;font-weight:600;transform:rotate(6deg)">${picks.length ? '优先发' : '新手推荐'}</span>
+    </div>
+    <button class="cap lime bigbtn" data-act="weak-next" style="margin-top:4px"><div class="top">就这些，去抽牌</div></button>
+    <button class="linkbtn" data-act="import">导入微信 / 支付宝账单，自动找</button>`);
+}
+function renderGuide() {
+  sheet('怎么玩', `
+    <div class="bar-top"><h1>怎么玩</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    <div class="gstack">
+      <div class="gcard g-orange"><span class="n">1</span><div><h3>每周一，抽 5 留 3</h3><p>留下的 3 张规则卡这周同时生效，比如"今天不点外卖"。每张都写着守住能加多少倍率。</p></div>${scaled(CARDS['01'], 0.35)}</div>
+      <div class="gcard g-lav"><span class="n">2</span><div><h3>每记一笔，马上知道</h3><p>记之前就能看到会不会碎牌。碎了当天就不算倍率，第二天零点恢复；按周算的牌碎到周日。</p></div><span class="gv">碎！</span></div>
+      <div class="gcard g-lime"><span class="n">3</span><div><h3>剩下的钱 × 倍率 = 分</h3><p>倍率从 1 开始，每张守住的牌加上去。一周攒够目标分就过关拿星星，没过不扣钱。</p></div><span class="gv">30×6</span></div>
+    </div>
+    <button class="cap lime bigbtn" data-act="close"><div class="top">知道了</div></button>`);
+}
+
+/* ---------- settings ---------- */
+function renderSettings() {
+  const s = S.setup, w = weeklyFrom(s), p = S.prefs;
+  const field = (k, label, sub) => `<div class="cv-field"><div><label for="st-${k}">${label}${sub ? `<small>${sub}</small>` : ''}</label><input id="st-${k}" inputmode="numeric" data-setup="${k}" value="${s[k]}"></div></div>`;
+  const sw = (k, label, sub) => `<div class="set-row"><div><b>${label}</b><small>${sub}</small></div><button class="sw" data-pref="${k}" aria-pressed="${p[k]}" aria-label="${label}"><i></i></button></div>`;
+  sheet('设置', `
+    <div class="bar-top"><h1>设置</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    <h2>预算</h2>
+    ${field('income', '月收入', '')}${field('fixed', '固定支出', '房租、话费、订阅')}${field('save', '每月想存', '先存再花')}
+    <div class="set-row"><div><b>每周额度</b><small id="setup-formula">${w >= 50 ? setupFormula(s) : '每周至少要有 ¥50'}</small></div><b class="px" id="setup-week" style="font-size:22px">${money(w)}</b></div>
+    <button class="go" data-act="settings-save" ${w >= 50 && w !== S.base ? '' : 'disabled'}>${w === S.base ? `现在就是每周 ¥${S.base}` : `改成每周 ¥${w}`}</button>
+    <div class="set-row"><div><b>必需品额度</b><small>每天三餐和通勤在这个数以内不算</small></div><div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="减少"><span>−</span></button><span class="px" style="font-size:20px;min-width:44px;text-align:center">¥${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="增加"><span>+</span></button></div></div>
+    <h2>提醒</h2>
+    ${sw('evening', '晚上提醒结束今天', '还会在首页放一张"今天记完了吗"')}
+    ${p.evening ? `<div class="set-row"><div><b>几点提醒</b><small>到点推送一条通知</small></div><div class="seg3">${[20.5, 21.5, 22].map(c => `<button data-evat="${c}" aria-pressed="${p.eveningAt === c}">${fmtClock(c)}</button>`).join('')}</div></div>` : ''}
+    ${sw('ruleAlerts', '花钱前的规则提醒', '比如饭点提醒外卖克星、21:30 提醒夜猫')}
+    ${sw('morning', '早上的"早上好"卡片', '昨天的分、待买清单、今天能花多少')}
+    <h2>演示</h2>
+    <div class="set-row"><div><b>怎么玩</b><small>三步讲清规则</small></div><button class="mini" data-act="help">看一下</button></div>
+    <div class="set-row"><div><b>重新看首页提示</b><small>第一次进首页时那 4 个气泡</small></div><button class="mini" data-act="coach-reset">再看一遍</button></div>
+    <div class="set-row"><div><b>从头再来</b><small>回到启动页，清掉 demo 里记的所有账</small></div><button class="mini" data-act="restart">从头再来</button></div>
+    <p class="note">demo 里的数据只在这个页面里，关掉就没了。</p>`);
+}
+
+/* ---------- monthly review ---------- */
+const HABITS = [
+  { name: '外卖', test: x => x.cat === 'takeout' }, { name: '奶茶咖啡', test: x => x.cat === 'tea' }, { name: '打车', test: x => x.cat === 'taxi' },
+  { name: '网购', test: x => x.cat === 'online' }, { name: '22 点后下单', test: x => !!x.night }
+];
+function monthStats(y, m) {
+  const recs = S.history.map(h => ({ h, d: dateOf(h.week, h.day) })).filter(o => o.d.getFullYear() === y && o.d.getMonth() === m);
+  const spent = recs.reduce((a, o) => a + o.h.extra, 0), allowed = dailyBudget() * recs.length;
+  const cards = {};
+  recs.forEach(o => o.h.cards.forEach(c => { const k = cards[c.no] || (cards[c.no] = { held: 0, days: 0 }); k.days++; if (c.state === 'on') k.held++; }));
+  const weeks = [...new Set(recs.map(o => o.h.week))].sort((a, b) => a - b);
+  // habits as "times per week", so a 4-day first week compares fairly with a full one
+  const rate = (w, test) => { const days = recs.filter(o => o.h.week === w); return days.length ? Math.round(days.reduce((a, o) => a + o.h.entries.filter(test).length, 0) / days.length * 7 * 10) / 10 : 0; };
+  // a week with only a day or two in this month says too little, so compare weeks with at least three days
+  const full = weeks.filter(w => recs.filter(o => o.h.week === w).length >= 3);
+  const habits = full.length > 1 ? HABITS.map(hb => ({ name: hb.name, first: rate(full[0], hb.test), last: rate(full[full.length - 1], hb.test) })).filter(hb => hb.first || hb.last) : [];
+  const best = recs.slice().sort((a, b) => b.h.score - a.h.score)[0];
+  return {
+    recs, full, days: recs.length, spent, allowed, score: recs.reduce((a, o) => a + o.h.score, 0), zero: recs.filter(o => o.h.extra === 0).length,
+    allHeld: recs.filter(o => o.h.cards.every(c => c.state === 'on')).length, cards, weeks, habits, best,
+    settled: (S.weeks || []).filter(w => weeks.includes(w.week)).length, passes: (S.weeks || []).filter(w => weeks.includes(w.week) && w.pass).length, stars: (S.weeks || []).filter(w => weeks.includes(w.week)).reduce((a, w) => a + w.stars, 0),
+    grads: (S.gradLog || []).filter(g => g.date.getFullYear() === y && g.date.getMonth() === m)
+  };
+}
+function reviewHTML(y, m) {
+  const st = monthStats(y, m);
+  if (!st.days) return '<p class="note">这个月还没有结束过的一天。今晚点"结束今天"以后，这里就开始有数据。</p>';
+  const saved = st.allowed - st.spent;
+  const cap = (outer, face, label, value) => `<div class="cap" style="height:76px;background:${outer}"><div class="top" style="background:${face};padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between"><span style="font-size:11px;font-weight:900">${label}</span><span class="px" style="font-size:19px;font-weight:600">${value}</span></div></div>`;
+  const cardRows = Object.entries(st.cards).sort((a, b) => b[1].held / b[1].days - a[1].held / a[1].days).map(([no, k]) => `<div class="hrow"><span class="hico" style="background:${coreOf(no)}">${artIcon(no, 26)}</span><span><b>${CARDS[no].name}</b><i style="width:${Math.round(k.held / k.days * 100)}%;background:${coreOf(no)}"></i></span><span class="px">${k.held}/${k.days} 天${S.grad.includes(no) ? ' · 毕业' : ''}</span></div>`).join('');
+  const habits = st.full.length > 1 && st.habits.length
+    ? st.habits.map(hb => { const d = hb.last - hb.first; return `<div class="trend ${d < 0 ? 'down' : d > 0 ? 'up' : ''}"><b>${hb.name}</b><span class="px">每周 ${hb.first} 次 → ${hb.last} 次</span><em>${d < 0 ? `少了 ${Math.round(-d * 10) / 10} 次` : d > 0 ? `多了 ${Math.round(d * 10) / 10} 次` : '没变'}</em></div>`; }).join('')
+    : `<p class="note left">${st.full.length > 1 ? '这个月没有记到外卖、奶茶、打车、网购或深夜的消费。' : '要有两个记满 3 天以上的周才能对比，再记几天就能看到。'}</p>`;
+  return `
+    <div class="mhero ${saved >= 0 ? '' : 'over'}"><span class="px">${m + 1} 月 · 记了 ${st.days} 天</span><b>${saved >= 0 ? '省下' : '超了'} ¥${Math.abs(saved)}</b><small>额度外花了 ¥${st.spent}，这 ${st.days} 天一共能花 ¥${st.allowed}</small></div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+      ${cap('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', '日均额度外', `¥${Math.round(st.spent / st.days)}`)}
+      ${cap('#B8D000', 'linear-gradient(180deg,#F2FF7A 0%,#E4FF1A 100%)', '零花费的天', `${st.zero} 天`)}
+      ${cap('#D94F0C', 'linear-gradient(180deg,#FF8A4A 0%,#FF6A1F 100%)', '三张全守住', `${st.allHeld} 天`)}
+    </div>
+    <div class="impact">
+      <div class="r"><span>本月分数</span><span>${st.score} 分</span></div>
+      <div class="r"><span>过关</span><span>${st.settled ? `${st.passes} / ${st.settled} 周${st.stars ? ` · ★ ${st.stars}` : ''}` : '这周还没结束'}</span></div>
+      ${st.best ? `<div class="r"><span>最好的一天</span><span>${st.best.d.getMonth() + 1} 月 ${st.best.d.getDate()} 日 · ${st.best.h.score} 分</span></div>` : ''}
+    </div>
+    <h2>习惯有没有变 <small>第一周 → 最后一周</small></h2>
+    ${habits}
+    <h2>每张牌守住了几天</h2>
+    <div class="hrows">${cardRows}</div>
+    ${st.grads.map(g => `<div class="gradcard"><div class="gimg">${scaled(CARDS[g.no], 0.3)}<span class="cv-grad">毕业</span></div><div><b>这个月毕业：${CARDS[g.no].name}</b><p>连续 ${GRAD_WEEKS} 周守住 6/7 天以上，底倍率 +1。</p></div></div>`).join('')}`;
+}
+// the first morning of a new month opens last month's review on top of whatever is showing
+function monthTurn(prev, now) {
+  if (prev.getMonth() === now.getMonth() || !monthStats(prev.getFullYear(), prev.getMonth()).days) return;
+  sheet('月度回顾', `<div class="bar-top"><h1>${prev.getMonth() + 1} 月回顾</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    ${reviewHTML(prev.getFullYear(), prev.getMonth())}
+    <p class="note">以后随时能在 账单 → 回顾 里看到。${now.getDay() === 1 ? "" : "这周的周结算还在后面，周日晚上结束今天时出现。"}</p>
+    <button class="cap lime bigbtn" data-act="close"><div class="top">开始 ${now.getMonth() + 1} 月</div></button>`);
+}
+
+/* ---------- the two daily moments ---------- */
+// heads-ups before the money goes out, one per held card, by time of day and state
+function alerts(ev) {
+  const c = S.clock, out = [];
+  ev.cards.forEach(x => {
+    const k = CARDS[x.no];
+    if (x.state === 'pending') { out.push(`${k.name}还睡着：今天记一笔就醒（+${k.plus}）。`); return; }
+    if (x.state !== 'on') return;
+    if (x.near) { out.push(x.near + '。'); return; }
+    if (x.no === '01' && ((c >= 11 && c < 13.5) || (c >= 17 && c < 19.5))) out.push(`饭点到了：点外卖的话外卖克星就碎，倍率少 ${k.plus}。`);
+    if (x.no === '06' && c >= 21 && c < 22) out.push(`再过 ${Math.round((22 - c) * 60)} 分钟就到 22 点，之后花一分钱夜猫就碎。`);
+    if (x.no === '06' && c >= 22) out.push('已经过了 22 点，现在花钱夜猫就碎（−2）。想买的先放进待买清单。');
+    if (x.no === '04' && ((c >= 7.5 && c < 9.5) || c >= 22)) out.push('想打车？步行者会碎（−1），坐地铁算通勤不受影响。');
+    if (x.no === '07' && c >= 20) out.push('晚上最容易下单：先放进待买清单，当场买冷静期就碎（−2）。');
+    if (x.no === '05') out.push('零元日还守着（+3）：今天额度外一分不花就拿得到。');
+  });
+  return out;
+}
+// when the day is lost on the game side, say what is still worth doing so people keep logging
+function stopHTML(ev) {
+  if (!S.held.length) return '';
+  const need = weekTarget() - scorePrior();
+  if (ev.left <= 0) return `<div class="stoploss"><span class="tag">止损</span><b>${ev.left < 0 ? `今天已经超了 ¥${-ev.left}` : `今天的 ¥${ev.daily} 刚好花完`}</b>
+    <p>今晚是 0 分。${ev.left < 0 ? `超出的钱会从明天的 ¥${dailyBudget()} 里扣，` : "再花就会从明天的额度里扣，"}现在再花的每一块，都是明天的钱。</p>
+    <button class="cap lime" data-act="log"><div class="top">想买的先放进待买清单</div></button></div>`;
+  if (ev.cards.every(c => c.state !== 'on')) return `<div class="stoploss"><span class="tag">止损</span><b>三张牌今天都碎了</b>
+    <p>倍率回到 ×${ev.mult}，但剩下的钱还算分：守住这 ${money(ev.left)}，今晚还有 <b>${ev.score} 分</b>。明天零点牌都会恢复${need > 0 ? `，这周还差 ${need} 分` : ''}。</p></div>`;
+  return '';
+}
+const BELL = '<svg width="20" height="20" viewBox="0 0 20 20" fill="#E4FF1A" aria-hidden="true"><path d="M10 2a5 5 0 0 0-5 5v3.5L3.5 14h13L15 10.5V7a5 5 0 0 0-5-5zM8 15.5a2 2 0 0 0 4 0z"/></svg>';
+function alertsHTML(ev) {
+  if (!S.held.length || !S.prefs.ruleAlerts) return '';
+  const list = alerts(ev).slice(0, 2);
+  return list.map(a => `<div class="alert" role="note"><span class="bell">${BELL}</span><p>${a}</p><span class="tag">${fmtClock(S.clock)} 提醒</span></div>`).join('');
+}
+// every notice lives here instead of on home, so the core widgets never get pushed down
+function inboxItems(ev = evaluate(S.today)) {
+  const out = [];
+  if (!S.held.length) return out;
+  const k = `${S.week}-${S.day}`;
+  S.revisit.forEach((x, i) => out.push({ key: `rv-${k}-${i}-${x.amt}`, kind: 'wish', title: '待买清单 · 已经等了 24 小时', text: `昨天想买的${entryName(x)} ¥${x.amt}，还要吗？`,
+    btns: [[`data-rv="${i}:buy"`, '还是要', ''], [`data-rv="${i}:skip"`, '不买了，省下', 'lime']] }));
+  if (S.day === 6) out.push({ key: `sun-${S.week}`, kind: 'sunday', title: '今天是这周最后一天', text: '今晚点"结束今天"就会出周结算：分数、星星、毕业，还有续留哪张牌、下周选什么难度。', btns: [['data-act="end"', '结束今天，看周结算', 'lime']] });
+  else if (S.prefs.evening && S.clock >= S.prefs.eveningAt) out.push({ key: `eve-${k}`, kind: 'evening', title: `${fmtClock(S.clock)} · 今天记完了吗？`, text: `今晚预计 ${ev.score} 分。记完点"结束今天"看小票，忘了也没事，零点会自动结束。`, btns: [['data-act="end"', '结束今天', 'lime']] });
+  if (ev.left <= 0) out.push({ key: `over-${k}`, kind: 'stop', title: ev.left < 0 ? `今天已经超了 ¥${-ev.left}` : `今天的 ¥${ev.daily} 刚好花完`, text: `今晚是 0 分。${ev.left < 0 ? '超出的钱会从明天的额度里扣，' : '再花就会从明天的额度里扣，'}现在再花的每一块，都是明天的钱。想买的先放进待买清单。` });
+  else if (ev.cards.every(c => c.state !== 'on')) out.push({ key: `broke-${k}`, kind: 'stop', title: '三张牌今天都碎了', text: `倍率回到 ×${ev.mult}，但剩下的钱还算分：守住这 ${money(ev.left)}，今晚还有 ${ev.score} 分。明天零点牌都会恢复。` });
+  if (S.prefs.ruleAlerts) alerts(ev).forEach(a => out.push({ key: `al-${k}-${a}`, kind: 'alert', title: `${fmtClock(S.clock)} · 规则提醒`, text: a }));
+  if (S.wish.length) out.push({ key: `wl-${k}-${S.wish.length}`, kind: 'memo', title: '待买清单', text: `里面有 ${S.wish.length} 件，明天再问你还要不要。今天不算钱，也不会碎牌。` });
+  return out;
+}
+function bellHTML(ev) {
+  const unseen = inboxItems(ev).filter(i => !S.seen.has(i.key)).length;
+  return `<button class="help bell ${unseen ? 'ring' : ''}" data-act="inbox" aria-label="通知${unseen ? `，${unseen} 条新的` : ''}">${BELL}${unseen ? `<span class="badge">${unseen}</span>` : ''}</button>`;
+}
+function renderInbox() {
+  const items = inboxItems();
+  const icon = { wish: '待', sunday: '周', evening: '晚', stop: '!', alert: BELL, memo: '单' };
+  items.forEach(i => S.seen.add(i.key));
+  sheet('通知', `
+    <div class="bar-top"><h1>通知</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    ${items.map(i => `<div class="ibox ${i.kind}"><span class="iic">${icon[i.kind]}</span><div><b>${i.title}</b><p>${i.text}</p>${i.btns ? `<div class="ibtns">${i.btns.map(([attr, label, cls]) => `<button class="rvbtn ${cls}" ${attr}>${label}</button>`).join('')}</div>` : ''}</div></div>`).join('')
+      || '<p class="note">没有新提醒。规则提醒、晚上提醒、待买清单都会出现在这里，不会占首页的位置。</p>'}`);
+  const bell = app.querySelector('.bell'); if (bell) { bell.classList.remove('ring'); const b = bell.querySelector('.badge'); if (b) b.remove(); }
+}
+// what the phone notification would look like; in the real app this is a system push
+function pushNote(title, body) {
+  app.querySelectorAll('.push').forEach(n => n.remove());
+  app.insertAdjacentHTML("beforeend", `<div class="push" role="status" data-act="inbox"><span class="appicon" aria-hidden="true">省</span><div><small>省钱小局 · 现在</small><b>${title}</b><span>${body}</span></div><button class="x" data-act="push-close" aria-label="关闭通知">✕</button></div>`);
+  const n = app.lastElementChild;
+  setTimeout(() => n.remove(), 4500);
+}
+function renderClock() {
+  sheet('切换时间', `
+    <div class="bar-top"><h1>演示：切换时间</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    <p class="note left">真实使用时跟着手机时间走。这里方便你看不同时刻会收到什么提醒。</p>
+    <div class="clocks">${TIMES.map(t => `<button class="cap ${Math.abs(t.c - S.clock) < 0.05 ? 'orange' : ''}" data-clock="${t.c}"><div class="top"><b class="px">${fmtClock(t.c)}</b><span>${t.name}</span></div></button>`).join('')}
+      <button class="cap lime" data-act="jump-sunday"><div class="top"><b class="px">周日</b><span>跳到周日晚上 · 结束今天就看到周结算</span></div></button>
+      <button class="cap dark" data-clock="midnight"><div class="top"><b class="px">00:00</b><span>零点 · 没点结束的话会自动帮你结束今天</span></div></button></div>`);
+}
+// first open of a new day: how yesterday scored, the wishlist that has waited 24 hours, and today's cards
+function renderMorning() {
+  const y = S.history[S.history.length - 1], ev = evaluate(S.today);
+  const kept = y.cards.filter(c => c.state === 'on').length;
+  const rv = S.revisit.map((x, i) => `<div class="rv"><span>${entryName(x)} <b class="px">¥${x.amt}</b></span><span><button class="rvbtn" data-rv="${i}:buy">还是要</button><button class="rvbtn lime" data-rv="${i}:skip">不买了</button></span></div>`).join('');
+  const a = alerts(ev)[0];
+  sheet('早上好', `
+    <div class="bar-top"><h1>周${DAYS[S.day]} · 早上好</h1><span class="px" style="color:var(--mute)">${fmtClock(S.clock)}</span></div>
+    ${(() => { const y = S.history[S.history.length - 1]; return y && y.unlogged && !y.resolved ? `<div class="unlogged"><b>昨天一笔都没记</b><span>真的一分没花吗？没记账的那天先按 0 分算。真的没花的话，按零花费补上 ${y.potential.score} 分。</span><div class="ibtns"><button class="rvbtn lime" data-act="unlogged-yes">真的没花</button><button class="rvbtn" data-act="unlogged-no">忘了记</button></div></div>` : ''; })()}
+    ${S.autoEnded ? '<div class="callout">昨晚你没点"结束今天"，零点自动帮你结束了，小票照样留着。</div>' : ''}
+    ${S.debt ? `<div class="callout">昨天透支了 <b>¥${S.debt}</b>，今天能花 ¥${dailyBudget()} − ¥${Math.min(S.debt, dailyBudget())} = <b>¥${todayBudget()}</b>。${S.debt > dailyBudget() ? `还剩 ¥${S.debt - dailyBudget()} 会接着从明天扣。` : ""}</div>` : ""}
+    <div class="cap"><div class="top" style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><b>昨天 · 周${DAYS[y.day]}</b><button class="linkbtn" data-day="${y.day}" style="padding:0;color:#5B4FC8;font-size:13px">看小票 →</button></div>
+      <div class="ystat"><div><small>得分</small><b>${y.score}</b></div><div><small>倍率</small><b>×${y.mult}</b></div><div><small>守住</small><b>${kept}/${y.cards.length}</b></div></div>
+    </div></div>
+    ${rv ? `<div class="wish"><span class="px" style="font-size:12px;opacity:0.85">待买清单 · 已经等了 24 小时</span><span style="font-weight:900;font-size:18px">这些还想要吗？</span>${rv}</div>`
+      : S.wishSaved ? `<div class="callout">待买清单清空了，<b>省下 ¥${S.wishSaved}</b>。</div>` : ''}
+    <div class="hold-lbl">${y.cards.some(c => c.state === 'broken') ? `昨天碎掉的牌零点恢复了${y.cards.some(c => c.state === 'broken' && CARDS[c.no].weekly) ? '（按周算的除外）' : ''}` : '今天的牌'}</div>
+    ${holdHTML(ev)}
+    <div class="cap orange hero"><div class="top">
+      <div class="row"><span style="font-weight:900;font-size:14px">今天能花</span><span class="px" style="font-size:13px">本周分数 ${scorePrior()} / ${weekTarget()}</span></div>
+      <span class="money">${money(ev.left)}</span>
+      <div class="row"><span style="font-weight:900;font-size:14px">全守住的话今晚 ${ev.base * (S.baseMult + S.held.reduce((s, no) => s + CARDS[no].plus, 0))} 分</span></div>
+    </div></div>
+    ${a ? `<div class="alert" role="note"><span class="bell">${BELL}</span><p>${a}</p><span class="tag">今天留意</span></div>` : ''}
+    <button class="cap lime bigbtn" data-act="morning-done"><div class="top">开始今天</div></button>`);
+}
+// close the week once: stars, per-card held days, graduation, unlocks. The sheet below only reads the result,
+// so picking a carry card or a stake can re-render it without paying out twice
+const GRAD_RATIO = 0.85, GRAD_WEEKS = 2;
+function settleWeek() {
+  const total = scorePrior(), target = weekTarget(), pass = total >= target;
+  const got = pass ? starsFrom(total, target) + S.stake : 0, before = S.stars;
+  S.stars += got; S.starsTotal += got;
+  const hist = weekHist();
+  const perCard = S.held.map(no => ({ no, held: hist.filter(h => h.cards.find(c => c.no === no && c.state === 'on')).length, days: hist.length }));
+  const grads = [];
+  perCard.forEach(p => {
+    const log = S.cardLog[p.no] || (S.cardLog[p.no] = { weeks: 0, held: 0, days: 0, streak: 0 });
+    log.weeks += 1; log.held += p.held; log.days += p.days;
+    // a strong week is holding about six days in seven; two in a row and the habit counts as changed
+    log.streak = p.days >= 3 && p.held / p.days >= GRAD_RATIO ? (log.streak || 0) + 1 : 0;
+    p.streak = log.streak;
+    if (log.streak >= GRAD_WEEKS && !S.grad.includes(p.no)) {
+      S.grad.push(p.no); S.unlocked = S.unlocked.filter(x => x !== p.no); S.baseMult += 1; grads.push(p.no);
+      (S.gradLog = S.gradLog || []).push({ no: p.no, date: dateOf(S.week, 6) });
+    }
+  });
+  const fresh = Object.values(CARDS).filter(x => x.unlock && x.unlock <= S.starsTotal && !S.unlocked.includes(x.no) && !S.grad.includes(x.no));
+  fresh.forEach(x => S.unlocked.push(x.no));
+  const best = perCard.slice().sort((a, b) => b.held / Math.max(1, b.days) - a.held / Math.max(1, a.days))[0];
+  S.lastResult = { pass, score: total, target, stars: got, best: best.no, fresh: fresh.map(x => x.name).join('、'), grads };
+  (S.weeks = S.weeks || []).push({ week: S.week, total, target, pass, stars: got, stake: S.stake });
+  if (pass) S.maxStake = Math.max(S.maxStake || 0, Math.min(STAKES.length - 1, S.stake + 1));
+  const carryable = perCard.filter(p => !S.grad.includes(p.no));
+  S.carry = carryable.length ? carryable.slice().sort((a, b) => b.held / Math.max(1, b.days) - a.held / Math.max(1, a.days))[0].no : null;
+  S.nextStake = S.stake;
+  S.weekResult = { total, target, pass, got, before, perCard, grads, fresh, real: moneyWeek(), spent: hist.reduce((a, h) => a + h.extra, 0) };
+}
+function renderWeek() {
+  const R = S.weekResult, st = STAKES[S.stake];
+  const stakeOpts = R.pass && S.stake < STAKES.length - 1 ? [S.stake + 1, S.stake] : !R.pass && S.stake > 0 ? [S.stake, S.stake - 1] : [S.stake];
+  const stakeBtn = i => {
+    const s = STAKES[i], tag = i > S.stake ? `目标 ×${s.k}，过关多 +${i} ★` : i < S.stake ? `目标降回 ×${s.k}` : '保持现在的难度';
+    return `<button class="stake ${S.nextStake === i ? 'on' : ''}" data-stake="${i}" aria-pressed="${S.nextStake === i}"><span class="chipk" style="background:${s.bg};color:${s.fg}">${s.name}</span><span>${tag}</span></button>`;
+  };
+  sheet('周结算', `
+    <div class="bar-top"><h1>第 ${S.week} 周结束</h1><span class="chipk" style="background:${st.bg};color:${st.fg}">${st.name}</span></div>
+    <span class="bigstamp ${R.pass ? '' : 'no'}">${R.pass ? '过关' : '没过'}</span>
+    <div class="impact">
+      <div class="r"><span>本周分数</span><span class="${R.pass ? 'good' : 'hot'}">${R.total} / ${R.target}</span></div>
+      <div class="r"><span>星星</span><span>${R.got ? `+${starStr(R.got)}　共 ${S.stars}` : `这周没拿到　共 ${R.before}`}</span></div>
+      <div class="r"><span>星星怎么算</span><span>够目标 ★ · 1.3 倍 ★★ · 1.6 倍 ★★★${S.stake ? ` · ${st.name} +${S.stake}` : ''}</span></div>
+    </div>
+    ${R.grads.map(no => `<div class="gradcard"><div class="gimg">${scaled(CARDS[no], 0.3)}<span class="cv-grad">毕业</span></div><div><b>「${CARDS[no].name}」毕业了！</b><p>连续 ${GRAD_WEEKS} 周守住 6/7 天以上，这个习惯算是改掉了。它离开发牌池，换来永久的底倍率 +1：以后倍率从 <b>${S.baseMult}</b> 开始。</p></div></div>`).join('')}
+    <h2>三张牌守得怎么样 <small>连续 ${GRAD_WEEKS} 周守住 6/7 天就毕业</small></h2>
+    <div class="pillrow">${R.perCard.map(p => `<span class="pill ${p.held >= p.days * 0.7 ? 'ok' : p.held >= p.days * 0.4 ? 'mid' : 'no'}">${CARDS[p.no].name} ${p.held}/${p.days} 天${S.grad.includes(p.no) ? ' · 毕业' : p.streak ? ` · 毕业 ${p.streak}/${GRAD_WEEKS}` : ''}</span>`).join('')}</div>
+    ${S.carry ? `<h2>续留一张到下周 <small>它一定会出现在下周的 5 张里</small></h2>
+    <div class="carry">${R.perCard.filter(p => !S.grad.includes(p.no)).map(p => `<button class="hcard ${S.carry === p.no ? 'on' : 'off'}" data-carry="${p.no}" aria-pressed="${S.carry === p.no}">${scaled(CARDS[p.no], 0.33)}<span>${S.carry === p.no ? '续留 ✓' : '点一下续留'}</span></button>`).join('')}</div>` : ''}
+    <h2>下周的难度</h2>
+    <div class="stakes">${stakeOpts.map(stakeBtn).join('')}</div>
+    <div class="cap ${R.real - R.spent >= 0 ? 'lime' : 'orange'}"><div class="top" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-weight:900">${R.real - R.spent >= 0 ? '这周真实省下' : '这周真实超了'}</span><span style="font-family:var(--f-display);font-size:30px">¥${Math.abs(R.real - R.spent)}</span></div></div>
+    <h2>每天的分 <small>点一天看小票</small></h2>
+    ${tilesHTML()}
+    ${R.fresh.map(x => `<div class="unlock">${scaled(x, 0.3)}<div><b style="font-size:13px">解锁新牌</b><div style="font-weight:900;font-size:20px">${x.name}</div><p class="note left">${x.cond}。以后发牌可能发到它。</p></div></div>`).join('')}
+    <p class="note">今晚就到这里，明早（周一）再开商店、抽新牌。<br>${R.pass ? '想挑战就升一注，过关星星更多；不想就保持现在的难度。' : '没过不扣钱，也不用重来。下周可以留几张更守得住的，或者降一注。'}</p>
+    <button class="cap lime bigbtn" data-act="to-monday"><div class="top">好，去周一早上</div></button>`);
+}
+
+// Monday morning opens the new week: a glance back, then the shop (optional) and the deal.
+// The week result stays on Sunday night so that evening is only about how the week went
+function renderMonday() {
+  const R = S.weekResult, next = dateOf(S.week + 1, 0);
+  sheet('周一早上好', `
+    <div class="bar-top"><h1>第 ${S.week + 1} 周 · 周一早上好</h1><span class="px" style="color:var(--mute)">${next.getMonth() + 1}/${next.getDate()} 08:30</span></div>
+    <div class="mhero ${R.pass ? '' : 'over'}"><span class="px">上周 · ${STAKES[S.stake].name}</span><b>${R.total} 分</b><small>${R.pass ? `过关，拿到 ${starStr(R.got)}` : `差 ${R.target - R.total} 分没过，不扣钱`}　·　真实${R.real - R.spent >= 0 ? `省下 ¥${R.real - R.spent}` : `超了 ¥${R.spent - R.real}`}</small></div>
+    <div class="impact">
+      <div class="r"><span>这周难度</span><span>${STAKES[S.nextStake].name}</span></div>
+      <div class="r"><span>续留</span><span>${S.carry ? CARDS[S.carry].name : '没有'}</span></div>
+      <div class="r"><span>这周发牌</span><span>发 ${DEALN()} 张，留 ${HOLDN()} 张</span></div>
+      <div class="r"><span>钱包</span><span>★ ${S.stars} 星星</span></div>
+    </div>
+    <p class="note left">新的一周从挑牌开始。抽牌前可以先去商店：提前解锁牌、指定这周一定发某张、加牌槽、买胶水。商店只在周一早上开。</p>
+    <button class="cap lime bigbtn" data-act="shop"><div class="top">先逛商店 · ★ ${S.stars}</div></button>
+    <button class="go" data-act="draw-now">直接抽牌</button>`);
+}
+
+/* ---------- shop: opens on Monday morning, stars are the money ---------- */
+// three tickets: a locked card bought early, or an unlocked one pinned into next week's deal
+function rollShop() {
+  const locked = Object.values(CARDS).filter(c => !S.unlocked.includes(c.no) && !S.grad.includes(c.no)).map(c => ({ no: c.no, kind: 'unlock', price: Math.max(1, Math.round(c.unlock / 2)) }));
+  const pins = S.unlocked.filter(no => no !== S.carry && !S.pinned.includes(no)).map(no => ({ no, kind: 'pin', price: 1 }));
+  const all = [...locked, ...pins.sort(() => Math.random() - 0.5)];
+  // keep the recommended card on the shelf whenever it can be sold at all
+  const rec = shopPick(), ri = rec ? all.findIndex(o => o.no === rec.no) : -1;
+  if (ri > 0) all.unshift(all.splice(ri, 1)[0]);
+  S.shopOffers = all.slice(0, 3);
+}
+// the card that targets last week's biggest spending category gets the "推荐" sticker
+function shopPick() {
+  const by = {};
+  weekHist().forEach(h => h.entries.filter(x => !cat(x.cat).ess).forEach(x => { if (CAT_CARD[x.cat]) by[x.cat] = (by[x.cat] || 0) + x.amt; }));
+  const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
+  return top ? { no: CAT_CARD[top[0]], why: `上周${cat(top[0]).name}花了 ¥${top[1]}` } : null;
+}
+const PRICE = { reroll: 1, slot: 5, slotWas: 6, glue: 2 };
+function renderShop() {
+  const rec = shopPick(), R = S.weekResult;
+  const can = n => S.stars >= n;
+  const tickets = S.shopOffers.map((o, i) => {
+    const c = CARDS[o.no], sold = o.sold, isRec = rec && rec.no === o.no;
+    return `<button class="sticket ${isRec ? 'rec' : ''}" data-buy="${i}" ${sold || !can(o.price) ? 'disabled' : ''} aria-label="${c.name}，${o.kind === 'unlock' ? '解锁' : '下周一定发'}，${o.price} 颗星">
+      <span class="stile" style="background:${coreOf(o.no)}">${artIcon(o.no, 56)}</span>
+      <b>${c.name}</b><b class="px lime">+${c.plus} 倍率</b><small>${o.kind === 'unlock' ? '提前解锁' : '下周一定发它'}</small>
+      <b class="px">${sold ? '已买' : `★ ${o.price}`}</b>
+      ${isRec ? '<b class="cv-glow rec-tag">推荐</b>' : ''}</button>`;
+  }).join('') || '<p class="note">牌都解锁了，也都在下周的牌里。</p>';
+  const rings = S.held.map(no => `<span class="sring" style="border-color:${coreOf(no)}">${artIcon(no, 22)}</span>`).join('') + '<span class="sring add"><span class="px">+</span></span>'.repeat(Math.max(0, S.slots - S.held.length));
+  sheet('商店', `
+    <div class="bar-top"><h1>商店</h1><span class="spill">★ ${S.stars} 星星</span></div>
+    <div class="pillrow"><span class="cv-pill">第 ${S.week} 周结束</span><span class="cv-pill">+</span><span class="cv-pill" style="color:#111">本周 ${R && R.got ? starStr(R.got) : '没拿到星星'}</span></div>
+    ${rec ? `<p class="note left">${rec.why}，推荐「${CARDS[rec.no].name}」。</p>` : ''}
+    <div class="stickets">${tickets}</div>
+    <div class="sband">
+      <div class="px sdeal"><span>限时</span><span>本周</span><svg width="16" height="20" viewBox="0 0 14 18" fill="#FF8A3D" aria-hidden="true"><path d="M8 0L0 10h5l-1 8 8-10H7z"/></svg></div>
+      <div class="sbtns">
+        <button data-act="reroll" ${can(PRICE.reroll) ? '' : 'disabled'}><span class="px">换一组</span><span class="px sub">★ ${PRICE.reroll}</span></button>
+        <button class="lime" data-act="slot" ${S.slots < 4 && can(PRICE.slot) ? '' : 'disabled'}><span class="px">${S.slots < 4 ? '加第 4 个牌槽' : '已经 4 个牌槽'}</span><span class="px sub">${S.slots < 4 ? `<s>${PRICE.slotWas}</s> ★ ${PRICE.slot}` : '每周留 4 张'}</span></button>
+      </div>
+    </div>
+    <div class="sglue"><div><b>胶水 × ${S.glue}</b><small>碎了的牌点开就能粘回去，只管当天。最多存 3 瓶。</small></div><button class="cap lime" data-act="glue-buy" ${S.glue < 3 && can(PRICE.glue) ? '' : 'disabled'}><div class="top">★ ${PRICE.glue} 买一瓶</div></button></div>
+    <div class="smine"><span style="font-weight:900;font-size:15px">我的牌槽</span><div style="display:flex;align-items:center">${rings}<span class="px" style="margin-left:12px;font-size:20px">${S.held.length}/${S.slots}</span></div></div>
+    <div class="sbubble"><svg width="100%" height="118" viewBox="0 0 350 118" preserveAspectRatio="none" aria-hidden="true"><path d="M40 6H300a36 36 0 0 1 36 36v20a36 36 0 0 1-36 36H112l-26 16 6-16H40a36 36 0 0 1-36-36V42a36 36 0 0 1 36-36z" fill="#FF9BC4" stroke="#FF3B1F" stroke-width="5" stroke-linejoin="round"/></svg>
+      <div class="sstar">下周</div>
+      <div class="stext"><b>第 ${S.week + 1} 周 · ${STAKES[S.nextStake].name}</b><span>${S.carry ? `续留「${CARDS[S.carry].name}」` : '没有续留'}${S.pinned.length ? `，一定发：${S.pinned.map(no => CARDS[no].name).join('、')}` : ''}；发 ${DEALN()} 张留 ${HOLDN()} 张。</span></div></div>
+    <button class="go" data-act="shop-done">进入第 ${S.week + 1} 周 · 去抽牌</button>`);
+}
+
+/* ---------- day flow ---------- */
+function endDay() {
+  const h = dayRecord();
+  S.history.push(h);
+  S.debt = Math.max(0, h.extra + S.debt - dailyBudget());
+  S.teaWeek += teaOf(S.today);
+  S.revisit = S.wish; S.wish = [];
+  S.today = [];
+  if (S.day === 6) { settleWeek(); renderTable(); renderWeek(); return; }
+  S.day += 1; S.clock = 8.5;
+  renderTable();
+  if (S.prefs.morning) renderMorning(); else toast(`周${DAYS[S.day]} · 今天能花 ¥${todayBudget()}`);
+  monthTurn(dateOf(S.week, S.day - 1), dateOf(S.week, S.day));
+}
+function startWeek() {
+  const lastDay = dateOf(S.week, 6);
+  S.lastWeek = DAYS.map((_, i) => (weekHist().find(h => h.day === i) || { entries: [] }).entries.map(x => ({ ...x })));
+  S.lastDays = weekDays();
+  S.autoEnded = false; S.clock = 8.5;
+  S.stake = S.nextStake; S.debt = 0;
+  S.week += 1; S.day = 0; S.weekStart = 0; S.held = []; S.teaWeek = 0; S.firstDraw = false; S.estimated = false;
+  draft = {};
+  renderTable(); renderDraw();
+  monthTurn(lastDay, dateOf(S.week, 0));
+}
+
+// long press on a favorite (in the log sheet or on home) saves it after half a second
+let pressTimer = null, pressFired = false;
+app.addEventListener('pointerdown', e => {
+  const b = e.target.closest('[data-quick], [data-hquick]'); if (!b || !S.held.length) return;
+  pressFired = false; b.classList.add('pressing');
+  pressTimer = setTimeout(() => { pressFired = true; quickSave(+(b.dataset.quick ?? b.dataset.hquick)); }, 500);
+});
+['pointerup', 'pointerleave', 'pointercancel'].forEach(type => app.addEventListener(type, () => {
+  clearTimeout(pressTimer); app.querySelectorAll('.pressing').forEach(n => n.classList.remove('pressing'));
+}, true));
+app.addEventListener('input', e => {
+  if (e.target.dataset.setup) {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    S.setup[e.target.dataset.setup] = +e.target.value || 0;
+    const w = weeklyFrom(S.setup);
+    document.getElementById('setup-week').textContent = money(w);
+    document.getElementById('setup-formula').textContent = w >= 50 ? setupFormula(S.setup) : '每周至少要有 ¥50，调一下上面的数';
+    const nx = document.querySelector("[data-act=setup-next], [data-act=settings-save]"); if (nx) nx.disabled = w < 50;
+  }
+  if (e.target.id === 'note') draft.note = e.target.value.trim();
+  if (e.target.id === 'newcat') draft.newName = e.target.value.trim();
+});
+app.addEventListener('click', e => {
+  const t = e.target.closest('button, .fb, .push'); if (!t) return;
+  // a long press already logged the favorite; swallow the click that follows it
+  if (pressFired && (t.dataset.quick || t.dataset.hquick)) { pressFired = false; return; }
+  const act = t.dataset.act, top = t.closest('.sheet');
+  if (act === 'fb-close') { app.querySelectorAll('.fb').forEach(n => n.remove()); return; }
+  if (act === 'launch-go') { top.remove(); renderSetup(); return; }
+  if (act === 'setup-next') { S.base = weeklyFrom(S.setup); top.remove(); renderTable(); renderWeak(); return; }
+  if (t.dataset.weak) { const id = t.dataset.weak; S.weak = S.weak.includes(id) ? S.weak.filter(x => x !== id) : [...S.weak, id]; replaceSheet(top, renderWeak); return; }
+  if (t.dataset.quota) { essQuota = Math.min(100, Math.max(0, essQuota + +t.dataset.quota)); replaceSheet(top, top.getAttribute('aria-label') === '设置' ? renderSettings : renderSetup); return; }
+  if (act === 'setup-skip') { S.base = BASE; top.remove(); renderTable(); renderWeak(); return; }
+  if (act === 'import') { toast('导入账单下个版本做，先手动选一下'); return; }
+  if (act === 'trend') { toast('趋势页还没做，先看日历和分类'); return; }
+  if (t.dataset.deck) { S.deckTab = t.dataset.deck; renderTable(); return; }
+  if (act === 'weak-next') {
+    // picking impulse shopping hands over that card right away instead of waiting for stars
+    if (S.weak.includes('online') && !S.unlocked.includes('07')) S.unlocked.push('07');
+    if (S.weak.includes('weekend') && !S.unlocked.includes('13')) S.unlocked.push('13');
+    S.lastWeek = estimateWeek(); S.estimated = S.lastWeek.some(d => d.length);
+    top.remove(); draft = {}; renderDraw();
+    return;
+  }
+  if (t.dataset.freq) { const [id, i] = t.dataset.freq.split(':'); S.freq[id] = +i; replaceSheet(top, renderWeak); return; }
+  if (act === 'coach-next') { S.coach += 1; clearCoach(); showCoach(); return; }
+  if (act === 'coach-skip') { S.coach = COACH.length; clearCoach(); return; }
+  if (act === 'goflow') { S.view = 'bill'; S.billTab = 'flow'; renderTable(); return; }
+  if (t.dataset.tab) { S.view = t.dataset.tab; renderTable(); return; }
+  if (t.dataset.bill) { S.billTab = t.dataset.bill; renderTable(); return; }
+  if (t.dataset.cal) { const [w, d] = t.dataset.cal.split('-').map(Number); renderDay(d, w); return; }
+  if (t.dataset.info) { renderRule(t.dataset.info); return; }
+  if (act === 'help') { renderGuide(); return; }
+  if (act === 'settings') { renderSettings(); return; }
+  if (act === 'inbox') { app.querySelectorAll('.push').forEach(n => n.remove()); renderInbox(); return; }
+  if (t.dataset.pref) { S.prefs[t.dataset.pref] = !S.prefs[t.dataset.pref]; replaceSheet(top, renderSettings); return; }
+  if (t.dataset.evat) { S.prefs.eveningAt = +t.dataset.evat; replaceSheet(top, renderSettings); return; }
+  if (act === 'settings-save') { S.base = weeklyFrom(S.setup); replaceSheet(top, renderSettings); toast(`每周额度改成 ¥${S.base}，每天 ¥${dailyBudget()}`); return; }
+  if (act === 'coach-reset') { S.coach = 0; S.view = 'home'; top.remove(); renderTable(); return; }
+  if (act === 'restart') { location.reload(); return; }
+  if (act === 'star') { toast('星星：周分数够目标拿 ★，1.3 倍拿 ★★，1.6 倍拿 ★★★。攒够会解锁新牌。'); return; }
+  // settings can change what home shows, so redraw it on the way out
+  if (act === 'close') { const lbl = top.getAttribute('aria-label'); top.remove(); if (lbl === '设置') { renderTable(); } return; }
+  if (act === 'draw') { draft = {}; renderDraw(); return; }
+  if (t.dataset.pick) {
+    const no = t.dataset.pick;
+    if (draft.sel.includes(no)) draft.sel = draft.sel.filter(x => x !== no);
+    else if (draft.sel.length < Math.min(HOLDN(), draft.hand.length)) draft.sel.push(no);
+    else toast(`最多留 ${HOLDN()} 张，先点掉一张`);
+    draft.focus = no; replaceSheet(top, renderDraw); return;
+  }
+  if (act === 'use-rec') { draft.sel = draft.rec.slice(); }
+  if (act === 'choose' || act === 'use-rec') { S.held = draft.sel.slice(); S.view = 'home'; draft = {}; top.remove(); renderTable(); toast(`这周的牌：${S.held.map(no => CARDS[no].name).join('、')}`); return; }
+  if (t.dataset.day) { renderDay(+t.dataset.day); return; }
+  if (act === 'log') { if (!S.held.length) { toast('先抽这周的牌'); return; } draft = { amt: '', cat: 'takeout', night: S.clock >= 22, note: '' }; renderLog(); return; }
+  if (act === 'clock') { renderClock(); return; }
+  // demo shortcut: end every remaining weekday as it stands, land on Sunday evening
+  if (act === 'jump-sunday') {
+    top.remove();
+    while (S.day < 6) endDay();
+    app.querySelectorAll('.sheet').forEach(n => n.remove());
+    S.clock = 21.5; S.view = 'home'; renderTable();
+    toast('到周日晚上了，点「结束今天」看周结算');
+    return;
+  }
+  if (t.dataset.clock) {
+    top.remove();
+    if (t.dataset.clock === 'midnight') { S.autoEnded = true; endDay(); return; }
+    const before = alerts(evaluate(S.today))[0];
+    S.clock = +t.dataset.clock; renderTable();
+    const a = alerts(evaluate(S.today))[0];
+    if (S.prefs.evening && S.clock >= S.prefs.eveningAt) pushNote('今天记完了吗？', `现在 ${fmtClock(S.clock)}，今晚预计 ${evaluate(S.today).score} 分。记完点"结束今天"看看小票。`);
+    else if (S.prefs.ruleAlerts && a && a !== before) pushNote('你的牌', a);
+    return;
+  }
+  if (t.dataset.rv) {
+    const [i, how] = t.dataset.rv.split(':'), x = S.revisit.splice(+i, 1)[0];
+    let msg;
+    if (how === 'buy') { S.today.push({ ...x, night: false, fromWish: true }); msg = '记下了 · 等过 24 小时再买'; }
+    else { S.wishSaved = (S.wishSaved || 0) + x.amt; msg = `不买了，省下 ¥${x.amt}`; }
+    const lbl = top.getAttribute('aria-label'); renderTable(); (lbl === '通知' ? renderInbox : renderMorning)(); lastSheet().style.animation = 'none'; toast(msg); return;
+  }
+  if (act === 'morning-done') { S.autoEnded = false; S.wishSaved = 0; top.remove(); renderTable(); return; }
+  if (act === 'push-close') { t.closest('.push').remove(); return; }
+  if (t.dataset.edit) { const i = +t.dataset.edit, x = S.today[i]; draft = { amt: String(x.amt), cat: x.cat, night: !!x.night, note: x.note || '', edit: i, fromWish: x.fromWish }; renderLog(); return; }
+  if (t.dataset.hquick) { if (!S.held.length) { toast('先抽这周的牌'); return; } const q = S.quicks[+t.dataset.hquick]; draft = { amt: String(q.amt), cat: q.cat, night: S.clock >= 22, note: q.label === cat(q.cat).name ? '' : q.label }; renderLog(); return; }
+  if (t.dataset.quick) { const q = S.quicks[+t.dataset.quick]; Object.assign(draft, { amt: String(q.amt), cat: q.cat, note: q.label === cat(q.cat).name ? '' : q.label }); refreshLog(); return; }
+  if (t.dataset.cat) { draft.cat = t.dataset.cat; refreshLog(); return; }
+  if (t.dataset.night) { draft.night = t.dataset.night === '1'; refreshLog(); return; }
+  if (t.dataset.newess) { draft.newEss = t.dataset.newess === '1'; refreshLog(); return; }
+  if (t.dataset.key) { const k = t.dataset.key; draft.amt = k === 'C' ? '' : k === '⌫' ? draft.amt.slice(0, -1) : (draft.amt + k).replace(/^0+/, '').slice(0, 4); refreshLog(); return; }
+  if (act === 'newcat') { draft.adding = !draft.adding; refreshLog(); return; }
+  if (act === 'addcat') {
+    if (!draft.newName) { toast('先给新类别起个名字'); return; }
+    const id = 'u' + Date.now();
+    CATS.push({ id, name: draft.newName, ess: !!draft.newEss });
+    Object.assign(draft, { cat: id, adding: false, newName: '', newEss: false });
+    refreshLog(); toast(`加好了：${cat(id).name}`); return;
+  }
+  if (act === 'savequick') {
+    const label = draft.note || cat(draft.cat).name, amt = parseInt(draft.amt, 10);
+    if (!S.quicks.some(q => q.label === label && q.amt === amt && q.cat === draft.cat)) { S.quicks.unshift({ label, cat: draft.cat, amt }); S.quicks = S.quicks.slice(0, 8); }
+    refreshLog(); toast(`存好了：${label} ¥${amt}，下次一按就填好`); return;
+  }
+  if (act === 'save') {
+    const entry = { cat: draft.cat, amt: parseInt(draft.amt, 10), night: !!draft.night, note: draft.note, fromWish: draft.fromWish };
+    const before = evaluate(S.today);
+    if (draft.edit != null) S.today[draft.edit] = entry; else S.today.push(entry);
+    renderTable(); verdict(before, evaluate(S.today)); return;
+  }
+  if (act === 'del') { const before = evaluate(S.today); S.today.splice(draft.edit, 1); renderTable(); const after = evaluate(S.today); toast(after.mult > before.mult ? `删掉了 · 倍率回到 ×${after.mult}` : '删掉了'); return; }
+  if (act === 'wish') { S.wish.push({ cat: draft.cat, amt: parseInt(draft.amt, 10), note: draft.note }); renderTable(); toast('放进待买清单，明天再问你 · 牌没碎'); return; }
+  if (act === 'wish-buy') { const x = S.revisit.shift(); const before = evaluate(S.today); S.today.push({ ...x, night: false, fromWish: true }); renderTable(); verdict(before, evaluate(S.today)); return; }
+  if (act === 'wish-skip') { const x = S.revisit.shift(); renderTable(); toast(`省下 ¥${x.amt}`); return; }
+  if (act === 'end') { if (!S.held.length) { toast('先抽这周的牌'); return; } renderEnd(); return; }
+  if (act === 'end-ok') { t.disabled = true; playStage(top); return; }
+  if (act === 'play-next') { t.disabled = true; endDay(); return; }
+  if (act === 'unlogged-yes' || act === 'unlogged-no') {
+    const y = S.history[S.history.length - 1];
+    if (act === 'unlogged-yes') Object.assign(y, y.potential, { unlogged: false });
+    y.resolved = true;
+    renderTable(); renderMorning(); lastSheet().style.animation = 'none';
+    toast(act === 'unlogged-yes' ? `补上了 ${y.score} 分` : '那天按 0 分算。以后花了钱随手记一笔');
+    return;
+  }
+  if (act === 'to-monday') { top.remove(); S.clock = 8.5; renderMonday(); return; }
+  if (act === 'shop') { rollShop(); top.remove(); renderShop(); return; }
+  if (act === 'draw-now') { top.remove(); startWeek(); return; }
+  if (t.dataset.buy) {
+    const o = S.shopOffers[+t.dataset.buy]; if (o.sold || S.stars < o.price) return;
+    S.stars -= o.price; o.sold = true;
+    if (o.kind === 'unlock') S.unlocked.push(o.no); else S.pinned.push(o.no);
+    replaceSheet(top, renderShop); toast(o.kind === 'unlock' ? `解锁了「${CARDS[o.no].name}」` : `下周一定会发「${CARDS[o.no].name}」`); return;
+  }
+  if (act === 'reroll') { S.stars -= PRICE.reroll; rollShop(); replaceSheet(top, renderShop); return; }
+  if (act === 'slot') { S.stars -= PRICE.slot; S.slots = 4; replaceSheet(top, renderShop); toast('下周起发 6 张，留 4 张'); return; }
+  if (act === 'glue-buy') { S.stars -= PRICE.glue; S.glue += 1; replaceSheet(top, renderShop); toast('买了一瓶胶水，碎了的牌点开就能用'); return; }
+  if (act === 'shop-done') { startWeek(); S.pinned = []; return; }
+  if (act === 'glue') {
+    const no = t.dataset.no; S.glue -= 1; S.glued = { week: S.week, day: S.day, no };
+    top.remove(); renderTable(); toast(`粘好了，「${CARDS[no].name}」今天又守着了 +${CARDS[no].plus}`); return;
+  }
+  if (t.dataset.carry) { S.carry = t.dataset.carry; replaceSheet(top, renderWeek); return; }
+  if (t.dataset.stake) { S.nextStake = +t.dataset.stake; replaceSheet(top, renderWeek); return; }
+  if (act === 'next-week') { startWeek(); return; }
+});
+
+renderTable();
+renderLaunch();
+</script>
+
+</html>
