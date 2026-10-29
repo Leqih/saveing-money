@@ -34,8 +34,22 @@ body {
 button { font: inherit; color: inherit; cursor: pointer; }
 button:focus-visible, input:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 2px; }
 .px { font-family: var(--f-px); }
-.phone { position: relative; width: 100%; max-width: 400px; height: 820px; background: var(--paper); border-radius: 40px; overflow: hidden; box-shadow: 0 30px 60px -20px rgba(0,0,0,0.45), 0 0 0 10px #111; }
-.screen { height: 100%; overflow-y: auto; padding: 22px 18px 110px; display: flex; flex-direction: column; gap: 14px; }
+/* iPhone 16 Pro mockup: 402 × 874 pt screen, black bezel, natural titanium band, side buttons, Dynamic Island */
+:root { --top: 60px; }
+.device { position: relative; flex-shrink: 0; padding: 14px; border-radius: 70px; background: linear-gradient(135deg, #DCD9D2 0%, #9C988F 22%, #CFCBC3 48%, #8E8A82 74%, #C8C4BC 100%); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5), inset 0 0 2px 2px rgba(0,0,0,0.25), 0 40px 70px -24px rgba(0,0,0,0.55); }
+.device::before { content: ""; position: absolute; inset: 4px; border-radius: 66px; background: #050506; }
+.dbtn { position: absolute; width: 5px; border-radius: 3px; background: linear-gradient(90deg, #7A766F, #C9C5BD 55%, #8E8A82); }
+.dbtn.l { left: -3px; } .dbtn.r { right: -3px; }
+.dbtn.action { top: 168px; height: 36px; } .dbtn.vup { top: 232px; height: 64px; } .dbtn.vdown { top: 310px; height: 64px; }
+.dbtn.power { top: 248px; height: 100px; }
+.dbtn.cam { top: 560px; height: 62px; right: -2px; width: 4px; background: linear-gradient(90deg, #5E5A54, #A8A49C); }
+.statusbar { position: absolute; left: 14px; right: 14px; top: 14px; height: 54px; z-index: 40; pointer-events: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 34px 0 50px; border-radius: 55px 55px 0 0; background: var(--paper); font-family: -apple-system, 'SF Pro Text', var(--f-body); font-weight: 700; font-size: 17px; color: var(--ink); }
+.island { position: absolute; left: 50%; top: 11px; width: 126px; height: 37px; margin-left: -63px; border-radius: 20px; background: #000; }
+.island::after { content: ""; position: absolute; right: 13px; top: 12px; width: 13px; height: 13px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #2A3346 0%, #0B0E15 60%); }
+.sb-icons { display: flex; align-items: center; gap: 6px; }
+.homebar { position: absolute; left: 50%; bottom: 22px; width: 140px; height: 5px; margin-left: -70px; border-radius: 3px; background: #111; z-index: 41; pointer-events: none; }
+.phone { position: relative; width: 402px; height: 874px; background: var(--paper); border-radius: 55px; overflow: hidden; }
+.screen { height: 100%; overflow-y: auto; padding: var(--top) 18px 110px; display: flex; flex-direction: column; gap: 14px; }
 .screen > * { flex-shrink: 0; }
 
 /* keycap */
@@ -114,11 +128,14 @@ button.chip:active { transform: translateY(2px); }
 .dock .log { border: 0; border-radius: 32px; background: var(--cobalt); color: #fff; font-weight: 900; font-size: 16px; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2), 0 10px 18px -6px rgba(31,107,255,0.5); }
 
 /* sheets */
-.sheet { position: absolute; inset: 0; background: var(--paper); z-index: 10; overflow-y: auto; padding: 22px 18px 24px; display: flex; flex-direction: column; gap: 12px; animation: up 0.25s ease; }
+.sheet { position: absolute; inset: 0; background: var(--paper); z-index: 10; overflow-y: auto; padding: var(--top) 18px 24px; display: flex; flex-direction: column; gap: 12px; animation: up 0.25s ease; }
 @keyframes up { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
 .sheet .bar-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .sheet h1 { margin: 0; font-weight: 900; font-size: 22px; }
-.x { width: 44px; height: 44px; flex-shrink: 0; border-radius: 22px; border: 2px solid var(--ink); background: #fff; font-size: 18px; }
+.x { width: 44px; height: 44px; flex-shrink: 0; border-radius: 15px; border: 0; padding: 0; background: var(--ink); color: var(--lime); display: flex; align-items: center; justify-content: center; transform: rotate(-4deg); box-shadow: inset 0 -4px 0 rgba(0,0,0,0.45), 0 6px 10px -4px rgba(20,20,30,0.4); transition: transform 0.12s ease; }
+.x:hover { transform: rotate(4deg) scale(1.05); } .x:active { transform: rotate(0) scale(0.94); }
+/* a chunky label stuck on a card or box: ink on lime, like the stamps */
+.sticker { position: absolute; z-index: 2; padding: 2px 10px; border-radius: 10px; background: var(--lime); color: var(--ink); border: 2px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font-size: 12px; font-weight: 900; white-space: nowrap; transform: rotate(6deg); }
 .lbl { font-size: 12px; font-weight: 900; color: var(--sub); margin-bottom: -4px; }
 .quick { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
 .amount { border-radius: 28px 60px 60px 28px; background: var(--lav); padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; }
@@ -353,8 +370,17 @@ button.hcard:active > div { transform: translateY(2px); }
 /* deal of five: two rows, picked cards lift and get a number */
 .deal { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 10px; padding: 12px 0 4px; }
 .deal .pick, .deal .pick:nth-child(1), .deal .pick:nth-child(3) { position: relative; transform: none; }
-.deal .pick.sel { transform: translateY(-8px); }
-.pick-n { position: absolute; right: -6px; top: -8px; z-index: 2; width: 26px; height: 26px; border-radius: 50%; background: var(--lime); border: 2px solid var(--ink); font-family: var(--f-display); font-size: 13px; display: flex; align-items: center; justify-content: center; }
+.deal .pick.sel { transform: translateY(-10px) rotate(-2deg); }
+.deal .pick.sel .face { outline: 4px solid var(--ink); outline-offset: 2px; box-shadow: 0 0 0 10px var(--lime); border-radius: 12px; }
+.deal.full .pick:not(.sel) { opacity: 0.4; filter: grayscale(0.7); }
+.draw-lead { margin: -4px 0 0; font-size: 14px; font-weight: 900; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.drawfoot { position: sticky; bottom: -24px; z-index: 3; margin: auto -18px -24px; padding: 12px 18px 22px; background: #FFF; border-radius: 22px 22px 0 0; box-shadow: 0 -10px 24px rgba(20,20,30,0.1); display: flex; flex-direction: column; gap: 10px; }
+.dsum { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--sub); }
+.dsum b { font-family: var(--f-display); font-weight: 400; font-size: 18px; color: var(--ink); }
+.dslots { display: flex; gap: 6px; }
+.dslot { width: 34px; height: 34px; border-radius: 11px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--ink); }
+.dslot.empty { border: 2px dashed #C4C4CC; background: #F6F6F8; }
+.pick-n { position: absolute; right: -8px; top: -10px; z-index: 2; width: 30px; height: 30px; border-radius: 50%; background: var(--lime); border: 2px solid var(--ink); font-family: var(--f-display); font-size: 13px; display: flex; align-items: center; justify-content: center; }
 /* verdict after saving an entry */
 .fb { position: absolute; inset: 0; z-index: 35; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(17,17,17,0.55); animation: up 0.2s ease; cursor: pointer; }
 .fb-card { width: 100%; border-radius: 28px; background: #FFF; padding: 20px 18px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.35); }
@@ -481,34 +507,66 @@ button.hcard:active > div { transform: translateY(2px); }
 .unlogged b { font-size: 16px; } .unlogged span { font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.8); }
 /* log sheet: verdict and save pinned to the bottom */
 .logfoot { position: sticky; bottom: -24px; z-index: 2; margin: 4px -18px -24px; padding: 12px 18px 22px; background: #FFF; border-radius: 22px 22px 0 0; box-shadow: 0 -10px 24px rgba(20,20,30,0.1); display: flex; flex-direction: column; gap: 10px; }
-.vline { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border-radius: 16px; background: #F3F3F6; }
+/* the live preview: a dark ticket whose star badge shows the multiplier you'll end up with */
+.vline { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 16px; border-radius: 22px; color: #FFF; background: linear-gradient(180deg, #1E1E22 0%, #0E0E11 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 14px 20px -12px rgba(20,20,30,0.5); }
+.vtext { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .vline b { font-size: 16px; font-weight: 900; }
-.vline span { font-size: 12px; color: var(--sub); }
-.vline small { font-size: 12px; font-weight: 900; color: #A10F2E; }
-.vline.bad { background: #FFE1E6; } .vline.bad b { color: #C8102E; }
-.vline.good { background: #F1FFB0; } .vline.good small { color: #4D6A00; }
+.vline span { font-size: 12px; color: #C9C3FF; }
+.vline small { font-size: 12px; font-weight: 900; color: var(--lime); line-height: 1.4; }
+.vline.bad b { color: #FF8FA3; } .vline.bad small { color: #FFD0D8; }
+.vline.good b { color: var(--lime); }
+.vmult { flex-shrink: 0; width: 64px; height: 64px; background: #C9C3FF; color: #2B2470; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
+.vmult b { font-family: var(--f-display); font-weight: 400; font-size: 21px; }
+.vmult small, .vmult s { font-size: 10px; font-weight: 900; color: inherit; opacity: 0.75; }
+.vline.good .vmult { background: var(--lime); color: var(--ink); }
+.vline.bad .vmult { background: var(--pink); color: #FFF; }
 .mini.on { background: #111; color: #FFF; }
 /* favorites fill up while held, so a long press reads as "saving" */
-.qchip { background-image: linear-gradient(var(--lime), var(--lime)); background-repeat: no-repeat; background-size: 0% 100%; transition: background-size 0.5s linear; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
-.qchip.pressing { background-size: 100% 100%; }
+.qchip { user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.qchip.on { background: var(--lime); border-color: var(--ink); }
 /* recommended set on the draw page */
-.recbox { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 22px; background: #F1FFB0; border: 2px solid var(--lime-edge); }
+.recbox { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 18px 12px 12px; margin-top: 8px; border-radius: 22px; background: #F1FFB0; border: 2px solid var(--lime-edge); }
+.rfoot { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 900; color: #3E5A00; }
+.rfoot .cap { width: auto; flex-shrink: 0; }
 .rhead b { display: block; font-size: 15px; font-weight: 900; }
 .rhead span { font-size: 12px; color: #3E5A00; }
 .ricons { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 6px; }
-.ricons > span { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 12px; font-weight: 900; text-align: center; }
-.ricons i { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+.ricons > span { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 900; white-space: nowrap; min-width: 0; }
+.ricons i { width: 32px; height: 32px; flex-shrink: 0; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
 .ricons em { font-style: normal; font-family: var(--f-px); font-weight: 400; color: var(--sub); }
-.recbox .cap > .top { text-align: center; font-weight: 900; font-size: 14px; padding: 10px; }
+.recbox .cap > .top { text-align: center; font-weight: 900; font-size: 13px; padding: 8px 14px; white-space: nowrap; }
 .linkbtn { border: 0; background: none; font-family: var(--f-px); font-size: 12px; color: #6A6A70; padding: 6px; }
 
-.toast { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); z-index: 30; max-width: calc(100% - 32px); padding: 8px 14px; border-radius: 14px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 900; box-shadow: 0 10px 20px rgba(0,0,0,0.25); text-align: center; }
+.toast { position: absolute; left: 50%; top: var(--top); transform: translateX(-50%); z-index: 30; max-width: calc(100% - 32px); padding: 8px 14px; border-radius: 14px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 900; box-shadow: 0 10px 20px rgba(0,0,0,0.25); text-align: center; }
 .sample { font-family: var(--f-mono); font-size: 11px; color: var(--mute); text-align: center; margin: 0; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
-@media (max-width: 440px) { body { padding-block: 0; padding-left: 0; padding-right: 0; } .phone { border-radius: 0; box-shadow: none; max-width: none; height: 100vh; height: 100dvh; } }
+/* shrink the whole mockup on short windows so the phone fits without scrolling the page */
+@media (max-height: 960px) and (min-width: 441px) { .device { zoom: 0.9; } }
+@media (max-height: 860px) and (min-width: 441px) { .device { zoom: 0.8; } }
+/* on a real phone the device is the frame: drop the mockup and use the screen's own safe area */
+@media (max-width: 440px) {
+  :root { --top: max(22px, env(safe-area-inset-top, 0px)); }
+  body { margin: 0; padding-block: 0; padding-left: 0; padding-right: 0; }
+  .device { padding: 0; border-radius: 0; background: none; box-shadow: none; width: 100%; zoom: 1; }
+  .device::before, .dbtn, .statusbar, .homebar { display: none; }
+  .phone { width: 100%; border-radius: 0; height: 100vh; height: 100dvh; }
+}
 </style>
 
-<div class="phone" id="app" aria-live="polite"></div>
+<div class="device">
+  <span class="dbtn l action" aria-hidden="true"></span><span class="dbtn l vup" aria-hidden="true"></span><span class="dbtn l vdown" aria-hidden="true"></span>
+  <span class="dbtn r power" aria-hidden="true"></span><span class="dbtn r cam" aria-hidden="true"></span>
+  <div class="phone" id="app" aria-live="polite"></div>
+  <div class="statusbar" aria-hidden="true">
+    <span>9:41</span><span class="island"></span>
+    <span class="sb-icons">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="#111"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="#111"><path d="M8 2.2c2.4 0 4.6.9 6.2 2.5l1.3-1.3C13.5 1.4 10.9.3 8 .3S2.5 1.4.5 3.4l1.3 1.3C3.4 3.1 5.6 2.2 8 2.2zm0 3.7c1.4 0 2.6.5 3.6 1.4l1.3-1.3C11.6 4.7 9.9 4 8 4s-3.6.7-4.9 2l1.3 1.3c1-.9 2.2-1.4 3.6-1.4zM8 9.6l2.1-2.1A3 3 0 0 0 8 6.7a3 3 0 0 0-2.1.8z"/></svg>
+      <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x="0.5" y="0.5" width="22" height="12" rx="3.5" stroke="#111" opacity="0.4"/><rect x="2" y="2" width="19" height="9" rx="2" fill="#111"/><path d="M24.5 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2z" fill="#111" opacity="0.45"/></svg>
+    </span>
+  </div>
+  <span class="homebar" aria-hidden="true"></span>
+</div>
 
 <script>
 /* ---------- card art (same library as the canvas card component) ---------- */
@@ -839,8 +897,8 @@ function homeHTML() {
     </div></div>
     <h2>今天记的账 <button class="linkbtn" data-act="goflow" style="font-size:13px;color:#5B4FC8;padding:0">全部流水 →</button></h2>
     <div class="keys">${list}</div>
-    <div class="lbl">常用 · 点一下填好，按住直接记下</div>
-    <div class="quick">${S.quicks.map((q, i) => `<button class="chip qchip" data-hquick="${i}">${esc(q.label)} <b>¥${q.amt}</b></button>`).join("")}</div>
+    <div class="lbl">常用 · 点一下选好是什么，再填金额</div>
+    <div class="quick">${S.quicks.map((q, i) => `<button class="chip qchip" data-hquick="${i}">${esc(q.label)}</button>`).join("")}</div>
     <button class="cap lime bigbtn endbtn" data-act="end"><div class="top">结束今天</div></button>
     <p class="sample">示例数据 · 每天能花 ¥${dailyBudget()} · 吃饭、通勤每天 ¥${essQuota} 以内不算</p>`;
 }
@@ -1084,10 +1142,10 @@ function bestCombo(hand, n, hasData) {
 function recHTML(need, hasData) {
   draft.rec = draft.rec || bestCombo(draft.hand, need, hasData);
   const r = draft.rec, mult = S.baseMult + r.reduce((a, no) => a + CARDS[no].plus, 0);
-  const how = hasData ? `${S.estimated ? "按你选的花法" : "按上周的账"}，这周大概 ${simulate(r, S.lastWeek, S.weekStart).total} 分（目标 ${weekTarget()}）` : `都是好守的牌，全守住倍率 ×${mult}`;
-  return `<div class="recbox"><div class="rhead"><b>推荐组合</b><span>${how}</span></div>
-    <div class="ricons">${r.map(no => `<span><i style="background:${coreOf(no)}">${artIcon(no, 30)}</i>${CARDS[no].name}<em>+${CARDS[no].plus}</em></span>`).join("")}</div>
-    <button class="cap lime" data-act="use-rec"><div class="top">就用这 ${r.length} 张</div></button></div>`;
+  const how = hasData ? `约 ${simulate(r, S.lastWeek, S.weekStart).total} 分 / 目标 ${weekTarget()}` : `好守，全守住 ×${mult}`;
+  return `<div class="recbox"><span class="sticker" style="left:12px;top:-11px;transform:rotate(-4deg)">推荐</span>
+    <div class="ricons">${r.map(no => `<span><i style="background:${coreOf(no)}">${artIcon(no, 24)}</i>${CARDS[no].name}</span>`).join("")}</div>
+    <div class="rfoot"><span>${how}</span><button class="cap lime" data-act="use-rec"><div class="top">就用这 ${r.length} 张</div></button></div></div>`;
 }
 function renderDraw() {
   if (!draft.hand) {
@@ -1102,7 +1160,7 @@ function renderDraw() {
   const sel = draft.sel, focus = draft.focus;
   const hasData = S.lastWeek.some(d => d.length);
   const cards = draft.hand.map(no => `<button class="pick ${sel.includes(no) ? 'sel' : ''}" data-pick="${no}" aria-pressed="${sel.includes(no)}" aria-label="${CARDS[no].name} +${CARDS[no].plus}"><div class="flip ${draft.flip ? 'down' : ''}"><div class="face"><div class="scale">${cardHTML(CARDS[no])}</div></div><div class="back"><span>?</span></div></div>${sel.includes(no) ? `<span class="pick-n">${sel.indexOf(no) + 1}</span>` : ''}${no === S.carry && !S.firstDraw ? '<span class="carry-tag">续留</span>' : !sel.includes(no) && clashIn(no, sel) ? '<span class="carry-tag">重叠</span>' : ''}</button>`).join('');
-  let info = '<p class="note">点一张牌看它管什么，再点一次放回去。</p>';
+  let info = '';
   if (focus) {
     const c = CARDS[focus];
     const one = hasData ? simulate([focus], S.lastWeek, S.weekStart) : null;
@@ -1114,23 +1172,20 @@ function renderDraw() {
       <div class="pillrow">${tag ? `<span class="pill ${tag[0]}">${S.estimated ? '按你选的估算' : '按上周'} · ${tag[1]}</span>` : `<span class="pill ${['', 'ok', 'mid', 'no'][c.diff]}">${['', '好守', '要留意', '最难也最值'][c.diff]}</span>`}</div>
     </div>`;
   }
-  let sum = '';
-  if (sel.length === need) {
-    if (hasData) {
-      const sim = simulate(sel, S.lastWeek, S.weekStart), target = weekTarget();
-      sum = `<div class="impact"><div class="r"><span>留这 3 张，${S.estimated ? '按你选的花法估算' : '按上周的账'}</span><span class="${sim.total >= target ? 'good' : 'hot'}">约 ${sim.total} 分</span></div><div class="r"><span>这周目标</span><span>${target} 分</span></div></div>`;
-    } else sum = `<p class="note">三张都守住时，倍率是 ×${S.baseMult + sel.reduce((a, no) => a + CARDS[no].plus, 0)}。</p>`;
-  }
-  const intro = !S.firstDraw ? (S.lastDays < 7 ? `下面用你上周真实的账算，不过上周你只用了 ${S.lastDays} 天，估得会偏少。` : '下面用你上周真实的账算守得住几天。')
-    : hasData ? '你还没有账单，下面按你上一步选的"一周大概几次"估算。' : '你还没有账单，先按难度挑。';
+  // the footer keeps the picks, what they add up to and the button on screen however far the cards scroll
+  const multSel = S.baseMult + sel.reduce((a, no) => a + CARDS[no].plus, 0);
+  const sum = sel.length === need && hasData ? (sim => `约 <b>${sim.total}</b> 分 / 目标 ${weekTarget()}`)(simulate(sel, S.lastWeek, S.weekStart)) : sel.length ? `全守住 <b>×${multSel}</b>` : '点牌选进来';
+  const slots = Array.from({ length: need }, (_, i) => sel[i] ? `<span class="dslot" style="background:${coreOf(sel[i])}">${artIcon(sel[i], 22)}</span>` : '<span class="dslot empty"></span>').join('');
   sheet('抽规则卡', `
-    <div class="bar-top"><h1>第 ${S.week} 周 · 抽 ${DEALN()} 留 ${HOLDN()}</h1><span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name} · 已选 ${sel.length}/${need}</span></div>
-    ${S.weekStart > 0 ? `<div class="callout">你周${DAYS[S.weekStart]}加入，这周只剩 <b>${weekDays()} 天</b>，目标分也按 ${weekDays()} 天算。下周一开始完整的一周。</div>` : ''}
-    <p class="note left">留下的 ${need} 张这周同时生效：守住一张就加它的倍率，打破了当天就碎。挑你守得住的，也可以挑倍率高的赌一把。${intro}</p>
+    <div class="bar-top"><h1>第 ${S.week} 周 · 抽 ${DEALN()} 留 ${HOLDN()}</h1><span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
+    <p class="draw-lead">留下的 ${need} 张这周同时生效，守住就加倍率${S.weekStart > 0 ? `<span class="chipk" style="background:var(--lime)">这周只剩 ${weekDays()} 天</span>` : ''}</p>
     ${recHTML(need, hasData)}
-    <div class="deal">${cards}</div>
-    ${info}${sum}
-    <button class="go" data-act="choose" ${sel.length === need ? '' : 'disabled'}>${sel.length === need ? `就留这 ${need} 张` : combosOf(draft.hand, need).some(c => sel.every(x => c.includes(x))) ? `再选 ${need - sel.length} 张` : `有重叠，凑不满 ${need} 张，换掉一张`}</button>`);
+    <div class="deal ${sel.length === need ? 'full' : ''}">${cards}</div>
+    ${info}
+    <div class="drawfoot">
+      <div class="dsum"><div class="dslots">${slots}</div><span>${sum}</span></div>
+      <button class="go" data-act="choose" ${sel.length === need ? '' : 'disabled'}>${sel.length === need ? `就留这 ${need} 张` : combosOf(draft.hand, need).some(c => sel.every(x => c.includes(x))) ? `再选 ${need - sel.length} 张` : `有重叠，凑不满 ${need} 张，换掉一张`}</button>
+    </div>`);
   if (draft.flip) {
     draft.flip = false;
     lastSheet().querySelectorAll('.flip').forEach((f, i) => setTimeout(() => f.classList.remove('down'), 300 + i * 160));
@@ -1153,16 +1208,17 @@ function renderLog() {
   const tone = !amt ? '' : broke.length || slip.length ? 'bad' : 'good';
   const head = !amt ? '输入金额，马上告诉你会不会碎牌'
     : broke.length ? `会碎：${broke.join('、')}` : slip.length ? `倍率会降：${slip.join('、')}` : woke.length ? `${woke.join('、')}会醒 ✓` : '没碰到规则 ✓';
-  const sub = !amt ? `今日还能花 ${money(before.left)} · 倍率 ×${before.mult}`
-    : `倍率 ×${before.mult} → ×${after.mult} · 今晚 ${before.score} → ${after.score} 分 · 还能花 ${money(after.left)}`;
-  const extra = amt && after.left < 0 ? `会超出 ¥${-after.left}，从明天的额度里扣` : amt && near ? near : broke.length ? '放进待买清单：今天不算钱，也不会碎牌，明天再决定' : '';
-  const quicks = S.quicks.map((q, i) => `<button class="chip qchip" data-quick="${i}">${esc(q.label)} <b>¥${q.amt}</b></button>`).join('');
+  const sub = !amt ? `今日还能花 ${money(before.left)} · 今晚 ${before.score} 分`
+    : `今晚 ${before.score} → ${after.score} 分 · 还能花 ${money(after.left)}`;
+  // before an amount is typed nothing can break, so only hint at the wishlist once there is something to save
+  const extra = amt && after.left < 0 ? `会超出 ¥${-after.left}，从明天的额度里扣` : amt && near ? near : amt && broke.length ? '放进待买清单：今天不算钱，也不碎牌，明天再决定' : '';
+  const quicks = S.quicks.map((q, i) => `<button class="chip qchip ${draft.cat === q.cat && (draft.note || '') === (q.label === cat(q.cat).name ? '' : q.label) ? 'on' : ''}" data-quick="${i}">${esc(q.label)}</button>`).join('');
   const cats = CATS.map(k => `<button class="cap ${k.id === draft.cat ? 'orange' : ''}" aria-pressed="${k.id === draft.cat}" data-cat="${k.id}"><div class="top">${esc(k.name)}${k.ess ? '<small>必需</small>' : ''}</div></button>`).join('')
     + `<button class="cap" data-act="newcat" aria-expanded="${!!draft.adding}"><div class="top">＋ 新类别</div></button>`;
   const pad = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map(k => `<button class="cap ${/[C⌫]/.test(k) ? 'dark' : ''}" data-key="${k}" aria-label="${k === '⌫' ? '删除一位' : k === 'C' ? '清空' : k}"><div class="top">${k}</div></button>`).join('');
   sheet(editing ? '改一笔' : '记一笔', `
-    <div class="bar-top"><h1>${editing ? '改一笔' : '记一笔'}</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
-    ${editing ? '' : `<div class="lbl">常用 · 点一下填好，按住直接记下</div><div class="quick">${quicks}</div>`}
+    <div class="bar-top"><h1>${editing ? '改一笔' : '记一笔'}</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
+    ${editing ? '' : `<div class="lbl">常用 · 点一下选好是什么</div><div class="quick">${quicks}</div>`}
     <div class="amount"><b>¥${amt}</b><span class="px" style="color:#4A4390;font-size:12px;text-align:right">周${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
     <div class="cats">${cats}</div>
     ${draft.adding ? `<div class="newcat">
@@ -1172,10 +1228,11 @@ function renderLog() {
     <div class="field"><input class="in" id="note" maxlength="12" value="${esc(draft.note || '')}" placeholder="买了什么（可不填）" aria-label="备注">
       ${draft.cat === 'meal' ? `<button class="mini ${draft.delivery ? 'on' : ''}" data-delivery="${draft.delivery ? 0 : 1}" aria-pressed="${!!draft.delivery}">外卖送的</button>` : ''}
       <button class="mini ${draft.night ? 'on' : ''}" data-night="${draft.night ? 0 : 1}" aria-pressed="${!!draft.night}">22 点后</button>
-      <button class="mini" data-act="savequick" ${amt ? '' : 'disabled'}>存常用</button></div>
+      <button class="mini" data-act="savequick">存常用</button></div>
     <div class="pad">${pad}</div>
     <div class="logfoot">
-      <div class="vline ${tone}"><b>${head}</b><span class="px">${sub}</span>${extra ? `<small>${extra}</small>` : ''}</div>
+      <div class="vline ${tone}"><div class="vtext"><b>${head}</b><span class="px">${sub}</span>${extra ? `<small>${extra}</small>` : ''}</div>
+        <div class="vmult" aria-label="倍率 ×${amt ? after.mult : before.mult}">${amt && after.mult !== before.mult ? `<s>×${before.mult}</s>` : '<small>倍率</small>'}<b>×${amt ? after.mult : before.mult}</b></div></div>
       ${editing ? `<div class="actions">
         <button class="cap dark" data-act="del"><div class="top">删掉这笔</div></button>
         <button class="go" data-act="save" ${amt ? '' : 'disabled'}>保存修改</button>
@@ -1186,14 +1243,6 @@ function renderLog() {
     </div>`);
 }
 // hold a favorite for half a second to log it without opening the keypad
-function quickSave(i) {
-  const q = S.quicks[i];
-  const entry = { cat: q.cat, amt: q.amt, night: S.clock >= 22, note: q.label === cat(q.cat).name ? '' : q.label };
-  const before = evaluate(S.today);
-  S.today.push(entry);
-  app.querySelectorAll('.sheet').forEach(n => { if (['记一笔', '改一笔'].includes(n.getAttribute('aria-label'))) n.remove(); });
-  renderTable(); verdict(before, evaluate(S.today));
-}
 const refreshLog = () => replaceSheet(lastSheet(), renderLog);
 // a delivered meal is takeout, not a meal: it doesn't hide inside the meal allowance or dodge 外卖克星
 const logCat = () => draft.cat === 'meal' && draft.delivery ? 'takeout' : draft.cat;
@@ -1312,7 +1361,7 @@ async function playStage(sh) {
 }
 function renderEnd() {
   sheet('结束今天', `
-    <div class="bar-top"><h1>周${DAYS[S.day]} · 结束今天</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    <div class="bar-top"><h1>周${DAYS[S.day]} · 结束今天</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     ${receiptHTML(dayRecord(), true)}
     <p class="note">结束后今天就不能再记了，有漏记的先补上。<br>忘了点也没关系，零点会自动帮你结束。</p>
     <div class="actions"><button class="cap" data-act="close"><div class="top">还要补记</div></button><button class="go" data-act="end-ok">出牌，结束今天</button></div>`);
@@ -1321,7 +1370,7 @@ function renderDay(i, week = S.week) {
   const h = S.history.find(x => x.week === week && x.day === i);
   if (!h) return;
   const d = dateOf(week, i);
-  sheet(`周${DAYS[i]}小票`, `<div class="bar-top"><h1>${d.getMonth() + 1} 月 ${d.getDate()} 日 · 周${DAYS[i]}</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>${receiptHTML(h)}
+  sheet(`周${DAYS[i]}小票`, `<div class="bar-top"><h1>${d.getMonth() + 1} 月 ${d.getDate()} 日 · 周${DAYS[i]}</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>${receiptHTML(h)}
     <p class="note">每天结束都会留一张小票：这周的在首页小格子里，以前的在账单日历里。</p>`);
 }
 function renderRule(no) {
@@ -1331,7 +1380,7 @@ function renderRule(no) {
   const state = cur ? (cur.state === 'on' ? `今天还守着，倍率 +${c.plus}。${cur.near ? cur.near + '。' : ''}` : cur.state === 'pending' ? '还睡着：今天记一笔就醒。' : `今天碎了：${cur.why}。${c.weekly ? `碎到周日。${cur.gain < 0 ? `今天又超了，倍率 ${gainStr(cur.gain)}。` : ''}` : `${cur.saved ? `碎了以后没再花额度外的钱，止损 +${cur.gain}。` : ''}明天零点恢复。`}`) : '';
   const stopLoss = c.weekly ? '' : Math.floor(c.plus / 2) ? `当天不再花额度外的钱，今晚拿回一半倍率（+${Math.floor(c.plus / 2)}）。` : '这张只有 +1，碎了拿不回。';
   sheet(c.name, `
-    <div class="bar-top"><h1>${c.name}</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    <div class="bar-top"><h1>${c.name}</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     <div class="bigcard">${cardHTML(c, cur ? cur.state : 'on')}</div>
     <div class="kv"><small>规则</small><p>${c.cond}。守住时倍率 +${c.plus}。</p></div>
     <div class="kv"><small>举个例子</small><p>${c.eg}</p></div>
@@ -1420,14 +1469,14 @@ function renderWeak() {
         <span class="px" style="font-size:16px;color:#E4FF1A">守住 +${first.plus} 倍率</span>
         <span style="font-size:12px;color:rgba(255,255,255,0.75)">${first.cond}${picks.length > 1 ? `；还有 ${picks.slice(1).map(w => CARDS[w.card].name).join('、')}` : ''}</span>
       </div>
-      <span class="cv-glow" style="position:absolute;right:10px;top:-12px;padding:1px 10px;border-radius:10px;background:#FFE04A;border:3px solid #FFC800;font-size:13px;font-weight:600;transform:rotate(6deg)">${picks.length ? '优先发' : '新手推荐'}</span>
+      <span class="sticker" style="right:10px;top:-12px">${picks.length ? '优先发' : '新手推荐'}</span>
     </div>
     <button class="cap lime bigbtn" data-act="weak-next" style="margin-top:4px"><div class="top">就这些，去抽牌</div></button>
     <button class="linkbtn" data-act="import">导入微信 / 支付宝账单，自动找</button>`);
 }
 function renderGuide() {
   sheet('怎么玩', `
-    <div class="bar-top"><h1>怎么玩</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    <div class="bar-top"><h1>怎么玩</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     <div class="gstack">
       <div class="gcard g-orange"><span class="n">1</span><div><h3>每周一，抽 5 留 3</h3><p>留下的 3 张规则卡这周同时生效，比如"今天不点外卖"。每张都写着守住能加多少倍率。</p></div>${scaled(CARDS['01'], 0.35)}</div>
       <div class="gcard g-lav"><span class="n">2</span><div><h3>每记一笔，马上知道</h3><p>记之前就能看到会不会碎牌。碎了当天就不算倍率，之后不再乱花能拿回一半，第二天零点恢复；按周算的牌碎到周日，再超还会扣倍率。</p></div><span class="gv">碎！</span></div>
@@ -1442,7 +1491,7 @@ function renderSettings() {
   const field = (k, label, sub) => `<div class="cv-field"><div><label for="st-${k}">${label}${sub ? `<small>${sub}</small>` : ''}</label><input id="st-${k}" inputmode="numeric" data-setup="${k}" value="${s[k]}"></div></div>`;
   const sw = (k, label, sub) => `<div class="set-row"><div><b>${label}</b><small>${sub}</small></div><button class="sw" data-pref="${k}" aria-pressed="${p[k]}" aria-label="${label}"><i></i></button></div>`;
   sheet('设置', `
-    <div class="bar-top"><h1>设置</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    <div class="bar-top"><h1>设置</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     <h2>预算</h2>
     ${field('income', '月收入', '')}${field('fixed', '固定支出', '房租、话费、订阅')}${field('save', '每月想存', '先存再花')}
     <div class="set-row"><div><b>每周额度</b><small id="setup-formula">${w >= 50 ? setupFormula(s) : '每周至少要有 ¥50'}</small></div><b class="px" id="setup-week" style="font-size:22px">${money(w)}</b></div>
@@ -1514,7 +1563,7 @@ function reviewHTML(y, m) {
 // the first morning of a new month opens last month's review on top of whatever is showing
 function monthTurn(prev, now) {
   if (prev.getMonth() === now.getMonth() || !monthStats(prev.getFullYear(), prev.getMonth()).days) return;
-  sheet('月度回顾', `<div class="bar-top"><h1>${prev.getMonth() + 1} 月回顾</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+  sheet('月度回顾', `<div class="bar-top"><h1>${prev.getMonth() + 1} 月回顾</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     ${reviewHTML(prev.getFullYear(), prev.getMonth())}
     <p class="note">以后随时能在 账单 → 回顾 里看到。${now.getDay() === 1 ? "" : "这周的周结算还在后面，周日晚上结束今天时出现。"}</p>
     <button class="cap lime bigbtn" data-act="close"><div class="top">开始 ${now.getMonth() + 1} 月</div></button>`);
@@ -1579,7 +1628,7 @@ function renderInbox() {
   const icon = { wish: '待', sunday: '周', evening: '晚', stop: '!', alert: BELL, memo: '单' };
   items.forEach(i => S.seen.add(i.key));
   sheet('通知', `
-    <div class="bar-top"><h1>通知</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    <div class="bar-top"><h1>通知</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     ${items.map(i => `<div class="ibox ${i.kind}"><span class="iic">${icon[i.kind]}</span><div><b>${i.title}</b><p>${i.text}</p>${i.btns ? `<div class="ibtns">${i.btns.map(([attr, label, cls]) => `<button class="rvbtn ${cls}" ${attr}>${label}</button>`).join('')}</div>` : ''}</div></div>`).join('')
       || '<p class="note">没有新提醒。规则提醒、晚上提醒、待买清单都会出现在这里，不会占首页的位置。</p>'}`);
   const bell = app.querySelector('.bell'); if (bell) { bell.classList.remove('ring'); const b = bell.querySelector('.badge'); if (b) b.remove(); }
@@ -1587,13 +1636,13 @@ function renderInbox() {
 // what the phone notification would look like; in the real app this is a system push
 function pushNote(title, body) {
   app.querySelectorAll('.push').forEach(n => n.remove());
-  app.insertAdjacentHTML("beforeend", `<div class="push" role="status" data-act="inbox"><span class="appicon" aria-hidden="true">省</span><div><small>省钱小局 · 现在</small><b>${title}</b><span>${body}</span></div><button class="x" data-act="push-close" aria-label="关闭通知">✕</button></div>`);
+  app.insertAdjacentHTML("beforeend", `<div class="push" role="status" data-act="inbox"><span class="appicon" aria-hidden="true">省</span><div><small>省钱小局 · 现在</small><b>${title}</b><span>${body}</span></div><button class="x" data-act="push-close" aria-label="关闭通知"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>`);
   const n = app.lastElementChild;
   setTimeout(() => n.remove(), 4500);
 }
 function renderClock() {
   sheet('切换时间', `
-    <div class="bar-top"><h1>演示：切换时间</h1><button class="x" data-act="close" aria-label="关闭">✕</button></div>
+    <div class="bar-top"><h1>演示：切换时间</h1><button class="x" data-act="close" aria-label="关闭"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     <p class="note left">真实使用时跟着手机时间走。这里方便你看不同时刻会收到什么提醒。</p>
     <div class="clocks">${TIMES.map(t => `<button class="cap ${Math.abs(t.c - S.clock) < 0.05 ? 'orange' : ''}" data-clock="${t.c}"><div class="top"><b class="px">${fmtClock(t.c)}</b><span>${t.name}</span></div></button>`).join('')}
       <button class="cap lime" data-act="jump-sunday"><div class="top"><b class="px">周日</b><span>跳到周日晚上 · 结束今天就看到周结算</span></div></button>
@@ -1799,16 +1848,6 @@ function startWeek() {
   monthTurn(lastDay, dateOf(S.week, 0));
 }
 
-// long press on a favorite (in the log sheet or on home) saves it after half a second
-let pressTimer = null, pressFired = false;
-app.addEventListener('pointerdown', e => {
-  const b = e.target.closest('[data-quick], [data-hquick]'); if (!b || !S.held.length) return;
-  pressFired = false; b.classList.add('pressing');
-  pressTimer = setTimeout(() => { pressFired = true; quickSave(+(b.dataset.quick ?? b.dataset.hquick)); }, 500);
-});
-['pointerup', 'pointerleave', 'pointercancel'].forEach(type => app.addEventListener(type, () => {
-  clearTimeout(pressTimer); app.querySelectorAll('.pressing').forEach(n => n.classList.remove('pressing'));
-}, true));
 app.addEventListener('input', e => {
   if (e.target.dataset.setup) {
     e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
@@ -1824,7 +1863,6 @@ app.addEventListener('input', e => {
 app.addEventListener('click', e => {
   const t = e.target.closest('button, .fb, .push'); if (!t) return;
   // a long press already logged the favorite; swallow the click that follows it
-  if (pressFired && (t.dataset.quick || t.dataset.hquick)) { pressFired = false; return; }
   const act = t.dataset.act, top = t.closest('.sheet');
   if (act === 'fb-close') { app.querySelectorAll('.fb').forEach(n => n.remove()); return; }
   if (act === 'launch-go') { top.remove(); renderSetup(); return; }
@@ -1906,8 +1944,8 @@ app.addEventListener('click', e => {
   if (act === 'morning-done') { S.autoEnded = false; S.wishSaved = 0; top.remove(); renderTable(); return; }
   if (act === 'push-close') { t.closest('.push').remove(); return; }
   if (t.dataset.edit) { const i = +t.dataset.edit, x = S.today[i]; draft = { amt: String(x.amt), cat: x.cat, night: !!x.night, note: x.note || '', edit: i, fromWish: x.fromWish }; renderLog(); return; }
-  if (t.dataset.hquick) { if (!S.held.length) { toast('先抽这周的牌'); return; } const q = S.quicks[+t.dataset.hquick]; draft = { amt: String(q.amt), cat: q.cat, night: S.clock >= 22, note: q.label === cat(q.cat).name ? '' : q.label }; renderLog(); return; }
-  if (t.dataset.quick) { const q = S.quicks[+t.dataset.quick]; Object.assign(draft, { amt: String(q.amt), cat: q.cat, note: q.label === cat(q.cat).name ? '' : q.label }); refreshLog(); return; }
+  if (t.dataset.hquick) { if (!S.held.length) { toast('先抽这周的牌'); return; } const q = S.quicks[+t.dataset.hquick]; draft = { amt: '', cat: q.cat, night: S.clock >= 22, note: q.label === cat(q.cat).name ? '' : q.label }; renderLog(); return; }
+  if (t.dataset.quick) { const q = S.quicks[+t.dataset.quick]; Object.assign(draft, { cat: q.cat, note: q.label === cat(q.cat).name ? '' : q.label }); refreshLog(); return; }
   if (t.dataset.cat) { draft.cat = t.dataset.cat; refreshLog(); return; }
   if (t.dataset.night) { draft.night = t.dataset.night === '1'; refreshLog(); return; }
   if (t.dataset.delivery) { draft.delivery = t.dataset.delivery === '1'; refreshLog(); return; }
@@ -1922,9 +1960,9 @@ app.addEventListener('click', e => {
     refreshLog(); toast(`加好了：${cat(id).name}`); return;
   }
   if (act === 'savequick') {
-    const label = draft.note || cat(logCat()).name, amt = parseInt(draft.amt, 10);
-    if (!S.quicks.some(q => q.label === label && q.amt === amt && q.cat === logCat())) { S.quicks.unshift({ label, cat: logCat(), amt }); S.quicks = S.quicks.slice(0, 8); }
-    refreshLog(); toast(`存好了：${label} ¥${amt}，下次一按就填好`); return;
+    const label = draft.note || cat(logCat()).name;
+    if (!S.quicks.some(q => q.label === label && q.cat === logCat())) { S.quicks.unshift({ label, cat: logCat() }); S.quicks = S.quicks.slice(0, 8); }
+    refreshLog(); toast(`存好了：${label}，下次点一下就选好，再填金额`); return;
   }
   if (act === 'save') {
     const entry = { cat: logCat(), amt: parseInt(draft.amt, 10), night: !!draft.night, note: draft.note, fromWish: draft.fromWish };
