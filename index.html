@@ -486,11 +486,11 @@ button.hcard:active > div { transform: translateY(2px); }
 .sc2.front .sc2-edge { opacity: 0; }
 
 .sc2:not(.front) { pointer-events: none; }
-.sc2.front .sc2-face { filter: drop-shadow(0 20px 22px rgba(0,0,0,0.5)); }
+.sc2-face > div { box-shadow: none !important; }
 .sc2:not(.front) .carry-tag, .sc2:not(.front) .sc2-rec { display: none; }
 .sc2.front { animation: hover 3s ease-in-out infinite; }
 @keyframes hover { 50% { margin-top: -5px; } }
-.sc2.front:active .sc2-face { filter: drop-shadow(0 6px 8px rgba(0,0,0,0.5)); }
+
 .sc2.flying { transition: none; animation: none; z-index: 90 !important; }
 
 .sc2-pickhint { position: absolute; left: 50%; bottom: -12px; transform: translateX(-50%); z-index: 3; padding: 3px 14px; border-radius: 14px; background: #111; color: var(--lime); font-size: 12px; font-weight: 900; white-space: nowrap; pointer-events: none; animation: pulse 1.4s ease-in-out infinite; }
@@ -1375,7 +1375,7 @@ function renderDraw() {
 // the cards sit side by side like a carousel: the front one is centred, its neighbours only show a coloured edge on either side
 const CARD_STEP = 330;
 function placeStack(stack, at, dx = 0) {
-  stack.querySelectorAll('.sc2').forEach(el => {
+  stack.querySelectorAll('.sc2:not(.flying)').forEach(el => {
     const k = +el.dataset.i - at, off = k * CARD_STEP + dx, d = Math.min(1, Math.abs(off) / CARD_STEP);
     el.style.transform = `translate(${off.toFixed(1)}px, 0px) scale(${(1 - d * 0.07).toFixed(3)})`;
     el.style.zIndex = String(50 - Math.round(d * 4));
@@ -1393,8 +1393,8 @@ const BAG_STRIP = `M0 8${Array.from({ length: 21 }, (_, i) => `L${i * 10} ${i % 
 // pressing on it and dragging right peels the top strip; let go past halfway and it tears, otherwise it springs back
 let tear = null, swipe = null;
 // a small damped spring: the card eases toward its target and overshoots a little, like the reference
-function spring(el, from, to, done, k = 190, c = 17, tick) {
-  const st = { ...from }, v = { x: 0, y: 0, s: 0 }; let last = performance.now(); const t0 = last;
+function spring(el, from, to, done, k = 190, c = 17, tick, v0 = {}) {
+  const st = { ...from }, v = { x: v0.x || 0, y: v0.y || 0, s: 0 }; let last = performance.now(); const t0 = last;
   const fin = () => { el.style.transform = `translate(${to.x}px, ${to.y}px) scale(${to.s})`; if (tick) tick(1); done && done(); };
   el.style.transition = 'none';
   const step = t => {
@@ -1416,13 +1416,16 @@ function keepFront(top, card, base, cur) {
   if (draft.sel.length >= keepN(draft.hand)) { toast(`最多留 ${HOLDN()} 张，先点一下牌槽里的放回来`); return false; }
   const left = draft.hand.filter(x => !draft.sel.includes(x));
   draft.sel.push(no); draft.landed = no;
-  draft.slide = draft.ci >= left.length - 1 && left.length > 1 ? -1 : 1;
   const foot = top.querySelector('.drawfoot');
   if (!foot || reducedMotion()) { replaceSheet(top, renderDraw); return true; }
-  const a = base || card.getBoundingClientRect(), s2 = 0.86, eg = card.querySelector('.sc2-edge');
+  const a = base || card.getBoundingClientRect(), s2 = 0.86, eg = card.querySelector('.sc2-edge'), stack = card.parentElement;
   card.classList.add('flying');
+  // the rest of the row closes up at the same moment: the next card springs into the front while this one drops
+  [...stack.querySelectorAll('.sc2:not(.flying)')].forEach((el, i) => { el.dataset.i = i; });
+  draft.ci = Math.min(draft.ci, Math.max(0, left.length - 2));
+  stack.classList.add('settle'); placeStack(stack, draft.ci);
   const ty = Math.round(foot.getBoundingClientRect().top - 14 + a.height * s2 / 2 - (a.top + a.height / 2));
-  spring(card, cur || { x: 0, y: 0, s: 1 }, { x: 0, y: ty, s: s2 }, () => replaceSheet(top, renderDraw), 200, 19, p => { if (eg) eg.style.opacity = String(Math.max(0, Math.min(1, (p - 0.35) * 2.2))); });
+  spring(card, cur || { x: 0, y: 0, s: 1 }, { x: 0, y: ty, s: s2 }, () => { stack.classList.remove('settle'); replaceSheet(top, renderDraw); }, 170, 19, p => { if (eg) eg.style.opacity = String(Math.max(0, Math.min(1, (p - 0.35) * 2.2))); }, { y: cur && cur.vy || 0 });
   return true;
 }
 const TEAR_PX = 150, SWIPE_PX = 110;
@@ -1453,12 +1456,14 @@ app.addEventListener('pointermove', e => {
     if (!swipe.moved || !swipe.front) return;
     // pulling straight down drops the card toward the tray, shrinking as it goes
     if (swipe.mode === 'down') {
+      const now = performance.now(); if (swipe.ly != null && now > swipe.lt) swipe.vy = (dyy - swipe.ly) / (now - swipe.lt) * 1000; swipe.ly = dyy; swipe.lt = now;
       swipe.dy = Math.max(0, dyy); swipe.dxx = dx * 0.15; swipe.sc = 1 - Math.min(1, swipe.dy / 420) * 0.12;
       swipe.front.style.transform = `translate(${swipe.dxx.toFixed(0)}px, ${swipe.dy.toFixed(0)}px) scale(${swipe.sc.toFixed(3)})`;
       return;
     }
     // sideways the whole row follows the finger, with a rubber band at either end
     const lastI = swipe.n - 1, atEnd = (draft.ci === 0 && dx > 0) || (draft.ci === lastI && dx < 0);
+    const nowx = performance.now(); if (swipe.lx != null && nowx > swipe.ltx) swipe.vx = (dx - swipe.lx) / (nowx - swipe.ltx) * 1000; swipe.lx = dx; swipe.ltx = nowx;
     swipe.dx = atEnd ? dx * 0.3 : dx;
     placeStack(swipe.st, draft.ci, swipe.dx);
     return;
@@ -1483,17 +1488,17 @@ app.addEventListener('pointermove', e => {
     // the click that follows a swipe shouldn't also count as a tap on a card
     draft.swiped = true; setTimeout(() => { draft.swiped = false; }, 0);
     if (w.mode === 'down') {
-      const cur = { x: w.dxx || 0, y: w.dy, s: w.sc || 1 };
-      if (w.dy >= 90 && keepFront(lastSheet(), w.front, w.rect, cur)) return;
+      const cur = { x: w.dxx || 0, y: w.dy, s: w.sc || 1, vy: Math.max(0, w.vy || 0) };
+      if ((w.dy >= 90 || cur.vy > 700) && w.dy > 20 && keepFront(lastSheet(), w.front, w.rect, cur)) return;
       // not far enough: the card springs back up
-      spring(w.front, cur, { x: 0, y: 0, s: 1 }, () => layoutStack(w.st, draft.ci), 260, 20);
+      spring(w.front, cur, { x: 0, y: 0, s: 1 }, () => layoutStack(w.st, draft.ci), 240, 20, null, { y: Math.min(0, -(w.dy) * 3) });
       return;
     }
-    // past a short pull (or a flick) the row slides one card over on a spring; otherwise it settles back
-    const dir = Math.abs(w.dx) > 60 ? -Math.sign(w.dx) : 0, to = Math.min(w.n - 1, Math.max(0, draft.ci + dir));
+    // past a short pull (or a flick) the row slides one card over on a spring; otherwise it settles back. The DOM stays put.
+    const dir = Math.abs(w.dx) > 60 || Math.abs(w.vx || 0) > 500 ? -Math.sign(Math.abs(w.dx) > 60 ? w.dx : w.vx) : 0, to = Math.min(w.n - 1, Math.max(0, draft.ci + dir));
     w.st.classList.add('settle');
     draft.ci = to; placeStack(w.st, to);
-    setTimeout(() => { w.st.classList.remove('settle'); const top = lastSheet(); if (top && top.querySelector('.stack') === w.st) replaceSheet(top, renderDraw); }, 420);
+    setTimeout(() => w.st.classList.remove('settle'), 560);
   }
 }));
 app.addEventListener('pointerout', e => {
