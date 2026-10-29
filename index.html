@@ -1193,7 +1193,6 @@ function homeHTML() {
       <span class="money">${money(ev.left)}</span>
       <div class="row"><span style="font-weight:900;font-size:15px">今晚预计 ${ev.score} 分</span><span class="px" style="font-size:13px">${ev.base} × ${ev.mult}</span></div>
     </div></div>
-    <div class="lbl">常用 · 点一下选好是什么，再填金额</div>
     <div class="quick">${S.quicks.map((q, i) => `<button class="chip qchip" data-hquick="${i}">${esc(q.label)}</button>`).join("")}</div>
     ${S.held.length ? holdHTML(ev) : `<button class="rulebar" data-act="draw"><div class="rtext" style="grid-column:1/-1"><small>本周的牌</small><b>还没抽</b><span>点这里抽 5 张，留 3 张</span></div></button>`}
     <div class="wkrow">
