@@ -505,12 +505,12 @@ button.hcard:active > div { transform: translateY(2px); }
 .dkc-tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
 .dkc-desc { margin: 0; font-size: 13px; line-height: 1.55; opacity: 0.92; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; min-height: 82px; }
 .dkc-count.bounce { animation: cbounce 0.6s cubic-bezier(.3,1.9,.5,1); }
-.dkc-count { margin-left: auto; margin-right: 0; padding: 2px 10px; border-radius: 12px; background: rgba(255,255,255,0.14); font-size: 12px; font-weight: 900; }
+.dkc-count { margin-left: auto; margin-right: 0; padding: 2px 10px; border-radius: 12px; background: rgba(17,17,17,0.08); color: var(--ink); font-size: 12px; font-weight: 900; }
 /* the draw screen goes dark and takes on the colour of the card in front */
-.sheet.drawdark { background: var(--tint, #111); overflow-x: hidden; color: #FFF; transition: background 0.4s; }
-.drawdark .bar-top { background: var(--tint, #111); transition: background 0.4s; }
-.drawdark .bar-top h1 { color: #FFF; }
-.drawdark .draw-lead { color: rgba(255,255,255,0.78); }
+.sheet.drawdark { background: var(--tint, #FFF); overflow-x: hidden; color: var(--ink); transition: background 0.4s; }
+.drawdark .bar-top { background: var(--tint, #FFF); transition: background 0.4s; }
+.drawdark .bar-top h1 { color: var(--ink); }
+.drawdark .draw-lead { color: var(--sub); }
 .drawdark .drawfoot { z-index: 6; background: #D9D9DE; box-shadow: none; border-radius: 30px 30px 0 0; padding: 8px 8px 22px; gap: 8px; }
 .drawdark .drawfoot .go { margin: 0 8px; width: calc(100% - 16px); }
 .deck-strips { position: absolute; left: 0; right: 0; top: 0; height: 0; pointer-events: none; }
@@ -1367,7 +1367,7 @@ function renderDraw() {
     </div>`);
   const st = lastSheet().querySelector('.stack'); if (st) layoutStack(st, ci);
   // the whole sheet is dark and takes on the colour of the card in front
-  { const sh = lastSheet(); sh.classList.add('drawdark'); const col = `color-mix(in srgb, ${focus ? coreOf(focus) : '#E4FF1A'} 12%, #111)`;
+  { const sh = lastSheet(); sh.classList.add('drawdark'); const col = '#FFFFFF';
     sh.style.setProperty('--tint', draft.tint || col); void sh.offsetWidth; requestAnimationFrame(() => sh.style.setProperty('--tint', col)); draft.tint = col; }
   // one-shot animations only play on the render that triggered them
   draft.dealIn = false; draft.landed = null; draft.slide = 0;
