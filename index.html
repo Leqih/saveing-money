@@ -1302,28 +1302,25 @@ const ART = {
   '13': { b: el(116, 138, 112, 78) + rr(40, 188, 30, 44, 8) + rr(150, 188, 30, 44, 8) + 'M58 76L84 30L110 68Z' + ci(224, 136, 26), cut: rr(94, 62, 52, 10, 5), a: ci(120, 28, 22), e: [154, 118, 180, 118] }
 };
 const coreOf = no => TYPES[CARDS[no].plus].core;
-// each card has its own look on its face: mouth, brows and a blush while it holds, X eyes and a wobbly mouth when broken, closed eyes while asleep
-const MOOD = { '01': ['smirk', 1], '03': ['grin', 0], '04': ['o', 0], '05': ['smile', 0], '06': ['cat', 0], '07': ['o', 0], '10': ['smile', 0], '15': ['flat', 1], '16': ['flat', 1], '17': ['tongue', 0], '13': ['grin', 0] };
-function faceHTML(c, art, state, eye, blush, ry) {
-  const [x1, y1, x2, y2] = art.e, mx = (x1 + x2) / 2, my = Math.max(y1, y2) + 20, [mouth, brows] = MOOD[c.no] || ['smile', 0];
-  const st = (d, w = 3.5) => `<path d="${d}" fill="none" stroke="${eye}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
-  if (state === 'broken') {
-    const x = (cx, cy) => st(`M${cx - 6} ${cy - 6}L${cx + 6} ${cy + 6}M${cx + 6} ${cy - 6}L${cx - 6} ${cy + 6}`, 3.5);
-    return x(x1, y1) + x(x2, y2) + st(`M${mx - 11} ${my + 4}q5.5 -9 11 0t11 0`, 3.5) + `<path d="M${x2 + 14} ${y2 - 14}q-6 9 0 13q6 -4 0 -13z" fill="${eye}" opacity="0.55"/>`;
-  }
-  if (state === 'pending') {
-    return st(`M${x1 - 7} ${y1}q7 8 14 0`, 3.5) + st(`M${x2 - 7} ${y2}q7 8 14 0`, 3.5) + st(`M${mx - 5} ${my + 2}h10`, 3.5)
-      + `<text x="${x2 + 12}" y="${y2 - 14}" font-family="Pixelify Sans, monospace" font-size="16" fill="${eye}" opacity="0.7">z</text><text x="${x2 + 24}" y="${y2 - 26}" font-family="Pixelify Sans, monospace" font-size="12" fill="${eye}" opacity="0.5">z</text>`;
-  }
-  const blink = `class="cardeye" style="animation-delay:-${(+c.no % 7) * 0.6}s"`;
-  const eyes = `<g ${blink}><ellipse cx="${x1}" cy="${y1}" rx="4.5" ry="${ry}" fill="${eye}"/><ellipse cx="${x2}" cy="${y2}" rx="4.5" ry="${ry}" fill="${eye}"/></g>`
-    + `<circle cx="${x1 + 1.5}" cy="${y1 - 3}" r="1.7" fill="#FFF" opacity="0.9"/><circle cx="${x2 + 1.5}" cy="${y2 - 3}" r="1.7" fill="#FFF" opacity="0.9"/>`;
-  const br = brows ? st(`M${x1 - 8} ${y1 - 17}L${x1 + 6} ${y1 - 12}M${x2 + 8} ${y2 - 17}L${x2 - 6} ${y2 - 12}`, 3.5) : '';
-  const m = { smile: st(`M${mx - 9} ${my}Q${mx} ${my + 10} ${mx + 9} ${my}`), grin: `<path d="M${mx - 10} ${my - 2}H${mx + 10}A10 11 0 0 1 ${mx - 10} ${my - 2}Z" fill="${eye}"/>`,
-    o: `<ellipse cx="${mx}" cy="${my + 2}" rx="4.5" ry="5.5" fill="${eye}"/>`, flat: st(`M${mx - 7} ${my + 2}H${mx + 7}`),
-    smirk: st(`M${mx - 8} ${my + 3}Q${mx} ${my + 8} ${mx + 9} ${my - 3}`), cat: st(`M${mx - 10} ${my - 1}Q${mx - 5} ${my + 8} ${mx} ${my - 1}Q${mx + 5} ${my + 8} ${mx + 10} ${my - 1}`),
-    tongue: st(`M${mx - 9} ${my}Q${mx} ${my + 10} ${mx + 9} ${my}`) + `<ellipse cx="${mx + 3}" cy="${my + 8}" rx="4" ry="5" fill="#FF7BA8"/>` }[mouth];
-  return eyes + br + m + (blush ? `<ellipse cx="${x1 - 14}" cy="${y1 + 14}" rx="7" ry="4.5" fill="${blush}" opacity="0.75"/><ellipse cx="${x2 + 14}" cy="${y2 + 14}" rx="7" ry="4.5" fill="${blush}" opacity="0.75"/>` : '');
+// the mascot only has eyes, so each card's mood is all in how they look: round, happy, wide, angry, sleepy, wink or starry; X when broken, closed while asleep
+const MOOD = { '01': 'angry', '03': 'happy', '04': 'round', '05': 'wide', '06': 'sleepy', '07': 'wide', '10': 'starry', '15': 'angry', '16': 'wink', '17': 'happy', '13': 'starry' };
+function faceHTML(c, art, state, eye) {
+  const [x1, y1, x2, y2] = art.e;
+  const st = d => `<path d="${d}" fill="none" stroke="${eye}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const arc = (x, y) => st(`M${x - 7} ${y + 4}Q${x} ${y - 9} ${x + 7} ${y + 4}`);
+  const shut = (x, y) => st(`M${x - 7} ${y - 2}Q${x} ${y + 8} ${x + 7} ${y - 2}`);
+  if (state === 'broken') { const X = (x, y) => st(`M${x - 6} ${y - 7}L${x + 6} ${y + 7}M${x + 6} ${y - 7}L${x - 6} ${y + 7}`); return X(x1, y1) + X(x2, y2); }
+  if (state === 'pending') return shut(x1, y1) + shut(x2, y2);
+  const m = MOOD[c.no] || 'round', blink = `class="cardeye" style="animation-delay:-${(+c.no % 7) * 0.6}s"`;
+  const oval = (x, y, rx, ry, rot = 0) => `<ellipse cx="${x}" cy="${y}" rx="${(rx * 1.2).toFixed(1)}" ry="${(ry * 1.2).toFixed(1)}" fill="${eye}"${rot ? ` transform="rotate(${rot} ${x} ${y})"` : ''}/>`;
+  const glint = (x, y, r = 1.7) => `<circle cx="${x + 1.5}" cy="${y - 3}" r="${r}" fill="#FFF" opacity="0.9"/>`;
+  if (m === 'happy') return arc(x1, y1) + arc(x2, y2);
+  if (m === 'wink') return `<g ${blink}>${oval(x1, y1, 4.5, 8)}</g>` + glint(x1, y1) + arc(x2, y2);
+  if (m === 'sleepy') { const half = (x, y) => `<path d="M${x - 7} ${y - 1}H${x + 7}A7 8 0 0 1 ${x - 7} ${y - 1}Z" fill="${eye}"/>`; return half(x1, y1) + half(x2, y2); }
+  if (m === 'angry') return `<g ${blink}>${oval(x1, y1, 4.2, 8, -28)}${oval(x2, y2, 4.2, 8, 28)}</g>`;
+  if (m === 'wide') return `<g ${blink}>${oval(x1, y1, 6.5, 11)}${oval(x2, y2, 6.5, 11)}</g>` + glint(x1, y1, 2.2) + glint(x2, y2, 2.2);
+  if (m === 'starry') return `<g ${blink}>${oval(x1, y1, 6, 9.5)}${oval(x2, y2, 6, 9.5)}</g>` + glint(x1 - 1, y1 - 1, 2.4) + glint(x2 - 1, y2 - 1, 2.4) + `<circle cx="${x1 + 2}" cy="${y1 + 4}" r="1.2" fill="#FFF" opacity="0.8"/><circle cx="${x2 + 2}" cy="${y2 + 4}" r="1.2" fill="#FFF" opacity="0.8"/>`;
+  return `<g ${blink}>${oval(x1, y1, 4.5, 8)}${oval(x2, y2, 4.5, 8)}</g>` + glint(x1, y1) + glint(x2, y2);
 }
 // state: 'on' holds, 'broken' cracked for today (or the week), 'pending' asleep until something is done
 function cardHTML(c, state = 'on') {
@@ -1355,7 +1352,7 @@ function cardHTML(c, state = 'on') {
      <path d="${art.cut || ''}" fill="${win}"/>
      <path d="${art.a || ''}" fill="${core}"/>
      <path d="${art.as || ''}" fill="none" stroke="${core}" stroke-width="${art.aw || 0}" stroke-linecap="round" stroke-linejoin="round"/>
-     ${faceHTML(c, art, state, art.ec === 'body' ? shape : win, t.core, 8)}
+     ${faceHTML(c, art, state, art.ec === 'body' ? shape : win)}
      ${state === 'broken' ? `<path d="M30 0L96 70L72 104L150 168L128 224" fill="none" stroke="${face}" stroke-width="9" stroke-linejoin="bevel"/><path d="M96 70L132 52M150 168L198 150" fill="none" stroke="${face}" stroke-width="6"/>` : ''}
     </svg>
    </div>
