@@ -218,6 +218,37 @@ button.chip:active { transform: translateY(2px); }
 .bigstamp.no { background: #FFE1E1; }
 
 /* rule sheet: the launch screen's sticker collage, then the details as gently tilted candy cards */
+/* rule card page: the sheet takes the card's colour, a big card flips over to show its rule, a drawer holds the rest */
+.sheet.rulec { background: var(--rc); gap: 0; padding-bottom: 0; }
+.sheet.rulec .bar-top { background: transparent; box-shadow: none; }
+.sheet.rulec .bar-top h1 { color: #FFF; }
+.rstage { position: relative; flex-shrink: 0; height: 468px; display: flex; align-items: center; justify-content: center; perspective: 1100px; }
+.rflip { position: relative; width: 300px; height: 425px; padding: 0; border: 0; background: none; transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(.3,1.25,.5,1); }
+.rflip.back { transform: rotateY(180deg); }
+.rface { position: absolute; inset: 0; display: block; backface-visibility: hidden; -webkit-backface-visibility: hidden; text-align: left; }
+.rscale { display: block; width: 240px; height: 340px; transform: scale(1.25); transform-origin: 0 0; pointer-events: none; }
+.rback { transform: rotateY(180deg); border-radius: 30px; background: #ECEAE3; color: var(--ink); padding: 24px 22px 20px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 10px 0 #C9C6BC, 0 24px 30px -12px rgba(0,0,40,0.5); overflow: hidden; }
+.rback small { font-family: var(--f-px); font-size: 12px; letter-spacing: 1px; color: #7A766A; margin-bottom: 4px; }
+.rback h3 { margin: 8px 0 0; font-family: var(--f-display); font-weight: 400; font-size: 16px; }
+.rback p { margin: 0; font-size: 14px; line-height: 1.5; }
+.rback .rprog { margin-top: 6px; } .rback .rprog i { background: #D4D4DB; } .rback .rprog i.on { background: var(--rc); } .rback .rprog em { color: #7A766A; }
+.rcook { position: absolute; right: 6px; top: 18px; z-index: 2; width: 76px; height: 76px; border-radius: 50%; background: #FFF; color: var(--rc); display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(10deg); box-shadow: 0 5px 0 rgba(0,0,0,0.22); pointer-events: none; }
+.rcook b { font-family: var(--f-display); font-weight: 400; font-size: 28px; line-height: 1; }
+.rcook small { font-size: 11px; font-weight: 900; }
+.rhint { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); padding: 4px 12px; border-radius: 12px; background: rgba(0,0,0,0.22); color: #FFF; font-size: 12px; letter-spacing: 1px; white-space: nowrap; pointer-events: none; }
+.rdrawer { position: relative; flex: 1 0 auto; margin: 0 -18px; padding: 10px 18px 120px; border-radius: 28px 28px 0 0; background: #FFF; display: flex; flex-direction: column; gap: 12px; }
+.rdrawer .grab { width: 40px; height: 5px; border-radius: 3px; background: #D4D4DB; align-self: center; }
+.rdrawer .rchips .chipk { background: #FFF; }
+.rdrawer .rlead { font-size: 20px; line-height: 1.3; }
+.rnote { padding: 12px 14px; border-radius: 16px; font-size: 14px; line-height: 1.45; font-weight: 700; }
+.rnote.ink { background: #111; color: #FFF; }
+.rnote.today { display: flex; gap: 10px; align-items: flex-start; background: var(--lime); box-shadow: 0 4px 0 #9DB000; }
+.rnote.today i { flex: none; width: 10px; height: 10px; margin-top: 5px; border-radius: 50%; background: #1AA84A; box-shadow: 0 0 0 3px rgba(26,168,74,0.25); }
+.rnote.today.broken { background: #FFE0E6; box-shadow: 0 4px 0 #E8A3B2; } .rnote.today.broken i { background: var(--pink); box-shadow: 0 0 0 3px rgba(255,75,122,0.25); }
+.rnote.today.pending { background: #F0F0F4; box-shadow: 0 4px 0 #D4D4DB; } .rnote.today.pending i { background: #8A8A92; box-shadow: none; }
+.rclashrow b { font-size: 12px; font-weight: 900; }
+.rsim { margin: 0; font-size: 14px; color: var(--sub); }
+@media (prefers-reduced-motion: reduce) { .rflip { transition: none; } }
 .rhero { position: relative; flex-shrink: 0; height: 400px; margin: 0 -4px; }
 .rh-glow { position: absolute; left: 50%; top: 10px; width: 330px; height: 330px; margin-left: -165px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--c) 28%, #FFF) 0%, color-mix(in srgb, var(--c) 10%, #FFF) 55%, transparent 70%); }
 .rh-blob { position: absolute; left: -8px; top: 64px; width: 190px; height: 150px; border-radius: 48% 52% 44% 56% / 58% 46% 54% 42%; background: #111; transform: rotate(-14deg); }
@@ -2445,32 +2476,35 @@ function renderRule(no) {
   const hasData = S.lastWeek.some(d => d.length), sim = hasData && !heldNow ? simulate([no], S.lastWeek, S.weekStart) : null;
   const state = cur ? (cur.state === 'on' ? `Still holding today, mult +${c.plus}.${cur.near ? cur.near + '.' : ''}` : cur.state === 'pending' ? 'Still asleep: log one entry today to wake it.' : `Broke today: ${cur.why}.${c.weekly ? `Stays broken until Sunday.${cur.gain < 0 ? `Over again today, mult ${gainStr(cur.gain)}.` : ''}` : `${cur.saved ? `After it broke you spent nothing more outside the allowance: stop-loss +${cur.gain}.` : ''}Back at midnight.`}`) : '';
   const stopLoss = c.weekly ? '' : Math.floor(c.plus / 2) ? `Spend nothing more outside the allowance today and get half the multiplier back tonight (+${Math.floor(c.plus / 2)}).` : 'This card is only +1; it can’t be earned back once broken.';
-  sheet(c.name, `
+  const core = coreOf(no), notUnlocked = !S.unlocked.includes(no) && !S.grad.includes(no) && c.unlock;
+  const grad = c.noGrad ? `${log ? `Used for ${log.weeks} weeks, held ${log.held}/${log.days} days. ` : ''}Log one entry and it’s held; it never graduates.` : S.grad.includes(no) ? 'Already graduated: base mult +1.' : `Hold 6/7 days for ${GRAD_WEEKS} weeks to graduate: base mult +1 for good.`;
+  const prog = !c.noGrad && !S.grad.includes(no) ? `<span class="rprog">${Array.from({ length: GRAD_WEEKS }, (_, q) => `<i class="${log && q < (log.streak || 0) ? 'on' : ''}"></i>`).join('')}<em>${log ? log.streak || 0 : 0}/${GRAD_WEEKS}</em></span>` : '';
+  const sh = sheet(c.name, `
     <div class="bar-top"><h1>Rule card</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
-    <div class="rhero" style="--c:${coreOf(no)}">
-      <span class="rh-glow" aria-hidden="true"></span>
-      <span class="rh-blob" aria-hidden="true"></span>
-      <svg class="rh-spark" style="left:18px;top:24px" width="22" height="22" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 0L12.6 7.4L20 10L12.6 12.6L10 20L7.4 12.6L0 10L7.4 7.4Z" fill="#111"/></svg>
-      <svg class="rh-spark" style="left:26px;top:250px" width="12" height="12" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 0L12.6 7.4L20 10L12.6 12.6L10 20L7.4 12.6L0 10L7.4 7.4Z" fill="#111"/></svg>
-      <svg class="rh-spark" style="right:20px;top:296px" width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 0L12.6 7.4L20 10L12.6 12.6L10 20L7.4 12.6L0 10L7.4 7.4Z" fill="var(--c)"/></svg>
-      <div class="rh-card">${cardHTML(c, cur ? cur.state : 'on')}</div>
-      <div class="rh-cookie" style="background:var(--c);color:${TYPES[c.plus].chipText}"><b>+${c.plus}</b><small>Mult</small></div>
-      ${cur ? `<span class="sticker rh-state ${cur.state}">Today${cur.state === 'on' ? 'Held ✓' : cur.state === 'pending' ? 'Asleep zzz' : brokenLabel(cur)}</span>` : ''}
+    <div class="rstage">
+      <button class="rflip" data-act="rflip" aria-pressed="false" aria-label="Flip the card to read the rule">
+        <span class="rface rfront"><span class="rscale">${cardHTML(c, cur ? cur.state : 'on')}</span></span>
+        <span class="rface rback">
+          <small>No.${c.no} · ${c.name}</small>
+          <h3>Example</h3><p>${c.eg}</p>
+          ${stopLoss && c.broken ? `<h3>After it breaks</h3><p>${stopLoss}</p>` : ''}
+          <h3>Graduating</h3><p>${grad}</p>${prog}
+        </span>
+      </button>
+      <span class="rcook"><b>+${c.plus}</b><small>Mult</small></span>
+      <span class="rhint px">TAP TO FLIP</span>
     </div>
-    <div class="rhead2">
-      <p class="rlead"><mark>${c.cond}</mark></p>
+    <div class="rdrawer">
+      <span class="grab" aria-hidden="true"></span>
       <div class="rchips"><span class="chipk"><i style="background:${c.weekly ? 'var(--purple)' : 'var(--blue)'}"></i>${c.weekly ? 'Weekly · broken until Sunday' : 'Daily · back at midnight'}</span><span class="chipk"><b class="rdots">${[1, 2, 3].map(n => `<i class="${c.diff >= n ? 'on' : ''}"></i>`).join('')}</b>${['', 'Easy', 'Careful', 'Hardest, most rewarding'][c.diff]}</span></div>
-    </div>
-    <div class="rcards">
-      ${!S.unlocked.includes(no) && !S.grad.includes(no) && c.unlock ? `<div class="rc g-ink"><span class="n">L</span><h3>Not unlocked yet</h3><p>Unlocks automatically at ★${c.unlock} stars in total (now ★${S.starsTotal}), or buy it early in the Monday shop for ★${Math.max(1, Math.round(c.unlock / 2))} .</p></div>` : ''}
-      ${cur ? `<div class="rc g-lime"><span class="n">T</span><h3>Today</h3><p>${state}</p></div>` : ''}
-      <div class="rc g-lav rquote"><span class="n">E</span><h3>Example</h3><p>${c.eg}</p></div>
-      ${stopLoss && c.broken ? `<div class="rc g-orange"><span class="n">Broke </span><h3>After it breaks</h3><p>${stopLoss}</p></div>` : ''}
-      ${clashNames(no).length ? `<div class="rc g-white"><span class="n">×</span><h3>Can’t be kept together</h3><div class="rclash">${Object.keys(CARDS).filter(x => clashes(no, x)).map(x => `<span><i style="background:${coreOf(x)}">${artIcon(x, 20)}</i>${CARDS[x].name}</span>`).join('')}</div></div>` : ''}
-      ${sim ? `<div class="rc g-lav"><span class="n">≈</span><h3>${S.estimated ? 'By your estimate' : 'By last week’s ledger'}</h3><p>You’d hold it about <b class="rbig">${sim.per[no]}/${sim.days}</b> days.</p></div>` : ''}
-      <div class="rc g-ink"><span class="n">G</span><h3>Graduated</h3><p>${c.noGrad ? `${log ? `Used for ${log.weeks} weeks, held ${log.held}/${log.days} days.` : ''}Log one entry and it’s held; it never graduates.` : S.grad.includes(no) ? 'Already graduated: base mult +1.' : `Hold 6/7 days for ${GRAD_WEEKS} weeks to graduate: base mult +1 for good.`}</p>${!c.noGrad && !S.grad.includes(no) ? `<span class="rprog">${Array.from({ length: GRAD_WEEKS }, (_, k) => `<i class="${log && k < (log.streak || 0) ? 'on' : ''}"></i>`).join('')}<em>${log ? `${log.streak || 0}/${GRAD_WEEKS} ` : `0/${GRAD_WEEKS} `}</em></span>` : ''}</div>
-    </div>
-    ${cur && cur.state === "broken" ? (S.glue ? `<button class="cap lime bigbtn" data-act="glue" data-no="${no}"><div class="top">Glue it back ( ${S.glue} left)</div></button>` : `<p class="note">Glue is sold in the Monday shop; it fixes a broken card for the day.</p>`) : ""}`);
+      <p class="rlead"><mark>${c.cond}</mark></p>
+      ${notUnlocked ? `<div class="rnote ink">Unlocks automatically at ★${c.unlock} stars in total (now ★${S.starsTotal}), or buy it early in the shop for ★${Math.max(1, Math.round(c.unlock / 2))}.</div>` : ''}
+      ${cur ? `<div class="rnote today ${cur.state}"><i></i>${state}</div>` : ''}
+      ${clashNames(no).length ? `<div class="rclashrow"><b>Can’t be kept together</b><div class="rclash">${Object.keys(CARDS).filter(x => clashes(no, x)).map(x => `<span><i style="background:${coreOf(x)}">${artIcon(x, 20)}</i>${CARDS[x].name}</span>`).join('')}</div></div>` : ''}
+      ${sim ? `<p class="rsim">${S.estimated ? 'By your estimate' : 'By last week’s ledger'}: you’d hold it about <b class="rbig">${sim.per[no]}/${sim.days}</b> days.</p>` : ''}
+      ${cur && cur.state === 'broken' ? (S.glue ? `<button class="cap lime bigbtn" data-act="glue" data-no="${no}"><div class="top">Glue it back ( ${S.glue} left)</div></button>` : `<p class="note">Glue is sold in the shop; it fixes a broken card for the day.</p>`) : ''}
+    </div>`);
+  sh.classList.add('rulec'); sh.style.setProperty('--rc', core);
 }
 
 /* ---------- first use ---------- */
@@ -3028,6 +3062,7 @@ app.addEventListener('click', e => {
   if (t.dataset.flowcat) { S.flowCat = t.dataset.flowcat; const top0 = app.querySelector('.screen').scrollTop; renderTable(); app.querySelector('.screen').scrollTop = top0; return; }
   if (t.dataset.cal) { const [w, d] = t.dataset.cal.split('-').map(Number); renderDay(d, w); return; }
   if (t.dataset.info) { renderRule(t.dataset.info); return; }
+  if (act === 'rflip') { const on = t.classList.toggle('back'); t.setAttribute('aria-pressed', String(on)); const ht = t.parentElement.querySelector('.rhint'); if (ht) ht.textContent = on ? 'TAP TO FLIP BACK' : 'TAP TO FLIP'; return; }
   if (act === 'help') { renderGuide(); return; }
   if (act === 'settings') { if (top.getAttribute('aria-label') === 'Stars') top.remove(); renderSettings(); return; }
   if (act === 'inbox') { app.querySelectorAll('.push').forEach(n => n.remove()); renderInbox(); return; }
