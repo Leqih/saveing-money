@@ -769,7 +769,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .screen:has(> .head) .hero > .top { min-height: 150px; }
 .wkrow { display: grid; grid-template-columns: 1fr 112px; gap: 12px; align-items: stretch; }
 .wkmini { width: auto; text-align: left; }
-.wkmini > .top { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; }
+.wkmini > .top { display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; }
 .wkmini .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 900; font-size: 14px; }
 .wkmini .bar { margin-top: 2px; }
 .wkgo { font-size: 12px; color: var(--sub); }
@@ -779,7 +779,9 @@ button.hcard:active > div { transform: translateY(2px); }
 .screen:has(> .head) .hero .money { font-size: 64px; }
 .wkgo { align-self: flex-start; font-size: 12px; padding: 0; color: #5B4FC8; }
 .wkmini .keys { gap: 6px; }
-.wkmini .chip { height: 30px; font-size: 12px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.wkmini .chip { height: 26px; font-size: 12px; max-width: 100%; min-width: 0; display: flex; align-items: center; gap: 6px; overflow: hidden; }
+.wkmini .chip .cl { min-width: 0; flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wkmini .chip b { flex: none; }
 
 /* the verdict is a luggage tag: a twisted rope through a punched hole, a hazard-stripe header, cut corners; blue when a card breaks, lime when one wakes */
 .fb-tag { position: relative; width: 100%; transform-origin: 50% -190px; animation: tagSwing 1.4s cubic-bezier(.3,.6,.4,1) both; }
@@ -820,7 +822,7 @@ button.hcard:active > div { transform: translateY(2px); }
 /* the upper lip sits over the paper (it tucks in behind it), the lower lip sits under the paper (the paper falls over it) */
 .prt-lip { position: absolute; left: 0; right: 0; top: 0; height: 20px; z-index: 4; border-radius: 16px 16px 0 0; background: linear-gradient(180deg, #F0F0F3, #B7B7BF) 0 0 / 100% 44px; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.85), 0 1px 0 #8E8E96; }
 /* the window starts halfway down the dark opening, so the paper comes out of the slot and falls over the faceplate */
-.rcpt-win { position: relative; z-index: 3; margin: -40px 13px 0; padding: 0 0 14px; overflow: hidden; }
+.rcpt-win { position: relative; z-index: 3; flex-shrink: 0; margin: -40px 13px 0; padding: 0 0 14px; overflow: hidden; }
 .rcpt-win .receipt { border-radius: 0; padding-top: 60px; }
 .rcpt-win::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 22px; z-index: 3; pointer-events: none; background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 4px, rgba(0, 0, 0, 0.32) 6px, rgba(0, 0, 0, 0)); }
 .rcpt-win.print .receipt { margin-bottom: 0; animation: rcPrint 2.4s cubic-bezier(.35,.9,.3,1) both, rcShake 0.07s steps(2) 30, rcWobble 0.9s ease-out 2.4s both; }
@@ -1047,7 +1049,8 @@ button.hcard:active > div { transform: translateY(2px); }
 .wkrow { align-items: start; }
 .wkrow .wkmini { height: 126px; }
 .wkrow .endbtn { height: 118px; align-self: start; }
-.wkrow { grid-template-columns: 1fr 118px; }
+.wkrow { grid-template-columns: minmax(0, 1fr) 118px; }
+.wkrow .wkmini { min-width: 0; }
 .wkrow .endbtn { width: 118px; height: 118px; }
 .wkrow .endbtn::before { inset: 11px; top: 11px; left: 11px; right: 11px; }
 .wkrow .endbtn > .top { left: 20px; right: 20px; top: 19px; height: 78px; font-size: 16px; }
@@ -1636,9 +1639,9 @@ function homeHTML() {
   const ev = evaluate(S.today), w = weekInfo();
   const dots = '';
   const br = breakers(S.today), sumToday = S.today.reduce((a, x) => a + x.amt, 0);
-  const list = S.today.map((x, i) => ({ x, i })).slice(-3).map(({ x, i }) => {
+  const list = S.today.map((x, i) => ({ x, i })).slice(-2).map(({ x, i }) => {
     const ess = !!cat(x.cat).ess, b = br[i];
-    return `<button class="chip ${ess ? 'ess' : b ? 'hit' : 'hot'}" data-edit="${i}" aria-label="${entryName(x)} ${x.amt} yuan, tap to edit">${entryName(x)}${ess ? ' · essential' : ''}${b ? ` · broke${b.join(', ')}` : ''} <b>¥${x.amt}</b></button>`;
+    return `<button class="chip ${ess ? 'ess' : b ? 'hit' : 'hot'}" data-edit="${i}" aria-label="${entryName(x)} ${x.amt} yuan, tap to edit"><span class="cl">${entryName(x)}${ess ? ' · essential' : ''}${b ? ` · broke ${b.join(', ')}` : ''}</span> <b>¥${x.amt}</b></button>`;
   }).join('') || '<span class="note">Nothing spent today.</span>';
   return `
     <div class="head">
@@ -1652,7 +1655,7 @@ function homeHTML() {
       <div class="cap meter wkmini"><div class="top">
         <div class="row"><span>Today’s ledger</span><span class="px">${money(sumToday)}</span></div>
         <div class="keys">${list}</div>
-        <button class="linkbtn wkgo" data-act="goflow">${S.today.length > 3 ? `+ ${S.today.length - 3} entries · ` : ''}All entries ›</button>
+        <button class="linkbtn wkgo" data-act="goflow">${S.today.length > 2 ? `+ ${S.today.length - 2} more · ` : ''}All entries ›</button>
       </div></div>
       <button class="cap lime bigbtn endbtn" data-act="end"><i class="scr a"></i><i class="scr b"></i><div class="top">End today</div></button>
     </div>`;
