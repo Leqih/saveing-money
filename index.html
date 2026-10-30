@@ -1879,7 +1879,8 @@ function deckHTML() {
       <div style="display:flex;align-items:center;height:52px;padding:0 14px 0 22px;border-radius:26px;border:2px solid #E2E2E8">${dots}
         <span class="px" aria-label="Unlocked ${open.length} / ${all.length}" style="margin-left:10px;display:flex;flex-direction:column;align-items:center;font-size:15px;line-height:1"><b style="font-weight:400">${open.length}</b><i style="width:22px;height:2px;margin:3px 0;background:#111"></i><b style="font-weight:400">${all.length}</b></span></div>
     </div>
-    ${tabsHTML([{ id: 'all', name: `All <span class="px" style="font-weight:400">${all.length}</span>`, on: f === 'all' }, { id: 'open', name: `Unlocked <span class="px" style="font-weight:400">${open.length}</span>`, on: f === 'open' }, { id: 'grad', name: `Graduated <span class="px" style="font-weight:400">${S.grad.length}</span>`, on: f === 'grad' }], 'data-deck')}
+    ${tabsHTML([{ id: 'all', name: `All <span class="px" style="font-weight:400">${all.length}</span>`, on: f === 'all' }, { id: 'open', name: `Unlocked <span class="px" style="font-weight:400">${open.length}</span>`, on: f === 'open' }, { id: 'grad', name: `Graduated <span class="px" style="font-weight:400">${S.grad.length}</span>`, on: f === 'grad' }, { id: 'shop', name: 'Shop', on: f === 'shop' }], 'data-deck')}
+    ${f === 'shop' ? shopBody(true) : `
     ${banner ? `<button class="dk-next" data-info="${banner.no}">
       <i class="dk-ico" style="background:${coreOf(banner.no)}">${artIcon(banner.no, 30)}</i>
       <span class="dk-main"><b>${banner.title}</b><small>${banner.sub}</small>${banner.need ? `<span class="dk-bar"><i style="width:${Math.min(100, Math.round(banner.have / banner.need * 100))}%"></i></span>` : ''}</span>
@@ -1894,7 +1895,7 @@ function deckHTML() {
       <span style="font-weight:900;font-size:13px;margin-right:2px">Stakes</span>
       ${STAKES.map((s, i) => `<span class="cv-pill" style="${i === S.stake ? `background:${s.bg};border-color:${i ? s.bg : "#111"};color:${s.fg}` : ""}">${s.name}${i < S.stake || i <= (S.maxStake || 0) && i !== S.stake ? " ✓" : ""}</span>`).join("")}
     </div>
-    <p class="note left">Every Monday 5 cards are dealt from your unlocked cards and you keep 3. Graduated cards leave the deck and raise your base multiplier by +1 (it now starts at ${S.baseMult} ). Tap a card to see how it works.</p>`;
+    <p class="note left">Every Monday 5 cards are dealt from your unlocked cards and you keep 3. Graduated cards leave the deck and raise your base multiplier by +1 (it now starts at ${S.baseMult} ). Tap a card to see how it works.</p>`}`;
 }
 
 /* ---------- weekly draw: deal 5, keep 3 ---------- */
@@ -2893,7 +2894,9 @@ function shopPick() {
   return top ? { no: CAT_CARD[top[0]], why: `Last week${cat(top[0]).name}Spent ¥${top[1]}` } : null;
 }
 const PRICE = { reroll: 1, slot: 5, slotWas: 6, glue: 2 };
-function renderShop() {
+function shopBody(browse) {
+  if (browse && !(S.shopOffers || []).length) rollShop();
+  const slotDone = S.slots >= 4 || S.slotPending;
   const rec = shopPick(), R = S.weekResult;
   const can = n => S.stars >= n;
   const tickets = S.shopOffers.map((o, i) => {
@@ -2905,16 +2908,15 @@ function renderShop() {
       ${isRec ? '<b class="cv-glow rec-tag">Top pick</b>' : ''}</button>`;
   }).join('') || '<p class="note">All cards are unlocked and in next week’s deck.</p>';
   const rings = S.held.map(no => `<span class="sring" style="border-color:${coreOf(no)}">${artIcon(no, 22)}</span>`).join('') + '<span class="sring add"><span class="px">+</span></span>'.repeat(Math.max(0, S.slots - S.held.length));
-  sheet('Shop', `
-    <div class="bar-top"><h1>Shop</h1><span class="spill">★ ${S.stars} Stars</span></div>
-    <div class="pillrow"><span class="cv-pill">Week ${S.week} over</span><span class="cv-pill">+</span><span class="cv-pill" style="color:#111">This week ${R && R.got ? starStr(R.got) : 'No stars'}</span></div>
+  return `
+    ${browse ? `<div class="pillrow"><span class="spill">★ ${S.stars} Stars</span></div>` : `<div class="pillrow"><span class="cv-pill">Week ${S.week} over</span><span class="cv-pill">+</span><span class="cv-pill" style="color:#111">This week ${R && R.got ? starStr(R.got) : 'No stars'}</span></div>`}
     ${rec ? `<p class="note left">${rec.why}, recommended “${CARDS[rec.no].name}”.</p>` : ''}
     <div class="stickets">${tickets}</div>
     <div class="sband">
       <div class="px sdeal"><span>Limited</span><span>This week</span><svg width="16" height="20" viewBox="0 0 14 18" fill="#FF8A3D" aria-hidden="true"><path d="M8 0L0 10h5l-1 8 8-10H7z"/></svg></div>
       <div class="sbtns">
         <button data-act="reroll" ${can(PRICE.reroll) ? '' : 'disabled'}><span class="px">Reroll</span><span class="px sub">★ ${PRICE.reroll}</span></button>
-        <button class="lime" data-act="slot" ${S.slots < 4 && can(PRICE.slot) ? '' : 'disabled'}><span class="px">${S.slots < 4 ? 'Add a 4th slot' : 'Already 4 slots'}</span><span class="px sub">${S.slots < 4 ? `<s>${PRICE.slotWas}</s> ★ ${PRICE.slot} · target +25%` : 'Keep 4 a week'}</span></button>
+        <button class="lime" data-act="slot" ${!slotDone && can(PRICE.slot) ? '' : 'disabled'}><span class="px">${!slotDone ? 'Add a 4th slot' : S.slots >= 4 ? 'Already 4 slots' : 'Bought · from next week'}</span><span class="px sub">${!slotDone ? `<s>${PRICE.slotWas}</s> ★ ${PRICE.slot} · target +25%` : 'Keep 4 a week'}</span></button>
       </div>
     </div>
     <div class="sglue"><div><b>Glue × ${S.glue}</b><small>Tap a broken card to glue it back, for that day only. Up to 3 bottles.</small></div><button class="cap lime" data-act="glue-buy" ${S.glue < 3 && can(PRICE.glue) ? '' : 'disabled'}><div class="top">★ ${PRICE.glue} Buy one</div></button></div>
@@ -2922,7 +2924,15 @@ function renderShop() {
     <div class="sbubble"><svg width="100%" height="118" viewBox="0 0 350 118" preserveAspectRatio="none" aria-hidden="true"><path d="M40 6H300a36 36 0 0 1 36 36v20a36 36 0 0 1-36 36H112l-26 16 6-16H40a36 36 0 0 1-36-36V42a36 36 0 0 1 36-36z" fill="#FF9BC4" stroke="#FF3B1F" stroke-width="5" stroke-linejoin="round"/></svg>
       <div class="sstar">Next week</div>
       <div class="stext"><b>Week ${S.week + 1} · ${STAKES[S.nextStake].name}</b><span>${S.carry ? `Carry “${CARDS[S.carry].name}”` : 'No carry'}${S.pinned.length ? `, guaranteed: ${S.pinned.map(no => CARDS[no].name).join(', ')}` : ''}; draw ${DEALN()}, keep ${HOLDN()}.</span></div></div>
-    <button class="go" data-act="shop-done">Enter week ${S.week + 1} · draw cards</button>`);
+${browse ? '' : `    <button class="go" data-act="shop-done">Enter week ${S.week + 1} · draw cards</button>`}`;
+}
+// the shop also lives in the Deck tab, where there is no sheet to swap
+const shopRe = top => top ? replaceSheet(top, renderShop) : renderTable();
+function renderShop() {
+  const R = S.weekResult;
+  sheet('Shop', `
+    <div class="bar-top"><h1>Shop</h1><span class="spill">★ ${S.stars} Stars</span></div>
+    ${shopBody(false)}`);
 }
 
 /* ---------- day flow ---------- */
@@ -2949,6 +2959,7 @@ function startWeek() {
   S.autoEnded = false; S.clock = 8.5;
   // an overspent Sunday still comes out of Monday's allowance, so the week boundary is no free night out
   S.stake = S.nextStake; S.overflow = 0;
+  if (S.slotPending) { S.slots = 4; S.slotPending = false; }
   S.week += 1; S.day = 0; S.weekStart = 0; S.held = []; S.teaWeek = 0; S.firstDraw = false; S.estimated = false;
   draft = {};
   renderTable(); renderDraw();
@@ -3119,16 +3130,16 @@ app.addEventListener('click', e => {
   }
   if (act === 'to-monday') { top.remove(); S.clock = 8.5; renderMonday(); return; }
   if (act === 'shop') { rollShop(); top.remove(); renderShop(); return; }
-  if (act === 'draw-now') { top.remove(); startWeek(); return; }
+  if (act === 'draw-now') { top.remove(); startWeek(); S.pinned = []; return; }
   if (t.dataset.buy) {
     const o = S.shopOffers[+t.dataset.buy]; if (o.sold || S.stars < o.price) return;
     S.stars -= o.price; o.sold = true;
     if (o.kind === 'unlock') S.unlocked.push(o.no); else S.pinned.push(o.no);
-    replaceSheet(top, renderShop); toast(o.kind === 'unlock' ? `Unlocked “${CARDS[o.no].name}”` : `Guaranteed next week: “${CARDS[o.no].name}”`); return;
+    shopRe(top); toast(o.kind === 'unlock' ? `Unlocked “${CARDS[o.no].name}”` : `Guaranteed next week: “${CARDS[o.no].name}”`); return;
   }
-  if (act === 'reroll') { S.stars -= PRICE.reroll; rollShop(); replaceSheet(top, renderShop); return; }
-  if (act === 'slot') { S.stars -= PRICE.slot; S.slots = 4; replaceSheet(top, renderShop); toast('From next week: 6 dealt, keep 4, target +25%'); return; }
-  if (act === 'glue-buy') { S.stars -= PRICE.glue; S.glue += 1; replaceSheet(top, renderShop); toast('Bought a bottle of glue; tap a broken card to use it'); return; }
+  if (act === 'reroll') { S.stars -= PRICE.reroll; rollShop(); shopRe(top); return; }
+  if (act === 'slot') { S.stars -= PRICE.slot; if (top) S.slots = 4; else S.slotPending = true; shopRe(top); toast('From next week: 6 dealt, keep 4, target +25%'); return; }
+  if (act === 'glue-buy') { S.stars -= PRICE.glue; S.glue += 1; shopRe(top); toast('Bought a bottle of glue; tap a broken card to use it'); return; }
   if (act === 'shop-done') { startWeek(); S.pinned = []; return; }
   if (act === 'glue') {
     const no = t.dataset.no; S.glue -= 1; S.glued = { week: S.week, day: S.day, no };
