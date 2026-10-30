@@ -1385,9 +1385,9 @@ function cardHTML(c, state = 'on') {
 }
 const scaled = (c, s, state) => `<div style="width:${240 * s}px;height:${340 * s}px" aria-hidden="true"><div style="width:240px;height:340px;transform:scale(${s});transform-origin:0 0">${cardHTML(c, state)}</div></div>`;
 // a card's art as a small icon on its colour, used where the canvas had mascot tiles
+const tintOf = no => mix(coreOf(no), 0.8);
 function artIcon(no, size) {
-  const p = { P: '#111', D: '#111', L: '#FFF', Y: '#FFF', W: '#FFF', I: '#111' };
-  return `<svg width="${size}" height="${Math.round(size * 224 / 240)}" viewBox="0 0 240 224" aria-hidden="true">${ILL[no](p)}</svg>`;
+  return `<svg width="${size}" height="${Math.round(size * 224 / 240)}" viewBox="0 0 240 224" aria-hidden="true">${ILL[no](palOf(coreOf(no), false))}</svg>`;
 }
 
 /* ---------- rules ---------- */
@@ -1923,7 +1923,7 @@ function catsHTML(recs, spent, tabs) {
       <div class="cv-lbl"><span style="font-weight:900;font-size:${s.fs}px">${name}</span><span class="px" style="font-size:14px">¥${v}</span>
         ${i === 0 && cardNo ? `<span class="px" style="align-self:flex-start;padding:1px 8px;border-radius:8px;background:#111;color:#E4FF1A;font-size:12px">Drew “${CARDS[cardNo].name}” — keep it</span>` : ''}</div>
       <span class="cv-pct" style="font-size:${s.pct}px;color:${s.pc}">${Math.round(v / total * 100)}%</span>
-      ${i === 0 && cardNo ? `<div style="position:absolute;right:18px;top:14px;width:54px;height:54px;border-radius:14px;background:${coreOf(cardNo)};display:flex;align-items:center;justify-content:center;transform:rotate(10deg);box-shadow:0 0 0 3px #FFF">${artIcon(cardNo, 42)}</div>` : ''}
+      ${i === 0 && cardNo ? `<div style="position:absolute;right:18px;top:14px;width:54px;height:54px;border-radius:14px;background:${tintOf(cardNo)};display:flex;align-items:center;justify-content:center;transform:rotate(10deg);box-shadow:0 0 0 3px #FFF">${artIcon(cardNo, 42)}</div>` : ''}
     </div>`;
   }).join('');
   return `<div style="display:flex;justify-content:space-between;align-items:center;min-height:44px"><h1 style="margin:0;font-weight:900;font-size:28px">Where it went this month</h1><span class="px" style="font-size:12px;color:#6A6A70">Outside the allowance ¥${spent.toLocaleString()}</span></div>
@@ -1941,13 +1941,13 @@ function deckHTML() {
   const gradCards = all.filter(x => S.grad.includes(x.no));
   const shown = f === 'open' ? open : f === 'grad' ? gradCards : all;
   const next = locked.slice().sort((a, b) => a.unlock - b.unlock)[0];
-  const dots = open.slice(0, 4).map(x => `<span style="width:34px;height:34px;border-radius:50%;border:4px solid ${coreOf(x.no)};background:#111;margin-left:-10px;box-shadow:0 0 0 2px #FFF;display:flex;align-items:center;justify-content:center">${artIcon(x.no, 18)}</span>`).join('');
+  const dots = open.slice(0, 4).map(x => `<span style="width:34px;height:34px;border-radius:50%;border:4px solid ${coreOf(x.no)};background:${tintOf(x.no)};margin-left:-10px;box-shadow:0 0 0 2px #FFF;display:flex;align-items:center;justify-content:center">${artIcon(x.no, 18)}</span>`).join('');
   const cells = shown.map(x => {
     const isOpen = S.unlocked.includes(x.no) || S.grad.includes(x.no), log = S.cardLog[x.no];
     const badge = S.grad.includes(x.no) ? '<span class="cv-grad">Graduated</span>' : S.held.includes(x.no) ? '<span class="cv-grad">This week</span>' : log && log.streak && !x.noGrad ?`<span class="cv-grad">Graduated ${log.streak}/${GRAD_WEEKS}</span>` : '';
     const own = log ? '<span class="cv-own"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 5l2 2 4-4" stroke="#FFF" stroke-width="1.8" fill="none"/></svg></span>' : '';
     return isOpen
-      ? `<button class="cv-cell" data-info="${x.no}" aria-label="${x.name}, +${x.plus} Mult${log ? `, held ${log.held}/${log.days} days` : ''}"><div class="cv-icon" style="background:${coreOf(x.no)}">${artIcon(x.no, 54)}${badge}${own}</div><span class="cv-name">${x.name} <span class="px" style="font-weight:400">+${x.plus}</span></span></button>`
+      ? `<button class="cv-cell" data-info="${x.no}" aria-label="${x.name}, +${x.plus} Mult${log ? `, held ${log.held}/${log.days} days` : ''}"><div class="cv-icon" style="background:${tintOf(x.no)}">${artIcon(x.no, 54)}${badge}${own}</div><span class="cv-name">${x.name} <span class="px" style="font-weight:400">+${x.plus}</span></span></button>`
       : `<button class="cv-cell" data-info="${x.no}" aria-label="${x.name}, unlocks at ${x.unlock} stars"><div class="cv-icon cv-lock"><span class="px" style="font-size:16px;color:#8A8A92">★${x.unlock}</span></div><span class="cv-name" style="color:#8A8A92">${x.name}</span></button>`;
   }).join('');
   const last = S.lastResult;
@@ -1964,7 +1964,7 @@ function deckHTML() {
     ${tabsHTML([{ id: 'all', name: `All <span class="px" style="font-weight:400">${all.length}</span>`, on: f === 'all' }, { id: 'open', name: `Unlocked <span class="px" style="font-weight:400">${open.length}</span>`, on: f === 'open' }, { id: 'grad', name: `Graduated <span class="px" style="font-weight:400">${S.grad.length}</span>`, on: f === 'grad' }, { id: 'shop', name: 'Shop', on: f === 'shop' }], 'data-deck')}
     ${f === 'shop' ? shopBody(true) : `
     ${banner ? `<button class="dk-next" data-info="${banner.no}">
-      <i class="dk-ico" style="background:${coreOf(banner.no)}">${artIcon(banner.no, 30)}</i>
+      <i class="dk-ico" style="background:${tintOf(banner.no)}">${artIcon(banner.no, 30)}</i>
       <span class="dk-main"><b>${banner.title}</b><small>${banner.sub}</small>${banner.need ? `<span class="dk-bar"><i style="width:${Math.min(100, Math.round(banner.have / banner.need * 100))}%"></i></span>` : ''}</span>
       <span class="dk-tail">${banner.need ? `<b class="px">★${banner.have}/${banner.need}</b>` : ''}${banner.tail && !banner.need ? `<small>${banner.tail}</small>` : ''}<svg width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></span>
     </button>` : ''}
@@ -2049,7 +2049,7 @@ function renderDraw() {
   // the footer keeps the picks, what they add up to and the button on screen however far the cards scroll
   const multSel = S.baseMult + sel.reduce((a, no) => a + CARDS[no].plus, 0);
   const sum = sel.length === need && hasData ? (sim => `about <b>${sim.total}</b> pts / target ${weekTarget()}`)(simulate(sel, S.lastWeek, S.weekStart)) : sel.length ? `All held <b>×${multSel}</b>` : (draft.opened ? `<button class="dsum-rec" data-act="use-rec">Best ${rec.length} · ×${recMult}</button>` : 'Tear open the pack');
-  const slots = Array.from({ length: need }, (_, i) => sel[i] ? `<button class="dslot ${draft.landed === sel[i] || draft.landed === 'all' ? 'land' : ''}" data-unpick="${sel[i]}" style="background:${coreOf(sel[i])}" aria-label="${CARDS[sel[i]].name}, tap to put back">${artIcon(sel[i], 22)}</button>` : '<span class="dslot empty"></span>').join('');
+  const slots = Array.from({ length: need }, (_, i) => sel[i] ? `<button class="dslot ${draft.landed === sel[i] || draft.landed === 'all' ? 'land' : ''}" data-unpick="${sel[i]}" style="background:${tintOf(sel[i])}" aria-label="${CARDS[sel[i]].name}, tap to put back">${artIcon(sel[i], 22)}</button>` : '<span class="dslot empty"></span>').join('');
   const plateBg = sel.length ? coreOf(sel[sel.length - 1]) : '#34343A', plateFg = sel.length ? TYPES[CARDS[sel[sel.length - 1]].plus].chipText : '#FFF';
   sheet('Draw rule cards', `
     <div class="bar-top"><h1>Week ${S.week} · Draw ${DEALN()}, keep ${HOLDN()}</h1>${draft.opened ? `<span class="dkc-count ${draft.landed ? 'bounce' : ''}">Dealt ${inHand.length}</span>` : ''}<span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
@@ -2633,7 +2633,7 @@ function renderWeak() {
     </div>
     <h2 style="margin-top:4px">${picks.length ? 'The first deal will favor' : 'Nothing picked? Here’s an easy one to hold'}</h2>
     <div class="cv-ticket">
-      <span class="cv-tile" style="width:96px;height:96px;border-radius:16px;background:${coreOf(first.no)}">${artIcon(first.no, 72)}</span>
+      <span class="cv-tile" style="width:96px;height:96px;border-radius:16px;background:${tintOf(first.no)}">${artIcon(first.no, 72)}</span>
       <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
         <span style="font-weight:900;font-size:20px">${first.name}</span>
         <span class="px" style="font-size:16px;color:#E4FF1A">Hold for +${first.plus} Mult</span>
@@ -2726,7 +2726,7 @@ function reviewHTML(y, m) {
   if (!st.days) return '<p class="note">No day has been ended this month yet. Tonight, tap "End today" and data will start showing up here.</p>';
   const saved = st.allowed - st.spent;
   const cap = (outer, face, label, value) => `<div class="cap" style="height:76px;background:${outer}"><div class="top" style="background:${face};padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between"><span style="font-size:11px;font-weight:900">${label}</span><span class="px" style="font-size:20px;font-weight:600">${value}</span></div></div>`;
-  const cardRows = Object.entries(st.cards).sort((a, b) => b[1].held / b[1].days - a[1].held / a[1].days).map(([no, k]) => `<div class="hrow"><span class="hico" style="background:${coreOf(no)}">${artIcon(no, 26)}</span><span><b>${CARDS[no].name}</b><i style="width:${Math.round(k.held / k.days * 100)}%;background:${coreOf(no)}"></i></span><span class="px">${k.held}/${k.days} days${S.grad.includes(no) ? ' · Graduated' : ''}</span></div>`).join('');
+  const cardRows = Object.entries(st.cards).sort((a, b) => b[1].held / b[1].days - a[1].held / a[1].days).map(([no, k]) => `<div class="hrow"><span class="hico" style="background:${tintOf(no)}">${artIcon(no, 26)}</span><span><b>${CARDS[no].name}</b><i style="width:${Math.round(k.held / k.days * 100)}%;background:${coreOf(no)}"></i></span><span class="px">${k.held}/${k.days} days${S.grad.includes(no) ? ' · Graduated' : ''}</span></div>`).join('');
   const habits = st.full.length > 1 && st.habits.length
     ? st.habits.map(hb => { const d = hb.last - hb.first; return `<div class="trend ${d < 0 ? 'down' : d > 0 ? 'up' : ''}"><b>${hb.name}</b><span class="px">Weekly ${hb.first} × → ${hb.last} ×</span><em>${d < 0 ? `Down ${Math.round(-d * 10) / 10} ×` : d > 0 ? `Up ${Math.round(d * 10) / 10} ×` : 'No change'}</em></div>`; }).join('')
     : `<p class="note left">${st.full.length > 1 ? 'No takeout, milk tea, taxi, online or late-night spending was logged this month.' : 'You need two weeks with 3+ logged days to compare; log a few more days.'}</p>`;
@@ -2982,12 +2982,12 @@ function shopBody(browse) {
   const tickets = S.shopOffers.map((o, i) => {
     const c = CARDS[o.no], sold = o.sold, isRec = rec && rec.no === o.no;
     return `<button class="sticket ${isRec ? 'rec' : ''}" data-buy="${i}" ${sold || !can(o.price) ? 'disabled' : ''} aria-label="${c.name}, ${o.kind === 'unlock' ? 'Unlock' : 'Guaranteed next week'}, ${o.price} stars">
-      <span class="stile" style="background:${coreOf(o.no)}">${artIcon(o.no, 56)}</span>
+      <span class="stile" style="background:${tintOf(o.no)}">${artIcon(o.no, 56)}</span>
       <b>${c.name}</b><b class="px lime">+${c.plus} Mult</b><small>${o.kind === 'unlock' ? 'Unlock early' : 'Guaranteed next week'}</small>
       <b class="px">${sold ? 'Bought' : `★ ${o.price}`}</b>
       ${isRec ? '<b class="cv-glow rec-tag">Top pick</b>' : ''}</button>`;
   }).join('') || '<p class="note">All cards are unlocked and in next week’s deck.</p>';
-  const rings = S.held.map(no => `<span class="sring" style="border-color:${coreOf(no)}">${artIcon(no, 22)}</span>`).join('') + '<span class="sring add"><span class="px">+</span></span>'.repeat(Math.max(0, S.slots - S.held.length));
+  const rings = S.held.map(no => `<span class="sring" style="border-color:${coreOf(no)};background:${tintOf(no)}">${artIcon(no, 22)}</span>`).join('') + '<span class="sring add"><span class="px">+</span></span>'.repeat(Math.max(0, S.slots - S.held.length));
   return `
     ${browse ? `<div class="pillrow"><span class="spill">★ ${S.stars} Stars</span></div>` : `<div class="pillrow"><span class="cv-pill">Week ${S.week} over</span><span class="cv-pill">+</span><span class="cv-pill" style="color:#111">This week ${R && R.got ? starStr(R.got) : 'No stars'}</span></div>`}
     ${rec ? `<p class="note left">${rec.why}, recommended “${CARDS[rec.no].name}”.</p>` : ''}
