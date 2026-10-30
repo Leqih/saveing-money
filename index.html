@@ -1077,6 +1077,10 @@ button.hcard:active > div { transform: translateY(2px); }
 .sheet[aria-label="一周几次"] .freqs { gap: 18px; padding: 18px 14px; }
 .sheet[aria-label="一周几次"] .freq { grid-template-columns: 1fr; gap: 8px; font-size: 16px; }
 .sheet[aria-label="一周几次"] .freq button { height: 48px; border-radius: 14px; font-size: 14px; }
+/* confetti from the torn pack sits above the cards and may fly past the hand's edges */
+.hand.dealing { overflow: visible; }
+.burst { z-index: 99 !important; top: 210px !important; }
+.sheet:has(.hand.dealing) { overflow-x: hidden; }
 </style>
 
 <div class="device">
