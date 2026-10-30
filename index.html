@@ -384,13 +384,13 @@ button.chip:active { transform: translateY(2px); }
 .lg-head .px { font-size: 12px; font-weight: 400; color: var(--sub); }
 .lg-list { border-radius: 22px; background: #F6F6F8; padding: 4px; display: flex; flex-direction: column; gap: 2px; }
 .lg-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 12px; border: 0; border-radius: 18px; background: #FFF; text-align: left; }
-.lg-ico { width: 38px; height: 38px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-style: normal; font-weight: 900; font-size: 14px; color: #111; }
+.lg-ico { width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-style: normal; font-weight: 900; font-size: 14px; color: #111; }
 .lg-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .lg-main b { font-size: 14px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lg-main small { font-size: 12px; color: var(--mute); }
-.lg-main em { align-self: flex-start; margin-top: 3px; font-style: normal; padding: 1px 8px; border-radius: 8px; background: #111; color: #FFF; font-size: 11px; font-weight: 900; }
+.lg-main em { align-self: flex-start; margin-top: 3px; font-style: normal; padding: 2px 9px; border-radius: 9px; background: var(--pink); color: #FFF; font-size: 11px; font-weight: 900; }
 .lg-amt { font-family: var(--f-px); font-size: 16px; white-space: nowrap; }
-.lg-amt.hit { color: #C8102E; } .lg-amt.wish { color: var(--mute); text-decoration: line-through; }
+.lg-amt.hit { color: #C8102E; } .lg-amt.wished { color: var(--mute); text-decoration: line-through; }
 .cv-cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
 .cv-day { height: 46px; border: 0; border-radius: 10px; padding: 2px 2px 6px; box-shadow: 0 4px 8px rgba(20,20,30,0.16); display: block; text-align: left; }
 .cv-day > span { display: flex; flex-direction: column; justify-content: space-between; height: 100%; border-radius: 8px; padding: 3px 5px; font-family: var(--f-px); font-size: 11px; color: #111; }
@@ -1853,7 +1853,15 @@ const tabsHTML = (items, attr) => `<div role="tablist" style="border-radius:20px
 
 // each category gets a color and a one-character badge so a long ledger scans at a glance
 const CAT_COLOR = { takeout: '#FF4D6A', tea: '#FF7BD5', online: '#2E8BFF', taxi: '#2FD15C', meal: '#FFD000', commute: '#C9C3FF', other: '#D4D4DB' };
-const catBadge = id => `<i class="lg-ico" style="background:${CAT_COLOR[id] || '#D4D4DB'}">${esc(cat(id).name.slice(0, 1))}</i>`;
+// the everyday categories that have no rule card get their own small flat icons in the same style
+const CAT_ART = {
+  meal: '<circle cx="120" cy="116" r="76" fill="#FFD21F"/><circle cx="120" cy="116" r="50" fill="#FFF"/><path d="M26 56V120M40 56V120M54 56V120M26 120H54M40 120V190" stroke="#111" stroke-width="9" stroke-linecap="round" fill="none"/><path d="M200 56Q222 90 200 124V190" stroke="#111" stroke-width="9" stroke-linecap="round" fill="none"/>',
+  commute: '<rect x="36" y="38" width="168" height="124" rx="30" fill="#8D80FF"/><rect x="54" y="58" width="60" height="44" rx="10" fill="#FFF"/><rect x="126" y="58" width="60" height="44" rx="10" fill="#FFF"/><rect x="36" y="118" width="168" height="12" fill="#6A5BE0"/><circle cx="82" cy="170" r="20" fill="#111"/><circle cx="158" cy="170" r="20" fill="#111"/><circle cx="82" cy="170" r="7" fill="#FFF"/><circle cx="158" cy="170" r="7" fill="#FFF"/>',
+  other: '<rect x="30" y="52" width="180" height="120" rx="34" fill="#9A9AA6"/><circle cx="80" cy="112" r="14" fill="#FFF"/><circle cx="120" cy="112" r="14" fill="#FFF"/><circle cx="160" cy="112" r="14" fill="#FFF"/>'
+};
+const catBadge = id => CAT_CARD[id] ? `<i class="lg-ico" style="background:${tintOf(CAT_CARD[id])}">${artIcon(CAT_CARD[id], 30)}</i>`
+  : CAT_ART[id] ? `<i class="lg-ico" style="background:${mix(CAT_COLOR[id] || '#D4D4DB', 0.78)}"><svg width="30" height="28" viewBox="0 0 240 224" aria-hidden="true">${CAT_ART[id]}</svg></i>`
+  : `<i class="lg-ico" style="background:${CAT_COLOR[id] || '#D4D4DB'}">${esc(cat(id).name.slice(0, 1))}</i>`;
 function flowHTML(tabs) {
   const f = S.flowCat || 'all';
   // today stays editable; past days come from history and open their receipt
@@ -1868,7 +1876,8 @@ function flowHTML(tabs) {
   const row = it => {
     const x = it.x, ess = !!cat(x.cat).ess;
     const tags = [ess ? 'Essential' : '', x.night ? 'after 10 pm' : '', x.fromWish ? 'waited 24 hours' : '', it.wish ? 'Wish list · asked tomorrow' : ''].filter(Boolean).join(' · ');
-    const inner = `${catBadge(x.cat)}<span class="lg-main"><b>${x.note ? esc(x.note) : cat(x.cat).name}</b><small>${cat(x.cat).name}${tags ? ' · ' + tags : ''}</small>${it.breaks ? `<em>Broken ${it.breaks.join(', ')}</em>` : ''}</span><span class="lg-amt ${it.breaks ? 'hit' : ''} ${it.wish ? 'wish' : ''}">${it.wish ? '' : '−'}¥${x.amt}</span>`;
+    const sub = [x.note ? cat(x.cat).name : '', tags].filter(Boolean).join(' · ');
+    const inner = `${catBadge(x.cat)}<span class="lg-main"><b>${x.note ? esc(x.note) : cat(x.cat).name}</b>${sub ? `<small>${sub}</small>` : ''}${it.breaks ? `<em>Broke ${it.breaks.join(', ')}</em>` : ''}</span><span class="lg-amt ${it.breaks ? 'hit' : ''} ${it.wish ? 'wished' : ''}">${it.wish ? '' : '−'}¥${x.amt}</span>`;
     return it.edit != null ? `<button class="lg-row" data-edit="${it.edit}" aria-label="${entryName(x)} ${x.amt} yuan, tap to edit">${inner}</button>` : `<div class="lg-row">${inner}</div>`;
   };
   const groups = days.map(d => {
