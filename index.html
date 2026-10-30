@@ -1997,8 +1997,10 @@ const layoutStack = placeStack;
 // a little screen shake, then the cards punch out of the pack one after another
 function openShow(sh) {
   const stack = sh.querySelector('.stack'); if (!stack) return;
-  const sr = sh.getBoundingClientRect(), r = stack.getBoundingClientRect();
-  const cx = r.left + r.width / 2 - sr.left, cy = r.top + 220 - sr.top + sh.scrollTop;
+  const sr0 = sh.getBoundingClientRect(), r = stack.getBoundingClientRect(), z = sr0.width / sh.offsetWidth || 1;
+  // everything below is in the sheet's own (unzoomed) pixels, so the cannons sit on the real screen edges at any mockup scale
+  const sr = { left: sr0.left, top: sr0.top, width: sh.offsetWidth, height: sh.offsetHeight };
+  const cx = (r.left + r.width / 2 - sr0.left) / z, cy = (r.top - sr0.top) / z + 220 + sh.scrollTop;
   // the row slides in from the right in its real order (front card first, then its neighbours), one after another, never piled up
   const cards = [...stack.querySelectorAll('.sc2')].filter(c => +c.dataset.k >= -1 && +c.dataset.k <= 2).sort((a, b) => +a.dataset.k - +b.dataset.k);
   const fc = cards.find(c => +c.dataset.k === 0); if (fc) { const g = document.createElement('i'); g.className = 'cardshine'; fc.appendChild(g); setTimeout(() => g.remove(), 1700); }
