@@ -1156,6 +1156,21 @@ button.hcard:active > div { transform: translateY(2px); }
 .kp-empty { opacity: 0.55; }
 .keypad { margin-top: 6px; }
 .kp-empty { opacity: 1 !important; }
+
+/* frequency choices as chunky keys: one dark well per spot, three cream keycaps with a dished button; the chosen one is pressed in */
+.fk-list { display: flex; flex-direction: column; gap: 18px; }
+.fk-row { display: flex; flex-direction: column; gap: 8px; }
+.fk-name { display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 15px; }
+.fk-name .dish { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 40% 30%, color-mix(in srgb, var(--d) 60%, #FFF), var(--d)); box-shadow: 0 2px 0 color-mix(in srgb, var(--d) 70%, #000); }
+.fk-well { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px; border-radius: 22px; background: #0B0B0C; box-shadow: inset 0 3px 6px #000, 0 6px 0 #4A4C51, 0 10px 14px -6px rgba(20,22,26,0.5); }
+.fk-cap { height: 78px; padding: 0; border: 0; border-radius: 16px; background: linear-gradient(180deg, #F4F2EE, #E3E0DA); box-shadow: inset 0 2px 0 rgba(255,255,255,0.9), inset 0 -3px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; }
+.fk-dish { width: 62px; height: 62px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-style: normal; background: radial-gradient(circle at 42% 28%, #FFFFFF 0%, #F6F4F0 55%, #DCD9D2 100%); box-shadow: inset 0 -3px 4px rgba(0,0,0,0.16), inset 0 2px 2px rgba(255,255,255,0.9), 0 4px 0 #BDBAB1, 0 8px 8px -2px rgba(0,0,0,0.3); transition: transform 0.2s cubic-bezier(.3,1.8,.5,1), box-shadow 0.12s, background 0.2s; }
+.fk-dish small { font-size: 11px; font-weight: 900; color: #2C2E33; line-height: 1; margin-top: 1px; }
+.fk-cap.on { background: linear-gradient(180deg, #E4E1DB, #D2CFC8); box-shadow: inset 0 3px 6px rgba(0,0,0,0.2); }
+.fk-cap.on .fk-dish { transform: translateY(3px); background: radial-gradient(circle at 42% 28%, #D6F2A0 0%, #A8E04A 55%, #7DBB22 100%); box-shadow: inset 0 3px 5px rgba(0,0,0,0.25), 0 1px 0 rgba(0,0,0,0.2); }
+.fk-cap:active .fk-dish { transform: translateY(4px) scale(0.95); }
+.fk-cap.pop .fk-dish { animation: fkPop 0.45s cubic-bezier(.3,1.9,.5,1); }
+@keyframes fkPop { 0% { transform: translateY(-4px) scale(1.12); } 100% { transform: translateY(3px); } }
 </style>
 
 <div class="device">
@@ -2496,30 +2511,19 @@ function renderWeak() {
 // step 3: how often each chosen spot happens, so the first week can be estimated
 function renderFreq() {
   const picks = WEAK.filter(w => S.weak.includes(w.id));
-  const labelsOf = w => w.id === 'weekend' ? ['¥50', '¥80', '¥120+'] : ['1–2', '3–5', '每天'];
+  const labelsOf = w => w.id === 'weekend' ? ['¥50', '¥80', '¥120+'] : ['1–2 次', '3–5 次', '每天'];
   const fullOf = w => w.id === 'weekend' ? ['¥50 左右', '¥80 左右', '¥120+'] : FREQ.map(f => f.label);
-  if (!picks.some(w => w.id === S.freqSel)) S.freqSel = picks[0].id;
-  const cur = picks.find(w => w.id === S.freqSel), curI = S.freq[cur.id] ?? 1, idx = picks.indexOf(cur);
   const DISH = ['#F25550', '#2C2E33', '#F1B94B', '#3F86D6', '#4CB05A', '#E97FB1'];
-  const GLYPH = ['<svg viewBox="0 0 24 24" width="26" height="26"><path d="M12 3a9 9 0 000 18z" fill="#2C2E33"/></svg>', '<svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="8" fill="#2C2E33"/></svg>', '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M12 12V3a9 9 0 11-9 9z" fill="#2C2E33"/></svg>'];
-  const left = picks.map((w, i) => `<button class="kp-cap ${w.id === cur.id ? 'on' : ''}" data-freqsel="${w.id}" aria-label="${w.name}" aria-pressed="${w.id === cur.id}"><i class="dish" style="--d:${DISH[i % 6]}"><b>${w.name.slice(0, 1)}</b></i></button>`).join('');
-  const freqKeys = labelsOf(cur).map((l, i) => `<button class="kp-cap ${curI === i ? 'on' : ''}" data-freq="${cur.id}:${i}" aria-label="${fullOf(cur)[i]}" aria-pressed="${curI === i}"><i class="dish light">${GLYPH[i]}<small>${l}</small></i></button>`).join('');
+  const GLYPH = ['<svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 3a9 9 0 000 18z" fill="#2C2E33"/></svg>', '<svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#2C2E33"/></svg>', '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 12V3a9 9 0 11-9 9z" fill="#2C2E33"/></svg>'];
+  const rows = picks.map((w, r) => { const cur = S.freq[w.id] ?? 1; return `<div class="fk-row" role="group" aria-label="${w.name}${w.id === 'weekend' ? '花多少' : '一周几次'}">
+      <span class="fk-name"><i class="dish" style="--d:${DISH[r % 6]}"></i>${w.name}</span>
+      <div class="fk-well">${labelsOf(w).map((l, i) => `<button class="fk-cap ${cur === i ? 'on' : ''}" data-freq="${w.id}:${i}" aria-label="${fullOf(w)[i]}" aria-pressed="${cur === i}"><i class="fk-dish">${GLYPH[i]}<small>${l}</small></i></button>`).join('')}</div>
+    </div>`; }).join('');
   sheet('一周几次', `
     ${progHTML(3)}
     <h1 style="margin:4px 0 0;font-weight:900;font-size:28px;line-height:1.25">它们一周<br>大概出现几次？</h1>
-    <p class="note left" style="color:#6A6A70;font-size:13px">左边选一项，右边按它大概一周几次。</p>
-    <div class="keypad">
-      <div class="kp-well kp-left" style="--n:${Math.max(4, picks.length)}">${left}${Array.from({ length: Math.max(0, 4 - picks.length) }, () => '<span class="kp-cap kp-empty" aria-hidden="true"></span>').join('')}</div>
-      <div class="kp-well kp-right">
-        ${freqKeys}
-        <div class="kp-lcd"><div class="kp-scr"><span>${cur.name}</span><b>${fullOf(cur)[curI]}</b></div></div>
-        <button class="kp-cap" data-freqnav="-1" aria-label="上一项"><i class="dish light"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 6l8 12H4z" fill="#2C2E33"/></svg></i></button>
-        <button class="kp-cap" data-freqnav="1" aria-label="下一项"><i class="dish light"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 18L4 6h16z" fill="#2C2E33"/></svg></i></button>
-        <button class="kp-cap kp-tall" data-act="weak-go" aria-label="去抽牌"><i class="dish pill"><b>!</b></i></button>
-        <button class="kp-cap" data-freqreset="1" aria-label="恢复默认"><i class="dish light"><small style="font-size:12px">重置</small></i></button>
-        <span class="kp-cap kp-dec" aria-hidden="true"><i class="dish light"><span class="dot"></span></i></span>
-      </div>
-    </div>
+    <p class="note left" style="color:#6A6A70;font-size:13px">只用来估算你的第一周，不准也没关系。</p>
+    <div class="fk-list">${rows}</div>
     <button class="cap lime bigbtn" data-act="weak-go" style="margin-top:4px"><div class="top">去抽牌</div></button>`);
 }
 function renderGuide() {
@@ -2938,7 +2942,7 @@ app.addEventListener('click', e => {
     draft = {}; swapSheet(top, renderDraw);
     return;
   }
-  if (t.dataset.freq) { const [id, i] = t.dataset.freq.split(':'); S.freq[id] = +i; replaceSheet(top, renderFreq); return; }
+  if (t.dataset.freq) { const [id, i] = t.dataset.freq.split(':'); S.freq[id] = +i; replaceSheet(top, renderFreq); const nb = app.querySelector(`[data-freq="${id}:${i}"]`); if (nb) nb.classList.add('pop'); return; }
   if (t.dataset.freqsel) { S.freqSel = t.dataset.freqsel; replaceSheet(top, renderFreq); return; }
   if (t.dataset.freqnav) { const ps = WEAK.filter(w => S.weak.includes(w.id)), i = ps.findIndex(w => w.id === S.freqSel); S.freqSel = ps[(i + +t.dataset.freqnav + ps.length) % ps.length].id; replaceSheet(top, renderFreq); return; }
   if (t.dataset.freqreset) { delete S.freq[S.freqSel]; replaceSheet(top, renderFreq); return; }
