@@ -962,6 +962,22 @@ button.hcard:active > div { transform: translateY(2px); }
 .wkrow .endbtn { width: 104px; height: 104px; }
 .rack-top { padding-bottom: 4px; }
 .screen:has(> .head) { gap: 16px; padding-bottom: 120px; }
+
+/* the rule cards lie in a brushed-steel tray, a little askew, each with a paper note stuck on its corner */
+.rack { border-radius: 22px; padding: 9px; margin-top: 4px; transform: rotate(-1.2deg); background: linear-gradient(135deg, #F7F9FB 0%, #B7BEC7 28%, #EDF0F3 52%, #98A1AB 80%, #D7DCE1 100%); box-shadow: inset 0 0 0 2px rgba(255,255,255,0.8), 0 0 0 2px #8E97A1, 0 10px 0 #7B848E, 0 16px 22px -6px rgba(30, 40, 50, 0.5); }
+.rack::before { content: none; }
+.rack-in { position: relative; border-radius: 16px; padding: 10px 12px 14px; background: repeating-linear-gradient(180deg, rgba(255,255,255,0.0) 0 3px, rgba(255,255,255,0.35) 3px 4px), linear-gradient(160deg, #AEB6BF 0%, #E4E8EC 38%, #A3ABB5 100%); box-shadow: inset 0 4px 10px rgba(40, 50, 60, 0.5), inset 0 -3px 6px rgba(255,255,255,0.7); overflow: hidden; }
+.rack-top { display: flex; justify-content: space-between; align-items: center; padding: 0; }
+.rack-ttl { padding: 3px 10px; border-radius: 3px; background: #FFF; color: #111; font-family: var(--f-body); font-weight: 900; font-size: 13px; box-shadow: 0 2px 0 rgba(0,0,0,0.25); transform: rotate(-2deg); }
+.rack-n { padding: 2px 8px; border-radius: 3px; background: #FFD3E2; font-family: var(--f-px); font-size: 13px; color: #111; box-shadow: 0 2px 0 rgba(0,0,0,0.25); transform: rotate(2deg); }
+.rack .hold { position: relative; display: block; padding: 0; background: none; box-shadow: none; margin-top: 8px; }
+.rack .hold .hcard { position: absolute; top: 0; left: calc(var(--p) * (100% - var(--cw))); width: var(--cw); padding: 0; border-radius: 0; background: none; box-shadow: none; display: block; transform: rotate(var(--r)); z-index: var(--z); transition: transform 0.25s cubic-bezier(.3,1.7,.5,1); }
+.rack .hold .hcard:active { transform: rotate(0) scale(1.05); z-index: 9; }
+.rack .hold .hcard:nth-child(2) { margin-top: 8px; }
+.rack .hold .hcard > div { filter: drop-shadow(0 6px 5px rgba(30, 40, 50, 0.45)); }
+.rack .hold .hcard > span { position: absolute; right: -6px; bottom: -4px; padding: 3px 8px; border-radius: 2px; background: var(--nb, #FFF); color: #111; font-size: 11px; font-weight: 900; box-shadow: 0 2px 0 rgba(0,0,0,0.25); transform: rotate(4deg); white-space: nowrap; margin: 0; }
+.rack .hold .hcard.broken > span { background: #FF9A9A; color: #5A0A0A; }
+.rack .hold .hcard.pending > span { background: #FFE9A8; }
 </style>
 
 <div class="device">
@@ -1280,13 +1296,14 @@ function tilesHTML() {
   }).join('')}</div>`;
 }
 function holdHTML(ev) {
-  const cards = ev.cards.map(c => {
+  const n = ev.cards.length, sc = n > 3 ? 0.34 : 0.4, tilt = [-7, 4, -3, 6], notes = ['#FFD3E2', '#CFE8FF', '#FFF3B0', '#D8F5C8'];
+  const cards = ev.cards.map((c, i) => {
     const card = CARDS[c.no];
     const label = c.state === 'on' ? `+${card.plus} 守住` : c.state === 'pending' ? '睡着' : brokenLabel(c);
-    return `<button class="hcard ${c.state}" data-info="${c.no}" aria-label="${card.name}，${label}${c.why ? '：' + c.why : ''}">${scaled(card, ev.cards.length > 3 ? 0.3 : 0.38, c.state)}<span>${label}</span></button>`;
+    return `<button class="hcard ${c.state}" data-info="${c.no}" style="--p:${n > 1 ? i / (n - 1) : 0};--cw:${Math.round(240 * sc)}px;--r:${tilt[i % 4]}deg;--z:${i + 1}" aria-label="${card.name}，${label}${c.why ? '：' + c.why : ''}">${scaled(card, sc, c.state)}<span style="--nb:${notes[i % 4]}">${label}</span></button>`;
   }).join('');
   const okN = ev.cards.filter(c => c.state === 'on').length;
-  return `<div class="rack"><div class="rack-top"><span class="rack-ttl">本周规则</span><span class="rack-leds" aria-hidden="true">${ev.cards.map(c => `<i class="${c.state}"></i>`).join('')}</span><span class="rack-n">${okN}/${ev.cards.length}</span></div><div class="hold" style="grid-template-columns:repeat(${ev.cards.length}, 1fr)">${cards}</div></div>`;
+  return `<div class="rack"><div class="rack-in"><div class="rack-top"><span class="rack-ttl">本周规则</span><span class="rack-n">${okN}/${n}</span></div><div class="hold" style="height:${Math.round(340 * sc) + 22}px">${cards}</div></div></div>`;
 }
 // consecutive finished days where every held card held
 function streakDays() { let n = 0; for (let i = S.history.length - 1; i >= 0; i--) { const h = S.history[i]; if (h.unlogged || !h.cards.length || !h.cards.every(c => c.state === 'on')) break; n++; } return n; }
