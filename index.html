@@ -2782,7 +2782,7 @@ function monthTurn(prev, now) {
   if (prev.getMonth() === now.getMonth() || !monthStats(prev.getFullYear(), prev.getMonth()).days) return;
   sheet('Monthly review', `<div class="bar-top"><h1>${MON[prev.getMonth()]} review</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     ${reviewHTML(prev.getFullYear(), prev.getMonth())}
-    <p class="note">You can always find this later under Ledger → Review.${now.getDay() === 1 ? "" : "This week’s summary comes later, on Sunday night when you end the day."}</p>
+    <p class="note">You can always find this later under Ledger → Review.${now.getDay() === 1 ? "" : " This week’s summary comes later, on Sunday night when you end the day."}</p>
     <button class="cap lime bigbtn" data-act="close"><div class="top">Start ${MON[now.getMonth()]}</div></button>`);
 }
 
@@ -2792,7 +2792,7 @@ function alerts(ev) {
   const c = S.clock, out = [];
   ev.cards.forEach(x => {
     const k = CARDS[x.no];
-    if (x.state === 'pending') { out.push(`${k.name}Still asleep: log one entry today to wake it (+${k.plus}).`); return; }
+    if (x.state === 'pending') { out.push(`${k.name} is still asleep: log one entry today to wake it (+${k.plus}).`); return; }
     if (x.state !== 'on') return;
     if (x.near) { out.push(x.near + '.'); return; }
     if (x.no === '01' && ((c >= 11 && c < 13.5) || (c >= 17 && c < 19.5))) out.push(`Mealtime: order takeout and Takeout Nemesis breaks, mult − ${k.plus}.`);
@@ -2800,7 +2800,7 @@ function alerts(ev) {
     if (x.no === '06' && c >= 22) out.push('It’s past 10 pm; spending now breaks Night Cat (−2). Put what you want on the wish list.');
     if (x.no === '04' && ((c >= 7.5 && c < 9.5) || c >= 22)) out.push('Want a taxi? Walker breaks (−1); the subway counts as commuting and is fine.');
     if (x.no === '07' && c >= 20) out.push('Evenings are when you order most: wish list first; buying on the spot breaks Cool-Off (−2).');
-    if (x.no === '05') out.push('Zero Day is still alive (+3): spend nothing outside the allowance today to earn it.');
+    if (x.no === '05') out.push(`Zero Day is still alive (+${k.plus}): spend nothing outside the allowance today to earn it.`);
   });
   return out;
 }
@@ -2876,6 +2876,12 @@ function renderMorning() {
     ${(() => { const y = S.history[S.history.length - 1]; return y && y.unlogged && !y.resolved ? `<div class="unlogged"><b>Nothing logged yesterday</b><span>Did you really spend nothing? An unlogged day counts as 0 pts first. If you really spent nothing, it’s restored to a zero-spend score of ${y.potential.score} pts (base multiplier only; cards add nothing on an unlogged day).</span><div class="ibtns"><button class="rvbtn lime" data-act="unlogged-yes">Really spent nothing</button><button class="rvbtn" data-act="unlogged-no">Forgot to log</button></div></div>` : ''; })()}
     ${S.autoEnded ? '<div class="callout">Last night you didn’t tap "End today", so midnight ended the day for you; the receipt is kept as usual.</div>' : ''}
     ${S.debt ? `<div class="callout">You overdrew yesterday by <b>¥${S.debt}</b>, today you can spend ¥${dailyBudget()} − ¥${Math.min(S.debt, dailyBudget())} = <b>¥${todayBudget()}</b>.${(() => { const y = S.history[S.history.length - 1]; return y && y.overflow ? `The other ¥${y.overflow} over is no longer carried forward; it adds to this week’s target score instead: +${y.overflow * OVERFLOW_PTS}.` : ''; })()}</div>` : ""}
+    <div class="cap orange hero"><div class="top">
+      <div class="row"><span style="font-weight:900;font-size:14px">Allowed today</span><span class="px" style="font-size:12px">Weekly Score ${scorePrior()} / ${weekTarget()}</span></div>
+      <span class="money">${money(ev.left)}</span>
+      <div class="row"><span style="font-weight:900;font-size:14px">If you hold them all, tonight ${ev.base * (S.baseMult + S.held.reduce((s, no) => s + CARDS[no].plus, 0))} pts</span></div>
+    </div></div>
+    ${a ? `<div class="alert" role="note"><span class="bell">${BELL}</span><p>${a}</p><span class="tag">Watch today</span></div>` : ''}
     <div class="cap"><div class="top" style="display:flex;flex-direction:column;gap:8px">
       <div style="display:flex;justify-content:space-between;align-items:baseline"><b>Yesterday · ${DAYS[y.day]}</b><button class="linkbtn" data-day="${y.day}" style="padding:0;color:#5B4FC8;font-size:12px">See receipt →</button></div>
       <div class="ystat"><div><small>Score</small><b>${y.score}</b></div><div><small>Mult</small><b>×${y.mult}</b></div><div><small>Held</small><b>${kept}/${y.cards.length}</b></div></div>
@@ -2884,12 +2890,6 @@ function renderMorning() {
       : S.wishSaved ? `<div class="callout">Wish list is empty, <b>saved ¥${S.wishSaved}</b>.</div>` : ''}
     <div class="hold-lbl">${y.cards.some(c => c.state === 'broken') ? `Cards that broke yesterday came back at midnight${y.cards.some(c => c.state === 'broken' && CARDS[c.no].weekly) ? ' (weekly ones excepted)' : ''}` : 'Today’s cards'}</div>
     ${holdHTML(ev)}
-    <div class="cap orange hero"><div class="top">
-      <div class="row"><span style="font-weight:900;font-size:14px">Allowed today</span><span class="px" style="font-size:12px">Weekly Score ${scorePrior()} / ${weekTarget()}</span></div>
-      <span class="money">${money(ev.left)}</span>
-      <div class="row"><span style="font-weight:900;font-size:14px">If you hold them all, tonight ${ev.base * (S.baseMult + S.held.reduce((s, no) => s + CARDS[no].plus, 0))} pts</span></div>
-    </div></div>
-    ${a ? `<div class="alert" role="note"><span class="bell">${BELL}</span><p>${a}</p><span class="tag">Watch today</span></div>` : ''}
     <button class="cap lime bigbtn" data-act="morning-done"><div class="top">Start today</div></button>`);
 }
 // close the week once: stars, per-card held days, graduation, unlocks. The sheet below only reads the result,
