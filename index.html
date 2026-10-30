@@ -986,6 +986,16 @@ button.hcard:active > div { transform: translateY(2px); }
 .wkrow .endbtn > .top::before { content: ''; position: absolute; left: 16px; top: 8px; width: 42px; height: 18px; border-radius: 50%; background: rgba(255,255,255,0.65); transform: rotate(-20deg); filter: blur(1px); }
 .wkrow .endbtn:active > .top { transform: translateY(5px); box-shadow: inset 0 -3px 0 rgba(90, 110, 0, 0.45), inset 0 3px 3px rgba(255,255,255,0.9), 0 1px 0 #7E9400, 0 3px 4px rgba(0,0,0,0.45); }
 .wkrow .endbtn:active { transform: none; }
+
+/* the end-of-day key, seen from a raised angle like the reference: a stacked dark base of flattened discs, a black gap, a thick orange cap with a lip */
+.wkrow { grid-template-columns: 1fr 156px; }
+.wkrow .endbtn { position: relative; width: 156px; height: 112px; margin-bottom: 14px; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; justify-self: end; overflow: visible; }
+.wkrow .endbtn::before { content: ''; position: absolute; left: 0; right: 0; top: 34px; height: 62px; border-radius: 50%; background: radial-gradient(ellipse at 50% 30%, #55504C, #2C2926 70%); box-shadow: 0 10px 0 #1E1B19, 0 18px 0 #38342F, 0 24px 14px -4px rgba(0,0,0,0.45), inset 0 3px 0 rgba(255,255,255,0.15); }
+.wkrow .endbtn::after { content: ''; position: absolute; left: 14px; right: 14px; top: 32px; height: 44px; border-radius: 50%; background: #0B0908; box-shadow: inset 0 6px 6px #000; }
+.wkrow .endbtn > .top { position: absolute; left: 22px; right: 22px; top: 10px; width: auto; height: 62px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.1; font-size: 17px; font-weight: 900; letter-spacing: 1px; color: #FFF; text-shadow: 0 2px 0 rgba(120, 30, 0, 0.7); background: radial-gradient(ellipse at 50% 20%, #FF9A5E 0%, #FF5A1F 55%, #E8420D 100%); box-shadow: inset 0 3px 0 rgba(255,255,255,0.45), inset 0 -4px 0 rgba(160, 40, 0, 0.5), 0 12px 0 #C23508, 0 14px 0 #7A1F00, 0 20px 8px rgba(0,0,0,0.4); transition: transform 0.12s ease-out, box-shadow 0.12s ease-out; z-index: 2; }
+.wkrow .endbtn > .top::before { content: none; }
+.wkrow .endbtn:active > .top { transform: translateY(9px); box-shadow: inset 0 3px 0 rgba(255,255,255,0.45), inset 0 -4px 0 rgba(160, 40, 0, 0.5), 0 3px 0 #C23508, 0 5px 0 #7A1F00, 0 8px 4px rgba(0,0,0,0.4); }
+.wkrow .endbtn .top br { display: none; }
 </style>
 
 <div class="device">
