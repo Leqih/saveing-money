@@ -1311,7 +1311,7 @@ const CARDS = {
   '06': { no: '06', name: 'Night Cat', plus: 2, diff: 2, cond: 'Not a cent after 10 pm', eg: 'Order a milk tea at 11 pm and this card breaks for the day. Daytime spending doesn’t affect it.',
     broken: d => d.night, why: d => `Spent after 10 pm ¥${d.nightSum}` },
   '03': { no: '03', name: 'Tea Quota', plus: 1, diff: 1, weekly: true, cond: 'No more than 3 milk teas or coffees this week', eg: 'The first 3 are fine; the 4th breaks this card until Sunday. Every extra cup after that costs another −1 mult that day.',
-    broken: d => d.weekTea > 3, why: d => `You’ve had ${d.weekTea} cups`, near: d => d.weekTea === 3 ? '3 cups already this week. One more breaks Tea Quota, then every cup costs −1 mult that day' : null,
+    broken: d => d.weekTea > 3, why: d => `You’ve had ${d.weekTea} cups`, near: d => d.weekTea === 3 ? '3 cups already this week. One more breaks Tea Quota, and then every cup costs −1 mult that day.' : null,
     // past the cup that cracked it, every cup costs a point of multiplier on the day it is drunk
     penalty: d => Math.max(0, d.weekTea - Math.max(4, d.teaBefore)) },
   '04': { no: '04', name: 'Walker', plus: 1, diff: 1, cond: 'No taxis today', eg: 'One taxi ride breaks this card for the day. Subway and bus count as commuting and are fine.',
@@ -1333,9 +1333,9 @@ const CARDS = {
   '16': { no: '16', name: 'One-Shot', plus: 2, diff: 2, unlock: 9, clash: ['05'], cond: 'At most one purchase outside the allowance today', eg: 'A milk tea is fine; one more takeout breaks it. Save up what you want and buy it in one go.',
     broken: d => d.extraCount > 1, why: d => `Outside the allowance today: ${d.extraCount} purchases`, near: d => d.extraCount === 1 ? 'That’s one purchase outside the allowance already; one more breaks One-Shot' : null },
   '17': { no: '17', name: 'Lunchbox', plus: 1, diff: 1, unlock: 12, cond: 'Meals today under ¥30', eg: 'Packed lunch or canteen keeps it alive; a ¥40 lunch breaks it. Delivered meals count as takeout, not meals.',
-    broken: d => d.sum('meal') > 30, why: d => `Meals today ¥${d.sum('meal')}`, near: d => d.sum('meal') > 20 && d.sum('meal') <= 30 ? `Meals today already ¥${d.sum('meal')}, spend ¥${31 - d.sum('meal')} and Lunchbox breaks` : null },
-  '13': { no: '13', name: 'Piggy Bank', plus: 2, diff: 2, unlock: 6, cond: 'Spend outside the allowance today ≤ ¥20', eg: 'A milk tea is fine; add a takeout and it breaks.',
-    broken: d => d.extra > 20, why: d => `Spent outside the allowance ¥${d.extra}`, near: d => d.extra > 10 && d.extra <= 20 ? `Outside the allowance today already ¥${d.extra}, spend ¥${21 - d.extra} and Piggy Bank breaks` : null }
+    broken: d => d.sum('meal') > 30, why: d => `Meals today ¥${d.sum('meal')}`, near: d => d.sum('meal') > 20 && d.sum('meal') <= 30 ? `Meals today already ¥${d.sum('meal')}, spend ¥${31 - d.sum('meal')}  more and Lunchbox breaks` : null },
+  '13': { no: '13', name: 'Piggy Bank', plus: 2, diff: 2, unlock: 6, cond: 'At most ¥20 outside the allowance today', eg: 'A milk tea is fine; add a takeout and it breaks.',
+    broken: d => d.extra > 20, why: d => `Spent outside the allowance ¥${d.extra}`, near: d => d.extra > 10 && d.extra <= 20 ? `Outside the allowance today already ¥${d.extra}, spend ¥${21 - d.extra}  more and Piggy Bank breaks` : null }
 };
 const clashes = (a, b) => (CARDS[a].clash || []).includes(b) || (CARDS[b].clash || []).includes(a);
 const clashIn = (no, sel) => sel.find(x => x !== no && clashes(no, x));
@@ -2682,7 +2682,7 @@ function stopHTML(ev) {
     <p>Tonight is 0 pts.${ev.left < 0 ? `The overage comes out of tomorrow’s ¥${dailyBudget()}, ` : "Spending more comes out of tomorrow’s allowance, "}every yuan you spend now is tomorrow’s money.</p>
     <button class="cap lime" data-act="log"><div class="top">Put what you want on the wish list first</div></button></div>`;
   if (ev.cards.every(c => c.state !== 'on')) return `<div class="stoploss"><span class="tag">Stop-loss</span><b>All three cards broke today</b>
-    <p>Mult is back to ×${ev.mult}, but the money left still counts: hold on to this ${money(ev.left)}, and tonight you still have <b>${ev.score} pts</b>. All cards come back at midnight${need > 0 ? `; ${need} pts` : ''}.</p></div>`;
+    <p>Mult is back to ×${ev.mult}, but the money left still counts: stay under ${money(ev.left)} and tonight you still get <b>${ev.score} pts</b>. All cards come back at midnight${need > 0 ? `; you still need ${need} pts this week` : ''}.</p></div>`;
   return '';
 }
 const BELL = '<svg width="20" height="20" viewBox="0 0 20 20" fill="#E4FF1A" aria-hidden="true"><path d="M10 2a5 5 0 0 0-5 5v3.5L3.5 14h13L15 10.5V7a5 5 0 0 0-5-5zM8 15.5a2 2 0 0 0 4 0z"/></svg>';
@@ -2701,7 +2701,7 @@ function inboxItems(ev = evaluate(S.today)) {
   if (S.day === 6) out.push({ key: `sun-${S.week}`, kind: 'sunday', title: 'Today is the last day of the week', text: 'Tonight, tap "End today" to see the weekly summary: score, stars, graduation, which card to carry over, and next week’s stake.', btns: [['data-act="end"', 'End today, see the weekly summary', 'lime']] });
   else if (S.prefs.evening && S.clock >= S.prefs.eveningAt) out.push({ key: `eve-${k}`, kind: 'evening', title: `${fmtClock(S.clock)} · Done logging?`, text: `Tonight’s estimate ${ev.score} pts. When you’re done, tap "End today" for the receipt; if you forget, midnight ends the day for you.`, btns: [['data-act="end"', 'End today', 'lime']] });
   if (ev.left <= 0) out.push({ key: `over-${k}`, kind: 'stop', title: ev.left < 0 ? `You’re already over by ¥${-ev.left}` : `Today’s ¥${ev.daily} is used up exactly`, text: `Tonight is 0 pts.${ev.left < 0 ? 'Overage comes out of tomorrow’s allowance; ' : 'Spending more comes out of tomorrow’s allowance, '}every yuan you spend now is tomorrow’s money. Put what you want on the wish list first.` });
-  else if (ev.cards.every(c => c.state !== 'on')) out.push({ key: `broke-${k}`, kind: 'stop', title: 'All three cards broke today', text: `Mult is back to ×${ev.mult}, but the money left still counts: hold on to this ${money(ev.left)}, and tonight you still have ${ev.score} pts. All cards come back at midnight.` });
+  else if (ev.cards.every(c => c.state !== 'on')) out.push({ key: `broke-${k}`, kind: 'stop', title: 'All three cards broke today', text: `Mult is back to ×${ev.mult}, but the money left still counts: stay under ${money(ev.left)} and tonight you still get ${ev.score} pts. All cards come back at midnight.` });
   if (S.prefs.ruleAlerts) alerts(ev).forEach(a => out.push({ key: `al-${k}-${a}`, kind: 'alert', title: `${fmtClock(S.clock)} · Rule reminder`, text: a }));
   if (S.wish.length) out.push({ key: `wl-${k}-${S.wish.length}`, kind: 'memo', title: 'Wish list', text: `It holds ${S.wish.length} items; tomorrow you’ll be asked if you still want them. They don’t count as spending and break no cards.` });
   return out;
@@ -2745,7 +2745,7 @@ function renderMorning() {
     <div class="bar-top"><h1>${DAYS[S.day]} · Good morning</h1><span class="px" style="color:var(--mute)">${fmtClock(S.clock)}</span></div>
     ${(() => { const y = S.history[S.history.length - 1]; return y && y.unlogged && !y.resolved ? `<div class="unlogged"><b>Nothing logged yesterday</b><span>Did you really spend nothing? An unlogged day counts as 0 pts first. If you really spent nothing, it’s restored to a zero-spend score of ${y.potential.score} pts (base multiplier only; cards add nothing on an unlogged day).</span><div class="ibtns"><button class="rvbtn lime" data-act="unlogged-yes">Really spent nothing</button><button class="rvbtn" data-act="unlogged-no">Forgot to log</button></div></div>` : ''; })()}
     ${S.autoEnded ? '<div class="callout">Last night you didn’t tap "End today", so midnight ended the day for you; the receipt is kept as usual.</div>' : ''}
-    ${S.debt ? `<div class="callout">You overdrew yesterday: <b>¥${S.debt}</b>, today you can spend ¥${dailyBudget()} − ¥${Math.min(S.debt, dailyBudget())} = <b>¥${todayBudget()}</b>.${(() => { const y = S.history[S.history.length - 1]; return y && y.overflow ? `The other ¥${y.overflow} over is no longer carried forward; it adds to this week’s target score instead: +${y.overflow * OVERFLOW_PTS}.` : ''; })()}</div>` : ""}
+    ${S.debt ? `<div class="callout">You overdrew yesterday by <b>¥${S.debt}</b>, today you can spend ¥${dailyBudget()} − ¥${Math.min(S.debt, dailyBudget())} = <b>¥${todayBudget()}</b>.${(() => { const y = S.history[S.history.length - 1]; return y && y.overflow ? `The other ¥${y.overflow} over is no longer carried forward; it adds to this week’s target score instead: +${y.overflow * OVERFLOW_PTS}.` : ''; })()}</div>` : ""}
     <div class="cap"><div class="top" style="display:flex;flex-direction:column;gap:8px">
       <div style="display:flex;justify-content:space-between;align-items:baseline"><b>Yesterday · ${DAYS[y.day]}</b><button class="linkbtn" data-day="${y.day}" style="padding:0;color:#5B4FC8;font-size:13px">See receipt →</button></div>
       <div class="ystat"><div><small>Score</small><b>${y.score}</b></div><div><small>Mult</small><b>×${y.mult}</b></div><div><small>Held</small><b>${kept}/${y.cards.length}</b></div></div>
