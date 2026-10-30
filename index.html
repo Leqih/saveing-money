@@ -1096,7 +1096,6 @@ button.hcard:active > div { transform: translateY(2px); }
 .cardshine { position: absolute; inset: 0; border-radius: 24px; pointer-events: none; overflow: hidden; z-index: 4; }
 .cardshine::after { content: ''; position: absolute; top: -20%; bottom: -20%; width: 40%; left: -60%; background: linear-gradient(100deg, transparent, rgba(255,255,255,0.85), transparent); transform: skewX(-18deg); animation: shineSweep 0.9s ease-out 0.7s both; }
 @keyframes shineSweep { to { left: 130%; } }
-.sc2 { opacity: 0; }
 
 /* step 3 as a tiny remote control: black-bezel LCD, glossy oval keys, one lit key per row */
 .sheet[aria-label="一周几次"] { background: #FFF; }
@@ -1195,6 +1194,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .hand.dealing { overflow-x: clip !important; overflow-y: visible !important; }
 .sheet:has(.hand) { overflow-x: clip !important; }
 .confcv { max-width: 100%; }
+.hand.dealing .sc2 { animation: none !important; }
 </style>
 
 <div class="device">
@@ -1990,10 +1990,6 @@ function openShow(sh) {
   const cx = r.left + r.width / 2 - sr.left, cy = r.top + 220 - sr.top + sh.scrollTop;
   // the row slides in from the right in its real order (front card first, then its neighbours), one after another, never piled up
   const cards = [...stack.querySelectorAll('.sc2')].filter(c => +c.dataset.k >= -1 && +c.dataset.k <= 2).sort((a, b) => +a.dataset.k - +b.dataset.k);
-  cards.forEach((c, i) => {
-    c.animate([{ translate: '560px 0', rotate: '6deg', opacity: 1 }, { translate: '-38px 0', rotate: '-1.2deg', offset: 0.62 }, { translate: '11px 0', rotate: '0.5deg', offset: 0.82 }, { translate: '0 0', rotate: '0deg' }],
-      { duration: 900, delay: 40 + i * 70, easing: 'cubic-bezier(.22,.8,.3,1)', fill: 'backwards' });
-  });
   const fc = cards.find(c => +c.dataset.k === 0); if (fc) { const g = document.createElement('i'); g.className = 'cardshine'; fc.appendChild(g); setTimeout(() => g.remove(), 1700); }
   // confetti canvas
   const cv = document.createElement('canvas'); cv.className = 'confcv'; cv.width = sr.width * 2; cv.height = sr.height * 2; cv.style.cssText = `position:absolute;left:0;top:${sh.scrollTop}px;width:${sr.width}px;height:${sr.height}px;pointer-events:none;z-index:120`;
