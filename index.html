@@ -1175,6 +1175,16 @@ button.hcard:active > div { transform: translateY(2px); }
 .cv-opt { border-radius: 16px; background: linear-gradient(180deg, #FAFAFC 0%, #EDEDF1 100%); box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.75), inset 0 -2px 0 rgba(0,0,0,0.04), 0 8px 0 #CFCFD6, 0 14px 16px -8px rgba(20,20,30,0.3); margin-bottom: 8px; transition: transform 0.14s ease-out, box-shadow 0.14s ease-out; }
 .cv-opt[aria-pressed="true"] { outline: none; background: linear-gradient(180deg, #EDEDF1 0%, #E2E2E8 100%); transform: translateY(6px); box-shadow: inset 0 3px 5px rgba(0,0,0,0.12), 0 2px 0 #CFCFD6, 0 4px 6px -4px rgba(20,20,30,0.3); }
 .cv-opt:active { transform: translateY(5px); }
+/* frequency keys use the same white slab as the income field and the weak-spot options */
+.fk-well { gap: 10px; padding: 0 0 8px; border-radius: 0; background: none; box-shadow: none; }
+.fk-cap { height: 92px; border-radius: 16px; flex-direction: column; gap: 4px; background: linear-gradient(180deg, #FAFAFC 0%, #EDEDF1 100%); box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.75), inset 0 -2px 0 rgba(0,0,0,0.04), 0 8px 0 #CFCFD6, 0 14px 16px -8px rgba(20,20,30,0.3); transition: transform 0.14s ease-out, box-shadow 0.14s ease-out; }
+.fk-dish { width: auto; height: auto; border-radius: 0; background: none !important; box-shadow: none !important; gap: 4px; transform: none !important; }
+.fk-dish small { font-size: 13px; margin: 0; }
+.fk-cap.on { background: linear-gradient(180deg, #EDEDF1 0%, #E2E2E8 100%); transform: translateY(6px); box-shadow: inset 0 3px 5px rgba(0,0,0,0.12), 0 2px 0 #CFCFD6, 0 4px 6px -4px rgba(20,20,30,0.3); }
+.fk-cap.on .fk-dish svg path, .fk-cap.on .fk-dish svg circle { fill: #3F7BE8; }
+.fk-cap:active { transform: translateY(5px); }
+.fk-cap.pop { animation: fkPop2 0.4s cubic-bezier(.3,1.9,.5,1); }
+@keyframes fkPop2 { 0% { transform: translateY(0) scale(1.05); } 100% { transform: translateY(6px); } }
 </style>
 
 <div class="device">
