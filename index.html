@@ -540,6 +540,8 @@ button.hcard:active > div { transform: translateY(2px); }
 .sheet .bar-top > * { min-height: 44px; display: flex; align-items: center; }
 .sheet .bar-top { align-items: center; }
 .sheet .impact, .sheet .rc, .sheet .mhero, .sheet .sglue, .sheet .smine, .sheet .gradcard, .sheet .cv-ticket, .sheet .set-row, .sheet .receipt, .dk-next, .screen .cap.meter .top { border-radius: 22px; }
+/* Deck and Ledger open with the same header row: one height, title centred in it */
+.screen:not(:has(> .head)) > :first-child { min-height: 56px; align-items: center; }
 /* dragging the pack or a card shouldn't highlight text */
 .bag, .hand, .stack, .sc2, .drawfoot, .dkc-count { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .stack { position: absolute; left: 0; right: 0; top: 0; height: 441px; overflow: visible; touch-action: none; cursor: grab; }
@@ -902,6 +904,10 @@ button.hcard:active > div { transform: translateY(2px); }
 .sfoot { position: sticky; bottom: -24px; z-index: 4; margin: auto -18px -24px; padding: 14px 24px 84px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(180deg, rgba(255,255,255,0), #FFF 22%); }
 .sfoot:has(.linkbtn) { padding-bottom: 34px; }
 .sfoot .cap.bigbtn, .sfoot .go { width: 100%; margin: 0 !important; }
+/* one primary action per page: the blue pill; the lime keycap stays an accent for small buttons, a plain keycap is the secondary */
+.sfoot .cap.lime.bigbtn { background: var(--cobalt); border-radius: 30px; padding: 0; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2); min-height: 52px; display: flex; }
+.sfoot .cap.lime.bigbtn > .top { flex: 1; display: flex; align-items: center; justify-content: center; background: transparent; box-shadow: none; color: #FFF; padding: 0 16px; }
+.sfoot .cap.lime.bigbtn:active { transform: translateY(2px); }
 .sfoot .linkbtn { align-self: center; }
 
 /* home: let the hero and the rule cards take the room that is left */
@@ -1860,7 +1866,7 @@ function flowHTML(tabs) {
     return `<section class="lg-day">${d.cal ? `<button class="lg-head" data-cal="${d.cal}">${head}</button>` : `<div class="lg-head">${head}</div>`}
       <div class="lg-list">${items.map(row).join('') || `<p class="note left" style="padding:12px 14px">${d.unlogged ? 'Nothing logged this day.' : 'Nothing spent yet today. Tap"Log"to start.'}</p>`}</div></section>`;
   }).join('');
-  return `<div style="display:flex;justify-content:space-between;align-items:center;min-height:44px">
+  return `<div style="display:flex;justify-content:space-between;align-items:center">
       <h1 style="margin:0;font-weight:900;font-size:28px">Ledger</h1>
       <span class="px" style="height:32px;padding:0 12px;border-radius:12px;border:2px solid #E2E2E8;display:inline-flex;align-items:center;font-size:14px;color:#55555C">${shown.length} ${shown.length === 1 ? 'entry' : 'entries'} · ¥${total}</span>
     </div>
@@ -1947,7 +1953,7 @@ function catsHTML(recs, spent, tabs) {
       ${i === 0 && cardNo ? `<div style="position:absolute;right:18px;top:14px;width:54px;height:54px;border-radius:14px;background:${tintOf(cardNo)};display:flex;align-items:center;justify-content:center;transform:rotate(10deg);box-shadow:0 0 0 3px #FFF">${artIcon(cardNo, 42)}</div>` : ''}
     </div>`;
   }).join('');
-  return `<div style="display:flex;justify-content:space-between;align-items:center;min-height:44px"><h1 style="margin:0;font-weight:900;font-size:28px">Where it went this month</h1><span class="px" style="font-size:12px;color:#6A6A70">Outside the allowance ¥${spent.toLocaleString()}</span></div>
+  return `<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-weight:900;font-size:28px">Where it went this month</h1><span class="px" style="font-size:12px;color:#6A6A70">Outside the allowance ¥${spent.toLocaleString()}</span></div>
     ${tabs}
     <div style="display:flex;flex-direction:column;margin-top:6px">${html || '<p class="note">No spending outside the allowance this month yet.</p>'}</div>
     <p class="note left" style="margin-top:12px">This is real money; meals and commuting within the essentials allowance aren’t counted.</p>`;
@@ -2974,7 +2980,7 @@ function renderMonday() {
       ${S.debt ? `<div class="r"><span>Overdrawn on Sunday ¥${S.debt}, taken today</span><span>−¥${Math.min(S.debt, dailyBudget())}</span></div>` : ''}
     </div>
     <p class="note left">A new week starts with picking cards. Before drawing you can visit the shop: unlock cards early, guarantee a card this week, add a slot, buy glue. The shop is only open Monday morning.</p>
-    <button class="cap lime bigbtn" data-act="shop"><div class="top">Visit the shop · ★ ${S.stars}</div></button>
+    <button class="cap bigbtn" data-act="shop"><div class="top">Visit the shop · ★ ${S.stars}</div></button>
     <button class="go" data-act="draw-now">Draw now</button>`);
 }
 
