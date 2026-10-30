@@ -718,7 +718,8 @@ button.hcard:active > div { transform: translateY(2px); }
 .stext b { font-size: 16px; font-weight: 900; } .stext span { font-size: 12px; line-height: 1.45; color: #3A1020; }
 /* end-of-day scoring stage */
 .stage-orbs { display: flex; align-items: center; justify-content: center; gap: 8px; }
-.stage-orbs .blob { width: 104px; height: 104px; } .stage-orbs .blob b { font-size: 38px; } .stage-orbs .blob span { font-size: 11px; padding: 0 8px; }
+.stage-orbs { align-self: stretch; justify-content: space-evenly; }
+.stage-orbs .blob { width: 122px; height: 122px; } .stage-orbs .blob b { font-size: 46px; } .stage-orbs .blob span { font-size: 12px; padding: 0 10px; }
 /* base score and multiplier are two round signal lamps in one housing */
 .stage-orbs { padding: 16px 18px 12px; margin: 0 auto; border-radius: 70px; background: linear-gradient(180deg, #3A3A40, #131316); box-shadow: inset 0 0 0 3px #4C4C54, 0 6px 0 #08080A, 0 18px 22px -10px rgba(0,0,0,0.55); gap: 6px; position: relative; }
 .stage-orbs::after { content: ""; position: absolute; left: 50%; bottom: -16px; width: 22px; height: 14px; margin-left: -11px; background: #2A2A30; border-radius: 0 0 4px 4px; z-index: -1; }
@@ -732,7 +733,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .blob b { position: relative; font-family: var(--f-display); font-weight: 400; font-size: 44px; line-height: 1.05; }
 .blob span { position: relative; font-size: 11px; font-weight: 900; padding: 0 10px; }
 .stage-x { font-family: var(--f-display); font-size: 28px; }
-.stage-cards { display: flex; justify-content: center; gap: 12px; padding-bottom: 12px; }
+.stage-cards { display: flex; justify-content: space-between; gap: 8px; padding: 6px 4px 16px; }
 .stage-cards .sc { position: relative; }
 .sc-tag { position: absolute; left: 50%; bottom: -12px; padding: 2px 10px; border: 2px solid var(--ink); border-radius: 12px; font-size: 12px; font-weight: 900; white-space: nowrap; transform: translateX(-50%) scale(0); transition: transform 0.3s cubic-bezier(.3,1.9,.5,1); background: var(--lime); color: var(--ink); z-index: 2; }
 .sc-tag.on { transform: translateX(-50%) scale(1); }
@@ -746,7 +747,9 @@ button.hcard:active > div { transform: translateY(2px); }
 .impact .r.off span { color: rgba(255,255,255,0.45); }
 .impact .r.sum { margin-top: 4px; padding-top: 8px; border-top: 1.5px dashed rgba(255,255,255,0.25); }
 .impact .r.sum span { color: var(--lime); }
-.score-oval { align-self: center; min-width: 230px; height: 104px; padding: 0 24px; border-radius: 52px; background: var(--yellow); display: flex; align-items: center; justify-content: center; transform: rotate(-6deg); font-family: var(--f-display); font-size: 64px; color: #2A2205; box-shadow: 0 12px 22px rgba(20,20,30,0.18); margin: 4px 0; }
+.score-oval { align-self: center; min-width: 250px; height: 118px; padding: 0 28px; border-radius: 59px; background: var(--yellow); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; transform: rotate(-4deg); color: #2A2205; box-shadow: 0 12px 22px rgba(20,20,30,0.18); margin: 2px 0 4px; }
+.score-oval small { font-family: var(--f-px); font-size: 14px; letter-spacing: 1px; opacity: 0.75; }
+.score-oval b { font-family: var(--f-display); font-weight: 400; font-size: 64px; line-height: 1; }
 .unlogged { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 22px; background: #111; color: #FFF; }
 .unlogged b { font-size: 16px; } .unlogged span { font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.8); }
 /* log sheet: verdict and save pinned to the bottom */
@@ -2478,12 +2481,12 @@ async function playStage(sh) {
   sh.innerHTML = `
     <div class="bar-top"><h1>${DAYS[S.day]} · tonight’s cards</h1><span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
     <div class="stage-orbs"><div class="blob"><b id="pb">0</b><span>Base score = money left</span></div><span class="stage-x">×</span><div class="blob m"><b id="pm">${S.baseMult}</b><span>Mult</span></div></div>
-    <div class="stage-cards">${h.cards.map(c => `<div class="sc ${c.state === 'on' ? '' : 'dim'}" data-no="${c.no}">${scaled(CARDS[c.no], h.cards.length > 3 ? 0.34 : 0.43, c.state)}<span class="sc-tag" aria-hidden="true"></span></div>`).join('')}</div>
+    <div class="stage-cards">${h.cards.map(c => `<div class="sc ${c.state === 'on' ? '' : 'dim'}" data-no="${c.no}">${scaled(CARDS[c.no], h.cards.length > 3 ? 0.36 : 0.46, c.state)}<span class="sc-tag" aria-hidden="true"></span></div>`).join('')}</div>
     <div class="impact lines" id="pl"></div>
-    <div class="score-oval" id="ps">0</div>
+    <div class="score-oval"><small id="pf">tonight</small><b id="ps">0</b></div>
     <div class="cap meter"><div class="top"><div class="row"><span>Weekly Score</span><span class="px" id="pw">${prior} / ${target}</span></div><div class="bar"><i id="pwb" style="width:${pct(prior)}%"></i></div></div></div>
-    <button class="go" data-act="play-next" id="pn" hidden>${S.day === 6 ? 'See weekly summary' : 'On to tomorrow'}</button>`;
-  sh.scrollTop = 0;
+    <button class="go" data-act="play-next" id="pn" style="visibility:hidden">${S.day === 6 ? 'See weekly summary' : 'On to tomorrow'}</button>`;
+  sh.scrollTop = 0; pinFoot(sh);
   const $ = id => sh.querySelector('#' + id);
   const tag = (el, txt, cls) => { const t = el.querySelector('.sc-tag'); t.textContent = txt; t.className = `sc-tag ${cls} on`; };
   const line = (l, r, cls = '') => $('pl').insertAdjacentHTML('beforeend', `<div class="r ${cls}"><span>${l}</span><span>${r}</span></div>`);
@@ -2511,12 +2514,12 @@ async function playStage(sh) {
       await countTo($('pm'), mult, 350);
     }
   }
-  line(`${h.base} × ${h.mult}`, `= ${h.score} pts`, 'sum');
+  $('pf').textContent = `${h.base} × ${h.mult} =`;
   await countTo($('ps'), h.score, 800);
   $('pw').textContent = `${prior + h.score} / ${target}`;
   $('pwb').style.width = pct(prior + h.score) + '%';
   if (prior < target && prior + h.score >= target) line('This week’s target score reached!', 'Cleared ✓', 'sum');
-  const n = $('pn'); n.hidden = false; n.focus();
+  const n = $('pn'); n.style.visibility = ''; n.focus();
 }
 function renderEnd() {
   sheet('End today', `
