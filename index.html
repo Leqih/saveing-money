@@ -1195,6 +1195,10 @@ button.hcard:active > div { transform: translateY(2px); }
 .sheet:has(.hand) { overflow-x: clip !important; }
 .confcv { max-width: 100%; }
 .hand.dealing .sc2 { animation: none !important; }
+.dsum-rec { height: 36px; padding: 0 16px; border-radius: 18px; font-size: 14px; font-weight: 900; color: #111 !important; background: #E4FF1A; border: 0; box-shadow: 0 3px 0 #9DB000; text-shadow: none; opacity: 1; }
+.drawdark .dsum .dsum-rec { color: #111 !important; }
+.confcv { z-index: 2 !important; }
+.drawdark .drawfoot { z-index: 6; }
 </style>
 
 <div class="device">
@@ -1998,7 +2002,7 @@ function openShow(sh) {
   const y0 = cy - sh.scrollTop;
   // the canvas-confetti "realistic" recipe: several overlapping shots from one point, each with its own spread, speed and size; strong drag so they pop and hang,
   // then a slow flutter down with a wobble. Shots are staged after the cards land instead of all at once.
-  const add = (x, y, ang, spread, spd, n, scale = 1, kinds = ['r', 'r', 'c', 'sp']) => { for (let i = 0; i < n; i++) { const a = ang + (Math.random() - 0.5) * spread, v = spd * (0.5 + Math.random() * 0.6); P.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 8, w: (13 + Math.random() * 6) * scale, h: (7 + Math.random() * 3) * scale, c: COLORS[(Math.random() * COLORS.length) | 0], k: kinds[(Math.random() * kinds.length) | 0], ph: Math.random() * 6.28, wob: 0.6 + Math.random() * 1, term: 130 + Math.random() * 90, born: 0, life: 2800 + Math.random() * 900 }); } };
+  const add = (x, y, ang, spread, spd, n, scale = 1, kinds = ['r', 'r', 'c', 'sp']) => { for (let i = 0; i < n; i++) { const a = ang + (Math.random() - 0.5) * spread, v = spd * (0.5 + Math.random() * 0.6); P.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 8, w: (13 + Math.random() * 6) * scale, h: (7 + Math.random() * 3) * scale, c: COLORS[(Math.random() * COLORS.length) | 0], k: kinds[(Math.random() * kinds.length) | 0], ph: Math.random() * 6.28, wob: 0.6 + Math.random() * 1, term: 130 + Math.random() * 90, born: 0, life: 2000 + Math.random() * 600 }); } };
   // two party-popper cannons from the bottom corners, then a soft shower from the top of the stack; fewer, bigger, calmer pieces in the app's own colours
   const pop = (x, ang) => { add(x, sr.height - 170, ang, 0.5, 1250, 14); add(x, sr.height - 170, ang, 0.9, 950, 14); add(x, sr.height - 170, ang, 1.2, 720, 8, 1.2, ['sp', 'c']); };
   setTimeout(() => { pop(-6, -Math.PI * 0.36); pop(sr.width + 6, -Math.PI * 0.64); }, 60);
