@@ -996,6 +996,15 @@ button.hcard:active > div { transform: translateY(2px); }
 .wkrow .endbtn > .top::before { content: none; }
 .wkrow .endbtn:active > .top { transform: translateY(9px); box-shadow: inset 0 3px 0 rgba(255,255,255,0.45), inset 0 -4px 0 rgba(160, 40, 0, 0.5), 0 3px 0 #C23508, 0 5px 0 #7A1F00, 0 8px 4px rgba(0,0,0,0.4); }
 .wkrow .endbtn .top br { display: none; }
+
+/* the end-of-day key seen from straight above: concentric rings only — dark base, black gap, orange domed cap with a gloss */
+.wkrow { grid-template-columns: 1fr 128px; }
+.wkrow .endbtn { position: relative; width: 128px; height: 128px; margin-bottom: 0; padding: 0; border: 0; border-radius: 50%; justify-self: end; overflow: visible; background: radial-gradient(circle at 50% 50%, #4A4642 0%, #34302C 55%, #2A2724 100%); box-shadow: inset 0 0 0 3px rgba(255,255,255,0.14), inset 0 -4px 6px rgba(0,0,0,0.5), 0 8px 12px -4px rgba(0,0,0,0.45); }
+.wkrow .endbtn::before { content: ''; position: absolute; inset: 12px; width: auto; height: auto; border-radius: 50%; background: #070606; box-shadow: inset 0 4px 6px #000, 0 1px 0 rgba(255,255,255,0.12); top: 12px; left: 12px; right: 12px; }
+.wkrow .endbtn::after { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: repeating-conic-gradient(rgba(255,255,255,0.05) 0 8deg, transparent 8deg 16deg); -webkit-mask: radial-gradient(circle, transparent 54%, #000 56%); mask: radial-gradient(circle, transparent 54%, #000 56%); box-shadow: none; }
+.wkrow .endbtn > .top { position: absolute; left: 17px; right: 17px; top: 17px; width: auto; height: 94px; padding: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.1; font-size: 17px; font-weight: 900; letter-spacing: 1px; color: #FFF; text-shadow: 0 2px 0 rgba(120, 30, 0, 0.7); background: radial-gradient(circle at 38% 26%, #FFB27A 0%, #FF5A1F 48%, #E23E0B 100%); box-shadow: inset 0 0 0 4px rgba(255, 120, 60, 0.9), inset 0 -7px 8px rgba(150, 30, 0, 0.5), inset 0 4px 4px rgba(255,255,255,0.35); transition: transform 0.12s ease-out, filter 0.12s; z-index: 2; }
+.wkrow .endbtn > .top::before { content: ''; position: absolute; left: 14px; top: 8px; width: 38px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.55); transform: rotate(-24deg); filter: blur(1px); }
+.wkrow .endbtn:active > .top { transform: scale(0.94); filter: brightness(0.9); }
 </style>
 
 <div class="device">
