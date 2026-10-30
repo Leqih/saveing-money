@@ -1054,6 +1054,9 @@ button.hcard:active > div { transform: translateY(2px); }
 .sheet .x svg { width: 18px; height: 18px; stroke-width: 4.4; filter: drop-shadow(0 1px 0 rgba(150, 10, 50, 0.6)); transition: transform 0.3s cubic-bezier(.3,1.8,.5,1); }
 .sheet .x:hover { transform: scale(1.06); } .sheet .x:hover svg { transform: rotate(90deg); }
 .sheet .x:active { transform: translateY(4px) scale(0.97); box-shadow: inset 0 0 0 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(150, 10, 50, 0.4), 0 2px 0 #C22E55, 0 4px 6px -4px rgba(150, 10, 50, 0.45); }
+
+@keyframes slideInR { from { transform: translateX(70px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes slideOutL { from { transform: none; opacity: 1; } to { transform: translateX(-70px); opacity: 0; } }
 </style>
 
 <div class="device">
@@ -1356,6 +1359,16 @@ function pinFoot(sh) {
   tail[0].before(foot); tail.forEach(el => foot.appendChild(el));
 }
 function sheet(label, html) { app.insertAdjacentHTML('beforeend', `<div class="sheet" role="dialog" aria-label="${label}">${html}</div>`); pinFoot(app.lastElementChild); return app.lastElementChild; }
+// step-to-step moves in onboarding: the next sheet slides in from the right over the old one, which drifts left and fades; nothing blanks in between
+function swapSheet(old, fn, keepTable = false) {
+  const rm = () => old.remove();
+  if (reducedMotion()) { rm(); fn(); return; }
+  const next = fn();
+  const n = app.lastElementChild;
+  if (n && n !== old && n.classList.contains('sheet')) n.style.animation = 'slideInR 0.42s cubic-bezier(.2,.9,.25,1) both';
+  old.style.animation = 'slideOutL 0.26s ease-in both'; old.style.pointerEvents = 'none';
+  setTimeout(rm, 440);
+}
 function replaceSheet(old, fn) { const top = old.scrollTop; old.remove(); fn(); const n = app.lastElementChild; n.style.animation = 'none'; n.scrollTop = top; }
 const lastSheet = () => [...app.querySelectorAll('.sheet')].pop();
 
@@ -1482,11 +1495,11 @@ function navHTML() {
   const on = S.view === 'flow' ? 'bill' : S.view;
   return `<nav class="cv-nav" aria-label="主导航">${NAV.map(n => `<button data-tab="${n.id}" class="${on === n.id ? 'on' : ''}" style="background:${n.bg};color:${n.fg};--cut:${n.cut};border-radius:${n.r}" aria-label="${n.name}" ${on === n.id ? 'aria-current="page"' : ''}>${n.icon}<span>${n.name}</span></button>`).join('')}<button class="cv-log" data-act="log"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M8 2v12M2 8h12"/></svg>记一笔</button></nav>`;
 }
-function renderTable() {
+function renderTable(quiet) {
   const body = { home: homeHTML, bill: billHTML, deck: deckHTML }[S.view]();
   app.innerHTML = `<div class="screen">${body}</div>${minibarHTML()}${navHTML()}`;
   app.classList.remove('scrolled');
-  showCoach();
+  if (!quiet) showCoach();
 }
 // switching pages keeps the nav bar in place so the keys can animate, and only swaps the screen underneath
 function switchTab(v) {
@@ -1975,7 +1988,24 @@ app.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') 
 // leftover cards slide back into the pack, then the week starts with the kept ones
 function keepHand(top) {
   const hand = top.querySelector('.hand');
-  const go = () => { S.held = draft.sel.slice(); S.view = 'home'; draft = {}; top.remove(); renderTable(); toast(`这周的牌：${S.held.map(no => CARDS[no].name).join('、')}`); };
+  const slots = [...top.querySelectorAll('.dslot:not(.empty)')].map(el => ({ no: el.dataset.unpick, r: el.getBoundingClientRect() }));
+  const go = () => {
+    S.held = draft.sel.slice(); S.view = 'home'; draft = {};
+    if (reducedMotion()) { top.remove(); renderTable(); return; }
+    // the home is built underneath, the draw sheet melts away, and each kept card flies from its slot to its place in the tray
+    renderTable(true); app.appendChild(top);
+    top.style.pointerEvents = 'none'; top.querySelector('.drawfoot') && (top.querySelector('.drawfoot').style.transition = 'transform 0.4s ease-in', top.querySelector('.drawfoot').style.transform = 'translateY(140px)');
+    top.style.transition = 'opacity 0.45s ease'; top.style.animation = 'none'; requestAnimationFrame(() => { top.style.opacity = '0'; });
+    const cards = [...app.querySelectorAll('.rack .hcard')];
+    cards.forEach((c, i) => {
+      const from = (slots[i] || slots[0] || {}).r; if (!from) return;
+      const to = c.getBoundingClientRect(), dx = from.left + from.width / 2 - (to.left + to.width / 2), dy = from.top + from.height / 2 - (to.top + to.height / 2), sc = from.width / to.width;
+      c.animate([{ translate: `${dx}px ${dy}px`, scale: sc, opacity: 0.2 }, { opacity: 1, offset: 0.2 }, { translate: '0 -14px', scale: 1.04, offset: 0.75 }, { translate: '0 0', scale: 1, opacity: 1 }], { duration: 900 + i * 110, delay: 120 + i * 90, easing: 'cubic-bezier(.3,.9,.3,1)', fill: 'backwards' });
+    });
+    const crt = app.querySelector('.crt'); if (crt) crt.animate([{ transform: 'scale(0.94)', opacity: 0 }, { transform: 'scale(1.02)', opacity: 1, offset: 0.6 }, { transform: 'none' }], { duration: 650, easing: 'cubic-bezier(.3,1.4,.5,1)', fill: 'backwards' });
+    const rest = app.querySelectorAll('.wkrow, .head'); rest.forEach((el, i) => el.animate([{ opacity: 0, translate: '0 18px' }, { opacity: 1, translate: '0 0' }], { duration: 500, delay: 300 + i * 80, easing: 'ease-out', fill: 'backwards' }));
+    setTimeout(() => { top.remove(); toast(`这周的牌：${S.held.map(no => CARDS[no].name).join('、')}`); setTimeout(showCoach, 1400); }, 700);
+  };
   if (!hand || reducedMotion()) return go();
   hand.classList.add('returning'); setTimeout(go, 520);
 }
@@ -2698,13 +2728,13 @@ app.addEventListener('click', e => {
   // a long press already logged the favorite; swallow the click that follows it
   const act = t.dataset.act, top = t.closest('.sheet');
   if (act === 'fb-close') { app.querySelectorAll('.fb').forEach(n => n.remove()); return; }
-  if (act === 'launch-go') { top.remove(); renderSetup(); return; }
+  if (act === 'launch-go') { swapSheet(top, renderSetup); return; }
   // skip the setup: default budget, no weak spots picked, straight to the first pack
   if (act === 'launch-skip') { S.base = BASE; top.remove(); renderTable(); S.lastWeek = estimateWeek(); S.estimated = S.lastWeek.some(d => d.length); draft = {}; renderDraw(); return; }
-  if (act === 'setup-next') { S.base = weeklyFrom(S.setup); top.remove(); renderTable(); renderWeak(); return; }
+  if (act === 'setup-next') { S.base = weeklyFrom(S.setup); swapSheet(top, () => { renderTable(true); app.appendChild(top); renderWeak(); }); return; }
   if (t.dataset.weak) { const id = t.dataset.weak; S.weak = S.weak.includes(id) ? S.weak.filter(x => x !== id) : [...S.weak, id]; replaceSheet(top, renderWeak); return; }
   if (t.dataset.quota) { essQuota = Math.min(100, Math.max(0, essQuota + +t.dataset.quota)); replaceSheet(top, top.getAttribute('aria-label') === '设置' ? renderSettings : renderSetup); return; }
-  if (act === 'setup-skip') { S.base = BASE; top.remove(); renderTable(); renderWeak(); return; }
+  if (act === 'setup-skip') { S.base = BASE; swapSheet(top, () => { renderTable(true); app.appendChild(top); renderWeak(); }); return; }
   if (act === 'import') { toast('导入账单下个版本做，先手动选一下'); return; }
   if (act === 'trend') { toast('趋势页还没做，先看日历和分类'); return; }
   if (t.dataset.deck) { S.deckTab = t.dataset.deck; renderTable(); return; }
@@ -2713,7 +2743,7 @@ app.addEventListener('click', e => {
     if (S.weak.includes('online') && !S.unlocked.includes('07')) S.unlocked.push('07');
     if (S.weak.includes('weekend') && !S.unlocked.includes('13')) S.unlocked.push('13');
     S.lastWeek = estimateWeek(); S.estimated = S.lastWeek.some(d => d.length);
-    top.remove(); draft = {}; renderDraw();
+    draft = {}; swapSheet(top, renderDraw);
     return;
   }
   if (t.dataset.freq) { const [id, i] = t.dataset.freq.split(':'); S.freq[id] = +i; replaceSheet(top, renderWeak); return; }
