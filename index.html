@@ -1389,7 +1389,7 @@ function crtHTML(ev) {
   const steps = Array.from({ length: 24 }, (_, i) => [6, 11, 4, 9, 13, 5, 10, 3][i % 8]);
   const wave = `<svg class="crt-wave" viewBox="0 0 96 40" preserveAspectRatio="none" shape-rendering="crispEdges" aria-hidden="true" style="height:${Math.round(12 + ratio * 48)}px"><path fill="currentColor" d="M0 40V${40 - steps[0]}${steps.map((h, i) => `H${(i + 1) * 4}V${40 - steps[(i + 1) % 24]}`).join('')}V40Z"/></svg>`;
   const streak = streakDays();
-  return `<button class="crt ${ev.left < 0 ? 'over' : ''} ${dropped ? 'blip' : ''}" data-act="crt" aria-label="今天还剩 ${ev.left} 元，已花 ${ev.d.extra} 元，共 ${ev.daily} 元，今晚预计 ${ev.score} 分，连续守住 ${streak} 天">
+  return `<button class="crt ${ev.left < 0 ? 'over' : ''} ${dropped ? 'blip' : ''}" data-act="crt" aria-label="今天还剩 ${ev.left} 元，已花 ${ev.d.extra} 元，共 ${ev.daily} 元，今日得分 ${ev.score}（剩余的钱 ${ev.base} 乘以倍率 ${ev.mult}），连续守住 ${streak} 天">
     <span class="crt-in">
       <span class="crt-scr">
         <span class="crt-top"><span class="crt-ttl">${ev.left < 0 ? '今天已超' : '今日还能花'}</span><span class="crt-streak ${streak ? 'on' : ''}"><svg width="10" height="12" viewBox="0 0 12 14" aria-hidden="true"><path d="M6 0c1 3 5 4.500 5 8.500A5 5 0 011 8.500C1 6.500 2.500 5.500 3 4c1 .8 1.200 1.800 1 2.800C5.500 6 6.200 3 6 0z" fill="currentColor"/></svg>连续 ${streak} 天</span></span>
@@ -1400,7 +1400,7 @@ function crtHTML(ev) {
         <span class="crt-glare"></span>
       </span>
     </span>
-    <span class="crt-base"><span class="lcd"><b>今晚能拿 ${ev.score} 分</b><i>${ev.base} × ${ev.mult}</i></span><i class="kb o"></i><i class="kb"></i></span>
+    <span class="crt-base"><span class="lcd"><b>今日得分 ${ev.score}</b><i>剩 ¥${ev.base} × 倍率 ${ev.mult}</i></span><i class="kb o"></i><i class="kb"></i></span>
   </button>`;
 }
 function weekInfo() {
