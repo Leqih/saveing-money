@@ -2710,9 +2710,8 @@ function renderSettings() {
   sheet('Settings', `
     <div class="bar-top"><h1>Settings</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     <h2>Budget</h2>
-    ${field('income', 'Monthly income', '')}${field('fixed', 'Fixed costs', 'Rent, phone, subscriptions')}${field('save', 'Monthly savings', 'Save first, spend later')}
     <div class="set-row"><div><b>Weekly allowance</b><small id="setup-formula">${w >= 50 ? setupFormula(s) : 'Weekly allowance must be at least ¥50'}</small></div><b class="px" id="setup-week" style="font-size:20px">${money(w)}</b></div>
-    <button class="go" data-act="settings-save" ${w >= 50 && w !== S.base ? '' : 'disabled'}>${w === S.base ? `It’s already ¥${S.base}` : `Change to ¥${w}`}</button>
+    ${field('income', 'Monthly income', '')}${field('fixed', 'Fixed costs', 'Rent, phone, subscriptions')}${field('save', 'Monthly savings', 'Save first, spend later')}
     <div class="set-row"><div><b>Essentials allowance</b><small>Meals and commuting within this amount a day don’t count</small></div><div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:44px;text-align:center">¥${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div></div>
     <h2>Reminders</h2>
     ${sw('evening', 'Evening reminder to end the day', 'Also shows a “Done logging?” card on the home screen')}
@@ -2723,7 +2722,8 @@ function renderSettings() {
     <div class="set-row"><div><b>How to play</b><small>The rules in three steps</small></div><button class="mini" data-act="help">Watch</button></div>
     <div class="set-row"><div><b>Replay home tips</b><small>The 4 bubbles shown on first visit to home</small></div><button class="mini" data-act="coach-reset">Watch again</button></div>
     <div class="set-row"><div><b>Start over</b><small>Back to the launch screen and clear everything logged in the demo</small></div><button class="mini" data-act="restart">Start over</button></div>
-    <p class="note">Demo data lives only on this page and disappears when you close it.</p>`);
+    <p class="note">Demo data lives only on this page and disappears when you close it.</p>
+    <button class="go" data-act="settings-save" ${w >= 50 && w !== S.base ? '' : 'disabled'}>${w === S.base ? `It’s already ¥${S.base}` : `Change to ¥${w}`}</button>`);
 }
 
 /* ---------- monthly review ---------- */
