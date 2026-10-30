@@ -1297,26 +1297,58 @@ const ART = {
   '17': { b: rr(24, 96, 192, 112, 22) + rr(36, 66, 168, 34, 14), as: 'M120 110V196', aw: 8, e: [66, 152, 88, 152] },
   '13': { b: el(116, 138, 112, 78) + rr(40, 188, 30, 44, 8) + rr(150, 188, 30, 44, 8) + 'M58 76L84 30L110 68Z' + ci(224, 136, 26), cut: rr(94, 62, 52, 10, 5), a: ci(120, 28, 22), e: [154, 118, 180, 118] }
 };
-// black and white linework added to each illustration: d(S, W) draws with the shape colour S and the window colour W; ac / asc pick the accent fill / stroke colour ('S' or 'W')
-const tick = (cx, cy, r1, r2, n) => Array.from({ length: n }, (_, k) => { const a = k / n * Math.PI * 2; return `M${(cx + Math.cos(a) * r1).toFixed(1)} ${(cy + Math.sin(a) * r1).toFixed(1)}L${(cx + Math.cos(a) * r2).toFixed(1)} ${(cy + Math.sin(a) * r2).toFixed(1)}`; }).join('');
-const lines = (S, W, o) => o.map(([c, d, w, extra = '']) => `<path d="${d}" fill="none" stroke="${c === 'S' ? S : W}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`).join('');
-const wave = (x0, x1, y, amp, step) => { let d = `M${x0} ${y}`; for (let x = x0; x < x1; x += step * 2) d += `q${step / 2} ${-amp} ${step} 0t${step} 0`; return d; };
-const dots = (x0, y0, cols, rows, gap, r, W, skew = 0) => Array.from({ length: rows }, (_, j) => Array.from({ length: cols }, (_, k) => `<circle cx="${x0 + k * gap + (j % 2 ? gap / 2 : 0) + skew * j}" cy="${y0 + j * gap * 0.866}" r="${r}" fill="${W}"/>`).join('')).join('');
-Object.assign(ART['01'], { asc: 'S', d: (S, W) => lines(S, W, [['W', 'M-10 98H250', 3], ['W', wave(8, 240, 150, 7, 22), 4], ['W', wave(19, 230, 170, 7, 22), 4], ['W', wave(34, 210, 190, 7, 22), 4], ['S', 'M30 68Q20 50 34 38Q48 26 38 8', 5], ['S', 'M56 74Q48 58 58 46', 5], ['S', 'M190 20Q200 8 190 -4', 4]]) + dots(54, 205, 8, 2, 18, 2, W) });
-Object.assign(ART['03'], { d: (S, W) => `<path d="M54 56Q120 6 186 56Z" fill="${S}"/>` + lines(S, W, [['W', 'M66 46Q120 14 174 46', 3], ['W', 'M62 104L68 176', 5], ['W', 'M164 118L160 168', 5]]) + `<rect x="74" y="108" width="92" height="62" rx="10" fill="none" stroke="${W}" stroke-width="3.5"/>` + lines(S, W, [['W', 'M90 128H150', 5], ['W', 'M98 146H142', 5]]) + `<path d="${star4(120, 160, 5)}" fill="${W}"/><path d="${ci(78, 216, 8) + ci(166, 218, 8) + ci(204, 222, 6)}" fill="${W}"/>` });
-Object.assign(ART['04'], { d: (S, W) => lines(S, W, [['W', 'M62 150H178', 4], ['W', 'M66 172H174', 4], ['S', 'M20 224H220', 3, 'stroke-dasharray="2 9"']]) + `<path d="${ci(120, 138, 4) + ci(120, 154, 4) + ci(120, 170, 4)}" fill="${W}"/><path d="${ci(48, 168, 13) + ci(192, 168, 13)}" fill="${S}"/>` });
-Object.assign(ART['05'], { ac: 'S', d: (S, W) => lines(S, W, [['W', tick(120, 112, 70, 96, 16), 5]]) + `<circle cx="120" cy="112" r="104" fill="none" stroke="${W}" stroke-width="2.5" stroke-dasharray="2 7"/><text x="120" y="130" text-anchor="middle" font-family="Archivo Black, Arial Black, sans-serif" font-size="46" fill="${W}">0</text>` });
-Object.assign(ART['06'], { ac: 'S', d: (S, W) => lines(S, W, [['S', star4(140, 30, 9), 3]]) + `<path d="${ci(40, 80, 7) + ci(36, 180, 9) + ci(75, 200, 6) + ci(30, 140, 5) + ci(62, 118, 4) + ci(90, 168, 5)}" fill="${W}"/><path d="${star4(212, 40, 7) + star4(150, 96, 5)}" fill="${S}"/>` + lines(S, W, [['W', 'M22 108Q40 70 78 48', 3], ['W', 'M18 160Q26 200 60 222', 3]]) });
-Object.assign(ART['07'], { d: (S, W) => lines(S, W, [['S', 'M84 94H208M92 122H200', 3], ['S', 'M104 68L112 150M132 68L136 150M160 68L160 150M188 68L184 150', 3], ['S', 'M-10 40H-4', 1]]) + `<path d="${ci(92, 196, 7) + ci(182, 196, 7)}" fill="${W}"/><path d="${ci(112, 44, 16)}" fill="${S}"/><path d="${rr(142, 26, 40, 38, 8)}" fill="${S}"/>` + lines(S, W, [['W', 'M148 36H176', 3], ['W', 'M162 28V60', 3], ['W', 'M104 40Q112 34 120 40', 3]]) + `<path d="M118 28q10-12 18-6q-4 10-18 6z" fill="${S}"/>` });
-Object.assign(ART['10'], { d: (S, W) => lines(S, W, [['W', 'M64 30H176', 8], ['W', 'M64 50H118M138 50H176', 4], ['W', 'M64 66H110M144 66H176', 4], ['W', 'M64 82H126M148 82H176', 4]]) + `<path d="${ci(58, 40, 3) + ci(58, 70, 3) + ci(58, 100, 3) + ci(58, 130, 3) + ci(58, 160, 3) + ci(182, 40, 3) + ci(182, 70, 3) + ci(182, 100, 3) + ci(182, 130, 3) + ci(182, 160, 3)}" fill="${W}"/>` + lines(S, W, [['W', 'M72 172V190M80 172V190M90 172V190M96 172V190M106 172V190M112 172V190M122 172V190M132 172V190M138 172V190M148 172V190M156 172V190M166 172V190', 3]]) });
-Object.assign(ART['15'], { ac: 'S', d: (S, W) => `<path d="${rr(40, 20, 118, 44, 8)}" fill="${W}" stroke="${S}" stroke-width="5"/><path d="M40 36H158" stroke="${S}" stroke-width="8"/>` + `<path d="${rr(38, 60, 164, 126, 16)}" fill="none" stroke="${W}" stroke-width="3" stroke-dasharray="5 6"/><path d="${ci(190, 34, 14)}" fill="${S}"/><path d="${ci(190, 34, 7)}" fill="none" stroke="${W}" stroke-width="3"/>` + lines(S, W, [['W', 'M54 100H110M54 120H96', 4], ['S', 'M52 50H70M52 56H90', 3]]) });
-Object.assign(ART['16'], { ac: 'S', d: (S, W) => `<path d="${ci(188, 182, 30)}" fill="none" stroke="${S}" stroke-width="4"/><path d="${ci(188, 182, 42)}" fill="none" stroke="${S}" stroke-width="3" stroke-dasharray="3 8"/>` + lines(S, W, [['S', tick(188, 182, 52, 64, 12), 4], ['W', 'M112 30V196', 3], ['W', 'M124 110H140M124 130H140M124 150H140M124 170H140', 5], ['S', 'M82 206H170', 10], ['S', 'M10 70H50M18 90H60M10 110H44', 4]]) });
-Object.assign(ART['17'], { d: (S, W) => lines(S, W, [['S', 'M84 66V46Q84 30 100 30H140Q156 30 156 46V66', 10], ['W', 'M50 83H190', 3, 'stroke-dasharray="2 9"'], ['W', 'M40 192H200', 4], ['W', 'M40 178H200', 3]]) + `<rect x="70" y="118" width="100" height="48" rx="10" fill="${W}"/>` + lines(S, W, [['S', 'M86 134H154M86 148H128', 5]]) + `<path d="M150 154q-8-6-4-12q6-2 8 4q2-6 8-4q4 6-4 12z" fill="${S}"/><path d="${rr(36, 106, 22, 28, 6) + rr(182, 106, 22, 28, 6)}" fill="${W}"/>` });
-Object.assign(ART['13'], { ac: 'S', d: (S, W) => `<path d="${ci(222, 128, 3) + ci(228, 141, 3)}" fill="${W}"/><path d="M62 70L82 44L96 66Z" fill="${W}"/>` + lines(S, W, [['W', 'M44 120Q52 90 84 82', 5], ['W', 'M64 164Q80 184 104 186', 4], ['S', 'M8 132Q-6 116 8 106Q20 100 20 112', 6], ['W', 'M130 168H176M138 180H170', 4]]) + `<path d="${ci(110, 108, 3) + ci(126, 100, 3) + ci(142, 108, 3)}" fill="${W}"/><text x="120" y="36" text-anchor="middle" font-family="Archivo Black, Arial Black, sans-serif" font-size="22" fill="${S === '#111111' ? '#FFF' : '#000'}">$</text>` });
 const coreOf = no => TYPES[CARDS[no].plus].core;
-// engraved look shared by every illustration: a sunburst behind, a thin white inline inside each solid shape, and a halftone of dots that thins out away from the light
-const burst = S => `<path d="${Array.from({ length: 40 }, (_, k) => { const a = k / 40 * Math.PI * 2, r1 = k % 2 ? 128 : 112; return `M${(120 + Math.cos(a) * r1).toFixed(1)} ${(112 + Math.sin(a) * r1).toFixed(1)}L${(120 + Math.cos(a) * 190).toFixed(1)} ${(112 + Math.sin(a) * 190).toFixed(1)}`; }).join('')}" stroke="${S}" stroke-width="1.3" fill="none"/>`;
-const halftone = W => { let d = ''; for (let j = 0; j < 27; j++) for (let k = 0; k < 28; k++) { const x = k * 9 + (j % 2 ? 4.5 : 0), y = j * 8, dist = Math.hypot(x - 40, y - 24), r = 3.7 * (1 - dist / 175); if (r > 0.7) d += `M${(x - r).toFixed(1)} ${y}a${r.toFixed(1)} ${r.toFixed(1)} 0 1 0 ${(2 * r).toFixed(1)} 0a${r.toFixed(1)} ${r.toFixed(1)} 0 1 0 ${(-2 * r).toFixed(1)} 0`; } return `<path d="${d}" fill="${W}"/>`; };
+// flat, chunky illustrations in the card's own colour: a shape in the main colour, a darker and a lighter tone of it, and small yellow / white / ink accents; details are cut out of the shapes
+const mix = (hex, k) => { const n = parseInt(hex.slice(1), 16), m = k < 0 ? 0 : 255, f = Math.abs(k); const c = [n >> 16, (n >> 8) & 255, n & 255].map(v => Math.round(v + (m - v) * f)); return '#' + c.map(v => v.toString(16).padStart(2, '0')).join(''); };
+const palOf = (core, off) => off ? { P: '#B9B6AD', D: '#98958C', L: '#D8D5CC', Y: '#CFCCC2', W: '#ECEAE3', I: '#6A6A70', bg: '#E3E1D9', stage: '#D8D5CC' }
+  : { P: core, D: mix(core, -0.32), L: mix(core, 0.55), Y: '#FFD21F', W: '#FFFFFF', I: '#111111', bg: mix(core, 0.86), stage: mix(core, 0.7) };
+const sp = (x, y, s, f) => `<path d="${star4(x, y, s)}" fill="${f}"/>`;
+const ILL = {
+  '01': p => `<path d="M30 118H210C210 164 172 192 120 192C68 192 30 164 30 118Z" fill="${p.P}"/><path d="M30 118H210C210 126 208 132 206 138H34C32 132 30 126 30 118Z" fill="${p.D}" opacity=".35"/>
+    <rect x="22" y="102" width="196" height="24" rx="12" fill="${p.D}"/><rect x="90" y="188" width="60" height="14" rx="7" fill="${p.D}"/>
+    <path d="M62 102Q60 68 84 70M104 102Q102 52 128 58M148 102Q148 74 168 78" fill="none" stroke="${p.Y}" stroke-width="11" stroke-linecap="round"/>
+    <circle cx="176" cy="94" r="16" fill="${p.W}"/><circle cx="176" cy="94" r="7" fill="${p.Y}"/>
+    <path d="M136 22L178 88M160 16L206 82" stroke="${p.I}" stroke-width="9" stroke-linecap="round"/>
+    <path d="M52 146Q80 160 108 146T164 146" fill="none" stroke="${p.W}" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="190" cy="164" r="26" fill="${p.W}" stroke="${p.I}" stroke-width="8"/><path d="M172 182L208 146" stroke="${p.I}" stroke-width="8" stroke-linecap="round"/>`,
+  '03': p => `<path d="M62 78H178L165 192Q164 200 156 200H84Q76 200 75 192Z" fill="${p.P}"/><path d="M62 78H178L176 94H64Z" fill="${p.D}" opacity=".4"/>
+    <rect x="52" y="64" width="136" height="22" rx="11" fill="${p.D}"/><path d="M68 64Q120 20 172 64Z" fill="${p.W}" stroke="${p.D}" stroke-width="0"/><path d="M84 54Q104 36 124 34" fill="none" stroke="${p.L}" stroke-width="6" stroke-linecap="round"/>
+    <path d="M130 52L152 12" stroke="${p.Y}" stroke-width="11" stroke-linecap="round"/><path d="M138 36L150 42" stroke="${p.I}" stroke-width="5" stroke-linecap="round"/>
+    <rect x="76" y="104" width="88" height="56" rx="12" fill="${p.W}"/><path d="M92 124H148M92 140H130" stroke="${p.P}" stroke-width="7" stroke-linecap="round"/>${sp(146, 142, 7, p.Y)}
+    <circle cx="94" cy="186" r="10" fill="${p.I}"/><circle cx="120" cy="188" r="10" fill="${p.I}"/><circle cx="146" cy="186" r="10" fill="${p.I}"/>${sp(200, 52, 9, p.Y)}${sp(40, 120, 6, p.W)}`,
+  '04': p => `<rect x="26" y="152" width="188" height="28" rx="14" fill="${p.D}"/><path d="M40 156V92Q40 78 54 78H88Q100 78 106 92Q116 120 146 124Q200 130 208 156Z" fill="${p.P}"/>
+    <path d="M146 124Q198 130 208 156H150Z" fill="${p.L}"/><path d="M40 134H100" stroke="${p.D}" stroke-width="8" stroke-linecap="round"/>
+    <path d="M96 100L124 120M108 90L136 112M122 86L148 108" stroke="${p.W}" stroke-width="7" stroke-linecap="round"/><rect x="40" y="72" width="62" height="16" rx="8" fill="${p.D}" opacity=".55"/>
+    <path d="M12 118H34M4 136H30M14 154H30" stroke="${p.I}" stroke-width="6" stroke-linecap="round" opacity=".85"/>${sp(204, 70, 10, p.Y)}${sp(178, 40, 6, p.W)}`,
+  '05': p => `<rect x="38" y="46" width="164" height="150" rx="26" fill="${p.W}" stroke="${p.D}" stroke-width="0"/><path d="M38 72Q38 46 64 46H176Q202 46 202 72V90H38Z" fill="${p.P}"/>
+    <rect x="68" y="30" width="16" height="32" rx="8" fill="${p.I}"/><rect x="156" y="30" width="16" height="32" rx="8" fill="${p.I}"/>
+    <text x="120" y="176" text-anchor="middle" font-family="Archivo Black, Arial Black, sans-serif" font-size="94" fill="${p.P}">0</text><path d="M62 72H100M140 72H178" stroke="${p.W}" stroke-width="7" stroke-linecap="round" opacity=".9"/>${sp(212, 34, 10, p.Y)}${sp(26, 150, 7, p.Y)}`,
+  '06': p => `<path d="M156 30A82 82 0 1 0 204 150A66 66 0 0 1 156 30Z" fill="${p.P}"/><path d="M156 30A82 82 0 0 0 52 62A84 84 0 0 1 156 30Z" fill="${p.L}" opacity=".7"/>
+    <circle cx="70" cy="118" r="11" fill="${p.D}"/><circle cx="96" cy="156" r="7" fill="${p.D}"/><circle cx="62" cy="84" r="6" fill="${p.D}"/>
+    ${sp(180, 70, 14, p.Y)}${sp(206, 112, 8, p.Y)}${sp(150, 112, 6, p.W)}${sp(36, 40, 7, p.Y)}
+    <rect x="86" y="176" width="92" height="22" rx="11" fill="${p.W}"/><circle cx="112" cy="174" r="17" fill="${p.W}"/><circle cx="142" cy="170" r="21" fill="${p.W}"/>`,
+  '07': p => `<path d="M62 78H208L190 148H80Z" fill="${p.P}" stroke="${p.P}" stroke-width="10" stroke-linejoin="round"/><path d="M96 92L102 138M126 92V138M156 92L152 138M182 92L174 138M74 112H198" stroke="${p.W}" stroke-width="5" stroke-linecap="round" opacity=".9"/>
+    <path d="M22 50H52L82 150H184" fill="none" stroke="${p.I}" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="98" cy="180" r="15" fill="${p.I}"/><circle cx="98" cy="180" r="5" fill="${p.W}"/><circle cx="176" cy="180" r="15" fill="${p.I}"/><circle cx="176" cy="180" r="5" fill="${p.W}"/>
+    <circle cx="184" cy="46" r="30" fill="${p.Y}" stroke="${p.I}" stroke-width="7"/><path d="M184 46V28M184 46L198 54" stroke="${p.I}" stroke-width="6" stroke-linecap="round"/>${sp(98, 40, 8, p.D)}`,
+  '10': p => `<path d="M64 26H176V190L162 178L148 190L134 178L120 190L106 178L92 190L78 178L64 190Z" fill="${p.D}" transform="translate(6 8)" opacity=".5"/><path d="M64 26H176V190L162 178L148 190L134 178L120 190L106 178L92 190L78 178L64 190Z" fill="${p.W}"/>
+    <rect x="80" y="42" width="80" height="14" rx="7" fill="${p.P}"/><path d="M82 72H128M82 86H112M144 72H158M130 86H158" stroke="${p.L}" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="120" cy="132" r="28" fill="${p.P}"/><path d="M106 132L116 142L136 120" fill="none" stroke="${p.W}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>${sp(194, 52, 11, p.Y)}${sp(40, 110, 7, p.Y)}`,
+  '15': p => `<rect x="34" y="78" width="172" height="112" rx="26" fill="${p.P}"/><path d="M34 104Q34 78 60 78H180Q206 78 206 104V112H34Z" fill="${p.D}" opacity=".45"/>
+    <rect x="62" y="40" width="96" height="48" rx="10" fill="${p.Y}" transform="rotate(-8 110 64)"/><path d="M70 62H140" stroke="${p.I}" stroke-width="7" stroke-linecap="round" transform="rotate(-8 110 64)"/>
+    <rect x="144" y="116" width="62" height="42" rx="16" fill="${p.W}"/><circle cx="172" cy="137" r="8" fill="${p.P}"/><path d="M48 106V170M60 170H132" fill="none" stroke="${p.W}" stroke-width="0"/>
+    <circle cx="192" cy="54" r="19" fill="${p.Y}" stroke="${p.I}" stroke-width="6"/><path d="M186 54H198M192 48V60" stroke="${p.I}" stroke-width="4" stroke-linecap="round"/><rect x="44" y="94" width="92" height="84" rx="18" fill="none" stroke="${p.W}" stroke-width="4" stroke-dasharray="3 9" stroke-linecap="round"/>${sp(26, 56, 8, p.Y)}`,
+  '16': p => `<circle cx="112" cy="116" r="84" fill="${p.W}"/><circle cx="112" cy="116" r="84" fill="none" stroke="${p.P}" stroke-width="14"/><circle cx="112" cy="116" r="54" fill="${p.P}"/><circle cx="112" cy="116" r="34" fill="${p.W}"/><circle cx="112" cy="116" r="16" fill="${p.D}"/>
+    <path d="M118 110L200 28" stroke="${p.I}" stroke-width="9" stroke-linecap="round"/><path d="M186 14L214 42L198 44L194 60L186 52L178 50L180 34Z" fill="${p.Y}" stroke="${p.I}" stroke-width="5" stroke-linejoin="round"/>${sp(40, 40, 9, p.Y)}${sp(210, 150, 7, p.Y)}`,
+  '17': p => `<path d="M82 76V54Q82 34 102 34H138Q158 34 158 54V76" fill="none" stroke="${p.I}" stroke-width="11" stroke-linecap="round"/>
+    <rect x="36" y="90" width="168" height="104" rx="26" fill="${p.P}"/><rect x="30" y="68" width="180" height="38" rx="16" fill="${p.D}"/><rect x="104" y="90" width="32" height="30" rx="8" fill="${p.Y}"/>
+    <rect x="62" y="132" width="116" height="42" rx="12" fill="${p.W}"/><path d="M76 146H122M76 160H106" stroke="${p.L}" stroke-width="7" stroke-linecap="round"/><path d="M152 168q-14-8-8-18q6-4 8 2q2-6 8-2q6 10-8 18z" fill="${p.P}"/>${sp(212, 70, 8, p.Y)}`,
+  '13': p => `<path d="M60 70L82 34L104 66Z" fill="${p.D}"/><ellipse cx="116" cy="134" rx="90" ry="64" fill="${p.P}"/><ellipse cx="116" cy="150" rx="66" ry="36" fill="${p.L}" opacity=".55"/>
+    <rect x="52" y="172" width="34" height="30" rx="12" fill="${p.D}"/><rect x="148" y="172" width="34" height="30" rx="12" fill="${p.D}"/><ellipse cx="206" cy="132" rx="22" ry="26" fill="${p.D}"/><circle cx="200" cy="124" r="4" fill="${p.W}"/><circle cx="208" cy="140" r="4" fill="${p.W}"/>
+    <rect x="86" y="76" width="56" height="10" rx="5" fill="${p.D}"/><path d="M28 124Q10 108 24 96Q36 92 36 106" fill="none" stroke="${p.D}" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="114" cy="40" r="22" fill="${p.Y}" stroke="${p.I}" stroke-width="6"/><text x="114" y="49" text-anchor="middle" font-family="Archivo Black, Arial Black, sans-serif" font-size="24" fill="${p.I}">$</text><path d="M56 118Q64 94 92 90" fill="none" stroke="${p.W}" stroke-width="7" stroke-linecap="round" opacity=".8"/>`
+};
+const illo = (no, core, off) => { const p = palOf(core, off); return `<circle cx="120" cy="108" r="96" fill="${p.stage}" opacity="${off ? 0.6 : 0.55}"/><ellipse cx="120" cy="208" rx="64" ry="8" fill="${p.D}" opacity=".22"/>${ILL[no](p)}`; };
 // state: 'on' holds, 'broken' cracked for today (or the week), 'pending' asleep until something is done
 function cardHTML(c, state = 'on') {
   const t = TYPES[c.plus], art = ART[c.no], off = state !== 'on';
@@ -1330,7 +1362,7 @@ function cardHTML(c, state = 'on') {
   const sticker = state === 'broken' ? (c.weekly ? 'Broken · until Sunday' : 'Broken · back tomorrow') : state === 'pending' ? 'Asleep · log one to wake it' : '';
   // a collectible-card build: white sleeve, a frame in the card's colour, name plaque row, art window, rule text box, footer strip
   const lip = off ? '#A8A59B' : `color-mix(in srgb, ${t.core} 62%, #000)`;
-  const win = off ? (t.dark ? '#1C1C20' : '#E3E1D9') : t.dark ? '#000000' : '#FFFFFF';
+  const win = palOf(t.core, off).bg;
   const box = t.dark ? 'rgba(236,234,227,0.10)' : 'rgba(17,17,17,0.06)';
   const key = t.dark ? 'rgba(236,234,227,0.22)' : 'rgba(17,17,17,0.14)';
   const nameSize = c.name.length > 11 ? 12 : 14;
@@ -1342,17 +1374,8 @@ function cardHTML(c, state = 'on') {
    <span style="position:absolute;right:8px;top:8px;width:26px;height:26px;border-radius:50%;background:${off ? '#8A8A92' : t.core};color:${t.chipText};display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-size:12px">+${c.plus}</span>
    <div style="position:absolute;left:8px;right:8px;top:42px;height:160px;border-radius:12px;background:${win};box-shadow:inset 0 0 0 2px ${key};overflow:hidden">
     <svg width="200" height="160" viewBox="0 0 240 224" aria-hidden="true" style="position:absolute;left:0;top:0">
-     <defs><clipPath id="ca${c.no}"><path d="${art.b || ''}" clip-rule="${art.rule || 'nonzero'}"/></clipPath></defs>
-     ${burst(shape)}
-     <path d="${art.b || ''}" fill="${shape}" fill-rule="${art.rule || 'nonzero'}"/>
-     <path d="${art.bs || ''}" fill="none" stroke="${shape}" stroke-width="${art.bw || 0}" stroke-linecap="round" stroke-linejoin="round"/>
-     ${art.bs ? `<path d="${art.bs}" fill="none" stroke="${win}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>` : ''}
-     ${art.b ? `<g clip-path="url(#ca${c.no})"><path d="${art.b}" fill="none" stroke="${win}" stroke-width="14" fill-rule="${art.rule || 'nonzero'}"/><path d="${art.b}" fill="none" stroke="${shape}" stroke-width="8" fill-rule="${art.rule || 'nonzero'}"/>${halftone(win)}</g>` : ''}
-     <path d="${art.cut || ''}" fill="${win}"/>
-     <path d="${art.a || ''}" fill="${art.ac === 'S' ? shape : win}"/>
-     ${art.as ? (art.asc === 'S' ? `<path d="${art.as}" fill="none" stroke="${win}" stroke-width="${art.aw + 8}" stroke-linecap="round" stroke-linejoin="round"/>` : '') + `<path d="${art.as}" fill="none" stroke="${art.asc === 'S' ? shape : win}" stroke-width="${art.aw}" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
-     ${art.d ? art.d(shape, win) : ''}
-     ${state === 'broken' ? `<path d="M30 0L96 70L72 104L150 168L128 224" fill="none" stroke="${face}" stroke-width="9" stroke-linejoin="bevel"/><path d="M96 70L132 52M150 168L198 150" fill="none" stroke="${face}" stroke-width="6"/>` : ''}
+     ${illo(c.no, t.core, off)}
+     ${state === 'broken' ? `<path d="M30 0L96 70L72 104L150 168L128 224" fill="none" stroke="${win}" stroke-width="9" stroke-linejoin="bevel"/><path d="M96 70L132 52M150 168L198 150" fill="none" stroke="${win}" stroke-width="6"/>` : ''}
     </svg>
    </div>
    <div style="position:absolute;left:8px;right:8px;top:210px;height:68px;box-sizing:border-box;padding:6px 10px;border-radius:10px;background:${box};display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;line-height:1.35;overflow:hidden;color:${t.dark ? PAPER : INK}">${c.cond}</div>
@@ -1363,11 +1386,8 @@ function cardHTML(c, state = 'on') {
 const scaled = (c, s, state) => `<div style="width:${240 * s}px;height:${340 * s}px" aria-hidden="true"><div style="width:240px;height:340px;transform:scale(${s});transform-origin:0 0">${cardHTML(c, state)}</div></div>`;
 // a card's art as a small icon on its colour, used where the canvas had mascot tiles
 function artIcon(no, size) {
-  const art = ART[no];
-  return `<svg width="${size}" height="${Math.round(size * 224 / 240)}" viewBox="0 0 240 224" aria-hidden="true">
-    <path d="${art.b || ''}" fill="#111" fill-rule="${art.rule || 'nonzero'}"/><path d="${art.bs || ''}" fill="none" stroke="#111" stroke-width="${art.bw || 0}" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="${art.cut || ''}" fill="${coreOf(no)}"/><path d="${art.a || ''}" fill="#FFF"/><path d="${art.as || ''}" fill="none" stroke="#FFF" stroke-width="${art.aw || 0}" stroke-linecap="round"/>
-  </svg>`;
+  const p = { P: '#111', D: '#111', L: '#FFF', Y: '#FFF', W: '#FFF', I: '#111' };
+  return `<svg width="${size}" height="${Math.round(size * 224 / 240)}" viewBox="0 0 240 224" aria-hidden="true">${ILL[no](p)}</svg>`;
 }
 
 /* ---------- rules ---------- */
