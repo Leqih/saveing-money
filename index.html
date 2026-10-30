@@ -1036,6 +1036,15 @@ button.hcard:active > div { transform: translateY(2px); }
 .wkrow { align-items: stretch; }
 .wkrow .wkmini { height: 140px; display: block; }
 .wkrow .wkmini > .top { height: 100%; box-sizing: border-box; justify-content: space-between; overflow: hidden; }
+/* visual heights match: the key's plate edge (8px) counts inside the row height */
+.wkrow { align-items: start; }
+.wkrow .wkmini { height: 126px; }
+.wkrow .endbtn { height: 118px; align-self: start; }
+.wkrow { grid-template-columns: 1fr 118px; }
+.wkrow .endbtn { width: 118px; height: 118px; }
+.wkrow .endbtn::before { inset: 11px; top: 11px; left: 11px; right: 11px; }
+.wkrow .endbtn > .top { left: 20px; right: 20px; top: 19px; height: 78px; font-size: 16px; }
+.wkrow .endbtn .scr { width: 9px; height: 9px; } .wkrow .endbtn .scr.a { left: 6px; bottom: 6px; } .wkrow .endbtn .scr.b { right: 6px; bottom: 6px; }
 </style>
 
 <div class="device">
