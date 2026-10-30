@@ -542,6 +542,13 @@ button.hcard:active > div { transform: translateY(2px); }
 .sheet .impact, .sheet .rc, .sheet .mhero, .sheet .sglue, .sheet .smine, .sheet .gradcard, .sheet .cv-ticket, .sheet .set-row, .sheet .receipt, .dk-next, .screen .cap.meter .top { border-radius: 22px; }
 /* Deck and Ledger open with the same header row: one height, title centred in it */
 .screen:not(:has(> .head)) > :first-child { min-height: 56px; align-items: center; }
+.about { display: flex; flex-direction: column; gap: 14px; }
+.about > summary { cursor: pointer; font-size: 16px; font-weight: 900; list-style: none; display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.about > summary::-webkit-details-marker { display: none; }
+.about > summary::after { content: "+"; font-family: var(--f-px); font-size: 20px; color: var(--mute); }
+.about[open] > summary::after { content: "−"; }
+.about[open] > summary { margin-bottom: 14px; }
+.about > .set-row, .about > .note { margin-top: 14px; }
 /* dragging the pack or a card shouldn't highlight text */
 .bag, .hand, .stack, .sc2, .drawfoot, .dkc-count { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .stack { position: absolute; left: 0; right: 0; top: 0; height: 441px; overflow: visible; touch-action: none; cursor: grab; }
@@ -1724,6 +1731,12 @@ function renderStarSheet() {
       <p class="hint">${w.hint} Real money left this week: ${money(moneyWeek() - spentWeek())}.</p>
       ${tilesHTML()}
     </div></div>
+    ${(() => {
+      const locked = Object.values(CARDS).filter(x => x.unlock && !S.unlocked.includes(x.no) && !S.grad.includes(x.no)).sort((a, b) => a.unlock - b.unlock)[0];
+      const weeks = (S.weeks || []).slice(-4).reverse();
+      return (locked ? `<button class="dk-next" data-info="${locked.no}"><i class="dk-ico" style="background:${tintOf(locked.no)}">${artIcon(locked.no, 30)}</i><span class="dk-main"><b>Next unlock: ${locked.name}</b><small>${locked.cond}</small><span class="dk-bar"><i style="width:${Math.min(100, Math.round(S.starsTotal / locked.unlock * 100))}%"></i></span></span><span class="dk-tail"><b class="px">★${S.starsTotal}/${locked.unlock}</b></span></button>` : '')
+        + (weeks.length ? `<h2>Recent weeks</h2>${weeks.map(k => `<div class="set-row"><div><b>Week ${k.week} · ${STAKES[k.stake].name}</b><small>${k.pass ? `Passed, ${starStr(k.stars)}` : 'Missed the target'}</small></div><b class="px">${k.total} / ${k.target}</b></div>`).join('')}` : '');
+    })()}
     <button class="cap bigbtn" data-act="settings"><div class="top">Settings</div></button>`);
 }
 function renderWeekSheet() {
@@ -2718,11 +2731,11 @@ function renderSettings() {
     ${p.evening ? `<div class="set-row"><div><b>Reminder time</b><small>Send a notification at that time</small></div><div class="seg3">${[20.5, 21.5, 22].map(c => `<button data-evat="${c}" aria-pressed="${p.eveningAt === c}">${fmtClock(c)}</button>`).join('')}</div></div>` : ''}
     ${sw('ruleAlerts', 'Rule reminders before you spend', 'E.g. mealtime reminds Takeout Nemesis, 21:30 reminds Night Cat')}
     ${sw('morning', 'Morning "Good morning" card', 'Yesterday’s score, wish list, what you can spend today')}
-    <h2>Demo</h2>
+    <details class="about"><summary>About this demo</summary>
     <div class="set-row"><div><b>How to play</b><small>The rules in three steps</small></div><button class="mini" data-act="help">Watch</button></div>
     <div class="set-row"><div><b>Replay home tips</b><small>The 4 bubbles shown on first visit to home</small></div><button class="mini" data-act="coach-reset">Watch again</button></div>
     <div class="set-row"><div><b>Start over</b><small>Back to the launch screen and clear everything logged in the demo</small></div><button class="mini" data-act="restart">Start over</button></div>
-    <p class="note">Demo data lives only on this page and disappears when you close it.</p>
+    <p class="note">Demo data lives only on this page and disappears when you close it.</p></details>
     <button class="go" data-act="settings-save" ${w >= 50 && w !== S.base ? '' : 'disabled'}>${w === S.base ? `It’s already ¥${S.base}` : `Change to ¥${w}`}</button>`);
 }
 
@@ -2921,7 +2934,7 @@ function settleWeek() {
   if (pass) S.maxStake = Math.max(S.maxStake || 0, Math.min(STAKES.length - 1, S.stake + 1));
   const carryable = perCard.filter(p => !S.grad.includes(p.no));
   S.carry = carryable.length ? carryable.slice().sort((a, b) => b.held / Math.max(1, b.days) - a.held / Math.max(1, a.days))[0].no : null;
-  S.nextStake = S.stake;
+  S.nextStake = S.stake; S.weekStep = 1;
   S.weekResult = { total, target, pass, got, before, perCard, grads, fresh, real: moneyWeek(), spent: hist.reduce((a, h) => a + h.extra, 0), logged: hist.reduce((a, h) => a + h.entries.reduce((b, x) => b + x.amt, 0), 0) };
 }
 function renderWeek() {
@@ -2931,8 +2944,9 @@ function renderWeek() {
     const s = STAKES[i], tag = i > S.stake ? `Target ×${s.k}, stars for passing ×${s.star}` : i < S.stake ? `Target back to ×${s.k}` : 'Keep the current stake';
     return `<button class="stake ${S.nextStake === i ? 'on' : ''}" data-stake="${i}" aria-pressed="${S.nextStake === i}"><span class="chipk" style="background:${s.bg};color:${s.fg}">${s.name}</span><span>${tag}</span></button>`;
   };
+  const step = S.weekStep || 1;
   sheet('Weekly summary', `
-    <div class="bar-top"><h1>Week ${S.week} over</h1><span class="chipk" style="background:${st.bg};color:${st.fg}">${st.name}</span></div>
+    ${step === 1 ? `<div class="bar-top"><h1>Week ${S.week} over</h1><span class="chipk" style="background:${st.bg};color:${st.fg}">${st.name}</span></div>
     <span class="bigstamp ${R.pass ? '' : 'no'}">${R.pass ? 'Passed' : 'missed'}</span>
     <div class="impact">
       <div class="r"><span>Weekly Score</span><span class="${R.pass ? 'good' : 'hot'}">${R.total} / ${R.target}</span></div>
@@ -2942,16 +2956,18 @@ function renderWeek() {
     ${R.grads.map(no => `<div class="gradcard"><div class="gimg">${scaled(CARDS[no], 0.3)}<span class="cv-grad">Graduated</span></div><div><b>“${CARDS[no].name}” graduated!</b><p>Held 6/7 days or more for ${GRAD_WEEKS} weeks in a row: this habit is gone. It leaves the deck and gives you a permanent base multiplier +1: from now on the multiplier starts at <b>${S.baseMult}</b> , and the weekly target score rises 25%.</p></div></div>`).join('')}
     <h2>How the three cards did <small>Hold 6/7 days for ${GRAD_WEEKS} weeks to graduate</small></h2>
     <div class="pillrow">${R.perCard.map(p => `<span class="pill ${p.held >= p.days * 0.7 ? 'ok' : p.held >= p.days * 0.4 ? 'mid' : 'no'}">${CARDS[p.no].name} ${p.held}/${p.days} days${S.grad.includes(p.no) ? ' · Graduated' : p.streak ? ` · Graduated ${p.streak}/${GRAD_WEEKS}` : ''}</span>`).join('')}</div>
-    ${S.carry ? `<h2>Carry one card to next week <small>It’s guaranteed to be in next week’s 5</small></h2>
-    <div class="carry">${R.perCard.filter(p => !S.grad.includes(p.no)).map(p => `<button class="hcard ${S.carry === p.no ? 'on' : 'off'}" data-carry="${p.no}" aria-pressed="${S.carry === p.no}">${scaled(CARDS[p.no], 0.33)}<span>${S.carry === p.no ? 'Carried ✓' : 'Tap to carry'}</span></button>`).join('')}</div>` : ''}
-    <h2>Next week’s stake</h2>
-    <div class="stakes">${stakeOpts.map(stakeBtn).join('')}</div>
     <div class="cap ${R.real - R.spent >= 0 ? 'lime' : 'orange'}"><div class="top" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-weight:900">${R.real - R.spent >= 0 ? 'Real money saved this week' : 'Real money over this week'}</span><span style="font-family:var(--f-display);font-size:28px">¥${Math.abs(R.real - R.spent)}</span></div></div>
     <h2>Score each day <small>Tap a day for the receipt</small></h2>
     ${tilesHTML()}
+    <button class="go" data-act="week-plan">Next: plan next week</button>` : `<div class="bar-top"><h1>Plan next week</h1><span class="chipk" style="background:${st.bg};color:${st.fg}">${st.name}</span></div>
+    ${S.carry ? `<h2>Carry one card to next week <small>It’s guaranteed to be in next week’s 5</small></h2>
+    <div class="carry">${R.perCard.filter(p => !S.grad.includes(p.no)).map(p => `<button class="hcard ${S.carry === p.no ? 'on' : 'off'}" data-carry="${p.no}" aria-pressed="${S.carry === p.no}">${scaled(CARDS[p.no], 0.4)}<span>${S.carry === p.no ? 'Carried ✓' : 'Tap to carry'}</span></button>`).join('')}</div>` : ''}
+    <h2>Next week’s stake</h2>
+    <div class="stakes">${stakeOpts.map(stakeBtn).join('')}</div>
     ${R.fresh.map(x => `<div class="unlock">${scaled(x, 0.3)}<div><b style="font-size:12px">New card unlocked</b><div style="font-weight:900;font-size:20px">${x.name}</div><p class="note left">${x.cond}. It may be dealt from now on.</p></div></div>`).join('')}
     <p class="note">That’s it for tonight; open the shop and draw new cards tomorrow (Monday) morning.<br>${R.pass ? 'Want a challenge? Raise the stake for more stars. If not, keep the current stake.' : 'Missing the target costs nothing and you don’t start over. Next week, keep cards that are easier to hold, or lower the stake.'}</p>
-    ${reconHTML(R)}`);
+    ${reconHTML(R)}
+    <button class="linkbtn" data-act="week-back">‹ Back to this week’s results</button>`}`);
 }
 // before Monday, the week's log is checked against what the payment apps say was really spent; a log missing a lot loses the stars
 const RECON_RATIO = 1.2, RECON_SLACK = 30;
@@ -3238,6 +3254,7 @@ app.addEventListener('click', e => {
     R.recon = { actual, voided, skipped: act === 'recon-skip' };
     replaceSheet(top, renderWeek); return;
   }
+  if (act === 'week-plan' || act === 'week-back') { S.weekStep = act === 'week-plan' ? 2 : 1; replaceSheet(top, renderWeek); lastSheet().scrollTop = 0; return; }
   if (act === 'to-monday') { top.remove(); S.clock = 8.5; renderMonday(); return; }
   if (act === 'shop') { rollShop(); top.remove(); renderShop(); return; }
   if (act === 'draw-now') { top.remove(); startWeek(); S.pinned = []; return; }
