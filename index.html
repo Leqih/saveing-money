@@ -1032,6 +1032,10 @@ button.hcard:active > div { transform: translateY(2px); }
 .wkrow .endbtn { margin-bottom: 0; }
 .screen:has(> .head) { padding-bottom: 112px; }
 .crt-ghosts { bottom: 12px !important; }
+/* the ledger card is exactly as tall as the end key beside it */
+.wkrow { align-items: stretch; }
+.wkrow .wkmini { height: 140px; display: block; }
+.wkrow .wkmini > .top { height: 100%; box-sizing: border-box; justify-content: space-between; overflow: hidden; }
 </style>
 
 <div class="device">
