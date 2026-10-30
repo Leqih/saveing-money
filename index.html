@@ -2012,9 +2012,9 @@ function openShow(sh) {
   const add = (x, y, ang, spread, spd, n, scale = 1, kinds = ['r', 'r', 'c', 'sp']) => { for (let i = 0; i < n; i++) { const a = ang + (Math.random() - 0.5) * spread, v = spd * (0.5 + Math.random() * 0.6); P.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 8, w: (13 + Math.random() * 6) * scale, h: (7 + Math.random() * 3) * scale, c: COLORS[(Math.random() * COLORS.length) | 0], k: kinds[(Math.random() * kinds.length) | 0], ph: Math.random() * 6.28, wob: 0.6 + Math.random() * 1, term: 130 + Math.random() * 90, born: 0, life: 2000 + Math.random() * 600 }); } };
   // two party-popper cannons from the bottom corners, then a soft shower from the top of the stack; fewer, bigger, calmer pieces in the app's own colours
   const pop = (x, ang) => { add(x, sr.height - 170, ang, 0.5, 1250, 14); add(x, sr.height - 170, ang, 0.9, 950, 14); add(x, sr.height - 170, ang, 1.2, 720, 8, 1.2, ['sp', 'c']); };
-  setTimeout(() => { pop(-6, -Math.PI * 0.36); pop(sr.width + 6, -Math.PI * 0.64); }, 60);
+  setTimeout(() => { pop(2, -Math.PI * 0.34); pop(sr.width - 2, -Math.PI * 0.66); }, 60);
   setTimeout(() => { for (let i = 0; i < 26; i++) add(30 + Math.random() * (sr.width - 60), -20, Math.PI / 2, 0.3, 60 + Math.random() * 120, 1, 1, ['r', 'c', 'sp']); }, 900);
-  setTimeout(() => { pop(-6, -Math.PI * 0.38); pop(sr.width + 6, -Math.PI * 0.62); }, 520);
+  setTimeout(() => { pop(2, -Math.PI * 0.36); pop(sr.width - 2, -Math.PI * 0.64); }, 520);
   let last = performance.now(); const t0 = last;
   const draw = t => {
     const dt = Math.min(0.034, (t - last) / 1000); last = t; g.clearRect(0, 0, sr.width, sr.height); const el = t - t0; let alive = 0;
