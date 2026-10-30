@@ -1013,6 +1013,18 @@ button.hcard:active > div { transform: translateY(2px); }
 .wkrow .endbtn > .top { left: 20px; right: 20px; top: 18px; height: 88px; background: radial-gradient(circle at 36% 24%, #FFD2A8 0%, #FF8A4A 22%, #FF5A1F 52%, #D93A08 88%, #B02D05 100%); box-shadow: inset 0 0 0 3px rgba(255, 150, 90, 0.85), inset 0 0 0 5px rgba(150, 30, 0, 0.35), inset 0 -9px 10px rgba(130, 25, 0, 0.55), inset 0 5px 5px rgba(255,255,255,0.4), 0 10px 10px rgba(0,0,0,0.5); font-size: 17px; text-shadow: 0 1px 0 #FFB894, 0 3px 0 rgba(120, 25, 0, 0.8), 0 5px 6px rgba(0,0,0,0.35); }
 .wkrow .endbtn > .top::before { left: 16px; top: 8px; width: 44px; height: 20px; background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.15)); filter: blur(0.6px); }
 .wkrow .endbtn > .top::after { content: ''; position: absolute; left: 8px; right: 8px; bottom: 5px; height: 18px; border-radius: 0 0 50% 50%; background: linear-gradient(180deg, transparent, rgba(255, 170, 110, 0.55)); filter: blur(2px); pointer-events: none; }
+
+/* end key, glossy red mushroom button on a brushed-steel plate with two screws, seen straight on */
+.wkrow { grid-template-columns: 1fr 140px; }
+.wkrow .endbtn { width: 140px; height: 140px; border-radius: 16px; overflow: hidden; background: repeating-linear-gradient(90deg, rgba(255,255,255,0.0) 0 2px, rgba(255,255,255,0.28) 2px 3px), linear-gradient(145deg, #F4F6F8 0%, #C6CBD2 30%, #E3E6EA 52%, #A9AFB8 78%, #D5D9DE 100%); box-shadow: inset 0 0 0 2px rgba(255,255,255,0.95), inset 0 -3px 4px rgba(0,0,0,0.25), 0 1px 0 #7E8590, 0 8px 0 #9AA1AB, 0 16px 16px -6px rgba(40, 30, 30, 0.5); }
+.wkrow .endbtn::before { content: ''; position: absolute; inset: 14px; top: 14px; left: 14px; right: 14px; width: auto; height: auto; border-radius: 50%; background: conic-gradient(from 10deg, #FDFDFE, #9AA1AB 16%, #F0F2F4 34%, #8A919B 52%, #FAFBFB 70%, #A0A7B1 86%, #FDFDFE); box-shadow: inset 0 0 0 2px rgba(255,255,255,0.9), 0 6px 8px rgba(0,0,0,0.35), inset 0 -3px 4px rgba(0,0,0,0.3); }
+.wkrow .endbtn::after { content: none; }
+.wkrow .endbtn > .top { left: 24px; right: 24px; top: 22px; height: 92px; background: radial-gradient(circle at 50% 72%, #FF6B6B 0%, #E62424 44%, #B80F0F 100%); box-shadow: inset 0 -8px 10px rgba(255, 140, 140, 0.55), inset 0 6px 10px rgba(110, 0, 0, 0.45), 0 8px 8px rgba(110, 0, 0, 0.45); font-size: 19px; letter-spacing: 1px; text-shadow: 0 2px 2px rgba(110, 0, 0, 0.5); z-index: 2; }
+.wkrow .endbtn > .top::before { left: 14%; right: 14%; top: 6px; width: auto; height: 36px; border-radius: 50% 50% 50% 50% / 80% 80% 30% 30%; transform: none; filter: none; background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.08)); }
+.wkrow .endbtn > .top::after { content: ''; position: absolute; left: 22%; right: 22%; bottom: 7px; height: 18px; border-radius: 50%; background: radial-gradient(ellipse, rgba(255,255,255,0.65), rgba(255,255,255,0) 70%); filter: none; background-position: center; }
+.wkrow .endbtn .scr { position: absolute; width: 11px; height: 11px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #F4F6F8, #8A919B); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.8); z-index: 3; }
+.wkrow .endbtn .scr::before { content: ''; position: absolute; left: 2px; right: 2px; top: 5px; height: 1px; background: #4A5059; } .wkrow .endbtn .scr::after { content: ''; position: absolute; top: 2px; bottom: 2px; left: 5px; width: 1px; background: #4A5059; }
+.wkrow .endbtn .scr.a { left: 8px; bottom: 8px; } .wkrow .endbtn .scr.b { right: 8px; bottom: 8px; }
 </style>
 
 <div class="device">
@@ -1426,7 +1438,7 @@ function homeHTML() {
         <div class="keys">${list}</div>
         <button class="linkbtn wkgo" data-act="goflow">${S.today.length > 3 ? `还有 ${S.today.length - 3} 笔 · ` : ''}全部流水 ›</button>
       </div></div>
-      <button class="cap lime bigbtn endbtn" data-act="end"><div class="top">结束<br>今天</div></button>
+      <button class="cap lime bigbtn endbtn" data-act="end"><i class="scr a"></i><i class="scr b"></i><div class="top">结束<br>今天</div></button>
     </div>`;
 }
 
