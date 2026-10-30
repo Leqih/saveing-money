@@ -1301,9 +1301,23 @@ const ART = {
   '17': { b: rr(24, 96, 192, 112, 22) + rr(36, 66, 168, 34, 14), as: 'M120 110V196', aw: 8, e: [66, 152, 88, 152] },
   '13': { b: el(116, 138, 112, 78) + rr(40, 188, 30, 44, 8) + rr(150, 188, 30, 44, 8) + 'M58 76L84 30L110 68Z' + ci(224, 136, 26), cut: rr(94, 62, 52, 10, 5), a: ci(120, 28, 22), e: [154, 118, 180, 118] }
 };
+// black and white linework added to each illustration: d(S, W) draws with the shape colour S and the window colour W; ac / asc pick the accent fill / stroke colour ('S' or 'W')
+const tick = (cx, cy, r1, r2, n) => Array.from({ length: n }, (_, k) => { const a = k / n * Math.PI * 2; return `M${(cx + Math.cos(a) * r1).toFixed(1)} ${(cy + Math.sin(a) * r1).toFixed(1)}L${(cx + Math.cos(a) * r2).toFixed(1)} ${(cy + Math.sin(a) * r2).toFixed(1)}`; }).join('');
+const lines = (S, W, o) => o.map(([c, d, w, extra = '']) => `<path d="${d}" fill="none" stroke="${c === 'S' ? S : W}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`).join('');
+Object.assign(ART['01'], { asc: 'S', d: (S, W) => lines(S, W, [['W', 'M30 166Q120 196 210 166', 4], ['W', 'M52 192Q120 214 188 192', 4], ['S', 'M30 68Q20 50 34 38Q48 26 38 8', 5], ['S', 'M56 74Q48 58 58 46', 5]]) });
+Object.assign(ART['03'], { d: (S, W) => lines(S, W, [['W', 'M62 104L68 176', 5], ['W', 'M164 118L160 168', 5], ['W', 'M46 71H70M84 71H100', 4]]) });
+Object.assign(ART['04'], { d: (S, W) => lines(S, W, [['W', 'M60 54q10-12 20 0', 4], ['W', 'M92 32q10-12 20 0', 4], ['W', 'M130 28q10-12 20 0', 4], ['W', 'M166 42q10-12 20 0', 4], ['W', 'M194 74q8-10 16 0', 4], ['W', 'M86 120Q120 104 154 120', 4], ['S', 'M20 224H220', 3, 'stroke-dasharray="2 9"']]) });
+Object.assign(ART['05'], { ac: 'S', d: (S, W) => lines(S, W, [['W', tick(120, 112, 70, 96, 16), 5], ['S', tick(120, 112, 120, 134, 16), 4]]) });
+Object.assign(ART['06'], { ac: 'S', d: (S, W) => lines(S, W, [['S', star4(140, 30, 9), 3]]) + `<path d="${ci(40, 80, 7) + ci(36, 180, 9) + ci(75, 200, 6) + ci(30, 140, 5)}" fill="${W}"/>` });
+Object.assign(ART['07'], { d: (S, W) => lines(S, W, [['S', 'M88 68L96 150M184 72L174 150', 4]]) + `<path d="${ci(92, 196, 7) + ci(182, 196, 7)}" fill="${W}"/><path d="${ci(112, 44, 16)}" fill="${S}"/><path d="${rr(142, 26, 40, 38, 8)}" fill="${S}"/>` });
+Object.assign(ART['10'], { d: (S, W) => lines(S, W, [['W', 'M72 26H168', 5], ['W', 'M66 176H174', 5]]) });
+Object.assign(ART['15'], { ac: 'S', d: (S, W) => `<path d="${rr(38, 60, 164, 126, 16)}" fill="none" stroke="${W}" stroke-width="3" stroke-dasharray="5 6"/>` });
+Object.assign(ART['16'], { ac: 'S', d: (S, W) => `<path d="${ci(188, 182, 30)}" fill="none" stroke="${S}" stroke-width="4"/><path d="${ci(188, 182, 42)}" fill="none" stroke="${S}" stroke-width="3" stroke-dasharray="3 8"/>` + lines(S, W, [['W', 'M116 112H136M116 136H136M116 160H136', 5], ['S', 'M82 206H170', 10]]) });
+Object.assign(ART['17'], { d: (S, W) => lines(S, W, [['S', 'M84 66V46Q84 30 100 30H140Q156 30 156 46V66', 10], ['W', 'M50 83H190', 3, 'stroke-dasharray="2 9"'], ['W', 'M40 192H200', 4]]) });
+Object.assign(ART['13'], { ac: 'S', d: (S, W) => `<path d="${ci(222, 128, 3) + ci(228, 141, 3)}" fill="${W}"/><path d="M96 66h48" stroke="${W}" stroke-width="0"/>` + lines(S, W, [['W', 'M64 146Q80 168 100 170', 4]]) + `<text x="120" y="36" text-anchor="middle" font-family="Archivo Black, Arial Black, sans-serif" font-size="22" fill="${S === '#111111' ? '#FFF' : '#000'}">$</text>` });
 const coreOf = no => TYPES[CARDS[no].plus].core;
 // the mascot only has eyes, so each card's mood is all in how they look: round, happy, wide, angry, sleepy, wink or starry; X when broken, closed while asleep
-const MOOD = { '01': 'angry', '03': 'happy', '04': 'round', '05': 'wide', '06': 'sleepy', '07': 'wide', '10': 'starry', '15': 'angry', '16': 'wink', '17': 'happy', '13': 'starry' };
+const MOOD = { '01': 'angry', '03': 'happy', '04': 'round', '05': 'wide', '06': 'sleepy', '07': 'wide', '10': 'round', '15': 'angry', '16': 'wink', '17': 'happy', '13': 'wide' };
 function faceHTML(c, art, state, eye) {
   const [x1, y1, x2, y2] = art.e;
   const st = d => `<path d="${d}" fill="none" stroke="${eye}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>`;
@@ -1313,14 +1327,12 @@ function faceHTML(c, art, state, eye) {
   if (state === 'pending') return shut(x1, y1) + shut(x2, y2);
   const m = MOOD[c.no] || 'round', blink = `class="cardeye" style="animation-delay:-${(+c.no % 7) * 0.6}s"`;
   const oval = (x, y, rx, ry, rot = 0) => `<ellipse cx="${x}" cy="${y}" rx="${(rx * 1.2).toFixed(1)}" ry="${(ry * 1.2).toFixed(1)}" fill="${eye}"${rot ? ` transform="rotate(${rot} ${x} ${y})"` : ''}/>`;
-  const glint = (x, y, r = 1.7) => `<circle cx="${x + 1.5}" cy="${y - 3}" r="${r}" fill="#FFF" opacity="0.9"/>`;
-  if (m === 'happy') return arc(x1, y1) + arc(x2, y2);
-  if (m === 'wink') return `<g ${blink}>${oval(x1, y1, 4.5, 8)}</g>` + glint(x1, y1) + arc(x2, y2);
+    if (m === 'happy') return arc(x1, y1) + arc(x2, y2);
+  if (m === 'wink') return `<g ${blink}>${oval(x1, y1, 4.5, 8)}</g>` + arc(x2, y2);
   if (m === 'sleepy') { const half = (x, y) => `<path d="M${x - 7} ${y - 1}H${x + 7}A7 8 0 0 1 ${x - 7} ${y - 1}Z" fill="${eye}"/>`; return half(x1, y1) + half(x2, y2); }
   if (m === 'angry') return `<g ${blink}>${oval(x1, y1, 4.2, 8, -28)}${oval(x2, y2, 4.2, 8, 28)}</g>`;
-  if (m === 'wide') return `<g ${blink}>${oval(x1, y1, 6.5, 11)}${oval(x2, y2, 6.5, 11)}</g>` + glint(x1, y1, 2.2) + glint(x2, y2, 2.2);
-  if (m === 'starry') return `<g ${blink}>${oval(x1, y1, 6, 9.5)}${oval(x2, y2, 6, 9.5)}</g>` + glint(x1 - 1, y1 - 1, 2.4) + glint(x2 - 1, y2 - 1, 2.4) + `<circle cx="${x1 + 2}" cy="${y1 + 4}" r="1.2" fill="#FFF" opacity="0.8"/><circle cx="${x2 + 2}" cy="${y2 + 4}" r="1.2" fill="#FFF" opacity="0.8"/>`;
-  return `<g ${blink}>${oval(x1, y1, 4.5, 8)}${oval(x2, y2, 4.5, 8)}</g>` + glint(x1, y1) + glint(x2, y2);
+  if (m === 'wide') return `<g ${blink}>${oval(x1, y1, 6.5, 11)}${oval(x2, y2, 6.5, 11)}</g>`;
+  return `<g ${blink}>${oval(x1, y1, 4.5, 8)}${oval(x2, y2, 4.5, 8)}</g>`;
 }
 // state: 'on' holds, 'broken' cracked for today (or the week), 'pending' asleep until something is done
 function cardHTML(c, state = 'on') {
@@ -1335,7 +1347,7 @@ function cardHTML(c, state = 'on') {
   const sticker = state === 'broken' ? (c.weekly ? 'Broken · until Sunday' : 'Broken · back tomorrow') : state === 'pending' ? 'Asleep · log one to wake it' : '';
   // a collectible-card build: white sleeve, a frame in the card's colour, name plaque row, art window, rule text box, footer strip
   const lip = off ? '#A8A59B' : `color-mix(in srgb, ${t.core} 62%, #000)`;
-  const win = off ? (t.dark ? '#1C1C20' : '#E3E1D9') : t.dark ? '#2A2A2F' : `color-mix(in srgb, ${t.core} 16%, ${face})`;
+  const win = off ? (t.dark ? '#1C1C20' : '#E3E1D9') : t.dark ? '#000000' : '#FFFFFF';
   const box = t.dark ? 'rgba(236,234,227,0.10)' : 'rgba(17,17,17,0.06)';
   const key = t.dark ? 'rgba(236,234,227,0.22)' : 'rgba(17,17,17,0.14)';
   const nameSize = c.name.length > 11 ? 12 : 14;
@@ -1350,8 +1362,9 @@ function cardHTML(c, state = 'on') {
      <path d="${art.b || ''}" fill="${shape}" fill-rule="${art.rule || 'nonzero'}"/>
      <path d="${art.bs || ''}" fill="none" stroke="${shape}" stroke-width="${art.bw || 0}" stroke-linecap="round" stroke-linejoin="round"/>
      <path d="${art.cut || ''}" fill="${win}"/>
-     <path d="${art.a || ''}" fill="${core}"/>
-     <path d="${art.as || ''}" fill="none" stroke="${core}" stroke-width="${art.aw || 0}" stroke-linecap="round" stroke-linejoin="round"/>
+     <path d="${art.a || ''}" fill="${art.ac === 'S' ? shape : win}"/>
+     ${art.as ? (art.asc === 'S' ? `<path d="${art.as}" fill="none" stroke="${win}" stroke-width="${art.aw + 8}" stroke-linecap="round" stroke-linejoin="round"/>` : '') + `<path d="${art.as}" fill="none" stroke="${art.asc === 'S' ? shape : win}" stroke-width="${art.aw}" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+     ${art.d ? art.d(shape, win) : ''}
      ${faceHTML(c, art, state, art.ec === 'body' ? shape : win)}
      ${state === 'broken' ? `<path d="M30 0L96 70L72 104L150 168L128 224" fill="none" stroke="${face}" stroke-width="9" stroke-linejoin="bevel"/><path d="M96 70L132 52M150 168L198 150" fill="none" stroke="${face}" stroke-width="6"/>` : ''}
     </svg>
