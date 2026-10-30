@@ -1046,6 +1046,14 @@ button.hcard:active > div { transform: translateY(2px); }
 .wkrow .endbtn > .top { left: 20px; right: 20px; top: 19px; height: 78px; font-size: 16px; }
 .wkrow .endbtn .scr { width: 9px; height: 9px; } .wkrow .endbtn .scr.a { left: 6px; bottom: 6px; } .wkrow .endbtn .scr.b { right: 6px; bottom: 6px; }
 .wkrow { margin-top: 12px; }
+
+/* selected category: no outline, the pressed red key is enough */
+.cats .cap[aria-pressed="true"] { outline: none; }
+/* close key: a round soft-pink bubble with a chunky white cross, pops and spins a little on tap */
+.sheet .x { width: 44px; height: 44px; border-radius: 50%; transform: none; background: radial-gradient(circle at 36% 26%, #FFD0DC 0%, #FF7A9E 50%, #F0426F 100%); color: #FFF; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.55), inset 0 -4px 6px rgba(150, 10, 50, 0.4), 0 6px 0 #C22E55, 0 10px 12px -4px rgba(150, 10, 50, 0.45); transition: transform 0.25s cubic-bezier(.3,1.8,.5,1), box-shadow 0.12s; }
+.sheet .x svg { width: 18px; height: 18px; stroke-width: 4.4; filter: drop-shadow(0 1px 0 rgba(150, 10, 50, 0.6)); transition: transform 0.3s cubic-bezier(.3,1.8,.5,1); }
+.sheet .x:hover { transform: scale(1.06); } .sheet .x:hover svg { transform: rotate(90deg); }
+.sheet .x:active { transform: translateY(4px) scale(0.97); box-shadow: inset 0 0 0 3px rgba(255,255,255,0.55), inset 0 -2px 4px rgba(150, 10, 50, 0.4), 0 2px 0 #C22E55, 0 4px 6px -4px rgba(150, 10, 50, 0.45); }
 </style>
 
 <div class="device">
