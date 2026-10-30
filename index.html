@@ -1185,6 +1185,11 @@ button.hcard:active > div { transform: translateY(2px); }
 .fk-cap:active { transform: translateY(5px); }
 .fk-cap.pop { animation: fkPop2 0.4s cubic-bezier(.3,1.9,.5,1); }
 @keyframes fkPop2 { 0% { transform: translateY(0) scale(1.05); } 100% { transform: translateY(6px); } }
+.openfx .ring { border-width: 4px; box-shadow: none; } .openfx .r1 { border-color: #FF4D6A; } .openfx .r2 { border-color: #E4FF1A; }
+.openfx .flash { opacity: 0.8; }
+.spark { position: absolute; width: 22px; height: 22px; z-index: 115; pointer-events: none; animation: sparkPop 0.9s cubic-bezier(.3,1.6,.5,1) both; }
+.spark svg { width: 100%; height: 100%; }
+@keyframes sparkPop { 0% { transform: scale(0) rotate(-40deg); opacity: 0; } 40% { transform: scale(1.3) rotate(10deg); opacity: 1; } 100% { transform: scale(0) rotate(60deg); opacity: 0; } }
 </style>
 
 <div class="device">
@@ -1979,7 +1984,7 @@ function openShow(sh) {
   const sr = sh.getBoundingClientRect(), r = stack.getBoundingClientRect();
   const cx = r.left + r.width / 2 - sr.left, cy = r.top + 220 - sr.top + sh.scrollTop;
   const fx = document.createElement('div'); fx.className = 'openfx'; fx.style.setProperty('--cx', cx + 'px'); fx.style.setProperty('--cy', cy + 'px');
-  fx.innerHTML = '<i class="rays"></i><i class="ring r1"></i><i class="ring r2"></i><i class="ring r3"></i><i class="flash"></i>';
+  fx.innerHTML = '<i class="ring r1"></i><i class="ring r2"></i><i class="flash"></i>';
   sh.appendChild(fx); setTimeout(() => fx.remove(), 2200);
   sh.animate([{ translate: '0 0' }, { translate: '-4px 3px' }, { translate: '3px -3px' }, { translate: '0 0' }], { duration: 300, easing: 'ease-out' });
   // the row slides in from the right in its real order (front card first, then its neighbours), one after another, never piled up
@@ -1990,18 +1995,21 @@ function openShow(sh) {
     c.animate([{ translate: '520px 0', rotate: '8deg', opacity: 0 }, { opacity: 1, offset: 0.15 }, { translate: front ? '-16px 0' : '-8px 0', rotate: '-1.5deg', offset: 0.78 }, { translate: '0 0', rotate: '0deg' }],
       { duration: front ? 760 : 620, delay: 380 + i * 160, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'backwards' });
   });
+  setTimeout(() => { const R = stack.getBoundingClientRect(); [[0.06, 0.12, '#FFFFFF', 26], [0.94, 0.1, '#E4FF1A', 20], [0.02, 0.6, '#FF4D6A', 18], [0.98, 0.55, '#FFFFFF', 22], [0.12, 0.98, '#E4FF1A', 20], [0.88, 0.95, '#FF8A1F', 18]].forEach(([fx0, fy0, col, sz], i) => { const sp = document.createElement('i'); sp.className = 'spark'; sp.style.cssText = `left:${R.left - sr.left + R.width * 0.5 - 150 + 300 * fx0 - sz / 2}px;top:${R.top - sr.top + sh.scrollTop + 8 + 425 * fy0 - sz / 2}px;width:${sz}px;height:${sz}px;animation-delay:${i * 90}ms`; sp.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 11 8 12 0Z" fill="${col}" stroke="#111" stroke-width="1.2"/></svg>`; sh.appendChild(sp); setTimeout(() => sp.remove(), 1500 + i * 90); }); }, 1100);
   const fc = cards.find(c => +c.dataset.k === 0); if (fc) { const g = document.createElement('i'); g.className = 'cardshine'; fc.appendChild(g); setTimeout(() => g.remove(), 1700); }
   // confetti canvas
   const cv = document.createElement('canvas'); cv.className = 'confcv'; cv.width = sr.width * 2; cv.height = sr.height * 2; cv.style.cssText = `position:absolute;left:0;top:${sh.scrollTop}px;width:${sr.width}px;height:${sr.height}px;pointer-events:none;z-index:120`;
   sh.appendChild(cv); const g = cv.getContext('2d'); g.scale(2, 2);
-  const COLORS = ['#E4FF1A', '#FF4D6A', '#2E8BFF', '#FF8A00', '#A55BFF', '#FFFFFF', '#3BD16F', '#FFD000'], P = [];
+  const COLORS = ['#E4FF1A', '#FF4D6A', '#2E8BFF', '#FF8A1F', '#C9C3FF', '#FFFFFF'], P = [];
   const y0 = cy - sh.scrollTop;
   // the canvas-confetti "realistic" recipe: several overlapping shots from one point, each with its own spread, speed and size; strong drag so they pop and hang,
   // then a slow flutter down with a wobble. Shots are staged after the cards land instead of all at once.
-  const add = (x, y, ang, spread, spd, n, scale = 1, kinds = ['r', 'r', 'c', 'st', 's']) => { for (let i = 0; i < n; i++) { const a = ang + (Math.random() - 0.5) * spread, v = spd * (0.55 + Math.random() * 0.6); P.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 9, w: (7 + Math.random() * 8) * scale, h: (4 + Math.random() * 5) * scale, c: COLORS[(Math.random() * COLORS.length) | 0], k: kinds[(Math.random() * kinds.length) | 0], ph: Math.random() * 6.28, wob: 0.6 + Math.random() * 1.2, term: 150 + Math.random() * 110, born: 0, life: 2600 + Math.random() * 1200 }); } };
-  const shots = (x, y, ang) => { add(x, y, ang, 0.45, 1250, 26); add(x, y, ang, 1.0, 1000, 20, 1); add(x, y, ang, 1.7, 760, 34, 0.85); add(x, y, ang, 2.4, 1050, 10, 1.4, ['s', 'st']); add(x, y, ang, 2.4, 620, 14, 1.2, ['r', 'c']); };
-  setTimeout(() => { shots(-4, sr.height - 160, -Math.PI * 0.36); shots(sr.width + 4, sr.height - 160, -Math.PI * 0.64); }, 1200);
-  setTimeout(() => shots(cx, y0 + 20, -Math.PI / 2), 1700);
+  const add = (x, y, ang, spread, spd, n, scale = 1, kinds = ['r', 'r', 'c', 'sp']) => { for (let i = 0; i < n; i++) { const a = ang + (Math.random() - 0.5) * spread, v = spd * (0.5 + Math.random() * 0.6); P.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 8, w: (13 + Math.random() * 6) * scale, h: (7 + Math.random() * 3) * scale, c: COLORS[(Math.random() * COLORS.length) | 0], k: kinds[(Math.random() * kinds.length) | 0], ph: Math.random() * 6.28, wob: 0.6 + Math.random() * 1, term: 130 + Math.random() * 90, born: 0, life: 2800 + Math.random() * 900 }); } };
+  // two party-popper cannons from the bottom corners, then a soft shower from the top of the stack; fewer, bigger, calmer pieces in the app's own colours
+  const pop = (x, ang) => { add(x, sr.height - 170, ang, 0.5, 1250, 14); add(x, sr.height - 170, ang, 0.9, 950, 14); add(x, sr.height - 170, ang, 1.2, 720, 8, 1.2, ['sp', 'c']); };
+  setTimeout(() => { pop(-6, -Math.PI * 0.36); pop(sr.width + 6, -Math.PI * 0.64); }, 1250);
+  setTimeout(() => { for (let i = 0; i < 26; i++) add(30 + Math.random() * (sr.width - 60), -20, Math.PI / 2, 0.3, 60 + Math.random() * 120, 1, 1, ['r', 'c', 'sp']); }, 1750);
+  setTimeout(() => { pop(-6, -Math.PI * 0.38); pop(sr.width + 6, -Math.PI * 0.62); }, 2150);
   let last = performance.now(); const t0 = last;
   const draw = t => {
     const dt = Math.min(0.034, (t - last) / 1000); last = t; g.clearRect(0, 0, sr.width, sr.height); const el = t - t0; let alive = 0;
@@ -2010,12 +2018,11 @@ function openShow(sh) {
       p.born += dt * 1000; if (p.born > p.life) return; alive++;
       p.vx *= drag; p.vy *= drag; p.vy += 560 * dt; if (p.vy > p.term) p.vy = p.term;
       p.ph += dt * 7 * p.wob; p.x += (p.vx + Math.sin(p.ph) * 38) * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
-      const fade = Math.min(1, (p.life - p.born) / 500); g.save(); g.globalAlpha = fade; g.translate(p.x, p.y); g.rotate(p.rot); g.fillStyle = p.c;
+      const fade = Math.min(1, (p.life - p.born) / 500); g.save(); g.globalAlpha = fade; g.translate(p.x, p.y); g.rotate(p.rot); g.fillStyle = p.c; g.shadowColor = 'rgba(20,20,40,0.22)'; g.shadowOffsetY = 2; g.shadowBlur = 3;
       const flip = Math.cos(p.ph * 1.3);
-      if (p.k === 'r') { g.scale(1, flip); g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); }
-      else if (p.k === 'c') { g.beginPath(); g.arc(0, 0, p.h * 0.7, 0, 6.28); g.fill(); }
-      else if (p.k === 'st') { g.scale(flip, 1); g.fillRect(-1.6, -p.w * 1.4, 3.2, p.w * 2.8); }
-      else { g.beginPath(); for (let i = 0; i < 10; i++) { const rr = i % 2 ? p.h * 0.5 : p.h * 1.3, an = i * Math.PI / 5; g.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); } g.closePath(); g.fill(); }
+      if (p.k === 'r') { g.scale(1, flip); const r = p.h / 2; g.beginPath(); g.moveTo(-p.w / 2 + r, -p.h / 2); g.arcTo(p.w / 2, -p.h / 2, p.w / 2, p.h / 2, r); g.arcTo(p.w / 2, p.h / 2, -p.w / 2, p.h / 2, r); g.arcTo(-p.w / 2, p.h / 2, -p.w / 2, -p.h / 2, r); g.arcTo(-p.w / 2, -p.h / 2, p.w / 2, -p.h / 2, r); g.fill(); }
+      else if (p.k === 'c') { g.scale(1, 0.55 + 0.45 * Math.abs(flip)); g.beginPath(); g.arc(0, 0, p.h * 0.75, 0, 6.28); g.fill(); }
+      else { g.scale(0.55 + 0.45 * Math.abs(flip), 1); g.beginPath(); const R = p.w * 0.55, q = R * 0.2; g.moveTo(0, -R); g.quadraticCurveTo(q, -q, R, 0); g.quadraticCurveTo(q, q, 0, R); g.quadraticCurveTo(-q, q, -R, 0); g.quadraticCurveTo(-q, -q, 0, -R); g.fill(); }
       g.restore();
     });
     if (el < 2600 || (alive && el < 6500)) requestAnimationFrame(draw); else cv.remove();
