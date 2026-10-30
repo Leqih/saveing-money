@@ -536,10 +536,6 @@ button.hcard:active > div { transform: translateY(2px); }
 .cf { position: absolute; left: 0; top: 0; opacity: 0; animation: confetti 1.15s cubic-bezier(.15,.7,.4,1) forwards; animation-delay: var(--cd); }
 @keyframes confetti { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 45% { opacity: 1; transform: translate(var(--cx), var(--cy)) rotate(var(--cr)); } 100% { opacity: 0; transform: translate(calc(var(--cx) * 1.25), calc(var(--cy) + 280px)) rotate(calc(var(--cr) * 2)); } }
 /* the stack: positions come from layoutStack(), CSS only animates between them */
-/* a card's eyes blink now and then */
-.cardeye { transform-box: fill-box; transform-origin: center; animation: blink 5s infinite; }
-@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
-@media (prefers-reduced-motion: reduce) { .cardeye { animation: none; } }
 /* dragging the pack or a card shouldn't highlight text */
 .bag, .hand, .stack, .sc2, .drawfoot, .dkc-count { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .stack { position: absolute; left: 0; right: 0; top: 0; height: 441px; overflow: visible; touch-action: none; cursor: grab; }
@@ -1306,7 +1302,7 @@ const tick = (cx, cy, r1, r2, n) => Array.from({ length: n }, (_, k) => { const 
 const lines = (S, W, o) => o.map(([c, d, w, extra = '']) => `<path d="${d}" fill="none" stroke="${c === 'S' ? S : W}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`).join('');
 Object.assign(ART['01'], { asc: 'S', d: (S, W) => lines(S, W, [['W', 'M30 166Q120 196 210 166', 4], ['W', 'M52 192Q120 214 188 192', 4], ['S', 'M30 68Q20 50 34 38Q48 26 38 8', 5], ['S', 'M56 74Q48 58 58 46', 5]]) });
 Object.assign(ART['03'], { d: (S, W) => lines(S, W, [['W', 'M62 104L68 176', 5], ['W', 'M164 118L160 168', 5], ['W', 'M46 71H70M84 71H100', 4]]) });
-Object.assign(ART['04'], { d: (S, W) => lines(S, W, [['W', 'M60 54q10-12 20 0', 4], ['W', 'M92 32q10-12 20 0', 4], ['W', 'M130 28q10-12 20 0', 4], ['W', 'M166 42q10-12 20 0', 4], ['W', 'M194 74q8-10 16 0', 4], ['W', 'M86 120Q120 104 154 120', 4], ['S', 'M20 224H220', 3, 'stroke-dasharray="2 9"']]) });
+Object.assign(ART['04'], { d: (S, W) => lines(S, W, [['W', 'M60 54q10-12 20 0', 4], ['W', 'M92 32q10-12 20 0', 4], ['W', 'M130 28q10-12 20 0', 4], ['W', 'M166 42q10-12 20 0', 4], ['W', 'M194 74q8-10 16 0', 4], ['S', 'M20 224H220', 3, 'stroke-dasharray="2 9"']]) });
 Object.assign(ART['05'], { ac: 'S', d: (S, W) => lines(S, W, [['W', tick(120, 112, 70, 96, 16), 5], ['S', tick(120, 112, 120, 134, 16), 4]]) });
 Object.assign(ART['06'], { ac: 'S', d: (S, W) => lines(S, W, [['S', star4(140, 30, 9), 3]]) + `<path d="${ci(40, 80, 7) + ci(36, 180, 9) + ci(75, 200, 6) + ci(30, 140, 5)}" fill="${W}"/>` });
 Object.assign(ART['07'], { d: (S, W) => lines(S, W, [['S', 'M88 68L96 150M184 72L174 150', 4]]) + `<path d="${ci(92, 196, 7) + ci(182, 196, 7)}" fill="${W}"/><path d="${ci(112, 44, 16)}" fill="${S}"/><path d="${rr(142, 26, 40, 38, 8)}" fill="${S}"/>` });
@@ -1316,30 +1312,6 @@ Object.assign(ART['16'], { ac: 'S', d: (S, W) => `<path d="${ci(188, 182, 30)}" 
 Object.assign(ART['17'], { d: (S, W) => lines(S, W, [['S', 'M84 66V46Q84 30 100 30H140Q156 30 156 46V66', 10], ['W', 'M50 83H190', 3, 'stroke-dasharray="2 9"'], ['W', 'M40 192H200', 4]]) });
 Object.assign(ART['13'], { ac: 'S', d: (S, W) => `<path d="${ci(222, 128, 3) + ci(228, 141, 3)}" fill="${W}"/><path d="M96 66h48" stroke="${W}" stroke-width="0"/>` + lines(S, W, [['W', 'M64 146Q80 168 100 170', 4]]) + `<text x="120" y="36" text-anchor="middle" font-family="Archivo Black, Arial Black, sans-serif" font-size="22" fill="${S === '#111111' ? '#FFF' : '#000'}">$</text>` });
 const coreOf = no => TYPES[CARDS[no].plus].core;
-// each card has its own look: eye shape, mouth and brows, all drawn in the one flat colour of the art; X eyes and a wobbly mouth when broken, closed eyes while asleep
-const MOOD = { '01': ['angry', 'smirk', 1], '03': ['happy', 'grin', 0], '04': ['round', 'o', 0], '05': ['wide', 'smile', 0], '06': ['sleepy', 'cat', 0], '07': ['wide', 'o', 0], '10': ['round', 'smile', 0], '15': ['angry', 'flat', 1], '16': ['wink', 'smirk', 0], '17': ['happy', 'grin', 0], '13': ['wide', 'grin', 0] };
-function faceHTML(c, art, state, eye) {
-  const [x1, y1, x2, y2] = art.e, mx = (x1 + x2) / 2, my = Math.max(y1, y2) + 22;
-  const st = (d, w = 4.5) => `<path d="${d}" fill="none" stroke="${eye}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
-  const arc = (x, y) => st(`M${x - 7} ${y + 4}Q${x} ${y - 9} ${x + 7} ${y + 4}`);
-  const shut = (x, y) => st(`M${x - 7} ${y - 2}Q${x} ${y + 8} ${x + 7} ${y - 2}`);
-  if (state === 'broken') { const X = (x, y) => st(`M${x - 6} ${y - 7}L${x + 6} ${y + 7}M${x + 6} ${y - 7}L${x - 6} ${y + 7}`); return X(x1, y1) + X(x2, y2) + st(`M${mx - 12} ${my + 3}q6 -9 12 0t12 0`); }
-  if (state === 'pending') return shut(x1, y1) + shut(x2, y2) + st(`M${mx - 6} ${my + 2}h12`);
-  const [look, mouth, brows] = MOOD[c.no] || ['round', 'smile', 0], blink = `class="cardeye" style="animation-delay:-${(+c.no % 7) * 0.6}s"`;
-  const oval = (x, y, rx, ry, rot = 0) => `<ellipse cx="${x}" cy="${y}" rx="${(rx * 1.2).toFixed(1)}" ry="${(ry * 1.2).toFixed(1)}" fill="${eye}"${rot ? ` transform="rotate(${rot} ${x} ${y})"` : ''}/>`;
-  let eyes;
-  if (look === 'happy') eyes = arc(x1, y1) + arc(x2, y2);
-  else if (look === 'wink') eyes = `<g ${blink}>${oval(x1, y1, 4.5, 8)}</g>` + arc(x2, y2);
-  else if (look === 'sleepy') { const half = (x, y) => `<path d="M${x - 8} ${y - 1}H${x + 8}A8 9 0 0 1 ${x - 8} ${y - 1}Z" fill="${eye}"/>`; eyes = half(x1, y1) + half(x2, y2); }
-  else if (look === 'angry') eyes = `<g ${blink}>${oval(x1, y1, 4.2, 8, -28)}${oval(x2, y2, 4.2, 8, 28)}</g>`;
-  else if (look === 'wide') eyes = `<g ${blink}>${oval(x1, y1, 6.5, 11)}${oval(x2, y2, 6.5, 11)}</g>`;
-  else eyes = `<g ${blink}>${oval(x1, y1, 4.5, 8)}${oval(x2, y2, 4.5, 8)}</g>`;
-  const br = brows ? st(`M${x1 - 9} ${y1 - 20}L${x1 + 7} ${y1 - 14}M${x2 + 9} ${y2 - 20}L${x2 - 7} ${y2 - 14}`) : '';
-  const m = { smile: st(`M${mx - 10} ${my}Q${mx} ${my + 11} ${mx + 10} ${my}`), grin: `<path d="M${mx - 11} ${my - 2}H${mx + 11}A11 12 0 0 1 ${mx - 11} ${my - 2}Z" fill="${eye}"/>`,
-    o: `<ellipse cx="${mx}" cy="${my + 3}" rx="5" ry="6" fill="${eye}"/>`, flat: st(`M${mx - 8} ${my + 2}H${mx + 8}`),
-    smirk: st(`M${mx - 9} ${my + 4}Q${mx} ${my + 9} ${mx + 10} ${my - 3}`), cat: st(`M${mx - 11} ${my - 1}Q${mx - 5.5} ${my + 9} ${mx} ${my - 1}Q${mx + 5.5} ${my + 9} ${mx + 11} ${my - 1}`) }[mouth];
-  return eyes + br + m;
-}
 // state: 'on' holds, 'broken' cracked for today (or the week), 'pending' asleep until something is done
 function cardHTML(c, state = 'on') {
   const t = TYPES[c.plus], art = ART[c.no], off = state !== 'on';
@@ -1371,7 +1343,6 @@ function cardHTML(c, state = 'on') {
      <path d="${art.a || ''}" fill="${art.ac === 'S' ? shape : win}"/>
      ${art.as ? (art.asc === 'S' ? `<path d="${art.as}" fill="none" stroke="${win}" stroke-width="${art.aw + 8}" stroke-linecap="round" stroke-linejoin="round"/>` : '') + `<path d="${art.as}" fill="none" stroke="${art.asc === 'S' ? shape : win}" stroke-width="${art.aw}" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
      ${art.d ? art.d(shape, win) : ''}
-     ${faceHTML(c, art, state, art.ec === 'body' ? shape : win)}
      ${state === 'broken' ? `<path d="M30 0L96 70L72 104L150 168L128 224" fill="none" stroke="${face}" stroke-width="9" stroke-linejoin="bevel"/><path d="M96 70L132 52M150 168L198 150" fill="none" stroke="${face}" stroke-width="6"/>` : ''}
     </svg>
    </div>
@@ -1387,7 +1358,7 @@ function artIcon(no, size) {
   return `<svg width="${size}" height="${Math.round(size * 224 / 240)}" viewBox="0 0 240 224" aria-hidden="true">
     <path d="${art.b || ''}" fill="#111" fill-rule="${art.rule || 'nonzero'}"/><path d="${art.bs || ''}" fill="none" stroke="#111" stroke-width="${art.bw || 0}" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="${art.cut || ''}" fill="${coreOf(no)}"/><path d="${art.a || ''}" fill="#FFF"/><path d="${art.as || ''}" fill="none" stroke="#FFF" stroke-width="${art.aw || 0}" stroke-linecap="round"/>
-    <ellipse cx="${art.e[0]}" cy="${art.e[1]}" rx="5" ry="9" fill="${art.ec === 'body' ? '#111' : '#FFF'}"/><ellipse cx="${art.e[2]}" cy="${art.e[3]}" rx="5" ry="9" fill="${art.ec === 'body' ? '#111' : '#FFF'}"/></svg>`;
+  </svg>`;
 }
 
 /* ---------- rules ---------- */
