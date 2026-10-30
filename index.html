@@ -506,7 +506,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .stack { position: absolute; left: 0; right: 0; top: 0; height: 441px; overflow: visible; touch-action: none; cursor: grab; }
 .stack.dragging { cursor: grabbing; }
 .sc2 { position: absolute; left: 50%; top: -16px; width: 300px; height: 425px; margin-left: -150px; border: 0; padding: 0; background: none; transition: transform 0.38s cubic-bezier(.25,1.3,.5,1), opacity 0.2s; }
-.stack.dragging .sc2 { transition: none; }
+.stack.dragging .sc2, .stack.gliding .sc2 { transition: none; }
 .stack.settle .sc2 { transition: transform 0.6s cubic-bezier(.22,1,.36,1) var(--sd, 0ms), opacity 0.2s; }
 .stack.slide1 .sc2.front { animation: slideR 0.62s cubic-bezier(.2,1.3,.4,1) both; }
 .stack.slide-1 .sc2.front { animation: slideL 0.62s cubic-bezier(.2,1.3,.4,1) both; }
@@ -1995,11 +1995,26 @@ function placeStack(stack, at, dx = 0) {
     const k = +el.dataset.i - at, off = k * CARD_STEP + dx, d = Math.min(1, Math.abs(off) / CARD_STEP);
     el.style.transform = `translate(${off.toFixed(1)}px, ${(d * 14).toFixed(1)}px) rotate(${(off / CARD_STEP * 7).toFixed(2)}deg) scale(${(1 - d * 0.07).toFixed(3)})`;
     el.style.zIndex = String(50 - Math.round(d * 4));
-    el.style.opacity = Math.abs(k) > 2 ? '0' : '1';
-    el.dataset.k = k;
+    el.style.opacity = Math.max(0, Math.min(1, 2.6 - Math.abs(k))).toFixed(2);
+    el.dataset.k = Math.round(k);
     const eg = el.querySelector('.sc2-edge'); if (eg) eg.style.opacity = String(Math.min(1, d * 1.6));
-    el.classList.toggle('front', k === 0);
+    el.classList.toggle('front', Math.abs(k) < 0.5);
   });
+  stack._at = at - dx / CARD_STEP;
+}
+// the row coasts to its resting card on a spring that keeps the finger's speed, so a flick carries on instead of restarting
+function glide(stack, to, v0 = 0, done) {
+  cancelAnimationFrame(stack._raf);
+  let x = stack._at == null ? to : stack._at, v = v0, last = performance.now();
+  stack.classList.add('gliding');
+  const K = 190, C = 21;
+  const step = now => {
+    let dt = Math.min(0.032, (now - last) / 1000); last = now;
+    for (let t = 0; t < dt; t += 0.004) { const h = Math.min(0.004, dt - t); v += (-K * (x - to) - C * v) * h; x += v * h; }
+    if (Math.abs(x - to) < 0.0015 && Math.abs(v) < 0.02) { placeStack(stack, to); stack.classList.remove('gliding'); if (done) done(); return; }
+    placeStack(stack, x); stack._raf = requestAnimationFrame(step);
+  };
+  stack._raf = requestAnimationFrame(step);
 }
 const layoutStack = placeStack;
 // flat chamfered panels: the strip on top tears off the body along a slightly slanted line
@@ -2130,7 +2145,9 @@ app.addEventListener('pointerdown', e => {
   if (b) { tear = { b, strip: b.querySelector('.bag-strip'), x: e.clientX, p: 0 }; capture(b, e.pointerId); b.classList.add('tearing-drag'); return; }
   const st = e.target.closest && e.target.closest('.stack');
   if (st) { swipe = { st, x: e.clientX, y: e.clientY, dx: 0, n: st.querySelectorAll('.sc2').length, front: st.querySelector('.sc2.front'), moved: false, id: e.pointerId, mode: 'side', dy: 0 };
-    if (swipe.front) swipe.rect = swipe.front.getBoundingClientRect(); }
+    if (swipe.front) swipe.rect = swipe.front.getBoundingClientRect();
+    // grabbing the row mid-glide catches it where it is
+    cancelAnimationFrame(st._raf); st.classList.remove('gliding'); swipe.at0 = st._at == null ? draft.ci : st._at; draft.ci = Math.max(0, Math.min(swipe.n - 1, Math.round(swipe.at0))); }
 });
 app.addEventListener('pointermove', e => {
   if (tear) {
@@ -2156,7 +2173,7 @@ app.addEventListener('pointermove', e => {
     const lastI = swipe.n - 1, atEnd = (draft.ci === 0 && dx > 0) || (draft.ci === lastI && dx < 0);
     const nowx = performance.now(); if (swipe.lx != null && nowx > swipe.ltx) swipe.vx = (dx - swipe.lx) / (nowx - swipe.ltx) * 1000; swipe.lx = dx; swipe.ltx = nowx;
     swipe.dx = atEnd ? dx * 0.3 : dx;
-    placeStack(swipe.st, draft.ci, swipe.dx);
+    placeStack(swipe.st, swipe.at0, swipe.dx);
     return;
   }
   const b = e.target.closest && e.target.closest('.bag.closed'); if (!b) return;
@@ -2188,9 +2205,7 @@ app.addEventListener('pointermove', e => {
     }
     // past a short pull (or a flick) the row slides one card over on a spring; otherwise it settles back. The DOM stays put.
     const dir = Math.abs(w.dx) > 60 || Math.abs(w.vx || 0) > 500 ? -Math.sign(Math.abs(w.dx) > 60 ? w.dx : w.vx) : 0, to = Math.min(w.n - 1, Math.max(0, draft.ci + dir));
-    w.st.classList.add('settle');
-    draft.ci = to; placeStack(w.st, to);
-    setTimeout(() => w.st.classList.remove('settle'), 560);
+    draft.ci = to; glide(w.st, to, -(w.vx || 0) / CARD_STEP);
   }
 }));
 app.addEventListener('pointerout', e => {
@@ -3011,7 +3026,7 @@ app.addEventListener('click', e => {
     if (draft.swiped) return;
     const no = t.dataset.pick, inHand = draft.hand.filter(x => !draft.sel.includes(x)), i = inHand.indexOf(no);
     // a side card comes to the front first; the front card is the one you keep
-    if (i !== draft.ci) { draft.ci = i; layoutStack(top.querySelector('.stack'), i); setTimeout(() => replaceSheet(top, renderDraw), 340); return; }
+    if (i !== draft.ci) { draft.ci = i; glide(top.querySelector('.stack'), i, 0, () => replaceSheet(top, renderDraw)); return; }
     if (!keepFront(top, t.closest('.sc2'))) replaceSheet(top, renderDraw);
     return;
   }
