@@ -2762,7 +2762,7 @@ function reviewHTML(y, m) {
   return `
     <div class="mhero ${saved >= 0 ? '' : 'over'}"><span class="px">${MON[m]} · ${st.days} days logged</span><b>${saved >= 0 ? 'Saved' : 'Over'} ¥${Math.abs(saved)}</b><small>Spent outside the allowance ¥${st.spent}, across these ${st.days} days you could spend ¥${st.allowed}</small></div>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
-      ${cap('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', 'Daily avg outside allowance', `¥${Math.round(st.spent / st.days)}`)}
+      ${cap('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', 'Daily average', `¥${Math.round(st.spent / st.days)}`)}
       ${cap('#B8D000', 'linear-gradient(180deg,#F2FF7A 0%,#E4FF1A 100%)', 'Zero-spend days', `${st.zero} days`)}
       ${cap('#D12E2E', 'linear-gradient(180deg,#FF7A7A 0%,#FF4B4B 100%)', 'All 3 held', `${st.allHeld} days`)}
     </div>
