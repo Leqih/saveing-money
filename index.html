@@ -1091,11 +1091,12 @@ button.hcard:active > div { transform: translateY(2px); }
 .openfx .ring { width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; border: 6px solid #FFF; box-shadow: 0 0 22px rgba(255, 230, 80, 0.9), inset 0 0 18px rgba(255, 230, 80, 0.7); opacity: 0; animation: ringOut 1s cubic-bezier(.1,.7,.3,1) both; }
 .openfx .r2 { animation-delay: 0.14s; border-color: #E4FF1A; } .openfx .r3 { animation-delay: 0.28s; border-color: #FF4D6A; }
 @keyframes ringOut { 0% { transform: scale(0.1); opacity: 0.95; } 100% { transform: scale(7); opacity: 0; border-width: 1px; } }
-.openfx .flash { width: 700px; height: 700px; margin: -350px 0 0 -350px; border-radius: 50%; background: radial-gradient(circle, #FFFFFF 0%, rgba(255, 245, 160, 0.9) 22%, rgba(255, 245, 160, 0) 62%); animation: flashPop 0.7s ease-out both; }
+.openfx .flash { width: 520px; height: 520px; margin: -260px 0 0 -260px; border-radius: 50%; background: radial-gradient(circle, #FFFFFF 0%, rgba(255, 245, 160, 0.9) 22%, rgba(255, 245, 160, 0) 62%); animation: flashPop 0.7s ease-out both; }
 @keyframes flashPop { 0% { transform: scale(0.1); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
 .cardshine { position: absolute; inset: 0; border-radius: 24px; pointer-events: none; overflow: hidden; z-index: 4; }
-.cardshine::after { content: ''; position: absolute; top: -20%; bottom: -20%; width: 40%; left: -60%; background: linear-gradient(100deg, transparent, rgba(255,255,255,0.85), transparent); transform: skewX(-18deg); animation: shineSweep 0.9s ease-out 0.75s both; }
+.cardshine::after { content: ''; position: absolute; top: -20%; bottom: -20%; width: 40%; left: -60%; background: linear-gradient(100deg, transparent, rgba(255,255,255,0.85), transparent); transform: skewX(-18deg); animation: shineSweep 0.9s ease-out 1.25s both; }
 @keyframes shineSweep { to { left: 130%; } }
+.sc2 { opacity: 0; }
 </style>
 
 <div class="device">
@@ -1892,15 +1893,14 @@ function openShow(sh) {
   const fx = document.createElement('div'); fx.className = 'openfx'; fx.style.setProperty('--cx', cx + 'px'); fx.style.setProperty('--cy', cy + 'px');
   fx.innerHTML = '<i class="rays"></i><i class="ring r1"></i><i class="ring r2"></i><i class="ring r3"></i><i class="flash"></i>';
   sh.appendChild(fx); setTimeout(() => fx.remove(), 2200);
-  sh.animate([{ translate: '0 0' }, { translate: '-7px 5px' }, { translate: '6px -6px' }, { translate: '-4px 3px' }, { translate: '3px -2px' }, { translate: '0 0' }], { duration: 420, easing: 'ease-out' });
-  // cards
-  const cards = [...stack.querySelectorAll('.sc2')].filter(c => +c.dataset.k >= -1 && +c.dataset.k <= 1).sort((a, b) => Math.abs(+b.dataset.k) - Math.abs(+a.dataset.k));
-  cards.forEach((c, i) => {
-    const front = +c.dataset.k === 0, side = +c.dataset.k;
-    c.animate(front
-      ? [{ translate: '0 190px', scale: 0.12, rotate: '-35deg', opacity: 0 }, { opacity: 1, offset: 0.18 }, { translate: '0 -48px', scale: 1.14, rotate: '5deg', offset: 0.6 }, { translate: '0 8px', scale: 0.97, rotate: '-1.5deg', offset: 0.82 }, { translate: '0 0', scale: 1, rotate: '0deg' }]
-      : [{ translate: `${-side * 330}px 150px`, scale: 0.2, rotate: `${side * -50}deg`, opacity: 0 }, { opacity: 1, offset: 0.2 }, { translate: '0 0', scale: 1, rotate: '0deg' }],
-      { duration: front ? 1150 : 900, delay: front ? 280 : 120 + i * 80, easing: 'cubic-bezier(.2,.9,.3,1)', fill: 'backwards' });
+  sh.animate([{ translate: '0 0' }, { translate: '-4px 3px' }, { translate: '3px -3px' }, { translate: '0 0' }], { duration: 300, easing: 'ease-out' });
+  // the row slides in from the right in its real order (front card first, then its neighbours), one after another, never piled up
+  const cards = [...stack.querySelectorAll('.sc2')].filter(c => +c.dataset.k >= -1 && +c.dataset.k <= 2).sort((a, b) => +a.dataset.k - +b.dataset.k);
+  const order = cards.slice().sort((a, b) => Math.abs(+a.dataset.k) - Math.abs(+b.dataset.k));
+  order.forEach((c, i) => {
+    const front = +c.dataset.k === 0;
+    c.animate([{ translate: '520px 0', rotate: '8deg', opacity: 0 }, { opacity: 1, offset: 0.15 }, { translate: front ? '-16px 0' : '-8px 0', rotate: '-1.5deg', offset: 0.78 }, { translate: '0 0', rotate: '0deg' }],
+      { duration: front ? 760 : 620, delay: 380 + i * 160, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'backwards' });
   });
   const fc = cards.find(c => +c.dataset.k === 0); if (fc) { const g = document.createElement('i'); g.className = 'cardshine'; fc.appendChild(g); setTimeout(() => g.remove(), 1700); }
   // confetti canvas
@@ -1908,26 +1908,29 @@ function openShow(sh) {
   sh.appendChild(cv); const g = cv.getContext('2d'); g.scale(2, 2);
   const COLORS = ['#E4FF1A', '#FF4D6A', '#2E8BFF', '#FF8A00', '#A55BFF', '#FFFFFF', '#3BD16F', '#FFD000'], P = [];
   const y0 = cy - sh.scrollTop;
-  const add = (x, y, ang, spd, n, kinds) => { for (let i = 0; i < n; i++) { const a = ang + (Math.random() - 0.5) * 0.9, v = spd * (0.45 + Math.random() * 0.75); P.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 14, w: 6 + Math.random() * 9, h: 4 + Math.random() * 6, c: COLORS[(Math.random() * COLORS.length) | 0], k: kinds[(Math.random() * kinds.length) | 0], ph: Math.random() * 6.28, born: 0, life: 2000 + Math.random() * 800 }); } };
-  add(cx, y0, -Math.PI / 2, 900, 90, ['r', 'r', 'c', 's', 'st']);
-  add(cx, y0, -Math.PI / 2, 520, 40, ['r', 'c', 'st']);
-  const cannon = () => { add(-4, sr.height - 150, -Math.PI / 3, 1150, 38, ['r', 'st', 'r', 'c']); add(sr.width + 4, sr.height - 150, -Math.PI * 2 / 3, 1150, 38, ['r', 'st', 'r', 'c']); };
-  setTimeout(cannon, 260); setTimeout(() => add(cx, y0 - 20, -Math.PI / 2, 760, 50, ['r', 'c', 's', 'st']), 620);
+  // the canvas-confetti "realistic" recipe: several overlapping shots from one point, each with its own spread, speed and size; strong drag so they pop and hang,
+  // then a slow flutter down with a wobble. Shots are staged after the cards land instead of all at once.
+  const add = (x, y, ang, spread, spd, n, scale = 1, kinds = ['r', 'r', 'c', 'st', 's']) => { for (let i = 0; i < n; i++) { const a = ang + (Math.random() - 0.5) * spread, v = spd * (0.55 + Math.random() * 0.6); P.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 9, w: (7 + Math.random() * 8) * scale, h: (4 + Math.random() * 5) * scale, c: COLORS[(Math.random() * COLORS.length) | 0], k: kinds[(Math.random() * kinds.length) | 0], ph: Math.random() * 6.28, wob: 0.6 + Math.random() * 1.2, term: 150 + Math.random() * 110, born: 0, life: 2600 + Math.random() * 1200 }); } };
+  const shots = (x, y, ang) => { add(x, y, ang, 0.45, 1250, 26); add(x, y, ang, 1.0, 1000, 20, 1); add(x, y, ang, 1.7, 760, 34, 0.85); add(x, y, ang, 2.4, 1050, 10, 1.4, ['s', 'st']); add(x, y, ang, 2.4, 620, 14, 1.2, ['r', 'c']); };
+  setTimeout(() => { shots(-4, sr.height - 160, -Math.PI * 0.36); shots(sr.width + 4, sr.height - 160, -Math.PI * 0.64); }, 1200);
+  setTimeout(() => shots(cx, y0 + 20, -Math.PI / 2), 1700);
   let last = performance.now(); const t0 = last;
   const draw = t => {
     const dt = Math.min(0.034, (t - last) / 1000); last = t; g.clearRect(0, 0, sr.width, sr.height); const el = t - t0; let alive = 0;
+    const drag = Math.pow(0.9, dt * 60);
     P.forEach(p => {
       p.born += dt * 1000; if (p.born > p.life) return; alive++;
-      p.vy += 980 * dt; p.vx *= 0.992; p.vy *= 0.992; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt; p.ph += dt * 9;
-      const fade = Math.min(1, (p.life - p.born) / 420); g.save(); g.globalAlpha = fade; g.translate(p.x, p.y); g.rotate(p.rot); g.fillStyle = p.c;
-      const flip = Math.cos(p.ph);
+      p.vx *= drag; p.vy *= drag; p.vy += 560 * dt; if (p.vy > p.term) p.vy = p.term;
+      p.ph += dt * 7 * p.wob; p.x += (p.vx + Math.sin(p.ph) * 38) * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
+      const fade = Math.min(1, (p.life - p.born) / 500); g.save(); g.globalAlpha = fade; g.translate(p.x, p.y); g.rotate(p.rot); g.fillStyle = p.c;
+      const flip = Math.cos(p.ph * 1.3);
       if (p.k === 'r') { g.scale(1, flip); g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); }
       else if (p.k === 'c') { g.beginPath(); g.arc(0, 0, p.h * 0.7, 0, 6.28); g.fill(); }
-      else if (p.k === 'st') { g.scale(flip, 1); g.fillRect(-1.6, -p.w * 1.5, 3.2, p.w * 3); }
-      else { g.beginPath(); for (let i = 0; i < 8; i++) { const rr = i % 2 ? p.h * 0.55 : p.h * 1.5, an = i * Math.PI / 4; g.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); } g.closePath(); g.fill(); }
+      else if (p.k === 'st') { g.scale(flip, 1); g.fillRect(-1.6, -p.w * 1.4, 3.2, p.w * 2.8); }
+      else { g.beginPath(); for (let i = 0; i < 10; i++) { const rr = i % 2 ? p.h * 0.5 : p.h * 1.3, an = i * Math.PI / 5; g.lineTo(Math.cos(an) * rr, Math.sin(an) * rr); } g.closePath(); g.fill(); }
       g.restore();
     });
-    if (alive && el < 3600) requestAnimationFrame(draw); else cv.remove();
+    if (el < 2600 || (alive && el < 6500)) requestAnimationFrame(draw); else cv.remove();
   };
   requestAnimationFrame(draw);
 }
