@@ -719,11 +719,13 @@ button.hcard:active > div { transform: translateY(2px); }
 /* end-of-day scoring stage */
 .stage-orbs { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .stage-orbs .blob { width: 104px; height: 104px; } .stage-orbs .blob b { font-size: 38px; } .stage-orbs .blob span { font-size: 11px; padding: 0 8px; }
-.tlight { flex: none; width: 50px; height: 118px; margin-left: 6px; padding: 8px 0; border-radius: 18px; background: linear-gradient(180deg, #34343A, #121215); box-shadow: inset 0 0 0 3px #4A4A52, 0 5px 0 #08080A, 0 14px 18px -8px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: space-between; position: relative; }
-.tlight::after { content: ""; position: absolute; left: 50%; bottom: -14px; width: 10px; height: 12px; margin-left: -5px; background: #2A2A30; border-radius: 0 0 3px 3px; z-index: -1; }
-.tlight i { width: 30px; height: 30px; border-radius: 50%; background: var(--lamp); opacity: 0.2; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3); transition: opacity 0.25s, box-shadow 0.25s; }
-.tlight .r { --lamp: #FF3B3B; } .tlight .y { --lamp: #FFC21F; } .tlight .g { --lamp: #35E06B; }
-.tlight[data-on="r"] .r, .tlight[data-on="y"] .y, .tlight[data-on="g"] .g { opacity: 1; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.25), inset 0 3px 0 rgba(255,255,255,0.45), 0 0 18px 4px var(--lamp); }
+/* base score and multiplier are two round signal lamps in one housing */
+.stage-orbs { padding: 16px 18px 12px; margin: 0 auto; border-radius: 70px; background: linear-gradient(180deg, #3A3A40, #131316); box-shadow: inset 0 0 0 3px #4C4C54, 0 6px 0 #08080A, 0 18px 22px -10px rgba(0,0,0,0.55); gap: 6px; position: relative; }
+.stage-orbs::after { content: ""; position: absolute; left: 50%; bottom: -16px; width: 22px; height: 14px; margin-left: -11px; background: #2A2A30; border-radius: 0 0 4px 4px; z-index: -1; }
+.stage-orbs .blob::before { border-radius: 50%; background-image: radial-gradient(circle at 34% 28%, rgba(255,255,255,0.7) 0, rgba(255,255,255,0) 32%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18) 0, rgba(255,255,255,0) 70%); box-shadow: inset 0 -7px 0 rgba(0,0,0,0.22), inset 0 0 0 5px rgba(0,0,0,0.18), 0 0 26px 2px rgba(46,139,255,0.7); }
+.stage-orbs .blob.m::before { border-radius: 50%; box-shadow: inset 0 -7px 0 rgba(0,0,0,0.22), inset 0 0 0 5px rgba(0,0,0,0.18), 0 0 26px 2px rgba(255,79,160,0.75); }
+.stage-orbs .blob::after { content: ""; position: absolute; left: -7%; right: -7%; top: -10px; height: 48%; border-radius: 50% 50% 0 0 / 100% 100% 0 0; border-top: 8px solid #0B0B0D; pointer-events: none; }
+.stage-orbs .stage-x { color: #FFF; }
 .blob { position: relative; width: 120px; height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #FFF; text-align: center; }
 .blob::before { content: ""; position: absolute; inset: 0; border-radius: 46% 54% 40% 60% / 52% 44% 56% 48%; background-color: #2E8BFF; background-image: radial-gradient(rgba(255,255,255,0.6) 0.8px, transparent 1px); background-size: 5px 5px; box-shadow: 0 0 30px rgba(46,139,255,0.5); }
 .blob.m::before { background-color: #FF4FA0; border-radius: 36% 64% 58% 42% / 40% 50% 50% 60%; box-shadow: 0 0 30px rgba(255,79,160,0.5); }
@@ -2475,7 +2477,7 @@ async function playStage(sh) {
   const pct = v => Math.min(100, Math.round(v / target * 100));
   sh.innerHTML = `
     <div class="bar-top"><h1>${DAYS[S.day]} · tonight’s cards</h1><span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
-    <div class="stage-orbs"><div class="blob"><b id="pb">0</b><span>Base score = money left</span></div><span class="stage-x">×</span><div class="blob m"><b id="pm">${S.baseMult}</b><span>Mult</span></div><div class="tlight" id="tl" role="img" aria-label="Tonight’s signal"><i class="r"></i><i class="y"></i><i class="g"></i></div></div>
+    <div class="stage-orbs"><div class="blob"><b id="pb">0</b><span>Base score = money left</span></div><span class="stage-x">×</span><div class="blob m"><b id="pm">${S.baseMult}</b><span>Mult</span></div></div>
     <div class="stage-cards">${h.cards.map(c => `<div class="sc ${c.state === 'on' ? '' : 'dim'}" data-no="${c.no}">${scaled(CARDS[c.no], h.cards.length > 3 ? 0.34 : 0.43, c.state)}<span class="sc-tag" aria-hidden="true"></span></div>`).join('')}</div>
     <div class="impact lines" id="pl"></div>
     <div class="score-oval" id="ps">0</div>
@@ -2483,7 +2485,6 @@ async function playStage(sh) {
     <button class="go" data-act="play-next" id="pn" hidden>${S.day === 6 ? 'See weekly summary' : 'On to tomorrow'}</button>`;
   sh.scrollTop = 0;
   const $ = id => sh.querySelector('#' + id);
-  const lamp = k => sh.querySelector('#tl').dataset.on = k;
   const tag = (el, txt, cls) => { const t = el.querySelector('.sc-tag'); t.textContent = txt; t.className = `sc-tag ${cls} on`; };
   const line = (l, r, cls = '') => $('pl').insertAdjacentHTML('beforeend', `<div class="r ${cls}"><span>${l}</span><span>${r}</span></div>`);
   await pause(300);
@@ -2500,19 +2501,17 @@ async function playStage(sh) {
       await pause(250);
       if (c.state !== 'on') {
         const g = gainOf(c);
-        tag(el, c.state === 'pending' ? 'zzz' : 'Broke', 'bad'); lamp(c.state === 'pending' ? 'y' : 'r');
+        tag(el, c.state === 'pending' ? 'zzz' : 'Broke', 'bad');
         line(`${card.name} · ${c.why}${c.saved ? ' · stop-loss' : ''}`, gainStr(g), g > 0 ? '' : 'off');
         if (g) { mult = Math.max(1, mult + g); await countTo($('pm'), mult, 350); }
         continue;
       }
       el.classList.add('pop'); mult += card.plus;
-      tag(el, `+${card.plus}`, 'good'); lamp('g');
+      tag(el, `+${card.plus}`, 'good');
       await countTo($('pm'), mult, 350);
     }
   }
   line(`${h.base} × ${h.mult}`, `= ${h.score} pts`, 'sum');
-  // the light settles on how the night went: red if a card broke, amber if one slept, green if everything held
-  lamp(h.cards.some(c => c.state === 'broken') ? 'r' : h.unlogged || h.cards.some(c => c.state === 'pending') ? 'y' : 'g');
   await countTo($('ps'), h.score, 800);
   $('pw').textContent = `${prior + h.score} / ${target}`;
   $('pwb').style.width = pct(prior + h.score) + '%';
