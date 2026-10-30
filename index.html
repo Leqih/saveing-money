@@ -1069,6 +1069,9 @@ button.hcard:active > div { transform: translateY(2px); }
 @keyframes tileSpin { 0% { transform: rotate(-14deg) scale(0.8); } 100% { transform: none; } }
 @keyframes optUn { 50% { transform: scale(0.95); } }
 .cv-opt:active { transform: scale(0.94); }
+.stack.settle .sc2 { transition: transform 0.55s cubic-bezier(.22,1.25,.4,1), opacity 0.2s; }
+.sc2.front { animation: none; }
+.sc2-edge { display: none !important; }
 </style>
 
 <div class="device">
@@ -1845,7 +1848,7 @@ const CARD_STEP = 330;
 function placeStack(stack, at, dx = 0) {
   stack.querySelectorAll('.sc2:not(.flying)').forEach(el => {
     const k = +el.dataset.i - at, off = k * CARD_STEP + dx, d = Math.min(1, Math.abs(off) / CARD_STEP);
-    el.style.transform = `translate(${off.toFixed(1)}px, 0px) scale(${(1 - d * 0.07).toFixed(3)})`;
+    el.style.transform = `translate(${off.toFixed(1)}px, ${(d * 14).toFixed(1)}px) rotate(${(off / CARD_STEP * 7).toFixed(2)}deg) scale(${(1 - d * 0.07).toFixed(3)})`;
     el.style.zIndex = String(50 - Math.round(d * 4));
     el.style.opacity = Math.abs(k) > 2 ? '0' : '1';
     el.dataset.k = k;
@@ -1950,7 +1953,7 @@ app.addEventListener('pointermove', e => {
   if (swipe) {
     const dx = e.clientX - swipe.x, dyy = e.clientY - swipe.y;
     // capture only once it's really a drag, so a plain tap still lands on the card button
-    if ((Math.abs(dx) > 6 || Math.abs(dyy) > 6) && !swipe.moved) { swipe.moved = true; swipe.mode = Math.abs(dyy) > Math.abs(dx) && dyy > 0 ? 'down' : 'side'; swipe.st.classList.add('dragging'); capture(swipe.st, swipe.id); }
+    if ((Math.abs(dx) > 8 || Math.abs(dyy) > 10) && !swipe.moved) { swipe.moved = true; swipe.mode = dyy > 0 && dyy > Math.abs(dx) * 1.8 ? 'down' : 'side'; swipe.st.classList.add('dragging'); capture(swipe.st, swipe.id); }
     if (!swipe.moved || !swipe.front) return;
     // pulling straight down drops the card toward the tray, shrinking as it goes
     if (swipe.mode === 'down') {
