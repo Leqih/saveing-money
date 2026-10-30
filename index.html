@@ -724,7 +724,13 @@ button.hcard:active > div { transform: translateY(2px); }
 .blob b { position: relative; font-family: var(--f-display); font-weight: 400; font-size: 44px; line-height: 1.05; }
 .blob span { position: relative; font-size: 11px; font-weight: 900; padding: 0 10px; }
 .stage-x { font-family: var(--f-display); font-size: 28px; }
-.stage-cards { display: flex; justify-content: center; gap: 10px; }
+.stage-cards { display: flex; justify-content: center; gap: 12px; padding-bottom: 12px; }
+.stage-cards .sc { position: relative; }
+.sc-tag { position: absolute; left: 50%; bottom: -12px; padding: 2px 10px; border: 2px solid var(--ink); border-radius: 12px; font-size: 12px; font-weight: 900; white-space: nowrap; transform: translateX(-50%) scale(0); transition: transform 0.3s cubic-bezier(.3,1.9,.5,1); background: var(--lime); color: var(--ink); z-index: 2; }
+.sc-tag.on { transform: translateX(-50%) scale(1); }
+.sc-tag.bad { background: var(--pink); color: #FFF; }
+.impact.lines .r span:first-child { white-space: normal; min-width: 0; }
+.impact.lines .r span:last-child { white-space: nowrap; flex: none; }
 .stage-cards .dim { opacity: 0.55; }
 .stage-cards .pop { animation: pop2 0.5s ease; filter: drop-shadow(0 0 10px #E4FF1A); }
 .lines:empty { display: none; }
@@ -2464,20 +2470,21 @@ async function playStage(sh) {
   sh.innerHTML = `
     <div class="bar-top"><h1>${DAYS[S.day]} · tonight’s cards</h1><span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
     <div class="stage-orbs"><div class="blob"><b id="pb">0</b><span>Base score = money left</span></div><span class="stage-x">×</span><div class="blob m"><b id="pm">${S.baseMult}</b><span>Mult</span></div></div>
-    <div class="stage-cards">${h.cards.map(c => `<div class="sc ${c.state === 'on' ? '' : 'dim'}" data-no="${c.no}">${scaled(CARDS[c.no], h.cards.length > 3 ? 0.26 : 0.3, c.state)}</div>`).join('')}</div>
+    <div class="stage-cards">${h.cards.map(c => `<div class="sc ${c.state === 'on' ? '' : 'dim'}" data-no="${c.no}">${scaled(CARDS[c.no], h.cards.length > 3 ? 0.34 : 0.43, c.state)}<span class="sc-tag" aria-hidden="true"></span></div>`).join('')}</div>
     <div class="impact lines" id="pl"></div>
     <div class="score-oval" id="ps">0</div>
     <div class="cap meter"><div class="top"><div class="row"><span>Weekly Score</span><span class="px" id="pw">${prior} / ${target}</span></div><div class="bar"><i id="pwb" style="width:${pct(prior)}%"></i></div></div></div>
     <button class="go" data-act="play-next" id="pn" hidden>${S.day === 6 ? 'See weekly summary' : 'On to tomorrow'}</button>`;
   sh.scrollTop = 0;
   const $ = id => sh.querySelector('#' + id);
+  const tag = (el, txt, cls) => { const t = el.querySelector('.sc-tag'); t.textContent = txt; t.className = `sc-tag ${cls} on`; };
   const line = (l, r, cls = '') => $('pl').insertAdjacentHTML('beforeend', `<div class="r ${cls}"><span>${l}</span><span>${r}</span></div>`);
   await pause(300);
   if (h.unlogged) {
     line('Nothing logged today', 'Base score starts at 0');
     line('Tomorrow morning you’ll be asked: if you really spent nothing, the base score is restored; cards add no multiplier', '', 'off');
   } else {
-    line(`Allowed today ¥${h.daily}, spent outside the allowance ¥${h.extra}`, `Base ${h.base}`);
+    line(`Allowed ¥${h.daily} · spent outside ¥${h.extra}`, `Base ${h.base}`);
     await countTo($('pb'), h.base, 600);
     let mult = S.baseMult;
     if (S.baseMult > 1) line(`Graduated cards start the multiplier at ${S.baseMult} `, `×${S.baseMult}`);
@@ -2486,12 +2493,13 @@ async function playStage(sh) {
       await pause(250);
       if (c.state !== 'on') {
         const g = gainOf(c);
-        line(`${c.state === 'pending' ? 'zzz' : 'Broke '} ${card.name} · ${c.why}${c.saved ? ' · no more spending, stop-loss' : ''}`, gainStr(g), g > 0 ? '' : 'off');
+        tag(el, c.state === 'pending' ? 'zzz' : 'Broke', 'bad');
+        line(`${card.name} · ${c.why}${c.saved ? ' · stop-loss' : ''}`, gainStr(g), g > 0 ? '' : 'off');
         if (g) { mult = Math.max(1, mult + g); await countTo($('pm'), mult, 350); }
         continue;
       }
       el.classList.add('pop'); mult += card.plus;
-      line(`${card.name} Held`, `+${card.plus}`);
+      tag(el, `+${card.plus}`, 'good');
       await countTo($('pm'), mult, 350);
     }
   }
