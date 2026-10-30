@@ -1206,6 +1206,8 @@ button.hcard:active > div { transform: translateY(2px); }
 @keyframes hintLate { from { opacity: 0; transform: translateY(6px); } }
 @keyframes footLate { from { opacity: 0; transform: translateY(40px); } }
 .sheet:has(.hand.dealing) .tray-hint, .sheet:has(.hand.dealing) .drawfoot { animation: none !important; }
+/* a sheet redrawn in place (tapping a stepper or an option) must not replay its entrance: the progress bar stays filled */
+.rerender .cv-prog i.pbar::after { animation: none; }
 </style>
 
 <div class="device">
@@ -1529,7 +1531,7 @@ function swapSheet(old, fn, keepTable = false) {
   old.style.animation = 'slideOutL 0.26s ease-in both'; old.style.pointerEvents = 'none';
   setTimeout(rm, 440);
 }
-function replaceSheet(old, fn) { const top = old.scrollTop; old.remove(); fn(); const n = app.lastElementChild; n.style.animation = 'none'; n.scrollTop = top; }
+function replaceSheet(old, fn) { const top = old.scrollTop; old.remove(); fn(); const n = app.lastElementChild; n.style.animation = 'none'; n.classList.add('rerender'); n.scrollTop = top; }
 const lastSheet = () => [...app.querySelectorAll('.sheet')].pop();
 
 function tilesHTML() {
