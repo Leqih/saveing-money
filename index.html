@@ -2259,11 +2259,11 @@ function renderLog() {
   // the one line that matters, pinned above the save button so it is never scrolled away
   const tone = !amt ? '' : broke.length || slip.length ? 'bad' : 'good';
   const head = !amt ? 'Enter an amount to see right away whether a card breaks'
-    : broke.length ? `Will break: ${broke.join(', ')}` : slip.length ? `Mult drops: ${slip.join(', ')}` : woke.length ? `${woke.join(', ')}will wake ✓` : 'No rule touched ✓';
+    : broke.length ? (broke.length > 2 ? `Breaks ${broke.length} cards` : `Will break: ${broke.join(', ')}`) : slip.length ? (slip.length > 1 ? `Mult drops ${slip.length} ways` : `Mult drops: ${slip[0]}`) : woke.length ? `${woke.join(', ')}will wake ✓` : 'No rule touched ✓';
   const sub = !amt ? `Left to spend today ${money(before.left)} · tonight ${before.score} pts`
     : `Tonight ${before.score} → ${after.score} pts · left ${money(after.left)}`;
   // before an amount is typed nothing can break, so only hint at the wishlist once there is something to save
-  const extra = amt && after.left < 0 ? `Over by ¥${-after.left}, taken from tomorrow’s allowance` : amt && near ? near : amt && broke.length ? 'Move it to the wish list: it doesn’t count as spending, no card breaks, decide tomorrow' : '';
+  const extra = amt && broke.length > 2 ? broke.join(' · ') : amt && after.left < 0 ? `Over by ¥${-after.left}, taken from tomorrow` : amt && near ? near : amt && broke.length ? 'Wish-list it instead: no card breaks, decide tomorrow' : '';
   const quicks = S.quicks.map((q, i) => `<button class="chip qchip ${draft.cat === q.cat && (draft.note || '') === (q.label === cat(q.cat).name ? '' : q.label) ? 'on' : ''}" data-quick="${i}">${esc(q.label)}</button>`).join('');
   const cats = CATS.map(k => `<button class="cap ${k.id === draft.cat ? 'orange' : ''}" aria-pressed="${k.id === draft.cat}" data-cat="${k.id}"><div class="top">${esc(k.name)}${k.ess ? '<small>Essential</small>' : ''}</div></button>`).join('')
     + `<button class="cap" data-act="newcat" aria-expanded="${!!draft.adding}"><div class="top">+ New category</div></button>`;
