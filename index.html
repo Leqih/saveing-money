@@ -1072,6 +1072,11 @@ button.hcard:active > div { transform: translateY(2px); }
 .stack.settle .sc2 { transition: transform 0.55s cubic-bezier(.22,1.25,.4,1), opacity 0.2s; }
 .sc2.front { animation: none; }
 .sc2-edge { display: none !important; }
+
+/* step 3 rows are roomy: this page has nothing else to do */
+.sheet[aria-label="一周几次"] .freqs { gap: 18px; padding: 18px 14px; }
+.sheet[aria-label="一周几次"] .freq { grid-template-columns: 1fr; gap: 8px; font-size: 16px; }
+.sheet[aria-label="一周几次"] .freq button { height: 48px; border-radius: 14px; font-size: 14px; }
 </style>
 
 <div class="device">
@@ -2308,7 +2313,7 @@ function renderLaunch() {
   sh.classList.add('launch');
 }
 const setupFormula = s => `(${s.income} − ${s.fixed} − ${s.save}) ÷ 4.3`;
-const progHTML = step => `<div class="cv-prog"><span class="px" style="font-size:15px">${step} / 2</span><i class="pbar" style="--from:${step === 1 ? 0 : 50}%;--to:${step === 1 ? 50 : 100}%" aria-hidden="true"></i></div>`;
+const progHTML = step => `<div class="cv-prog"><span class="px" style="font-size:15px">${step} / 3</span><i class="pbar" style="--from:${Math.round((step - 1) / 3 * 100)}%;--to:${Math.round(step / 3 * 100)}%" aria-hidden="true"></i></div>`;
 // first use, step 1: income minus fixed costs minus savings gives the weekly allowance
 function renderSetup() {
   const s = S.setup, w = weeklyFrom(s);
@@ -2345,9 +2350,6 @@ function renderWeak() {
     <div role="group" aria-label="最容易花钱的地方" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
       ${WEAK.map(w => `<button class="cv-opt" aria-pressed="${S.weak.includes(w.id)}" data-weak="${w.id}"><span class="cv-tile" style="background:${w.bg}"><svg width="40" height="40" viewBox="0 0 60 60" aria-hidden="true">${w.svg}</svg></span>${w.name}${S.weak.includes(w.id) ? '<span class="cv-tick" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" stroke="#FFF" stroke-width="1.8" fill="none"/></svg></span>' : ''}</button>`).join('')}
     </div>
-    ${picks.length ? `<div class="freqs"><span class="lbl" style="margin:0">${picks.some(w => w.id !== 'weekend') ? '一周大概几次？用来估算你的第一周' : '周末大概花多少？用来估算你的第一周'}</span>
-      ${picks.map(w => `<div class="freq"><b>${w.name}</b><div role="group" aria-label="${w.name}${w.id === 'weekend' ? '花多少' : '一周几次'}">${(w.id === 'weekend' ? ['¥50 左右', '¥80 左右', '¥120+'] : FREQ.map(f => f.label)).map((l, i) => `<button data-freq="${w.id}:${i}" aria-pressed="${(S.freq[w.id] ?? 1) === i}">${l}</button>`).join('')}</div></div>`).join('')}
-    </div>` : ''}
     <h2 style="margin-top:4px">${picks.length ? '第一次发牌会优先发' : '还没选？先给你一张好守的'}</h2>
     <div class="cv-ticket">
       <span class="cv-tile" style="width:96px;height:96px;border-radius:16px;background:${coreOf(first.no)}">${artIcon(first.no, 72)}</span>
@@ -2358,8 +2360,19 @@ function renderWeak() {
       </div>
       <span class="sticker" style="right:10px;top:-12px">${picks.length ? '优先发' : '新手推荐'}</span>
     </div>
-    <button class="cap lime bigbtn" data-act="weak-next" style="margin-top:4px"><div class="top">就这些，去抽牌</div></button>
+    <button class="cap lime bigbtn" data-act="weak-next" style="margin-top:4px"><div class="top">${picks.length ? '下一步：一周大概几次' : '就这些，去抽牌'}</div></button>
     <button class="linkbtn" data-act="import">导入微信 / 支付宝账单，自动找</button>`);
+}
+// step 3: how often each chosen spot happens, so the first week can be estimated
+function renderFreq() {
+  const picks = WEAK.filter(w => S.weak.includes(w.id));
+  sheet('一周几次', `
+    ${progHTML(3)}
+    <h1 style="margin:4px 0 0;font-weight:900;font-size:28px;line-height:1.25">它们一周<br>大概出现几次？</h1>
+    <p class="note left" style="color:#6A6A70;font-size:13px">只用来估算你的第一周，不准也没关系。</p>
+    ${`<div class="freqs">      ${picks.map(w => `<div class="freq"><b>${w.name}</b><div role="group" aria-label="${w.name}${w.id === 'weekend' ? '花多少' : '一周几次'}">${(w.id === 'weekend' ? ['¥50 左右', '¥80 左右', '¥120+'] : FREQ.map(f => f.label)).map((l, i) => `<button data-freq="${w.id}:${i}" aria-pressed="${(S.freq[w.id] ?? 1) === i}">${l}</button>`).join('')}</div></div>`).join('')}
+    </div>`}
+    <button class="cap lime bigbtn" data-act="weak-go" style="margin-top:4px"><div class="top">去抽牌</div></button>`);
 }
 function renderGuide() {
   sheet('怎么玩', `
@@ -2768,7 +2781,8 @@ app.addEventListener('click', e => {
   if (act === 'import') { toast('导入账单下个版本做，先手动选一下'); return; }
   if (act === 'trend') { toast('趋势页还没做，先看日历和分类'); return; }
   if (t.dataset.deck) { S.deckTab = t.dataset.deck; renderTable(); return; }
-  if (act === 'weak-next') {
+  if (act === 'weak-next' && S.weak.length) { swapSheet(top, renderFreq); return; }
+  if (act === 'weak-next' || act === 'weak-go') {
     // picking impulse shopping hands over that card right away instead of waiting for stars
     if (S.weak.includes('online') && !S.unlocked.includes('07')) S.unlocked.push('07');
     if (S.weak.includes('weekend') && !S.unlocked.includes('13')) S.unlocked.push('13');
@@ -2776,7 +2790,7 @@ app.addEventListener('click', e => {
     draft = {}; swapSheet(top, renderDraw);
     return;
   }
-  if (t.dataset.freq) { const [id, i] = t.dataset.freq.split(':'); S.freq[id] = +i; replaceSheet(top, renderWeak); return; }
+  if (t.dataset.freq) { const [id, i] = t.dataset.freq.split(':'); S.freq[id] = +i; replaceSheet(top, renderFreq); return; }
   if (act === 'to-top') { app.querySelector('.screen').scrollTo({ top: 0, behavior: 'smooth' }); return; }
   if (act === 'coach-next') { S.coach += 1; clearCoach(); showCoach(); return; }
   if (act === 'coach-skip') { S.coach = COACH.length; clearCoach(); return; }
