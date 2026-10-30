@@ -1316,23 +1316,29 @@ Object.assign(ART['16'], { ac: 'S', d: (S, W) => `<path d="${ci(188, 182, 30)}" 
 Object.assign(ART['17'], { d: (S, W) => lines(S, W, [['S', 'M84 66V46Q84 30 100 30H140Q156 30 156 46V66', 10], ['W', 'M50 83H190', 3, 'stroke-dasharray="2 9"'], ['W', 'M40 192H200', 4]]) });
 Object.assign(ART['13'], { ac: 'S', d: (S, W) => `<path d="${ci(222, 128, 3) + ci(228, 141, 3)}" fill="${W}"/><path d="M96 66h48" stroke="${W}" stroke-width="0"/>` + lines(S, W, [['W', 'M64 146Q80 168 100 170', 4]]) + `<text x="120" y="36" text-anchor="middle" font-family="Archivo Black, Arial Black, sans-serif" font-size="22" fill="${S === '#111111' ? '#FFF' : '#000'}">$</text>` });
 const coreOf = no => TYPES[CARDS[no].plus].core;
-// the mascot only has eyes, so each card's mood is all in how they look: round, happy, wide, angry, sleepy, wink or starry; X when broken, closed while asleep
-const MOOD = { '01': 'angry', '03': 'happy', '04': 'round', '05': 'wide', '06': 'sleepy', '07': 'wide', '10': 'round', '15': 'angry', '16': 'wink', '17': 'happy', '13': 'wide' };
+// each card has its own look: eye shape, mouth and brows, all drawn in the one flat colour of the art; X eyes and a wobbly mouth when broken, closed eyes while asleep
+const MOOD = { '01': ['angry', 'smirk', 1], '03': ['happy', 'grin', 0], '04': ['round', 'o', 0], '05': ['wide', 'smile', 0], '06': ['sleepy', 'cat', 0], '07': ['wide', 'o', 0], '10': ['round', 'smile', 0], '15': ['angry', 'flat', 1], '16': ['wink', 'smirk', 0], '17': ['happy', 'grin', 0], '13': ['wide', 'grin', 0] };
 function faceHTML(c, art, state, eye) {
-  const [x1, y1, x2, y2] = art.e;
-  const st = d => `<path d="${d}" fill="none" stroke="${eye}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const [x1, y1, x2, y2] = art.e, mx = (x1 + x2) / 2, my = Math.max(y1, y2) + 22;
+  const st = (d, w = 4.5) => `<path d="${d}" fill="none" stroke="${eye}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
   const arc = (x, y) => st(`M${x - 7} ${y + 4}Q${x} ${y - 9} ${x + 7} ${y + 4}`);
   const shut = (x, y) => st(`M${x - 7} ${y - 2}Q${x} ${y + 8} ${x + 7} ${y - 2}`);
-  if (state === 'broken') { const X = (x, y) => st(`M${x - 6} ${y - 7}L${x + 6} ${y + 7}M${x + 6} ${y - 7}L${x - 6} ${y + 7}`); return X(x1, y1) + X(x2, y2); }
-  if (state === 'pending') return shut(x1, y1) + shut(x2, y2);
-  const m = MOOD[c.no] || 'round', blink = `class="cardeye" style="animation-delay:-${(+c.no % 7) * 0.6}s"`;
+  if (state === 'broken') { const X = (x, y) => st(`M${x - 6} ${y - 7}L${x + 6} ${y + 7}M${x + 6} ${y - 7}L${x - 6} ${y + 7}`); return X(x1, y1) + X(x2, y2) + st(`M${mx - 12} ${my + 3}q6 -9 12 0t12 0`); }
+  if (state === 'pending') return shut(x1, y1) + shut(x2, y2) + st(`M${mx - 6} ${my + 2}h12`);
+  const [look, mouth, brows] = MOOD[c.no] || ['round', 'smile', 0], blink = `class="cardeye" style="animation-delay:-${(+c.no % 7) * 0.6}s"`;
   const oval = (x, y, rx, ry, rot = 0) => `<ellipse cx="${x}" cy="${y}" rx="${(rx * 1.2).toFixed(1)}" ry="${(ry * 1.2).toFixed(1)}" fill="${eye}"${rot ? ` transform="rotate(${rot} ${x} ${y})"` : ''}/>`;
-    if (m === 'happy') return arc(x1, y1) + arc(x2, y2);
-  if (m === 'wink') return `<g ${blink}>${oval(x1, y1, 4.5, 8)}</g>` + arc(x2, y2);
-  if (m === 'sleepy') { const half = (x, y) => `<path d="M${x - 7} ${y - 1}H${x + 7}A7 8 0 0 1 ${x - 7} ${y - 1}Z" fill="${eye}"/>`; return half(x1, y1) + half(x2, y2); }
-  if (m === 'angry') return `<g ${blink}>${oval(x1, y1, 4.2, 8, -28)}${oval(x2, y2, 4.2, 8, 28)}</g>`;
-  if (m === 'wide') return `<g ${blink}>${oval(x1, y1, 6.5, 11)}${oval(x2, y2, 6.5, 11)}</g>`;
-  return `<g ${blink}>${oval(x1, y1, 4.5, 8)}${oval(x2, y2, 4.5, 8)}</g>`;
+  let eyes;
+  if (look === 'happy') eyes = arc(x1, y1) + arc(x2, y2);
+  else if (look === 'wink') eyes = `<g ${blink}>${oval(x1, y1, 4.5, 8)}</g>` + arc(x2, y2);
+  else if (look === 'sleepy') { const half = (x, y) => `<path d="M${x - 8} ${y - 1}H${x + 8}A8 9 0 0 1 ${x - 8} ${y - 1}Z" fill="${eye}"/>`; eyes = half(x1, y1) + half(x2, y2); }
+  else if (look === 'angry') eyes = `<g ${blink}>${oval(x1, y1, 4.2, 8, -28)}${oval(x2, y2, 4.2, 8, 28)}</g>`;
+  else if (look === 'wide') eyes = `<g ${blink}>${oval(x1, y1, 6.5, 11)}${oval(x2, y2, 6.5, 11)}</g>`;
+  else eyes = `<g ${blink}>${oval(x1, y1, 4.5, 8)}${oval(x2, y2, 4.5, 8)}</g>`;
+  const br = brows ? st(`M${x1 - 9} ${y1 - 20}L${x1 + 7} ${y1 - 14}M${x2 + 9} ${y2 - 20}L${x2 - 7} ${y2 - 14}`) : '';
+  const m = { smile: st(`M${mx - 10} ${my}Q${mx} ${my + 11} ${mx + 10} ${my}`), grin: `<path d="M${mx - 11} ${my - 2}H${mx + 11}A11 12 0 0 1 ${mx - 11} ${my - 2}Z" fill="${eye}"/>`,
+    o: `<ellipse cx="${mx}" cy="${my + 3}" rx="5" ry="6" fill="${eye}"/>`, flat: st(`M${mx - 8} ${my + 2}H${mx + 8}`),
+    smirk: st(`M${mx - 9} ${my + 4}Q${mx} ${my + 9} ${mx + 10} ${my - 3}`), cat: st(`M${mx - 11} ${my - 1}Q${mx - 5.5} ${my + 9} ${mx} ${my - 1}Q${mx + 5.5} ${my + 9} ${mx + 11} ${my - 1}`) }[mouth];
+  return eyes + br + m;
 }
 // state: 'on' holds, 'broken' cracked for today (or the week), 'pending' asleep until something is done
 function cardHTML(c, state = 'on') {
