@@ -749,6 +749,11 @@ button.hcard:active > div { transform: translateY(2px); }
 .stage-cards { display: flex; justify-content: space-between; gap: 8px; padding: 6px 4px 16px; }
 .stage-cards .sc { position: relative; }
 .sc-tag { position: absolute; left: 50%; bottom: -12px; padding: 2px 10px; border: 2px solid var(--ink); border-radius: 12px; font-size: 12px; font-weight: 900; white-space: nowrap; transform: translateX(-50%) scale(0); transition: transform 0.3s cubic-bezier(.3,1.9,.5,1); background: var(--lime); color: var(--ink); z-index: 2; }
+.sheet.tonight > * { animation: stageIn 0.45s cubic-bezier(.2,1,.3,1) both; }
+.sheet.tonight > :nth-child(2) { animation-delay: 0.04s; } .sheet.tonight > :nth-child(3) { animation-delay: 0.1s; } .sheet.tonight > :nth-child(4) { animation-delay: 0.16s; } .sheet.tonight > :nth-child(5) { animation-delay: 0.22s; } .sheet.tonight > :nth-child(n+6) { animation-delay: 0.28s; }
+@keyframes stageIn { from { opacity: 0; transform: translateY(16px); } }
+@media (prefers-reduced-motion: reduce) { .sheet.tonight > * { animation: none; } }
+.skiphint { margin: 0; text-align: center; font-size: 12px; letter-spacing: 1px; color: var(--mute); }
 .sc-tag.on { transform: translateX(-50%) scale(1); }
 .sc-tag.bad { background: var(--pink); color: #FFF; }
 .impact.lines .r span:first-child { white-space: normal; min-width: 0; }
@@ -886,13 +891,13 @@ button.hcard:active > div { transform: translateY(2px); }
 .rcpt-win { position: relative; z-index: 3; flex-shrink: 0; margin: -40px 13px 0; padding: 0 0 14px; overflow: hidden; }
 .rcpt-win .receipt { border-radius: 0; padding-top: 60px; }
 .rcpt-win::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 22px; z-index: 3; pointer-events: none; background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 4px, rgba(0, 0, 0, 0.32) 6px, rgba(0, 0, 0, 0)); }
-.rcpt-win.print .receipt { margin-bottom: 0; animation: rcPrint 2.4s cubic-bezier(.35,.9,.3,1) both, rcShake 0.07s steps(2) 30, rcWobble 0.9s ease-out 2.4s both; }
+.rcpt-win.print .receipt { margin-bottom: 0; animation: rcPrint 1.8s cubic-bezier(.35,.9,.3,1) both, rcShake 0.07s steps(2) 24, rcWobble 0.8s ease-out 1.8s both; }
 /* the paper is fed in bursts: a quick pull, a short stop, again, then it settles with a little sway */
 @keyframes rcPrint { 0% { transform: translateY(-100%); } 11% { transform: translateY(-87%); } 15% { transform: translateY(-87%); } 27% { transform: translateY(-71%); } 31% { transform: translateY(-71%); } 44% { transform: translateY(-53%); } 47% { transform: translateY(-53%); } 60% { transform: translateY(-35%); } 63% { transform: translateY(-35%); } 76% { transform: translateY(-18%); } 79% { transform: translateY(-18%); } 92% { transform: translateY(-3%); } 100% { transform: none; } }
 @keyframes rcShake { 50% { translate: 0.7px 0; } }
 @keyframes rcWobble { 0% { rotate: 0deg; transform-origin: 50% 0; } 25% { rotate: -1.6deg; } 55% { rotate: 1deg; } 80% { rotate: -0.4deg; } 100% { rotate: 0deg; } }
 .rcpt-win.print ~ * { }
-.prt-slot::before { animation: slotLit 2.4s ease-out both; }
+.prt-slot::before { animation: slotLit 1.8s ease-out both; }
 @keyframes slotLit { 0%, 100% { box-shadow: inset 0 3px 4px rgba(0, 0, 0, 0.9); } 10%, 90% { box-shadow: inset 0 3px 4px rgba(0, 0, 0, 0.9), 0 6px 10px rgba(255, 236, 150, 0.7); } }
 .print .receipt .stamp { animation: slam 0.4s cubic-bezier(.3,1.8,.5,1) both 2.55s; }
 @keyframes slam { from { transform: scale(2.6) rotate(-24deg); opacity: 0; } }
@@ -2497,11 +2502,13 @@ function dayRecord() {
 }
 // the nightly ritual: the money left drops in as the base, each held card lights up and adds its multiplier, then the score
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-const pause = ms => new Promise(r => setTimeout(r, reducedMotion() ? 0 : ms));
+// a tap anywhere during tonight's count fast-forwards it to the result
+let rush = false;
+const pause = ms => new Promise(r => setTimeout(r, reducedMotion() || rush ? 0 : ms));
 function countTo(el, to, ms) {
   return new Promise(res => {
     const from = parseFloat(el.textContent) || 0, t0 = performance.now();
-    if (reducedMotion()) { el.textContent = to; return res(); }
+    if (reducedMotion() || rush) { el.textContent = to; return res(); }
     // setTimeout rather than rAF so it still finishes when the tab is in the background
     const step = () => { const k = Math.min(1, (performance.now() - t0) / ms); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3))); k < 1 ? setTimeout(step, 16) : res(); };
     step();
@@ -2517,8 +2524,10 @@ async function playStage(sh) {
     <div class="impact lines" id="pl"></div>
     <div class="score-oval"><small id="pf">tonight</small><b id="ps">0</b></div>
     <div class="cap meter"><div class="top"><div class="row"><span>Weekly Score</span><span class="px" id="pw">${prior} / ${target}</span></div><div class="bar"><i id="pwb" style="width:${pct(prior)}%"></i></div></div></div>
+    <p class="skiphint px" id="sk">Tap anywhere to skip ahead</p>
     <button class="go" data-act="play-next" id="pn" style="visibility:hidden">${S.day === 6 ? 'See weekly summary' : 'On to tomorrow'}</button>`;
-  sh.scrollTop = 0; pinFoot(sh);
+  sh.classList.add('tonight'); sh.scrollTop = 0; pinFoot(sh);
+  rush = false; const stop = () => { rush = true; }; sh.addEventListener('pointerdown', stop);
   const $ = id => sh.querySelector('#' + id);
   const tag = (el, txt, cls) => { const t = el.querySelector('.sc-tag'); t.textContent = txt; t.className = `sc-tag ${cls} on`; };
   const line = (l, r, cls = '') => $('pl').insertAdjacentHTML('beforeend', `<div class="r ${cls}"><span>${l}</span><span>${r}</span></div>`);
@@ -2551,6 +2560,7 @@ async function playStage(sh) {
   $('pw').textContent = `${prior + h.score} / ${target}`;
   $('pwb').style.width = pct(prior + h.score) + '%';
   if (prior < target && prior + h.score >= target) line('This week’s target score reached!', 'Cleared ✓', 'sum');
+  sh.removeEventListener('pointerdown', stop); rush = false; $('sk').style.visibility = 'hidden';
   const n = $('pn'); n.style.visibility = ''; n.focus();
 }
 function renderEnd() {
