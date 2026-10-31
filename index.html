@@ -671,6 +671,14 @@ button.hcard:active > div { transform: translateY(2px); }
 .mhero.over { background: #FF8CC6; box-shadow: 0 9px 0 #D25D9B; }
 .mhero b { font-family: var(--f-display); font-weight: 400; font-size: 44px; line-height: 1.05; }
 .mhero small { font-size: 12px; color: #3A3A10; }
+.mchart { position: relative; height: 104px; padding: 10px 6px 0; border-radius: 18px; background: #F3F3F6; display: flex; align-items: flex-end; justify-content: center; gap: 4px; }
+.mbar { flex: 1 1 0; max-width: 22px; min-width: 4px; border-radius: 6px 6px 3px 3px; background: var(--ink); }
+.mbar.over { background: var(--pink); } .mbar.zero { background: var(--lime); box-shadow: inset 0 0 0 2px #B8D000; }
+.mline { position: absolute; left: 6px; right: 6px; height: 0; border-top: 2px dashed rgba(17,17,17,0.35); pointer-events: none; }
+.mline em { position: absolute; right: 0; top: -17px; font-style: normal; font-family: var(--f-px); font-size: 11px; color: var(--sub); }
+.mrange { display: flex; justify-content: space-between; margin-top: -8px; padding: 0 6px; font-family: var(--f-px); font-size: 11px; color: var(--mute); }
+.lockrow { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 16px; background: #F3F3F6; color: var(--sub); font-size: 12px; line-height: 1.4; }
+.lockrow svg { flex: none; color: var(--mute); }
 .trend { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 16px; background: #F3F3F6; font-size: 12px; }
 .trend em { font-style: normal; font-weight: 900; font-size: 12px; padding: 2px 8px; border-radius: 8px; background: #E2E2E8; }
 .trend.down em { background: var(--lime); }
@@ -2865,7 +2873,11 @@ function reviewHTML(y, m) {
   const cardRows = Object.entries(st.cards).sort((a, b) => b[1].held / b[1].days - a[1].held / a[1].days).map(([no, k]) => `<div class="hrow"><span class="hico" style="background:${tintOf(no)}">${artIcon(no, 26)}</span><span><b>${CARDS[no].name}</b><i style="width:${Math.round(k.held / k.days * 100)}%;background:${coreOf(no)}"></i></span><span class="px">${k.held}/${k.days} days${S.grad.includes(no) ? ' · Graduated' : ''}</span></div>`).join('');
   const habits = st.full.length > 1 && st.habits.length
     ? st.habits.map(hb => { const d = hb.last - hb.first; return `<div class="trend ${d < 0 ? 'down' : d > 0 ? 'up' : ''}"><b>${hb.name}</b><span class="px">Weekly ${hb.first} × → ${hb.last} ×</span><em>${d < 0 ? `Down ${Math.round(-d * 10) / 10} ×` : d > 0 ? `Up ${Math.round(d * 10) / 10} ×` : 'No change'}</em></div>`; }).join('')
-    : `<p class="note left">${st.full.length > 1 ? 'No takeout, milk tea, taxi, online or late-night spending was logged this month.' : 'You need two weeks with 3+ logged days to compare; log a few more days.'}</p>`;
+    : `<div class="lockrow"><svg width="18" height="20" viewBox="0 0 18 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><rect x="2" y="9" width="14" height="9" rx="3" fill="currentColor" stroke="none"/><path d="M5 9V6a4 4 0 0 1 8 0v3"/></svg><span>${st.full.length > 1 ? 'No takeout, milk tea, taxi, online or late-night spending was logged this month.' : 'Habit trends unlock after two weeks with 3+ logged days each.'}</span></div>`;
+  // one bar per logged day: spending outside the allowance, red when it was more than a day's allowance, with the allowance as a dashed line
+  const per = dailyBudget(), top = Math.max(per * 1.6, ...st.recs.map(o => o.h.extra), 1);
+  const chart = `<div class="mchart" role="img" aria-label="Spending outside the allowance for each logged day"><i class="mline" style="bottom:${Math.round(per / top * 84)}px"><em>Allowance ¥${per}</em></i>${st.recs.map(o => `<span class="mbar ${o.h.extra === 0 ? 'zero' : o.h.extra > per ? 'over' : ''}" style="height:${o.h.extra === 0 ? 6 : Math.max(8, Math.round(o.h.extra / top * 84))}px" title="${MON[o.d.getMonth()]} ${o.d.getDate()}: ¥${o.h.extra}"></span>`).join('')}</div>
+    <div class="mrange"><span>${MON[st.recs[0].d.getMonth()]} ${st.recs[0].d.getDate()}</span><span>${MON[st.recs[st.recs.length - 1].d.getMonth()]} ${st.recs[st.recs.length - 1].d.getDate()}</span></div>`;
   return `
     <div class="mhero ${saved >= 0 ? '' : 'over'}"><span class="px">${MON[m]} · ${st.days} days logged</span><b>${saved >= 0 ? 'Saved' : 'Over'} ¥${Math.abs(saved)}</b><small>Spent outside the allowance ¥${st.spent}, across these ${st.days} days you could spend ¥${st.allowed}</small></div>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
@@ -2873,6 +2885,8 @@ function reviewHTML(y, m) {
       ${cap('#B8D000', 'linear-gradient(180deg,#F2FF7A 0%,#E4FF1A 100%)', 'Zero-spend days', `${st.zero} days`)}
       ${cap('#D12E2E', 'linear-gradient(180deg,#FF7A7A 0%,#FF4B4B 100%)', 'All 3 held', `${st.allHeld} days`)}
     </div>
+    <h2>Day by day <small>Spent outside the allowance</small></h2>
+    ${chart}
     <div class="impact">
       <div class="r"><span>Score this month</span><span>${st.score} pts</span></div>
       <div class="r"><span>Passed</span><span>${st.settled ? `${st.passes} / ${st.settled} ${st.stars ? ` · ★ ${st.stars}` : ''}` : 'This week isn’t over yet'}</span></div>
