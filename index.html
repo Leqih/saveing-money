@@ -564,6 +564,24 @@ button.hcard:active > div { transform: translateY(2px); }
 .sheet .impact, .sheet .rc, .sheet .mhero, .sheet .sglue, .sheet .smine, .sheet .gradcard, .sheet .cv-ticket, .sheet .set-row, .sheet .receipt, .dk-next, .screen .cap.meter .top { border-radius: 22px; }
 /* Deck and Ledger open with the same header row: one height, title centred in it */
 .screen:not(:has(> .head)) > :first-child { min-height: 56px; align-items: center; }
+.seg { display: flex; gap: 4px; padding: 4px; border-radius: 16px; background: #F0F0F4; }
+.seg > button { flex: 1 1 0; height: 38px; border: 0; border-radius: 12px; background: transparent; font-size: 14px; font-weight: 900; color: var(--mute); }
+.seg > button[aria-selected="true"] { background: #FFF; color: var(--ink); box-shadow: 0 2px 0 #D4D4DB; }
+.imp-busy { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 80px 0; text-align: center; } .imp-busy i { width: 44px; height: 44px; border-radius: 50%; border: 5px solid #E4E4EA; border-top-color: var(--cobalt); animation: spin 0.8s linear infinite; } .imp-busy small { color: var(--sub); font-size: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.imp-banks { display: flex; flex-direction: column; gap: 8px; }
+.imp-bank { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border: 0; border-radius: 18px; background: #F3F3F6; text-align: left; font-size: 14px; }
+.imp-bank i { width: 36px; height: 36px; border-radius: 12px; background: var(--ink); color: var(--lime); display: flex; align-items: center; justify-content: center; font-style: normal; font-family: var(--f-display); font-size: 16px; }
+.imp-bank b { flex: 1; font-weight: 900; } .imp-bank span { color: var(--mute); font-size: 20px; }
+.imp-text { width: 100%; border: 2px solid #E2E2E8; border-radius: 16px; padding: 12px; font-family: var(--f-px); font-size: 12px; line-height: 1.5; resize: none; background: #FFF; }
+.imp-list { display: flex; flex-direction: column; gap: 6px; }
+.imp-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 8px; border-radius: 18px; background: #F3F3F6; }
+.imp-row.off { opacity: 0.45; }
+.imp-chk { flex: none; width: 26px; height: 26px; border-radius: 9px; border: 2px solid #C4C4CC; background: #FFF; color: transparent; display: flex; align-items: center; justify-content: center; padding: 0; }
+.imp-chk[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--lime); }
+.imp-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; } .imp-main b { font-size: 14px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.imp-cat { align-self: flex-start; max-width: 100%; border: 0; background: transparent; padding: 0; font: inherit; font-size: 12px; color: var(--sub); font-weight: 700; }
+.imp-amt { font-size: 16px; white-space: nowrap; }
 .about { display: flex; flex-direction: column; gap: 14px; }
 .about > summary { cursor: pointer; font-size: 16px; font-weight: 900; list-style: none; display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
 .about > summary::-webkit-details-marker { display: none; }
@@ -1505,35 +1523,35 @@ function artIcon(no, size) {
 // today's score = money left today × multiplier; the multiplier starts at 1 and every card still holding adds its +n
 const CARDS = {
   '01': { no: '01', name: 'Takeout Nemesis', plus: 2, diff: 2, cond: 'No takeout today', eg: 'Order a takeout today and this card breaks for the day: mult −2. Back at midnight.',
-    broken: d => d.has('takeout'), why: d => `Takeout today ¥${d.sum('takeout')}` },
-  '06': { no: '06', name: 'Night Cat', plus: 2, diff: 2, cond: 'Not a cent after 10 pm', eg: 'Order a milk tea at 11 pm and this card breaks for the day. Daytime spending doesn’t affect it.',
-    broken: d => d.night, why: d => `Spent after 10 pm ¥${d.nightSum}` },
-  '03': { no: '03', name: 'Tea Quota', plus: 1, diff: 1, weekly: true, cond: 'No more than 3 milk teas or coffees this week', eg: 'The first 3 are fine; the 4th breaks this card until Sunday. Every extra cup after that costs another −1 mult that day.',
-    broken: d => d.weekTea > 3, why: d => `You’ve had ${d.weekTea} cups`, near: d => d.weekTea === 3 ? '3 cups already this week. One more breaks Tea Quota, and then every cup costs −1 mult that day.' : null,
+    broken: d => d.has('takeout'), why: d => `Takeout today $${d.sum('takeout')}` },
+  '06': { no: '06', name: 'Night Cat', plus: 2, diff: 2, cond: 'Not a cent after 10 pm', eg: 'Order a coffee at 11 pm and this card breaks for the day. Daytime spending doesn’t affect it.',
+    broken: d => d.night, why: d => `Spent after 10 pm $${d.nightSum}` },
+  '03': { no: '03', name: 'Coffee Quota', plus: 1, diff: 1, weekly: true, cond: 'No more than 3 coffee or boba runs this week', eg: 'The first 3 are fine; the 4th breaks this card until Sunday. Every extra cup after that costs another −1 mult that day.',
+    broken: d => d.weekTea > 3, why: d => `You’ve had ${d.weekTea} cups`, near: d => d.weekTea === 3 ? '3 cups already this week. One more breaks Coffee Quota, and then every cup costs −1 mult that day.' : null,
     // past the cup that cracked it, every cup costs a point of multiplier on the day it is drunk
     penalty: d => Math.max(0, d.weekTea - Math.max(4, d.teaBefore)) },
-  '04': { no: '04', name: 'Walker', plus: 1, diff: 1, cond: 'No taxis today', eg: 'One taxi ride breaks this card for the day. Subway and bus count as commuting and are fine.',
-    broken: d => d.has('taxi'), why: d => `Taxi today ¥${d.sum('taxi')}` },
+  '04': { no: '04', name: 'Walker', plus: 1, diff: 1, cond: 'No rideshares today', eg: 'One Uber or Lyft ride breaks this card for the day. Subway and bus count as commuting and are fine.',
+    broken: d => d.has('taxi'), why: d => `Rideshare today $${d.sum('taxi')}` },
   // holding Zero Day already holds these four (online buys are outside the allowance even from the wishlist), so they can't be kept alongside it
-  '05': { no: '05', name: 'Zero Day', plus: 4, diff: 3, clash: ['01', '04', '13', '07'], cond: 'Nothing outside the allowance today', eg: 'Only meals and commuting keep it alive; one milk tea breaks it. The hardest, and the most rewarding.',
-    broken: d => d.extra > 0, why: d => `Spent outside the allowance ¥${d.extra}` },
+  '05': { no: '05', name: 'Zero Day', plus: 4, diff: 3, clash: ['01', '04', '13', '07'], cond: 'Nothing outside the allowance today', eg: 'Only meals and commuting keep it alive; one coffee breaks it. The hardest, and the most rewarding.',
+    broken: d => d.extra > 0, why: d => `Spent outside the allowance $${d.extra}` },
   // one entry a day wakes it, so holding it says nothing about a habit changing: it never graduates
   '10': { no: '10', name: 'Bookkeeper', plus: 1, diff: 1, noGrad: true, cond: 'Log at least one entry today', eg: 'Asleep until you log something; the first entry wakes it. Meals and commuting count.',
     pending: d => d.count === 0, why: () => 'Nothing logged yet today' },
   '07': { no: '07', name: 'Cool-Off', plus: 2, diff: 2, unlock: 3, cond: 'Online buys go on the wish list first; wait 24 hours', eg: 'Buying on the spot breaks it; buying after 24 hours from the wish list doesn’t count.',
-    broken: d => d.directOnline, why: d => `Bought online on the spot ¥${d.sum('online')}` },
-  // a week-long allowance: half the week's money outside meals and commute; past it, each ¥20 more costs a point that day
-  '15': { no: '15', name: 'Weekly Cap', plus: 2, diff: 2, weekly: true, cond: 'Outside spending this week stays under half a week’s allowance', eg: 'Saving on weekdays and going out on the weekend is fine, only the weekly total counts. Break it and it stays broken until Sunday; after that every extra ¥20 costs −1 mult that day.',
-    broken: d => d.weekExtra > d.weekCap, why: d => `Outside the allowance this week ¥${d.weekExtra} (cap ¥${d.weekCap})`,
-    near: d => d.weekExtra > d.weekCap * 0.75 ? `Outside the allowance this week ¥${d.weekExtra}, spend ¥${d.weekCap - d.weekExtra + 1} more and Weekly Cap breaks` : null,
+    broken: d => d.directOnline, why: d => `Bought online on the spot $${d.sum('online')}` },
+  // a week-long allowance: half the week's money outside meals and commute; past it, each $20 more costs a point that day
+  '15': { no: '15', name: 'Weekly Cap', plus: 2, diff: 2, weekly: true, cond: 'Outside spending this week stays under half a week’s allowance', eg: 'Saving on weekdays and going out on the weekend is fine, only the weekly total counts. Break it and it stays broken until Sunday; after that every extra $20 costs −1 mult that day.',
+    broken: d => d.weekExtra > d.weekCap, why: d => `Outside the allowance this week $${d.weekExtra} (cap $${d.weekCap})`,
+    near: d => d.weekExtra > d.weekCap * 0.75 ? `Outside the allowance this week $${d.weekExtra}, spend $${d.weekCap - d.weekExtra + 1} more and Weekly Cap breaks` : null,
     penalty: d => d.weekBefore > d.weekCap ? Math.ceil(d.extra / 20) : 0 },
   // Zero Day already allows no extra entry at all, so the two overlap
-  '16': { no: '16', name: 'One-Shot', plus: 2, diff: 2, unlock: 9, clash: ['05'], cond: 'At most one purchase outside the allowance today', eg: 'A milk tea is fine; one more takeout breaks it. Save up what you want and buy it in one go.',
+  '16': { no: '16', name: 'One-Shot', plus: 2, diff: 2, unlock: 9, clash: ['05'], cond: 'At most one purchase outside the allowance today', eg: 'A coffee is fine; one more takeout breaks it. Save up what you want and buy it in one go.',
     broken: d => d.extraCount > 1, why: d => `Outside the allowance today: ${d.extraCount} purchases`, near: d => d.extraCount === 1 ? 'That’s one purchase outside the allowance already; one more breaks One-Shot' : null },
-  '17': { no: '17', name: 'Lunchbox', plus: 1, diff: 1, unlock: 12, cond: 'Meals today under ¥30', eg: 'Packed lunch or canteen keeps it alive; a ¥40 lunch breaks it. Delivered meals count as takeout, not meals.',
-    broken: d => d.sum('meal') > 30, why: d => `Meals today ¥${d.sum('meal')}`, near: d => d.sum('meal') > 20 && d.sum('meal') <= 30 ? `Meals today already ¥${d.sum('meal')}, spend ¥${31 - d.sum('meal')}  more and Lunchbox breaks` : null },
-  '13': { no: '13', name: 'Piggy Bank', plus: 2, diff: 2, unlock: 6, cond: 'At most ¥20 outside the allowance today', eg: 'A milk tea is fine; add a takeout and it breaks.',
-    broken: d => d.extra > 20, why: d => `Spent outside the allowance ¥${d.extra}`, near: d => d.extra > 10 && d.extra <= 20 ? `Outside the allowance today already ¥${d.extra}, spend ¥${21 - d.extra}  more and Piggy Bank breaks` : null }
+  '17': { no: '17', name: 'Lunchbox', plus: 1, diff: 1, unlock: 12, cond: 'Meals today under $30', eg: 'Packed lunch or canteen keeps it alive; a $40 lunch breaks it. Delivered meals count as takeout, not meals.',
+    broken: d => d.sum('meal') > 30, why: d => `Meals today $${d.sum('meal')}`, near: d => d.sum('meal') > 20 && d.sum('meal') <= 30 ? `Meals today already $${d.sum('meal')}, spend $${31 - d.sum('meal')}  more and Lunchbox breaks` : null },
+  '13': { no: '13', name: 'Piggy Bank', plus: 2, diff: 2, unlock: 6, cond: 'At most $20 outside the allowance today', eg: 'A coffee is fine; add a takeout and it breaks.',
+    broken: d => d.extra > 20, why: d => `Spent outside the allowance $${d.extra}`, near: d => d.extra > 10 && d.extra <= 20 ? `Outside the allowance today already $${d.extra}, spend $${21 - d.extra}  more and Piggy Bank breaks` : null }
 };
 const clashes = (a, b) => (CARDS[a].clash || []).includes(b) || (CARDS[b].clash || []).includes(a);
 const clashIn = (no, sel) => sel.find(x => x !== no && clashes(no, x));
@@ -1545,7 +1563,7 @@ const HOLDN = () => S.slots, DEALN = () => Math.max(S.slots, Math.min(8, S.unloc
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CATS = [
-  { id: 'takeout', name: 'Takeout' }, { id: 'tea', name: 'Tea & Coffee' }, { id: 'online', name: 'Online' }, { id: 'taxi', name: 'Taxi' },
+  { id: 'takeout', name: 'Takeout' }, { id: 'tea', name: 'Coffee & Tea' }, { id: 'online', name: 'Online' }, { id: 'taxi', name: 'Rideshare' },
   { id: 'meal', name: 'Meals', ess: true }, { id: 'commute', name: 'Commute', ess: true }, { id: 'other', name: 'Other' }
 ];
 const cat = id => CATS.find(c => c.id === id) || { name: 'Other' };
@@ -1632,7 +1650,7 @@ let S = {
   baseMult: 1, grad: [], stake: 0, nextStake: 0, carry: null, debt: 0, starsTotal: 0, slots: 3, glue: 0, glued: null, pinned: [],
   prefs: { evening: true, eveningAt: 21.5, ruleAlerts: true, morning: true },
   history: [], today: [{ cat: 'meal', amt: 8, note: 'Breakfast' }], teaWeek: 0, wish: [], revisit: [],
-  quicks: [{ label: 'Breakfast', cat: 'meal', amt: 8 }, { label: 'Subway', cat: 'commute', amt: 4 }, { label: 'Luckin', cat: 'tea', amt: 15 }, { label: 'McDonald’s', cat: 'takeout', amt: 32 }]
+  quicks: [{ label: 'Breakfast', cat: 'meal', amt: 8 }, { label: 'Transit', cat: 'commute', amt: 4 }, { label: 'Starbucks', cat: 'tea', amt: 6 }, { label: 'DoorDash', cat: 'takeout', amt: 32 }]
 };
 let draft = {};
 S.seen = new Set();
@@ -1644,8 +1662,8 @@ const fmtClock = c => `${String(Math.floor(c)).padStart(2, '0')}:${String(Math.r
 // with no receipts yet, "how often" answers on the weak-spot step stand in for last week
 const FREQ = [{ label: '1–2×', n: 2 }, { label: '3–5×', n: 4 }, { label: 'Almost daily', n: 7 }];
 const TYPICAL = {
-  takeout: { cat: 'takeout', amt: 30, note: 'Takeout' }, tea: { cat: 'tea', amt: 16, note: 'Milk tea' }, online: { cat: 'online', amt: 60, note: 'Online' },
-  taxi: { cat: 'taxi', amt: 22, note: 'Taxi' }, night: { cat: 'other', amt: 40, note: 'Late-night orders', night: true }, weekend: { cat: 'other', amt: 80, note: 'Weekend outings', weekend: true }
+  takeout: { cat: 'takeout', amt: 30, note: 'Takeout' }, tea: { cat: 'tea', amt: 6, note: 'Coffee' }, online: { cat: 'online', amt: 60, note: 'Online' },
+  taxi: { cat: 'taxi', amt: 22, note: 'Rideshare' }, night: { cat: 'other', amt: 40, note: 'Late-night orders', night: true }, weekend: { cat: 'other', amt: 80, note: 'Weekend outings', weekend: true }
 };
 function estimateWeek() {
   const days = DAYS.map(() => []);
@@ -1663,9 +1681,9 @@ const dateOf = START_DAY;
 const EYES = '<ellipse cx="25" cy="30" rx="2.6" ry="4.5" fill="#FFF"/><ellipse cx="35" cy="30" rx="2.6" ry="4.5" fill="#FFF"/>';
 const WEAK = [
   { id: 'takeout', name: 'Takeout', card: '01', bg: '#FFD000', svg: `<polygon points="58,30 48.5,37.7 49.8,49.8 37.7,48.5 30,58 22.3,48.5 10.2,49.8 11.5,37.7 2,30 11.5,22.3 10.2,10.2 22.3,11.5 30,2 37.7,11.5 49.8,10.2 48.5,22.3" fill="#111"/>${EYES}` },
-  { id: 'tea', name: 'Tea & Coffee', card: '03', bg: '#FF7BD5', svg: `<circle cx="30" cy="30" r="22" fill="#111"/>${EYES}` },
+  { id: 'tea', name: 'Coffee & Tea', card: '03', bg: '#FF7BD5', svg: `<circle cx="30" cy="30" r="22" fill="#111"/>${EYES}` },
   { id: 'online', name: 'Online', card: '07', bg: '#2E8BFF', svg: '<rect x="6" y="16" width="48" height="28" rx="8" fill="#111"/><ellipse cx="24" cy="30" rx="2.6" ry="4.5" fill="#FFF"/><ellipse cx="36" cy="30" rx="2.6" ry="4.5" fill="#FFF"/>' },
-  { id: 'taxi', name: 'Taxi', card: '04', bg: '#2FD15C', svg: '<path d="M24 4h12v8h8v8h8v20h-8v8h-8v8H24v-8h-8v-8H8V20h8v-8h8z" fill="#111"/><rect x="23" y="24" width="5" height="10" fill="#FFF"/><rect x="33" y="24" width="5" height="10" fill="#FFF"/>' },
+  { id: 'taxi', name: 'Rideshare', card: '04', bg: '#2FD15C', svg: '<path d="M24 4h12v8h8v8h8v20h-8v8h-8v8H24v-8h-8v-8H8V20h8v-8h8z" fill="#111"/><rect x="23" y="24" width="5" height="10" fill="#FFF"/><rect x="33" y="24" width="5" height="10" fill="#FFF"/>' },
   { id: 'night', name: 'Late night', card: '06', bg: '#FF4D6A', svg: `<path d="M30 2C33 22 38 27 58 30C38 33 33 38 30 58C27 38 22 33 2 30C22 27 27 22 30 2Z" fill="#111"/>${EYES}` },
   { id: 'weekend', name: 'Weekend', card: '15', bg: '#A55BFF', svg: '<path d="M6 12H54L30 54Z" fill="#111" stroke="#111" stroke-width="6" stroke-linejoin="round"/><ellipse cx="25" cy="24" rx="2.6" ry="4.5" fill="#FFF"/><ellipse cx="35" cy="24" rx="2.6" ry="4.5" fill="#FFF"/>' }
 ];
@@ -1673,12 +1691,12 @@ const weeklyFrom = s => Math.round((s.income - s.fixed - s.save) / 4.3);
 
 const weekHist = () => S.history.filter(h => h.week === S.week);
 const dailyBudget = () => Math.round(S.base / 7);
-// money spent past today's allowance comes out of tomorrow's, so every yuan still counts after a blown day
+// money spent past today's allowance comes out of tomorrow's, so every dollars still counts after a blown day
 const todayBudget = () => Math.max(0, dailyBudget() - S.debt);
 // tomorrow gives up at most half its allowance, so one blown day can't zero out the rest of the week
 const debtCap = () => Math.round(dailyBudget() / 2);
 const weekDays = () => 7 - S.weekStart;
-// calibrated by simulating spenders on a ¥50/day allowance: someone spending ~80% of it on extras passes about half
+// calibrated by simulating spenders on a $50/day allowance: someone spending ~80% of it on extras passes about half
 // the time, ~45% splits between two and three stars, ~20% always gets three, and overspending never passes
 // stakes raise the bar after a pass, the way Balatro moves from white to black stake
 // star: what a pass's stars are multiplied by on this stake (rounded), rather than a flat bonus per stake
@@ -1697,7 +1715,7 @@ const starsFrom = (score, target) => score >= target * 2.6 ? 3 : score >= target
 
 /* ---------- views ---------- */
 const app = document.getElementById('app');
-const money = n => (n < 0 ? '−¥' + Math.abs(n) : '¥' + n);
+const money = n => (n < 0 ? '−$' + Math.abs(n) : '$' + n);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const entryName = x => `${cat(x.cat).name}${x.note && x.note !== cat(x.cat).name ? ' · ' + esc(x.note) : ''}`;
 const starStr = n => '★'.repeat(n);
@@ -1782,18 +1800,18 @@ function crtHTML(ev) {
   const steps = Array.from({ length: 24 }, (_, i) => [6, 11, 4, 9, 13, 5, 10, 3][i % 8]);
   const wave = `<svg class="crt-wave" viewBox="0 0 96 40" preserveAspectRatio="none" shape-rendering="crispEdges" aria-hidden="true" style="height:${Math.round(12 + ratio * 48)}px"><path fill="currentColor" d="M0 40V${40 - steps[0]}${steps.map((h, i) => `H${(i + 1) * 4}V${40 - steps[(i + 1) % 24]}`).join('')}V40Z"/></svg>`;
   const streak = streakDays();
-  return `<button class="crt ${ev.left < 0 ? 'over' : ''} ${dropped ? 'blip' : ''}" data-act="crt" aria-label="Left today ${ev.left} yuan left, spent ${ev.d.extra} yuan of ${ev.daily} yuan, today’s score ${ev.score} (money left ${ev.base} times the multiplier ${ev.mult}), streak ${streak} days">
+  return `<button class="crt ${ev.left < 0 ? 'over' : ''} ${dropped ? 'blip' : ''}" data-act="crt" aria-label="Left today ${ev.left} dollars left, spent ${ev.d.extra} dollars of ${ev.daily} dollars, today’s score ${ev.score} (money left ${ev.base} times the multiplier ${ev.mult}), streak ${streak} days">
     <span class="crt-in">
       <span class="crt-scr">
         <span class="crt-top"><span class="crt-ttl">${ev.left < 0 ? 'Over today' : 'Left to spend today'}</span><span class="crt-streak ${streak ? 'on' : ''}"><svg width="10" height="12" viewBox="0 0 12 14" aria-hidden="true"><path d="M6 0c1 3 5 4.500 5 8.500A5 5 0 011 8.500C1 6.500 2.500 5.500 3 4c1 .8 1.200 1.800 1 2.800C5.500 6 6.200 3 6 0z" fill="currentColor"/></svg>Streak ${streak} ${streak === 1 ? 'day' : 'days'}</span></span>
         <span class="crt-money">${money(ev.left)}</span>
-        <span class="crt-sub"><i>▶</i> Spent ¥${ev.d.extra} / ¥${ev.daily}${S.debt ? ` · overdrawn ¥${Math.min(S.debt, dailyBudget())}` : ''}</span>
+        <span class="crt-sub"><i>▶</i> Spent $${ev.d.extra} / $${ev.daily}${S.debt ? ` · overdrawn $${Math.min(S.debt, dailyBudget())}` : ''}</span>
         <span class="crt-ghosts">${ghosts}</span>
         ${wave}
         <span class="crt-glare"></span>
       </span>
     </span>
-    <span class="crt-base"><span class="lcd"><b>Today’s score ${ev.score}</b><i>left ¥${ev.base} × mult ${ev.mult}</i></span><i class="kb o"></i><i class="kb"></i></span>
+    <span class="crt-base"><span class="lcd"><b>Today’s score ${ev.score}</b><i>left $${ev.base} × mult ${ev.mult}</i></span><i class="kb o"></i><i class="kb"></i></span>
   </button>`;
 }
 function weekInfo() {
@@ -1842,7 +1860,7 @@ function homeHTML() {
   const br = breakers(S.today), sumToday = S.today.reduce((a, x) => a + x.amt, 0);
   const list = S.today.map((x, i) => ({ x, i })).slice(-2).map(({ x, i }) => {
     const ess = !!cat(x.cat).ess, b = br[i];
-    return `<button class="chip ${ess ? 'ess' : b ? 'hit' : 'hot'}" data-edit="${i}" aria-label="${entryName(x)} ${x.amt} yuan, tap to edit"><span class="cl">${entryName(x)}${ess ? ' · essential' : ''}${b ? ` · broke ${b.join(', ')}` : ''}</span> <b>¥${x.amt}</b></button>`;
+    return `<button class="chip ${ess ? 'ess' : b ? 'hit' : 'hot'}" data-edit="${i}" aria-label="${entryName(x)} ${x.amt} dollars, tap to edit"><span class="cl">${entryName(x)}${ess ? ' · essential' : ''}${b ? ` · broke ${b.join(', ')}` : ''}</span> <b>$${x.amt}</b></button>`;
   }).join('') || '<span class="note">Nothing spent today.</span>';
   return `
     <div class="head">
@@ -1962,30 +1980,31 @@ function flowHTML(tabs) {
   const byCat = {}; all.forEach(it => { byCat[it.x.cat] = (byCat[it.x.cat] || 0) + it.x.amt; });
   const shown = all.filter(it => f === 'all' || it.x.cat === f), total = shown.reduce((a, it) => a + it.x.amt, 0);
   const chips = [['all', 'All', all.reduce((a, it) => a + it.x.amt, 0)], ...Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([id, v]) => [id, cat(id).name, v])]
-    .map(([id, name, v]) => `<button class="lg-chip ${f === id ? 'on' : ''}" data-flowcat="${id}" aria-pressed="${f === id}">${id === 'all' ? '' : `<i style="background:${CAT_COLOR[id] || '#D4D4DB'}"></i>`}${name}<b>¥${v}</b></button>`).join('');
+    .map(([id, name, v]) => `<button class="lg-chip ${f === id ? 'on' : ''}" data-flowcat="${id}" aria-pressed="${f === id}">${id === 'all' ? '' : `<i style="background:${CAT_COLOR[id] || '#D4D4DB'}"></i>`}${name}<b>$${v}</b></button>`).join('');
   const row = it => {
     const x = it.x, ess = !!cat(x.cat).ess;
     const tags = [ess ? 'Essential' : '', x.night ? 'after 10 pm' : '', x.fromWish ? 'waited 24 hours' : '', it.wish ? 'Wish list · asked tomorrow' : ''].filter(Boolean).join(' · ');
     const sub = [x.note ? cat(x.cat).name : '', tags].filter(Boolean).join(' · ');
-    const inner = `${catBadge(x.cat)}<span class="lg-main"><b>${x.note ? esc(x.note) : cat(x.cat).name}</b>${sub ? `<small>${sub}</small>` : ''}${it.breaks ? `<em>Broke ${it.breaks.join(', ')}</em>` : ''}</span><span class="lg-amt ${it.breaks ? 'hit' : ''} ${it.wish ? 'wished' : ''}">${it.wish ? '' : '−'}¥${x.amt}</span>`;
-    return it.edit != null ? `<button class="lg-row" data-edit="${it.edit}" aria-label="${entryName(x)} ${x.amt} yuan, tap to edit">${inner}</button>` : `<div class="lg-row">${inner}</div>`;
+    const inner = `${catBadge(x.cat)}<span class="lg-main"><b>${x.note ? esc(x.note) : cat(x.cat).name}</b>${sub ? `<small>${sub}</small>` : ''}${it.breaks ? `<em>Broke ${it.breaks.join(', ')}</em>` : ''}</span><span class="lg-amt ${it.breaks ? 'hit' : ''} ${it.wish ? 'wished' : ''}">${it.wish ? '' : '−'}$${x.amt}</span>`;
+    return it.edit != null ? `<button class="lg-row" data-edit="${it.edit}" aria-label="${entryName(x)} ${x.amt} dollars, tap to edit">${inner}</button>` : `<div class="lg-row">${inner}</div>`;
   };
   const groups = days.map(d => {
     const items = d.items.filter(it => f === 'all' || it.x.cat === f);
     if (!items.length && (f !== 'all' || d.label !== 'Today')) return '';
     const sum = items.filter(it => !it.wish).reduce((a, it) => a + it.x.amt, 0);
-    const head = `<span>${d.label}<small>${d.date.getMonth() + 1}/${d.date.getDate()}</small></span><span class="px">¥${sum}${d.cal ? ' · receipt →' : ''}</span>`;
+    const head = `<span>${d.label}<small>${d.date.getMonth() + 1}/${d.date.getDate()}</small></span><span class="px">$${sum}${d.cal ? ' · receipt →' : ''}</span>`;
     return `<section class="lg-day">${d.cal ? `<button class="lg-head" data-cal="${d.cal}">${head}</button>` : `<div class="lg-head">${head}</div>`}
       <div class="lg-list">${items.map(row).join('') || `<p class="note left" style="padding:12px 14px">${d.unlogged ? 'Nothing logged this day.' : 'Nothing spent yet today. Tap"Log"to start.'}</p>`}</div></section>`;
   }).join('');
   return `<div style="display:flex;justify-content:space-between;align-items:center">
       <h1 style="margin:0;font-weight:900;font-size:28px">Ledger</h1>
-      <span class="px" style="height:32px;padding:0 12px;border-radius:12px;border:2px solid #E2E2E8;display:inline-flex;align-items:center;font-size:14px;color:#5E5E66">${shown.length} ${shown.length === 1 ? 'entry' : 'entries'} · ¥${total}</span>
+      <span class="px" style="height:32px;padding:0 12px;border-radius:12px;border:2px solid #E2E2E8;display:inline-flex;align-items:center;font-size:14px;color:#5E5E66">${shown.length} ${shown.length === 1 ? 'entry' : 'entries'} · $${total}</span>
     </div>
     ${tabs}
     <div class="lg-chips">${chips}</div>
     ${groups || '<p class="note">No spending in this category yet.</p>'}
-    <p class="note">Tap today’s entries to edit or delete; tap a date to see that day’s receipt.</p>`;
+    <p class="note">Tap today’s entries to edit or delete; tap a date to see that day’s receipt.</p>
+    <button class="linkbtn" data-act="import-log">Import from your bank ›</button>`;
 }
 
 // bill: calendar month with keycap day cells (ToyBill) and where it went (ToyCats); always real money
@@ -2018,8 +2037,8 @@ function billHTML() {
     const rec = recs.find(o => o.d.getDate() === d), isNow = d === now.getDate();
     if (!rec && !isNow) { cells.push(`<span class="cv-day future"><span>${d}</span></span>`); continue; }
     const v = rec ? rec.h.extra : todayExtra, [outer, face] = tone(v / avg);
-    const inner = `<span style="background:${face}">${d}<b>¥${v}</b></span>`;
-    cells.push(rec ? `<button class="cv-day" style="background:${outer}" data-cal="${rec.h.week}-${rec.h.day}" aria-label="${MON[m]} ${d}: spent ¥${v}">${inner}</button>`
+    const inner = `<span style="background:${face}">${d}<b>$${v}</b></span>`;
+    cells.push(rec ? `<button class="cv-day" style="background:${outer}" data-cal="${rec.h.week}-${rec.h.day}" aria-label="${MON[m]} ${d}: spent $${v}">${inner}</button>`
       : `<span class="cv-day now" style="background:${outer}" aria-label="Today, spent so far ${v} ">${inner}</span>`);
   }
   const top3 = monthByCat(recs).slice(0, 3), max = top3.length ? top3[0][1] : 1, stripes = ['#FF4B4B', '#FF52D9', '#A9C3D1'];
@@ -2027,8 +2046,8 @@ function billHTML() {
   return `<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-weight:900;font-size:28px">${MON[m]} bill</h1></div>
     ${tabs}
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
-      ${capk('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', 'Discretionary', `¥${free.toLocaleString()}`)}
-      ${capk('#D12E2E', 'linear-gradient(180deg,#FF7A7A 0%,#FF4B4B 100%)', 'Spent', `¥${spent.toLocaleString()}`)}
+      ${capk('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', 'Discretionary', `$${free.toLocaleString()}`)}
+      ${capk('#D12E2E', 'linear-gradient(180deg,#FF7A7A 0%,#FF4B4B 100%)', 'Spent', `$${spent.toLocaleString()}`)}
       ${capk('#B8D000', 'linear-gradient(180deg,#F2FF7A 0%,#E4FF1A 100%)', `Left ${daysLeft} days`, money(free - spent))}
     </div>
     <div style="display:flex;flex-direction:column;gap:6px">
@@ -2043,7 +2062,7 @@ function billHTML() {
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <h2>Top three categories</h2>
-      ${top3.map(([id, v], i) => `<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="font-weight:900">${cat(id).name}</span><span class="px">¥${v} · ${Math.round(v / Math.max(1, spent) * 100)}%</span></div><div aria-hidden="true" style="height:12px;width:${Math.round(v / max * 100)}%;border-radius:3px;background:repeating-linear-gradient(90deg,${stripes[i]} 0 12px,transparent 12px 15px)"></div></div>`).join('') || '<p class="note left">No spending outside the allowance this month yet.</p>'}
+      ${top3.map(([id, v], i) => `<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="font-weight:900">${cat(id).name}</span><span class="px">$${v} · ${Math.round(v / Math.max(1, spent) * 100)}%</span></div><div aria-hidden="true" style="height:12px;width:${Math.round(v / max * 100)}%;border-radius:3px;background:repeating-linear-gradient(90deg,${stripes[i]} 0 12px,transparent 12px 15px)"></div></div>`).join('') || '<p class="note left">No spending outside the allowance this month yet.</p>'}
     </div>
     <p class="note left">Each square is that day’s real spending outside the allowance. Tap a day for the receipt.</p>`;
 }
@@ -2059,13 +2078,13 @@ function catsHTML(recs, spent, tabs) {
   const html = bands.map(([id, v], i) => {
     const s = STY[i], name = id === 'rest' ? 'Other' : cat(id).name, cardNo = CAT_CARD[id];
     return `<div class="cv-band" style="height:${s.h}px;z-index:${4 - i};${i ? 'margin-top:-18px;padding-top:32px;' : ''}background:${s.bg};box-shadow:0 9px 0 ${s.sh},0 14px 20px rgba(20,20,30,0.15)">
-      <div class="cv-lbl"><span style="font-weight:900;font-size:${s.fs}px">${name}</span><span class="px" style="font-size:14px">¥${v}</span>
+      <div class="cv-lbl"><span style="font-weight:900;font-size:${s.fs}px">${name}</span><span class="px" style="font-size:14px">$${v}</span>
         ${i === 0 && cardNo ? `<span class="px" style="align-self:flex-start;padding:1px 8px;border-radius:8px;background:#111;color:#E4FF1A;font-size:12px">Drew “${CARDS[cardNo].name}” — keep it</span>` : ''}</div>
       <span class="cv-pct" style="font-size:${s.pct}px;color:${s.pc}">${Math.round(v / total * 100)}%</span>
       ${i === 0 && cardNo ? `<div style="position:absolute;right:18px;top:14px;width:54px;height:54px;border-radius:14px;background:${tintOf(cardNo)};display:flex;align-items:center;justify-content:center;transform:rotate(10deg);box-shadow:0 0 0 3px #FFF">${artIcon(cardNo, 42)}</div>` : ''}
     </div>`;
   }).join('');
-  return `<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-weight:900;font-size:28px">Where it went</h1><span class="px" style="font-size:12px;color:#5E5E66">Outside the allowance ¥${spent.toLocaleString()}</span></div>
+  return `<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-weight:900;font-size:28px">Where it went</h1><span class="px" style="font-size:12px;color:#5E5E66">Outside the allowance $${spent.toLocaleString()}</span></div>
     ${tabs}
     <div style="display:flex;flex-direction:column;margin-top:6px">${html || '<p class="note">No spending outside the allowance this month yet.</p>'}</div>
     <p class="note left" style="margin-top:12px">This is real money; meals and commuting within the essentials allowance aren’t counted.</p>`;
@@ -2496,14 +2515,14 @@ function renderLog() {
   const sub = !amt ? `Left to spend today ${money(before.left)} · tonight ${before.score} pts`
     : `Tonight ${before.score} → ${after.score} pts · left ${money(after.left)}`;
   // before an amount is typed nothing can break, so only hint at the wishlist once there is something to save
-  const extra = amt && broke.length > 2 ? broke.join(' · ') : amt && after.left < 0 ? `Over by ¥${-after.left}, taken from tomorrow` : amt && near ? near : amt && broke.length ? 'Wish-list it instead: no card breaks, decide tomorrow' : '';
+  const extra = amt && broke.length > 2 ? broke.join(' · ') : amt && after.left < 0 ? `Over by $${-after.left}, taken from tomorrow` : amt && near ? near : amt && broke.length ? 'Wish-list it instead: no card breaks, decide tomorrow' : '';
   const quicks = S.quicks.map((q, i) => `<button class="chip qchip ${draft.cat === q.cat && (draft.note || '') === (q.label === cat(q.cat).name ? '' : q.label) ? 'on' : ''}" data-quick="${i}">${esc(q.label)}</button>`).join('');
   const cats = CATS.map(k => `<button class="cap ${k.id === draft.cat ? 'orange' : ''}" aria-pressed="${k.id === draft.cat}" data-cat="${k.id}"><div class="top">${esc(k.name)}${k.ess ? '<small>Essential</small>' : ''}</div></button>`).join('')
     + `<button class="cap" data-act="newcat" aria-expanded="${!!draft.adding}"><div class="top">+ New category</div></button>`;
   const pad = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map(k => `<button class="cap ${/[C⌫]/.test(k) ? 'dark' : ''}" data-key="${k}" aria-label="${k === '⌫' ? 'Delete one digit' : k === 'C' ? 'Clear' : k}"><div class="top">${k}</div></button>`).join('');
   sheet(editing ? 'Edit entry' : 'Log', `
     <div class="bar-top"><h1>${editing ? 'Edit entry' : 'Log'}</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
-    <div class="amount"><b>¥${amt}</b><span class="px" style="color:#5E5E66;font-size:12px;text-align:right">${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
+    <div class="amount"><b>$${amt}</b><span class="px" style="color:#5E5E66;font-size:12px;text-align:right">${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
     <div class="cats">${cats}</div>
     <div class="field"><input class="in" id="note" maxlength="12" value="${esc(draft.note || '')}" placeholder="What was it? (optional)" aria-label="Note">
       ${draft.cat === 'meal' ? `<button class="mini ${draft.delivery ? 'on' : ''}" data-delivery="${draft.delivery ? 0 : 1}" aria-pressed="${!!draft.delivery}">Delivered</button>` : ''}
@@ -2536,7 +2555,7 @@ function verdict(before, after) {
   if (!broke.length && !woke.length) {
     const near = after.cards.map(x => x.near).filter(Boolean)[0];
     const slip = slipped(before, after).map(slipWhy);
-    toast(slip.length ? `Logged · ${slip.join(', ')}, mult ×${before.mult} → ×${after.mult}` : after.left < 0 && after.left < before.left ? `Logged · overdrawn ¥${-after.left}, taken from tomorrow’s allowance` : near ? `Logged · ${near}` : `No rule touched ✓ mult is still ×${after.mult}`);
+    toast(slip.length ? `Logged · ${slip.join(', ')}, mult ×${before.mult} → ×${after.mult}` : after.left < 0 && after.left < before.left ? `Logged · overdrawn $${-after.left}, taken from tomorrow’s allowance` : near ? `Logged · ${near}` : `No rule touched ✓ mult is still ×${after.mult}`);
     app.querySelectorAll('.hcard.on').forEach(n => n.classList.add('glow'));
     return;
   }
@@ -2547,7 +2566,7 @@ function verdict(before, after) {
       <div class="fb-cards">${shown.map(x => `<div class="${broke.length ? 'shake' : 'pop'}">${scaled(CARDS[x.no], 0.5, broke.length ? 'broken' : 'on')}</div>`).join('')}</div>
       <b>${broke.length ? `${shown.map(x => CARDS[x.no].name).join(', ')} broke!` : `${shown.map(x => CARDS[x.no].name).join(', ')} woke up ✓`}</b>
       <div class="fb-sts" aria-label="Mult ×${before.mult} to ×${after.mult}, tonight’s estimate ${before.score} to ${after.score} pts"><span class="st-g"><i>Mult</i><b>×${before.mult}→×${after.mult}</b></span><span class="st-b"><b>${before.score}→${after.score}</b><i>Tonight’s pts</i></span></div>
-      <small>${broke.length ? (after.cards.every(x => x.state !== "on") ? (after.left > 0 ? `All three broke, mult ×${after.mult}. The money left still counts: keep ${money(after.left)} and tonight is ${after.score} pts.` : `All three broke, and today’s money is gone too.`) : shown.some(x => CARDS[x.no].weekly) ? "Weekly cards stay broken until Sunday; every extra cup then costs another −1 mult that day." : shown.some(x => x.saved) ? `Stop-loss: spend nothing more outside the allowance today and the broken card gives back half its multiplier tonight. Back at midnight.` : "Back at midnight. Your other cards can still hold today.") : "The more cards you hold today, the higher the score."}${after.left < 0 ? ` You’re already over by ¥${-after.left}, taken from tomorrow’s allowance.` : ""}</small>
+      <small>${broke.length ? (after.cards.every(x => x.state !== "on") ? (after.left > 0 ? `All three broke, mult ×${after.mult}. The money left still counts: keep ${money(after.left)} and tonight is ${after.score} pts.` : `All three broke, and today’s money is gone too.`) : shown.some(x => CARDS[x.no].weekly) ? "Weekly cards stay broken until Sunday; every extra cup then costs another −1 mult that day." : shown.some(x => x.saved) ? `Stop-loss: spend nothing more outside the allowance today and the broken card gives back half its multiplier tonight. Back at midnight.` : "Back at midnight. Your other cards can still hold today.") : "The more cards you hold today, the higher the score."}${after.left < 0 ? ` You’re already over by $${-after.left}, taken from tomorrow’s allowance.` : ""}</small>
       <button class="ok" data-act="fb-close">Got it</button>
     </div></div></div>
   </div>`);
@@ -2558,21 +2577,21 @@ function receiptHTML(h, preview) {
   const br = breakers(h.entries, h.held, h.teaBefore, h.weekBefore || 0);
   const rows = h.entries.map((x, i) => {
     const ess = !!cat(x.cat).ess;
-    return `<div class="r ${ess ? 'off' : br[i] ? 'hitc' : ''}"><span>${entryName(x)}${ess ? '<i>Essential</i>' : ''}${x.night ? '<i>after 10 pm</i>' : ''}${br[i] ? `<i class="hit">Broke ${br[i].join(', ')}</i>` : ''}</span><span>¥${x.amt}</span></div>`;
-  }).join('') || '<div class="r off"><span>Nothing spent this day</span><span>¥0</span></div>';
+    return `<div class="r ${ess ? 'off' : br[i] ? 'hitc' : ''}"><span>${entryName(x)}${ess ? '<i>Essential</i>' : ''}${x.night ? '<i>after 10 pm</i>' : ''}${br[i] ? `<i class="hit">Broke ${br[i].join(', ')}</i>` : ''}</span><span>$${x.amt}</span></div>`;
+  }).join('') || '<div class="r off"><span>Nothing spent this day</span><span>$0</span></div>';
   const cards = h.cards.map(c => `<div class="r ${c.state === 'on' ? '' : 'off'}"><span>${c.state === 'on' ? '' : c.state === 'pending' ? 'zzz ' : 'Broke '}${CARDS[c.no].name}${c.why ? ' · ' + c.why : ''}${c.saved ? ' · stop-loss' : ''}</span><span>${gainStr(gainOf(c))}</span></div>`).join('');
   const all = h.cards.every(c => c.state === 'on');
   return `<div class="receipt">${h.unlogged ? `<span class="stamp no">Not logged</span>` : all ? `<span class="stamp">All held</span>` : ""}
     <span class="cap-t">Week ${h.week} · ${DAYS[h.day]}</span>
     <hr>${rows}<hr>
-    ${overOf(h.entries) ? `<div class="r"><span>Essentials over the daily ¥${essQuota}</span><span>+¥${overOf(h.entries)}</span></div>` : ''}
-    ${h.debtIn ? `<div class="r hitc"><span>Overdrawn yesterday</span><span>−¥${Math.min(h.debtIn, dailyBudget())}</span></div>` : ""}
-    <div class="r"><span>Allowed today</span><span>¥${h.daily}</span></div>
-    <div class="r"><span>Spent outside the allowance</span><span>¥${h.extra}</span></div>
+    ${overOf(h.entries) ? `<div class="r"><span>Essentials over the daily $${essQuota}</span><span>+$${overOf(h.entries)}</span></div>` : ''}
+    ${h.debtIn ? `<div class="r hitc"><span>Overdrawn yesterday</span><span>−$${Math.min(h.debtIn, dailyBudget())}</span></div>` : ""}
+    <div class="r"><span>Allowed today</span><span>$${h.daily}</span></div>
+    <div class="r"><span>Spent outside the allowance</span><span>$${h.extra}</span></div>
     <div class="r"><span>Money left = base score</span><span>${h.base}</span></div>
     <hr><div class="r"><span>Mult starts at ${h.baseMult || 1} ${(h.baseMult || 1) > 1 ? ` (graduated ${h.baseMult - 1} )` : ""}</span><span>${h.baseMult || 1}</span></div>${cards}<hr>
     <div class="tot"><span class="px">${h.base} × ${h.mult}</span><b>${h.score} pts</b></div>
-    ${h.extra > h.daily ? `<p class="note left" style="margin:4px 0 0">Over by ¥${h.extra - h.daily}, tomorrow takes at most ¥${debtCap()}${h.extra - h.daily > debtCap() ? `; the extra ¥${h.extra - h.daily - debtCap()} each add to this week’s target +${OVERFLOW_PTS}` : ''}.</p>` : ""}
+    ${h.extra > h.daily ? `<p class="note left" style="margin:4px 0 0">Over by $${h.extra - h.daily}, tomorrow takes at most $${debtCap()}${h.extra - h.daily > debtCap() ? `; the extra $${h.extra - h.daily - debtCap()} each add to this week’s target +${OVERFLOW_PTS}` : ''}.</p>` : ""}
     ${receiptStickers(h)}
   </div>`;
 }
@@ -2667,7 +2686,7 @@ async function playStage(sh) {
     line('Nothing logged today', 'Base score starts at 0');
     line('Tomorrow morning you’ll be asked: if you really spent nothing, the base score is restored; cards add no multiplier', '', 'off');
   } else {
-    line(`Allowed ¥${h.daily} · spent outside ¥${h.extra}`, `Base ${h.base}`);
+    line(`Allowed $${h.daily} · spent outside $${h.extra}`, `Base ${h.base}`);
     await countTo($('pb'), h.base, 600);
     let mult = S.baseMult;
     if (S.baseMult > 1) line(`Graduated cards start the multiplier at ${S.baseMult} `, `×${S.baseMult}`);
@@ -2767,7 +2786,7 @@ function renderLaunch() {
       <ellipse cx="17" cy="50" rx="2.400" ry="9" fill="#FFF" opacity=".75" filter="url(#jBl)"/><circle cx="98" cy="40" r="2.600" fill="#FFF" opacity=".85"/><circle cx="92" cy="49" r="1.300" fill="#FFF" opacity=".7"/>
       <text x="60" y="66" font-family="Archivo Black, Arial Black, sans-serif" font-size="40" text-anchor="middle" fill="#FFF" stroke="#FFF" stroke-width="1.500" stroke-linejoin="round" filter="url(#jT)">×6</text>
       <text x="60" y="87" font-family="Noto Sans SC, sans-serif" font-size="11" font-weight="900" fill="#FFF" fill-opacity=".92" text-anchor="middle" letter-spacing="1">Mult</text></svg></div>
-    <div class="l-abs stk pill30" style="--r:-7deg;--d:900ms;--f:5.8s;left:128px;top:36px">¥30 <small>/wk</small></div>
+    <div class="l-abs stk pill30" style="--r:-7deg;--d:900ms;--f:5.8s;left:128px;top:36px">$30 <small>/wk</small></div>
     <div class="l-abs stk ring" style="--r:12deg;--d:1000ms;right:20px;top:20px" aria-hidden="true"><svg width="74" height="74" viewBox="0 0 96 96"><defs><path id="launch-ring" d="M48 48m-36 0a36 36 0 1 1 72 0a36 36 0 1 1-72 0"/></defs><circle cx="48" cy="48" r="46" fill="#FFF"/><circle cx="48" cy="48" r="25" fill="#111"/><path d="M48 31C50 43 53 46 65 48C53 50 50 53 48 65C46 53 43 50 31 48C43 46 46 43 48 31Z" fill="#FF4D6A"/><text font-family="Noto Sans SC, sans-serif" font-size="9.5" font-weight="900" fill="#8A8A92" letter-spacing="2"><textPath href="#launch-ring">ORIGINAL · PENNY ROUND · WEEK 1 ·</textPath></text></svg></div>
     <div class="l-abs stk cbub" style="--r:8deg;--d:760ms;--f:4.8s;left:252px;top:66px" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="#FFF"/><circle cx="15" cy="15" r="9.500" fill="none" stroke="#A855F7" stroke-width="2.200"/><path d="M11.500 10.500L15 15.500M18.500 10.500L15 15.500M15 15.500V21M11.500 17.500h7M11.500 14h7" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round"/></svg></div>
     <div class="l-abs stk burst" style="--r:-10deg;--d:1100ms;--f:6.2s;left:8px;top:248px" aria-hidden="true"><svg width="76" height="76" viewBox="0 0 76 76"><polygon points="38.0,2.0 44.0,11.7 53.6,5.6 54.8,16.9 66.1,15.6 62.3,26.3 73.1,30.0 65.0,38.0 73.1,46.0 62.3,49.7 66.1,60.4 54.8,59.1 53.6,70.4 44.0,64.3 38.0,74.0 32.0,64.3 22.4,70.4 21.2,59.1 9.9,60.4 13.7,49.7 2.9,46.0 11.0,38.0 2.9,30.0 13.7,26.3 9.9,15.6 21.2,16.9 22.4,5.6 32.0,11.7" fill="#A4FF2E" stroke="#FFF" stroke-width="3.500" stroke-linejoin="round"/></svg><b>Over!</b></div>
@@ -2803,16 +2822,16 @@ function renderSetup() {
         <span style="font-size:12px;font-weight:900;color:#111111">Your weekly allowance</span>
         <span id="setup-week" style="font-family:var(--f-display);font-size:44px;line-height:1.05;color:#111111">${money(w)}</span>
       </div>
-      <span class="px" id="setup-formula" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);white-space:nowrap;padding:2px 10px;border-radius:10px;background:#111;color:#FFF;font-size:12px">${w >= 50 ? setupFormula(s) : 'Weekly allowance must be at least ¥50'}</span>
+      <span class="px" id="setup-formula" style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);white-space:nowrap;padding:2px 10px;border-radius:10px;background:#111;color:#FFF;font-size:12px">${w >= 50 ? setupFormula(s) : 'Weekly allowance must be at least $50'}</span>
       <svg width="66" height="66" viewBox="0 0 60 64" aria-hidden="true" style="position:absolute;right:-4px;top:-14px;transform:rotate(-125deg)"><path d="M14 34V12a5 5 0 0 1 10 0v16h2v-6a5 5 0 0 1 10 0v6h2v-3a5 5 0 0 1 10 0v15c0 10-7 18-17 18h-4c-7 0-12-4-15-10l-5-11a5 5 0 0 1 8-5z" fill="#FFF" stroke="#1E88E5" stroke-width="4" stroke-linejoin="round"/></svg>
       <div aria-hidden="true" style="position:absolute;left:0;top:-6px;width:62px;height:62px;background:#6CFF2E;clip-path:polygon(50% 0%,61% 18%,82% 10%,80% 32%,100% 42%,85% 58%,95% 79%,72% 80%,62% 100%,50% 84%,38% 100%,28% 80%,5% 79%,15% 58%,0% 42%,20% 32%,18% 10%,39% 18%);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg)"><span style="font-size:12px;font-weight:900;color:#0F4A00">Adjust</span></div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:76px;padding:0 12px 0 18px;border-radius:22px;background:#E3F7D5">
       <div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:14px">Essentials allowance</span><span style="font-size:11px;color:#3F5F2A">Meals and commuting within this amount a day don’t count against the allowance</span></div>
-      <div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:48px;text-align:center">¥${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div>
+      <div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:48px;text-align:center">$${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div>
     </div>
     <button class="cap lime bigbtn" data-act="setup-next" ${w >= 50 ? '' : 'disabled'}><div class="top">Next: find where money leaks</div></button>
-    <button class="linkbtn" data-act="setup-skip">Skip, use the default ¥${BASE}</button>`);
+    <button class="linkbtn" data-act="setup-skip">Skip, use the default $${BASE}</button>`);
 }
 // step 2: weak spots decide which cards the first deal puts in front of you
 function renderWeak() {
@@ -2836,13 +2855,13 @@ function renderWeak() {
       <span class="sticker" style="right:10px;top:-12px">${picks.length ? 'Priority' : 'Starter pick'}</span>
     </div>
     <button class="cap lime bigbtn" data-act="weak-next" style="margin-top:4px"><div class="top">${picks.length ? 'Next: how often a week' : 'That’s it, draw cards'}</div></button>
-    <button class="linkbtn" data-act="import">Import WeChat / Alipay bills to find them automatically</button>`);
+    <button class="linkbtn" data-act="import">Import your bank transactions to find them automatically</button>`);
 }
 // step 3: how often each chosen spot happens, so the first week can be estimated
 function renderFreq() {
   const picks = WEAK.filter(w => S.weak.includes(w.id));
-  const labelsOf = w => w.id === 'weekend' ? ['¥50', '¥80', '¥120+'] : ['1–2×', '3–5×', 'Every day'];
-  const fullOf = w => w.id === 'weekend' ? ['About ¥50', 'About ¥80', '¥120+'] : FREQ.map(f => f.label);
+  const labelsOf = w => w.id === 'weekend' ? ['$50', '$80', '$120+'] : ['1–2×', '3–5×', 'Every day'];
+  const fullOf = w => w.id === 'weekend' ? ['About $50', 'About $80', '$120+'] : FREQ.map(f => f.label);
   const DISH = ['#F25550', '#111111', '#F1B94B', '#3F86D6', '#4CB05A', '#E97FB1'];
   const GLYPH = ['<svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 3a9 9 0 000 18z" fill="#111111"/></svg>', '<svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#111111"/></svg>', '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 12V3a9 9 0 11-9 9z" fill="#111111"/></svg>'];
   const rows = picks.map((w, r) => { const cur = S.freq[w.id] ?? 1; return `<div class="fk-row" role="group" aria-label="${w.name}${w.id === 'weekend' ? ' spending' : 'Weekly Frequency'}">
@@ -2875,9 +2894,9 @@ function renderSettings() {
   sheet('Settings', `
     <div class="bar-top"><h1>Settings</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     <h2>Budget</h2>
-    <div class="set-row"><div><b>Weekly allowance</b><small id="setup-formula">${w >= 50 ? setupFormula(s) : 'Weekly allowance must be at least ¥50'}</small></div><b class="px" id="setup-week" style="font-size:20px">${money(w)}</b></div>
+    <div class="set-row"><div><b>Weekly allowance</b><small id="setup-formula">${w >= 50 ? setupFormula(s) : 'Weekly allowance must be at least $50'}</small></div><b class="px" id="setup-week" style="font-size:20px">${money(w)}</b></div>
     ${field('income', 'Monthly income', '')}${field('fixed', 'Fixed costs', 'Rent, phone, subscriptions')}${field('save', 'Monthly savings', 'Save first, spend later')}
-    <div class="set-row"><div><b>Essentials allowance</b><small>Meals and commuting within this amount a day don’t count</small></div><div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:44px;text-align:center">¥${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div></div>
+    <div class="set-row"><div><b>Essentials allowance</b><small>Meals and commuting within this amount a day don’t count</small></div><div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:44px;text-align:center">$${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div></div>
     <h2>Reminders</h2>
     ${sw('evening', 'Evening reminder to end the day', 'Also shows a “Done logging?” card on the home screen')}
     ${p.evening ? `<div class="set-row"><div><b>Reminder time</b><small>Send a notification at that time</small></div><div class="seg3">${[20.5, 21.5, 22].map(c => `<button data-evat="${c}" aria-pressed="${p.eveningAt === c}">${fmtClock(c)}</button>`).join('')}</div></div>` : ''}
@@ -2888,12 +2907,74 @@ function renderSettings() {
     <div class="set-row"><div><b>Replay home tips</b><small>The 4 bubbles shown on first visit to home</small></div><button class="mini" data-act="coach-reset">Watch again</button></div>
     <div class="set-row"><div><b>Start over</b><small>Back to the launch screen and clear everything logged in the demo</small></div><button class="mini" data-act="restart">Start over</button></div>
     <p class="note">Demo data lives only on this page and disappears when you close it.</p></details>
-    <button class="go" data-act="settings-save" ${w >= 50 && w !== S.base ? '' : 'disabled'}>${w === S.base ? `It’s already ¥${S.base}` : `Change to ¥${w}`}</button>`);
+    <button class="go" data-act="settings-save" ${w >= 50 && w !== S.base ? '' : 'disabled'}>${w === S.base ? `It’s already $${S.base}` : `Change to $${w}`}</button>`);
+}
+
+
+/* ---------- import from a bank: connect (demo) or paste a CSV, then review ---------- */
+// merchant keywords, checked in this order; anything unmatched is Other
+const GUESS = [
+  ['takeout', /doordash|uber ?eats|grubhub|postmates|seamless|chipotle|mcdonald|burger king|wendy|taco bell|domino|papa john|pizza|kfc|chick-?fil|panda express|five guys|shake shack|jimmy john|wingstop|popeyes/],
+  ['taxi', /\buber(?! ?eats)|\blyft\b|waymo|\btaxi\b|\bcab\b/],
+  ['tea', /starbucks|dunkin|peet|blue bottle|philz|dutch bros|tim hortons|coffee|\bcafe\b|boba|gong cha|kung fu tea|tiger sugar|sharetea|\btea\b/],
+  ['online', /amazon|amzn|temu|shein|ebay|etsy|walmart\.com|target\.com|best ?buy|apple\.com|nike\.com|aliexpress|shopify/],
+  ['commute', /\bmta\b|\bbart\b|clipper|metro|transit|septa|\bcta\b|parking|shell|chevron|exxon|\bbp\b|\bgas\b|fuel|\btoll|ez-?pass|amtrak/],
+  ['meal', /whole foods|trader joe|safeway|kroger|costco|aldi|publix|grocery|sprouts|h-?e-?b\b/]
+];
+// payments, deposits and fixed bills (already covered by the budget's fixed costs) are not discretionary spending
+const NOT_SPEND = /payment|thank you|deposit|payroll|transfer|refund|autopay|interest|credit card|statement|netflix|spotify|hulu|disney|youtube|icloud|adobe|rent\b|insurance|geico|verizon|at&t|comcast|xfinity|t-mobile|utilit|\bpg&e|con ?ed/;
+const guessCat = d => { const t = d.toLowerCase(); const hit = GUESS.find(([, re]) => re.test(t)); return hit ? hit[0] : 'other'; };
+// one line per transaction: a date, a description and an amount; purchases are negative on most bank CSVs and positive on Apple Card's
+function parseTx(text) {
+  const rows = [];
+  text.split(/\r?\n/).forEach(line => {
+    const money = [...line.matchAll(/-?\$?\(?\d{1,3}(?:,\d{3})*\.\d{2}\)?|-?\$?\d+\.\d{2}/g)]; if (!money.length) return;
+    const raw = money[money.length - 1][0], neg = /-|\(/.test(raw), n = Math.abs(parseFloat(raw.replace(/[^0-9.]/g, '')));
+    const date = (line.match(/\d{1,2}\/\d{1,2}(?:\/\d{2,4})?|\d{4}-\d{2}-\d{2}/) || [''])[0];
+    let desc = line.replace(raw, ' ').replace(date, ' ').replace(/["$]/g, ' ').replace(/,+/g, ' ').replace(/\s+/g, ' ').trim();
+    desc = desc.replace(/^(posted|pending|purchase|sale|debit|credit)\b\s*/i, '');
+    if (!desc || NOT_SPEND.test(desc.toLowerCase())) return;
+    rows.push({ date, desc: desc.slice(0, 40), amt: Math.max(1, Math.round(n)), neg });
+  });
+  const anyNeg = rows.some(r => r.neg), spend = rows.filter(r => anyNeg ? r.neg : true);
+  return spend.map((r, i) => ({ id: i, date: r.date, desc: r.desc, amt: r.amt, cat: guessCat(r.desc), on: true }));
+}
+const SAMPLE_BANK = `Posted  DoorDash*Chipotle  -32.40
+Posted  Starbucks #12345  -6.45
+Posted  Uber *Trip  -18.20
+Posted  Amazon.com*2K4LM  -41.99
+Posted  Whole Foods Market  -62.18
+Posted  MTA*NYCT PAYGO  -2.90
+Posted  Dunkin’ #3321  -4.10
+Posted  Shell Oil 5712  -41.00
+Posted  Netflix.com  -15.49
+Posted  Payment Thank You  250.00`;
+let IMP = null;
+function renderImport() {
+  const I = IMP, tabs = [['bank', 'Connect bank'], ['paste', 'Paste CSV']];
+  const rows = I.rows || [], on = rows.filter(r => r.on), total = on.reduce((a, r) => a + r.amt, 0);
+  const body = I.busy ? `<div class="imp-busy"><i></i><b>Connecting to ${esc(I.bank)}…</b><small>Reading the last few days of transactions</small></div>`
+    : rows.length ? `<p class="note left" style="margin:0">${I.src === 'bank' ? 'Sample data from a demo account. ' : ''}We guessed a category for each purchase. Tap one to change it, or untick what you don’t want.</p>
+      <div class="imp-list">${rows.map((r, i) => `<div class="imp-row ${r.on ? '' : 'off'}">
+        <button class="imp-chk" data-impi="${i}" aria-pressed="${r.on}" aria-label="Include ${esc(r.desc)}"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3"/></svg></button>
+        ${catBadge(r.cat)}
+        <span class="imp-main"><b>${esc(r.desc)}</b><select class="imp-cat" data-impc="${i}" aria-label="Category for ${esc(r.desc)}">${CATS.map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${c.name}</option>`).join('')}</select></span>
+        <span class="px imp-amt">$${r.amt}</span></div>`).join('')}</div>`
+    : I.src === 'paste' ? `<p class="note left" style="margin:0">Export transactions from your bank, Apple Card, Venmo or Cash App as CSV and paste the lines here. Only purchases are used; payments and deposits are skipped.</p>
+      <textarea class="imp-text" id="imp-text" rows="8" placeholder="05/12/2026,STARBUCKS #1234,-6.45&#10;05/12/2026,DOORDASH*CHIPOTLE,-32.40" aria-label="Transactions"></textarea>
+      <div class="actions"><button class="cap" data-act="imp-sample"><div class="top">Try a sample</div></button><button class="go" data-act="imp-parse">Read it</button></div>`
+    : `<p class="note left" style="margin:0">Pick your bank. In the real app this is a secure link through your bank; here it loads a demo account.</p>
+      <div class="imp-banks">${['Chase', 'Bank of America', 'Wells Fargo', 'Capital One', 'Apple Card'].map(b => `<button class="imp-bank" data-act="imp-bank" data-bank="${b}"><i>${b[0]}</i><b>${b}</b><span aria-hidden="true">›</span></button>`).join('')}</div>`;
+  const cta = rows.length && !I.busy ? `<button class="go" data-act="imp-add" ${on.length ? '' : 'disabled'}>${I.mode === 'habits' ? 'Use these to find my habits' : `Add ${on.length} to today · $${total}`}</button>` : '';
+  sheet('Import', `
+    <div class="bar-top"><h1>Import</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
+    ${rows.length || I.busy ? '' : `<div class="seg" role="tablist" aria-label="Source">${tabs.map(([k, n]) => `<button role="tab" aria-selected="${I.src === k}" data-act="imp-tab" data-src="${k}">${n}</button>`).join('')}</div>`}
+    ${body}${cta}`);
 }
 
 /* ---------- monthly review ---------- */
 const HABITS = [
-  { name: 'Takeout', test: x => x.cat === 'takeout' }, { name: 'Tea & Coffee', test: x => x.cat === 'tea' }, { name: 'Taxi', test: x => x.cat === 'taxi' },
+  { name: 'Takeout', test: x => x.cat === 'takeout' }, { name: 'Coffee & Tea', test: x => x.cat === 'tea' }, { name: 'Rideshare', test: x => x.cat === 'taxi' },
   { name: 'Online', test: x => x.cat === 'online' }, { name: 'Ordered after 10 pm', test: x => !!x.night }
 ];
 function monthStats(y, m) {
@@ -2923,15 +3004,15 @@ function reviewHTML(y, m) {
   const cardRows = Object.entries(st.cards).sort((a, b) => b[1].held / b[1].days - a[1].held / a[1].days).map(([no, k]) => `<div class="hrow"><span class="hico" style="background:${tintOf(no)}">${artIcon(no, 26)}</span><span><b>${CARDS[no].name}</b><i style="width:${Math.round(k.held / k.days * 100)}%;background:${coreOf(no)}"></i></span><span class="px">${k.held}/${k.days} days${S.grad.includes(no) ? ' · Graduated' : ''}</span></div>`).join('');
   const habits = st.full.length > 1 && st.habits.length
     ? st.habits.map(hb => { const d = hb.last - hb.first; return `<div class="trend ${d < 0 ? 'down' : d > 0 ? 'up' : ''}"><b>${hb.name}</b><span class="px">Weekly ${hb.first} × → ${hb.last} ×</span><em>${d < 0 ? `Down ${Math.round(-d * 10) / 10} ×` : d > 0 ? `Up ${Math.round(d * 10) / 10} ×` : 'No change'}</em></div>`; }).join('')
-    : `<div class="lockrow"><svg width="18" height="20" viewBox="0 0 18 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><rect x="2" y="9" width="14" height="9" rx="3" fill="currentColor" stroke="none"/><path d="M5 9V6a4 4 0 0 1 8 0v3"/></svg><span>${st.full.length > 1 ? 'No takeout, milk tea, taxi, online or late-night spending was logged this month.' : 'Habit trends unlock after two weeks with 3+ logged days each.'}</span></div>`;
+    : `<div class="lockrow"><svg width="18" height="20" viewBox="0 0 18 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><rect x="2" y="9" width="14" height="9" rx="3" fill="currentColor" stroke="none"/><path d="M5 9V6a4 4 0 0 1 8 0v3"/></svg><span>${st.full.length > 1 ? 'No takeout, coffee, rideshare, online or late-night spending was logged this month.' : 'Habit trends unlock after two weeks with 3+ logged days each.'}</span></div>`;
   // one bar per logged day: spending outside the allowance, red when it was more than a day's allowance, with the allowance as a dashed line
   const per = dailyBudget(), top = Math.max(per * 1.6, ...st.recs.map(o => o.h.extra), 1);
-  const chart = `<div class="mchart" role="img" aria-label="Spending outside the allowance for each logged day"><i class="mline" style="bottom:${Math.round(per / top * 84)}px"><em>Allowance ¥${per}</em></i>${st.recs.map(o => `<span class="mbar ${o.h.extra === 0 ? 'zero' : o.h.extra > per ? 'over' : ''}" style="height:${o.h.extra === 0 ? 6 : Math.max(8, Math.round(o.h.extra / top * 84))}px" title="${MON[o.d.getMonth()]} ${o.d.getDate()}: ¥${o.h.extra}"></span>`).join('')}</div>
+  const chart = `<div class="mchart" role="img" aria-label="Spending outside the allowance for each logged day"><i class="mline" style="bottom:${Math.round(per / top * 84)}px"><em>Allowance $${per}</em></i>${st.recs.map(o => `<span class="mbar ${o.h.extra === 0 ? 'zero' : o.h.extra > per ? 'over' : ''}" style="height:${o.h.extra === 0 ? 6 : Math.max(8, Math.round(o.h.extra / top * 84))}px" title="${MON[o.d.getMonth()]} ${o.d.getDate()}: $${o.h.extra}"></span>`).join('')}</div>
     <div class="mrange"><span>${MON[st.recs[0].d.getMonth()]} ${st.recs[0].d.getDate()}</span><span>${MON[st.recs[st.recs.length - 1].d.getMonth()]} ${st.recs[st.recs.length - 1].d.getDate()}</span></div>`;
   return `
-    <div class="mhero ${saved >= 0 ? '' : 'over'}"><span class="px">${MON[m]} · ${st.days} days logged</span><b>${saved >= 0 ? 'Saved' : 'Over'} ¥${Math.abs(saved)}</b><small>Spent outside the allowance ¥${st.spent}, across these ${st.days} days you could spend ¥${st.allowed}</small></div>
+    <div class="mhero ${saved >= 0 ? '' : 'over'}"><span class="px">${MON[m]} · ${st.days} days logged</span><b>${saved >= 0 ? 'Saved' : 'Over'} $${Math.abs(saved)}</b><small>Spent outside the allowance $${st.spent}, across these ${st.days} days you could spend $${st.allowed}</small></div>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
-      ${cap('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', 'Daily average', `¥${Math.round(st.spent / st.days)}`)}
+      ${cap('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', 'Daily average', `$${Math.round(st.spent / st.days)}`)}
       ${cap('#B8D000', 'linear-gradient(180deg,#F2FF7A 0%,#E4FF1A 100%)', 'Zero-spend days', `${st.zero} days`)}
       ${cap('#D12E2E', 'linear-gradient(180deg,#FF7A7A 0%,#FF4B4B 100%)', 'All 3 held', `${st.allHeld} days`)}
     </div>
@@ -2969,7 +3050,7 @@ function alerts(ev) {
     if (x.no === '01' && ((c >= 11 && c < 13.5) || (c >= 17 && c < 19.5))) out.push(`Mealtime: order takeout and Takeout Nemesis breaks, mult − ${k.plus}.`);
     if (x.no === '06' && c >= 21 && c < 22) out.push(`In ${Math.round((22 - c) * 60)} min it’s 10 pm; after that, one cent breaks Night Cat.`);
     if (x.no === '06' && c >= 22) out.push('It’s past 10 pm; spending now breaks Night Cat (−2). Put what you want on the wish list.');
-    if (x.no === '04' && ((c >= 7.5 && c < 9.5) || c >= 22)) out.push('Want a taxi? Walker breaks (−1); the subway counts as commuting and is fine.');
+    if (x.no === '04' && ((c >= 7.5 && c < 9.5) || c >= 22)) out.push('Want an Uber? Walker breaks (−1); the subway counts as commuting and is fine.');
     if (x.no === '07' && c >= 20) out.push('Evenings are when you order most: wish list first; buying on the spot breaks Cool-Off (−2).');
     if (x.no === '05') out.push(`Zero Day is still alive (+${k.plus}): spend nothing outside the allowance today to earn it.`);
   });
@@ -2979,8 +3060,8 @@ function alerts(ev) {
 function stopHTML(ev) {
   if (!S.held.length) return '';
   const need = weekTarget() - scorePrior();
-  if (ev.left <= 0) return `<div class="stoploss"><span class="tag">Stop-loss</span><b>${ev.left < 0 ? `You’re already over by ¥${-ev.left}` : `Today’s ¥${ev.daily} is used up exactly`}</b>
-    <p>Tonight is 0 pts.${ev.left < 0 ? `The overage comes out of tomorrow’s ¥${dailyBudget()}, ` : "Spending more comes out of tomorrow’s allowance, "}every yuan you spend now is tomorrow’s money.</p>
+  if (ev.left <= 0) return `<div class="stoploss"><span class="tag">Stop-loss</span><b>${ev.left < 0 ? `You’re already over by $${-ev.left}` : `Today’s $${ev.daily} is used up exactly`}</b>
+    <p>Tonight is 0 pts.${ev.left < 0 ? `The overage comes out of tomorrow’s $${dailyBudget()}, ` : "Spending more comes out of tomorrow’s allowance, "}every dollars you spend now is tomorrow’s money.</p>
     <button class="cap lime" data-act="log"><div class="top">Put what you want on the wish list first</div></button></div>`;
   if (ev.cards.every(c => c.state !== 'on')) return `<div class="stoploss"><span class="tag">Stop-loss</span><b>All three cards broke today</b>
     <p>Mult is back to ×${ev.mult}, but the money left still counts: stay under ${money(ev.left)} and tonight you still get <b>${ev.score} pts</b>. All cards come back at midnight${need > 0 ? `; you still need ${need} pts this week` : ''}.</p></div>`;
@@ -2997,11 +3078,11 @@ function inboxItems(ev = evaluate(S.today)) {
   const out = [];
   if (!S.held.length) return out;
   const k = `${S.week}-${S.day}`;
-  S.revisit.forEach((x, i) => out.push({ key: `rv-${k}-${i}-${x.amt}`, kind: 'wish', title: 'Wish list · waited 24 hours', text: `Yesterday you wanted ${entryName(x)} ¥${x.amt}, still want it?`,
+  S.revisit.forEach((x, i) => out.push({ key: `rv-${k}-${i}-${x.amt}`, kind: 'wish', title: 'Wish list · waited 24 hours', text: `Yesterday you wanted ${entryName(x)} $${x.amt}, still want it?`,
     btns: [[`data-rv="${i}:buy"`, 'Still want it', ''], [`data-rv="${i}:skip"`, 'Skip, save', 'lime']] }));
   if (S.day === 6) out.push({ key: `sun-${S.week}`, kind: 'sunday', title: 'Today is the last day of the week', text: 'Tonight, tap "End today" to see the weekly summary: score, stars, graduation, which card to carry over, and next week’s stake.', btns: [['data-act="end"', 'End today, see the weekly summary', 'lime']] });
   else if (S.prefs.evening && S.clock >= S.prefs.eveningAt) out.push({ key: `eve-${k}`, kind: 'evening', title: `${fmtClock(S.clock)} · Done logging?`, text: `Tonight’s estimate ${ev.score} pts. When you’re done, tap "End today" for the receipt; if you forget, midnight ends the day for you.`, btns: [['data-act="end"', 'End today', 'lime']] });
-  if (ev.left <= 0) out.push({ key: `over-${k}`, kind: 'stop', title: ev.left < 0 ? `You’re already over by ¥${-ev.left}` : `Today’s ¥${ev.daily} is used up exactly`, text: `Tonight is 0 pts.${ev.left < 0 ? 'Overage comes out of tomorrow’s allowance; ' : 'Spending more comes out of tomorrow’s allowance, '}every yuan you spend now is tomorrow’s money. Put what you want on the wish list first.` });
+  if (ev.left <= 0) out.push({ key: `over-${k}`, kind: 'stop', title: ev.left < 0 ? `You’re already over by $${-ev.left}` : `Today’s $${ev.daily} is used up exactly`, text: `Tonight is 0 pts.${ev.left < 0 ? 'Overage comes out of tomorrow’s allowance; ' : 'Spending more comes out of tomorrow’s allowance, '}every dollars you spend now is tomorrow’s money. Put what you want on the wish list first.` });
   else if (ev.cards.every(c => c.state !== 'on')) out.push({ key: `broke-${k}`, kind: 'stop', title: 'All three cards broke today', text: `Mult is back to ×${ev.mult}, but the money left still counts: stay under ${money(ev.left)} and tonight you still get ${ev.score} pts. All cards come back at midnight.` });
   if (S.prefs.ruleAlerts) alerts(ev).forEach(a => out.push({ key: `al-${k}-${a}`, kind: 'alert', title: `${fmtClock(S.clock)} · Rule reminder`, text: a }));
   if (S.wish.length) out.push({ key: `wl-${k}-${S.wish.length}`, kind: 'memo', title: 'Wish list', text: `It holds ${S.wish.length} items; tomorrow you’ll be asked if you still want them. They don’t count as spending and break no cards.` });
@@ -3040,13 +3121,13 @@ function renderClock() {
 function renderMorning() {
   const y = S.history[S.history.length - 1], ev = evaluate(S.today);
   const kept = y.cards.filter(c => c.state === 'on').length;
-  const rv = S.revisit.map((x, i) => `<div class="rv"><span>${entryName(x)} <b class="px">¥${x.amt}</b></span><span><button class="rvbtn" data-rv="${i}:buy">Still want it</button><button class="rvbtn lime" data-rv="${i}:skip">Skip</button></span></div>`).join('');
+  const rv = S.revisit.map((x, i) => `<div class="rv"><span>${entryName(x)} <b class="px">$${x.amt}</b></span><span><button class="rvbtn" data-rv="${i}:buy">Still want it</button><button class="rvbtn lime" data-rv="${i}:skip">Skip</button></span></div>`).join('');
   const a = alerts(ev)[0];
   sheet('Good morning', `
     <div class="bar-top"><h1>${DAYS[S.day]} · Good morning</h1><span class="px" style="color:var(--mute)">${fmtClock(S.clock)}</span></div>
     ${(() => { const y = S.history[S.history.length - 1]; return y && y.unlogged && !y.resolved ? `<div class="unlogged"><b>Nothing logged yesterday</b><span>Did you really spend nothing? An unlogged day counts as 0 pts first. If you really spent nothing, it’s restored to a zero-spend score of ${y.potential.score} pts (base multiplier only; cards add nothing on an unlogged day).</span><div class="ibtns"><button class="rvbtn lime" data-act="unlogged-yes">Really spent nothing</button><button class="rvbtn" data-act="unlogged-no">Forgot to log</button></div></div>` : ''; })()}
     ${S.autoEnded ? '<div class="callout">Last night you didn’t tap "End today", so midnight ended the day for you; the receipt is kept as usual.</div>' : ''}
-    ${S.debt ? `<div class="callout">You overdrew yesterday by <b>¥${S.debt}</b>, today you can spend ¥${dailyBudget()} − ¥${Math.min(S.debt, dailyBudget())} = <b>¥${todayBudget()}</b>.${(() => { const y = S.history[S.history.length - 1]; return y && y.overflow ? `The other ¥${y.overflow} over is no longer carried forward; it adds to this week’s target score instead: +${y.overflow * OVERFLOW_PTS}.` : ''; })()}</div>` : ""}
+    ${S.debt ? `<div class="callout">You overdrew yesterday by <b>$${S.debt}</b>, today you can spend $${dailyBudget()} − $${Math.min(S.debt, dailyBudget())} = <b>$${todayBudget()}</b>.${(() => { const y = S.history[S.history.length - 1]; return y && y.overflow ? `The other $${y.overflow} over is no longer carried forward; it adds to this week’s target score instead: +${y.overflow * OVERFLOW_PTS}.` : ''; })()}</div>` : ""}
     <div class="cap orange hero"><div class="top">
       <div class="row"><span style="font-weight:900;font-size:14px">Allowed today</span><span class="px" style="font-size:12px">Weekly Score ${scorePrior()} / ${weekTarget()}</span></div>
       <span class="money">${money(ev.left)}</span>
@@ -3058,7 +3139,7 @@ function renderMorning() {
       <div class="ystat"><div><small>Score</small><b>${y.score}</b></div><div><small>Mult</small><b>×${y.mult}</b></div><div><small>Held</small><b>${kept}/${y.cards.length}</b></div></div>
     </div></div>
     ${rv ? `<div class="wish"><span class="px" style="font-size:12px;opacity:0.85">Wish list · waited 24 hours</span><span style="font-weight:900;font-size:16px">Still want these?</span>${rv}</div>`
-      : S.wishSaved ? `<div class="callout">Wish list is empty, <b>saved ¥${S.wishSaved}</b>.</div>` : ''}
+      : S.wishSaved ? `<div class="callout">Wish list is empty, <b>saved $${S.wishSaved}</b>.</div>` : ''}
     <div class="hold-lbl">${y.cards.some(c => c.state === 'broken') ? `Cards that broke yesterday came back at midnight${y.cards.some(c => c.state === 'broken' && CARDS[c.no].weekly) ? ' (weekly ones excepted)' : ''}` : 'Today’s cards'}</div>
     ${holdHTML(ev)}
     <button class="cap lime bigbtn" data-act="morning-done"><div class="top">Start today</div></button>`);
@@ -3114,7 +3195,7 @@ function renderWeek() {
     ${R.grads.map(no => `<div class="gradcard"><div class="gimg">${scaled(CARDS[no], 0.3)}<span class="cv-grad">Graduated</span></div><div><b>“${CARDS[no].name}” graduated!</b><p>Held 6/7 days or more for ${GRAD_WEEKS} weeks in a row: this habit is gone. It leaves the deck and gives you a permanent base multiplier +1: from now on the multiplier starts at <b>${S.baseMult}</b> , and the weekly target score rises 25%.</p></div></div>`).join('')}
     <h2>How the three cards did <small>Hold 6/7 days for ${GRAD_WEEKS} weeks to graduate</small></h2>
     <div class="pillrow">${R.perCard.map(p => `<span class="pill ${p.held >= p.days * 0.7 ? 'ok' : p.held >= p.days * 0.4 ? 'mid' : 'no'}">${CARDS[p.no].name} ${p.held}/${p.days} days${S.grad.includes(p.no) ? ' · Graduated' : p.streak ? ` · Graduated ${p.streak}/${GRAD_WEEKS}` : ''}</span>`).join('')}</div>
-    <div class="cap ${R.real - R.spent >= 0 ? 'lime' : 'orange'}"><div class="top" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-weight:900">${R.real - R.spent >= 0 ? 'Real money saved this week' : 'Real money over this week'}</span><span style="font-family:var(--f-display);font-size:28px">¥${Math.abs(R.real - R.spent)}</span></div></div>
+    <div class="cap ${R.real - R.spent >= 0 ? 'lime' : 'orange'}"><div class="top" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-weight:900">${R.real - R.spent >= 0 ? 'Real money saved this week' : 'Real money over this week'}</span><span style="font-family:var(--f-display);font-size:28px">$${Math.abs(R.real - R.spent)}</span></div></div>
     <h2>Score each day <small>Tap a day for the receipt</small></h2>
     ${tilesHTML()}
     <button class="go" data-act="week-plan">Next: plan next week</button>` : `<div class="bar-top"><h1>Plan next week</h1><span class="chipk" style="background:${st.bg};color:${st.fg}">${st.name}</span></div>
@@ -3136,9 +3217,9 @@ const RECON_RATIO = 1.2, RECON_SLACK = 30;
 function reconHTML(R) {
   const go = `<button class="cap lime bigbtn" data-act="to-monday"><div class="top">Start week ${S.week + 1} · draw cards</div></button>`;
   if (!R.got && !R.recon) return go;
-  if (R.recon) return `<div class="callout">${R.recon.voided ? `Reconcile off by ¥${R.recon.actual - R.logged}: actually ¥${R.recon.actual}, only logged ¥${R.logged}. This week’s ${starStr(R.recon.voided)} don’t count; score unchanged.` : R.recon.skipped ? `Not reconciled; this week’s stars are halved, ${R.got ? `you get only ${starStr(R.got)}` : 'none left'}.` : `Matches: actually ¥${R.recon.actual}, logged ¥${R.logged}. Stars kept ✓`}</div>${go}`;
+  if (R.recon) return `<div class="callout">${R.recon.voided ? `Reconcile off by $${R.recon.actual - R.logged}: actually $${R.recon.actual}, only logged $${R.logged}. This week’s ${starStr(R.recon.voided)} don’t count; score unchanged.` : R.recon.skipped ? `Not reconciled; this week’s stars are halved, ${R.got ? `you get only ${starStr(R.got)}` : 'none left'}.` : `Matches: actually $${R.recon.actual}, logged $${R.logged}. Stars kept ✓`}</div>${go}`;
   return `<h2>Reconcile <small>The last step before stars</small></h2>
-    <div class="impact"><p class="note left" style="margin:0">Open WeChat or Alipay and see how much you spent this week (meals and commuting too). You logged <b>¥${R.logged}</b> this week. If the real amount is 20% or more above what you logged, this week’s stars don’t count.</p>
+    <div class="impact"><p class="note left" style="margin:0">Open your bank app or Venmo and see how much you spent this week (meals and commuting too). You logged <b>$${R.logged}</b> this week. If the real amount is 20% or more above what you logged, this week’s stars don’t count.</p>
       <div class="field"><input class="in" id="recon" inputmode="numeric" maxlength="6" placeholder="How much you really spent this week" aria-label="How much you really spent this week"><button class="mini" data-act="recon">Check</button></div></div>
     <button class="cap bigbtn" data-act="recon-skip"><div class="top">Skip (stars halved)</div></button>`;
 }
@@ -3149,13 +3230,13 @@ function renderMonday() {
   const R = S.weekResult, next = dateOf(S.week + 1, 0);
   sheet('Good morning, Monday', `
     <div class="bar-top"><h1>Week ${S.week + 1} · Monday morning</h1><span class="px" style="color:var(--mute)">${next.getMonth() + 1}/${next.getDate()} 08:30</span></div>
-    <div class="mhero ${R.pass ? '' : 'over'}"><span class="px">Last week · ${STAKES[S.stake].name}</span><b>${R.total} pts</b><small>${R.pass ? (R.got ? `Passed, earned ${starStr(R.got)}` : 'Passed, no stars') : `Missed by ${R.target - R.total} pts, nothing lost`} · real ${R.real - R.spent >= 0 ? `saved ¥${R.real - R.spent}` : `over ¥${R.spent - R.real}`}</small></div>
+    <div class="mhero ${R.pass ? '' : 'over'}"><span class="px">Last week · ${STAKES[S.stake].name}</span><b>${R.total} pts</b><small>${R.pass ? (R.got ? `Passed, earned ${starStr(R.got)}` : 'Passed, no stars') : `Missed by ${R.target - R.total} pts, nothing lost`} · real ${R.real - R.spent >= 0 ? `saved $${R.real - R.spent}` : `over $${R.spent - R.real}`}</small></div>
     <div class="impact">
       <div class="r"><span>This week’s stake</span><span>${STAKES[S.nextStake].name}</span></div>
       <div class="r"><span>Carried</span><span>${S.carry ? CARDS[S.carry].name : 'None'}</span></div>
       <div class="r"><span>This week’s deal</span><span>Draw ${DEALN()}, keep ${HOLDN()} cards</span></div>
       <div class="r"><span>Wallet</span><span>★ ${S.stars} Stars</span></div>
-      ${S.debt ? `<div class="r"><span>Overdrawn on Sunday ¥${S.debt}, taken today</span><span>−¥${Math.min(S.debt, dailyBudget())}</span></div>` : ''}
+      ${S.debt ? `<div class="r"><span>Overdrawn on Sunday $${S.debt}, taken today</span><span>−$${Math.min(S.debt, dailyBudget())}</span></div>` : ''}
     </div>
     <p class="note left">A new week starts with picking cards. Before drawing you can visit the shop: unlock cards early, guarantee a card this week, add a slot, buy glue. The shop is only open Monday morning.</p>
     <button class="cap bigbtn" data-act="shop"><div class="top">Visit the shop · ★ ${S.stars}</div></button>
@@ -3178,7 +3259,7 @@ function shopPick() {
   const by = {};
   weekHist().forEach(h => h.entries.filter(x => !cat(x.cat).ess).forEach(x => { if (CAT_CARD[x.cat]) by[x.cat] = (by[x.cat] || 0) + x.amt; }));
   const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
-  return top ? { no: CAT_CARD[top[0]], why: `Last week${cat(top[0]).name}Spent ¥${top[1]}` } : null;
+  return top ? { no: CAT_CARD[top[0]], why: `Last week${cat(top[0]).name}Spent $${top[1]}` } : null;
 }
 const PRICE = { reroll: 1, slot: 5, slotWas: 6, glue: 2 };
 function shopBody(browse) {
@@ -3228,7 +3309,7 @@ function endDay() {
   S.history.push(h);
   const owed = Math.max(0, h.extra + S.debt - dailyBudget());
   S.debt = Math.min(debtCap(), owed);
-  // whatever tomorrow can't absorb raises this week's target: every yuan still has to be won back by saving
+  // whatever tomorrow can't absorb raises this week's target: every dollars still has to be won back by saving
   h.overflow = owed - S.debt; S.overflow = (S.overflow || 0) + h.overflow;
   S.teaWeek += teaOf(S.today);
   S.revisit = S.wish; S.wish = [];
@@ -3236,7 +3317,7 @@ function endDay() {
   if (S.day === 6) { settleWeek(); renderTable(); renderWeek(); return; }
   S.day += 1; S.clock = 8.5;
   renderTable();
-  if (S.prefs.morning) renderMorning(); else toast(`${DAYS[S.day]} · allowed today ¥${todayBudget()}`);
+  if (S.prefs.morning) renderMorning(); else toast(`${DAYS[S.day]} · allowed today $${todayBudget()}`);
   monthTurn(dateOf(S.week, S.day - 1), dateOf(S.week, S.day));
 }
 function startWeek() {
@@ -3253,13 +3334,14 @@ function startWeek() {
   monthTurn(lastDay, dateOf(S.week, 0));
 }
 
+app.addEventListener('change', e => { const sel = e.target.closest && e.target.closest('.imp-cat'); if (!sel) return; IMP.rows[+sel.dataset.impc].cat = sel.value; const top = sel.closest('.sheet'); replaceSheet(top, renderImport); });
 app.addEventListener('input', e => {
   if (e.target.dataset.setup) {
     e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
     S.setup[e.target.dataset.setup] = +e.target.value || 0;
     const w = weeklyFrom(S.setup);
     tickMoney(document.getElementById('setup-week'), w);
-    document.getElementById('setup-formula').textContent = w >= 50 ? setupFormula(S.setup) : 'Weekly allowance must be at least ¥50; adjust the numbers above';
+    document.getElementById('setup-formula').textContent = w >= 50 ? setupFormula(S.setup) : 'Weekly allowance must be at least $50; adjust the numbers above';
     const nx = document.querySelector("[data-act=setup-next], [data-act=settings-save]"); if (nx) nx.disabled = w < 50;
   }
   if (e.target.id === 'note') draft.note = e.target.value.trim();
@@ -3283,7 +3365,23 @@ app.addEventListener('click', e => {
   }
   if (t.dataset.quota) { essQuota = Math.min(100, Math.max(0, essQuota + +t.dataset.quota)); replaceSheet(top, top.getAttribute('aria-label') === 'Settings' ? renderSettings : renderSetup); return; }
   if (act === 'setup-skip') { S.base = BASE; swapSheet(top, () => { renderTable(true); app.appendChild(top); renderWeak(); }); return; }
-  if (act === 'import') { toast('Bill import comes in the next version; pick by hand for now'); return; }
+  if (act === 'import' || act === 'import-log') { IMP = { mode: act === 'import' ? 'habits' : 'log', src: 'bank', rows: null, busy: false }; renderImport(); return; }
+  if (act === 'imp-tab') { IMP.src = t.dataset.src; replaceSheet(top, renderImport); return; }
+  if (act === 'imp-bank') { IMP.busy = true; IMP.bank = t.dataset.bank; replaceSheet(top, renderImport); setTimeout(() => { IMP.busy = false; IMP.rows = parseTx(SAMPLE_BANK); const cur = lastSheet(); if (cur && cur.getAttribute('aria-label') === 'Import') replaceSheet(cur, renderImport); }, reducedMotion() ? 0 : 1300); return; }
+  if (act === 'imp-sample') { IMP.rows = parseTx(SAMPLE_BANK); replaceSheet(top, renderImport); return; }
+  if (act === 'imp-parse') { const rows = parseTx((top.querySelector('#imp-text') || {}).value || ''); if (!rows.length) { toast('No purchases found. Each line needs a date, a name and an amount like -6.45'); return; } IMP.rows = rows; replaceSheet(top, renderImport); return; }
+  if (t.dataset.impi != null) { const r = IMP.rows[+t.dataset.impi]; r.on = !r.on; replaceSheet(top, renderImport); return; }
+  if (act === 'imp-add') {
+    const picked = IMP.rows.filter(r => r.on);
+    if (IMP.mode === 'habits') {
+      const found = new Set(picked.map(r => r.cat)); S.weak = WEAK.filter(w => w.id !== 'night' && w.id !== 'weekend' && found.has(w.id)).map(w => w.id);
+      closeSheet(top, () => { const w = app.querySelector('.sheet[aria-label="Weak spots"]'); if (w) replaceSheet(w, renderWeak); toast(S.weak.length ? `Found ${S.weak.length} spending habit${S.weak.length > 1 ? 's' : ''} to guard` : 'No usual suspects in there, nice'); });
+    } else {
+      picked.forEach(r => S.today.push({ cat: r.cat, amt: r.amt, note: r.desc.slice(0, 12) }));
+      closeSheet(top, () => { renderTable(); toast(`Added ${picked.length} to today`); });
+    }
+    return;
+  }
   if (act === 'trend') { toast('The trends page isn’t ready; see the calendar and categories for now'); return; }
   if (t.dataset.deck) { S.deckTab = t.dataset.deck; renderTable(); return; }
   if (act === 'weak-next' && S.weak.length) { swapSheet(top, renderFreq); return; }
@@ -3316,7 +3414,7 @@ app.addEventListener('click', e => {
   if (act === 'inbox') { app.querySelectorAll('.push').forEach(n => n.remove()); renderInbox(); return; }
   if (t.dataset.pref) { S.prefs[t.dataset.pref] = !S.prefs[t.dataset.pref]; replaceSheet(top, renderSettings); return; }
   if (t.dataset.evat) { S.prefs.eveningAt = +t.dataset.evat; replaceSheet(top, renderSettings); return; }
-  if (act === 'settings-save') { S.base = weeklyFrom(S.setup); replaceSheet(top, renderSettings); toast(`Weekly allowance set to ¥${S.base}, ¥${dailyBudget()}`); return; }
+  if (act === 'settings-save') { S.base = weeklyFrom(S.setup); replaceSheet(top, renderSettings); toast(`Weekly allowance set to $${S.base}, $${dailyBudget()}`); return; }
   if (act === 'coach-reset') { S.coach = 0; S.view = 'home'; top.remove(); renderTable(); return; }
   if (act === 'restart') { location.reload(); return; }
   if (act === 'star') { renderStarSheet(); return; }
@@ -3360,7 +3458,7 @@ app.addEventListener('click', e => {
     const [i, how] = t.dataset.rv.split(':'), x = S.revisit.splice(+i, 1)[0];
     let msg;
     if (how === 'buy') { S.today.push({ ...x, night: false, fromWish: true }); msg = 'Logged · wait 24 hours before buying'; }
-    else { S.wishSaved = (S.wishSaved || 0) + x.amt; msg = `Skip it, saved ¥${x.amt}`; }
+    else { S.wishSaved = (S.wishSaved || 0) + x.amt; msg = `Skip it, saved $${x.amt}`; }
     const lbl = top.getAttribute('aria-label'); renderTable(); (lbl === 'Notifications' ? renderInbox : renderMorning)(); lastSheet().style.animation = 'none'; toast(msg); return;
   }
   if (act === 'morning-done') { S.autoEnded = false; S.wishSaved = 0; closeSheet(top, renderTable); return; }
@@ -3395,7 +3493,7 @@ app.addEventListener('click', e => {
   if (act === 'del') { const before = evaluate(S.today); S.today.splice(draft.edit, 1); renderTable(); const after = evaluate(S.today); toast(after.mult > before.mult ? `Deleted · mult back to ×${after.mult}` : 'Deleted'); return; }
   if (act === 'wish') { S.wish.push({ cat: logCat(), amt: parseInt(draft.amt, 10), note: draft.note }); renderTable(); toast('Moved to the wish list; we’ll ask again tomorrow · no card broke'); return; }
   if (act === 'wish-buy') { const x = S.revisit.shift(); const before = evaluate(S.today); S.today.push({ ...x, night: false, fromWish: true }); renderTable(); verdict(before, evaluate(S.today)); return; }
-  if (act === 'wish-skip') { const x = S.revisit.shift(); renderTable(); toast(`saved ¥${x.amt}`); return; }
+  if (act === 'wish-skip') { const x = S.revisit.shift(); renderTable(); toast(`saved $${x.amt}`); return; }
   if (act === 'end') { if (!S.held.length) { toast('Draw this week’s cards first'); return; } renderEnd(); return; }
   if (act === 'end-ok') { t.disabled = true; playStage(top); return; }
   if (act === 'play-next') { t.disabled = true; endDay(); return; }
