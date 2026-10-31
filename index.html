@@ -168,6 +168,16 @@ button.chip:active { transform: translateY(2px); }
 .cats .cap > .top { text-align: center; font-weight: 900; font-size: 12px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 44px; }
 .cats .cap[aria-pressed="true"] { outline: 3px solid var(--ink); outline-offset: 2px; }
 .cats .cap small { font-weight: 500; font-size: 11px; color: var(--sub); }
+.sheet:has(.logfoot) { overflow: hidden; }
+/* on shorter screens the Log page tightens up so it still fits without scrolling */
+@media (max-height: 840px) {
+  .sheet:has(.logfoot) { gap: 10px; }
+  .sheet:has(.logfoot) .amount { padding: 8px 20px; } .sheet:has(.logfoot) .amount b { font-size: 40px; }
+  .sheet:has(.logfoot) .pad { gap: 6px; } .sheet:has(.logfoot) .pad .cap { height: 42px; padding: 3px 3px 6px; }
+  .sheet:has(.logfoot) .logfoot { padding-bottom: 28px; gap: 8px; }
+  .sheet:has(.logfoot) .logfoot .actions .cap > .top, .sheet:has(.logfoot) .logfoot .go { min-height: 46px; }
+}
+@media (max-height: 700px) { .sheet:has(.logfoot) { overflow-y: auto; } }
 .newcat { border-radius: 18px; background: #F3F3F6; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
 .toggle { display: flex; gap: 6px; }
 .toggle button { flex: 1; height: 38px; border-radius: 19px; border: 2px solid var(--rule); background: #fff; font-weight: 900; font-size: 12px; }
@@ -2469,15 +2479,14 @@ function renderLog() {
     <div class="bar-top"><h1>${editing ? 'Edit entry' : 'Log'}</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     <div class="amount"><b>¥${amt}</b><span class="px" style="color:#5E5E66;font-size:12px;text-align:right">${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
     <div class="cats">${cats}</div>
-    ${draft.adding ? `<div class="newcat">
-      <div class="field"><input class="in" id="newcat" maxlength="5" value="${esc(draft.newName || '')}" placeholder="Name, e.g. Game top-up" aria-label="New category name"><button class="mini" data-act="addcat">Add</button></div>
-      <div class="toggle"><button aria-pressed="${!draft.newEss}" data-newess="0">Outside the allowance</button><button aria-pressed="${!!draft.newEss}" data-newess="1">Essential</button></div>
-    </div>` : ''}
     <div class="field"><input class="in" id="note" maxlength="12" value="${esc(draft.note || '')}" placeholder="What was it? (optional)" aria-label="Note">
       ${draft.cat === 'meal' ? `<button class="mini ${draft.delivery ? 'on' : ''}" data-delivery="${draft.delivery ? 0 : 1}" aria-pressed="${!!draft.delivery}">Delivered</button>` : ''}
       <button class="mini ${draft.night ? 'on' : ''}" data-night="${draft.night ? 0 : 1}" aria-pressed="${!!draft.night}">after 10 pm</button>
       <button class="mini" data-act="savequick">Save favorite</button></div>
-    <div class="pad">${pad}</div>
+    ${draft.adding ? `<div class="newcat">
+      <div class="field"><input class="in" id="newcat" maxlength="5" value="${esc(draft.newName || '')}" placeholder="Name, e.g. Game top-up" aria-label="New category name"><button class="mini" data-act="addcat">Add</button></div>
+      <div class="toggle"><button aria-pressed="${!draft.newEss}" data-newess="0">Outside the allowance</button><button aria-pressed="${!!draft.newEss}" data-newess="1">Essential</button></div>
+    </div>` : `<div class="pad">${pad}</div>`}
     <div class="logfoot">
       <div class="vline ${tone}"><div class="vtext"><b>${head}</b><span class="px">${sub}</span>${extra ? `<small>${extra}</small>` : ''}</div>
         <div class="vmult" aria-label="Mult ×${amt ? after.mult : before.mult}">${amt && after.mult !== before.mult ? `<s>×${before.mult}</s>` : '<small>Mult</small>'}<b>×${amt ? after.mult : before.mult}</b></div></div>
