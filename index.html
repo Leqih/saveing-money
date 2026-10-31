@@ -1974,7 +1974,7 @@ function homeHTML() {
       <button class="cookie" data-act="star" aria-label="Stars ${S.stars}, tap for the guide and settings"><span class="n">${S.stars}</span><span class="l">★ Stars</span></button>
     </div>
     <div class="hero herocrt ${ev.left < 0 ? 'over' : ''}">${crtHTML(ev)}</div>
-    ${S.held.length ? holdHTML(ev) : `<button class="rulebar" data-act="draw"><div class="rtext" style="grid-column:1/-1"><small>This week’s cards</small><b>Not drawn yet</b><span>Tap to draw this week’s cards</span></div></button>`}
+    ${S.held.length ? holdHTML(ev) : `<button class="rulebar" data-act="draw"><div class="rtext" style="grid-column:1/-1"><small>This week’s cards</small><b>Not drawn yet</b><span>Tap to draw</span></div></button>`}
     <div class="wkrow">
       <div class="cap meter wkmini"><div class="top">
         <div class="row"><span>Today’s ledger</span><span class="px">${money(sumToday)}</span></div>
@@ -2029,11 +2029,11 @@ app.addEventListener('scroll', e => {
 }, true);
 // replaces the old one-minute guide: tips on the real home screen, the first time it opens
 const COACH = [
-  { sel: '.hold', title: 'Your 3 cards', text: 'Hold one to earn its multiplier. If it breaks, it sits out until midnight.' },
+  { sel: '.hold', title: 'Your 3 cards', text: 'Hold a card to earn its multiplier. If it breaks, it’s out until midnight.' },
   { sel: '.pf', title: 'Your profile', text: 'Badges, notifications and settings live here.' },
   { sel: '.hero', title: 'Today’s score', text: 'Money left today × multiplier. Spend less and hold more cards.' },
-  { sel: '.cv-log', title: 'Log a spend', text: 'See which card it would break before you save.' },
-  { sel: '.endbtn', title: 'End the day', text: 'Tap here for today’s receipt. Midnight does it for you if you forget.' }
+  { sel: '.cv-log', title: 'Log a spend', text: 'See which card an entry would break before you save it.' },
+  { sel: '.endbtn', title: 'End the day', text: 'Tap to get today’s receipt. If you forget, it happens at midnight.' }
 ];
 function showCoach() {
   if (S.view !== 'home' || !S.held.length || S.coach >= COACH.length || lastSheet()) return;
@@ -2088,7 +2088,7 @@ function flowHTML(tabs) {
     .map(([id, name, v]) => `<button class="lg-chip ${f === id ? 'on' : ''}" data-flowcat="${id}" aria-pressed="${f === id}">${id === 'all' ? '' : `<i style="background:${CAT_COLOR[id] || '#D4D4DB'}"></i>`}${name}<b>$${v}</b></button>`).join('');
   const row = it => {
     const x = it.x, ess = !!cat(x.cat).ess;
-    const tags = [ess ? 'Essential' : '', x.caught ? 'caught by bank' : '', x.night ? 'after 10 pm' : '', x.fromWish ? 'waited 24 hours' : '', it.wish ? 'Wish list · asked tomorrow' : ''].filter(Boolean).join(' · ');
+    const tags = [ess ? 'Essential' : '', x.caught ? 'caught by bank' : '', x.night ? 'after 10 pm' : '', x.fromWish ? 'waited 24 hours' : '', it.wish ? 'Wish list · decide tomorrow' : ''].filter(Boolean).join(' · ');
     const sub = [x.note ? cat(x.cat).name : '', tags].filter(Boolean).join(' · ');
     const inner = `${catBadge(x.cat)}<span class="lg-main"><b>${x.note ? esc(x.note) : cat(x.cat).name}</b>${sub ? `<small>${sub}</small>` : ''}${it.breaks ? `<em>Broke ${it.breaks.join(', ')}</em>` : ''}</span><span class="lg-amt ${it.breaks ? 'hit' : ''} ${it.wish ? 'wished' : ''}">${it.wish ? '' : '−'}$${x.amt}</span>`;
     return it.edit != null ? `<button class="lg-row" data-edit="${it.edit}" aria-label="${entryName(x)} ${x.amt} dollars, tap to edit">${inner}</button>` : `<div class="lg-row">${inner}</div>`;
@@ -2099,7 +2099,7 @@ function flowHTML(tabs) {
     const sum = items.filter(it => !it.wish).reduce((a, it) => a + it.x.amt, 0);
     const head = `<span>${d.label}<small>${d.date.getMonth() + 1}/${d.date.getDate()}</small></span><span class="px">$${sum}${d.cal ? ' · receipt →' : ''}</span>`;
     return `<section class="lg-day">${d.cal ? `<button class="lg-head" data-cal="${d.cal}">${head}</button>` : `<div class="lg-head">${head}</div>`}
-      <div class="lg-list">${items.map(row).join('') || `<p class="note left" style="padding:12px 14px">${d.unlogged ? 'Nothing logged this day.' : 'Nothing spent yet today. Tap"Log"to start.'}</p>`}</div></section>`;
+      <div class="lg-list">${items.map(row).join('') || `<p class="note left" style="padding:12px 14px">${d.unlogged ? 'Nothing logged this day.' : 'Nothing spent yet today. Tap Log to start.'}</p>`}</div></section>`;
   }).join('');
   return `<div style="display:flex;justify-content:space-between;align-items:center">
       <h1 style="margin:0;font-weight:900;font-size:28px">Ledger</h1>
@@ -2612,7 +2612,7 @@ function renderLog() {
   const slip = slipped(before, after).map(slipWhy);
   // the one line that matters, pinned above the save button so it is never scrolled away
   const tone = !amt ? '' : broke.length || slip.length ? 'bad' : 'good';
-  const head = !amt ? 'Enter an amount to see right away whether a card breaks'
+  const head = !amt ? 'Enter an amount to see if a card breaks'
     : broke.length ? (broke.length > 2 ? `Breaks ${broke.length} cards` : `Will break: ${broke.join(', ')}`) : slip.length ? (slip.length > 1 ? `Mult drops ${slip.length} ways` : `Mult drops: ${slip[0]}`) : woke.length ? `${woke.join(', ')}will wake ✓` : 'No rule touched ✓';
   const sub = !amt ? `Left to spend today ${money(before.left)} · tonight ${before.score} pts`
     : `Tonight ${before.score} → ${after.score} pts · left ${money(after.left)}`;
@@ -2900,7 +2900,7 @@ function renderLaunch() {
     <svg class="l-abs stk flower" style="--r:14deg;--d:1250ms;--f:5.4s;left:140px;top:516px;width:44px" viewBox="0 0 40 40" aria-hidden="true"><g fill="#6DFF8C" stroke="#FFF" stroke-width="2.500"><circle cx="20" cy="10" r="8"/><circle cx="20" cy="30" r="8"/><circle cx="10" cy="20" r="8"/><circle cx="30" cy="20" r="8"/></g><circle cx="20" cy="20" r="6" fill="#FFD92E"/></svg>
     <div class="l-abs l-foot">
       <h1>Money left × cards held<br>= today’s score.</h1>
-      <p>Every entry tells you right away if you broke a rule; on Sunday you see whether you passed.</p>
+      <p>Every entry shows right away if it breaks a rule. On Sunday, see whether you passed.</p>
       <button class="cap lime bigbtn" data-act="launch-go"><div class="top">Start week 1</div></button>
       <button class="linkbtn" data-act="launch-skip">Skip setup, draw cards</button>
     </div>
@@ -2927,7 +2927,7 @@ function renderSetup() {
       <div aria-hidden="true" style="position:absolute;left:0;top:-6px;width:62px;height:62px;background:#6CFF2E;clip-path:polygon(50% 0%,61% 18%,82% 10%,80% 32%,100% 42%,85% 58%,95% 79%,72% 80%,62% 100%,50% 84%,38% 100%,28% 80%,5% 79%,15% 58%,0% 42%,20% 32%,18% 10%,39% 18%);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg)"><span style="font-size:12px;font-weight:900;color:#0F4A00">Adjust</span></div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:76px;padding:0 12px 0 18px;border-radius:22px;background:#E3F7D5">
-      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:14px">Essentials allowance</span><span style="font-size:11px;color:#3F5F2A">Meals and commuting within this amount a day don’t count against the allowance</span></div>
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:14px">Essentials allowance</span><span style="font-size:11px;color:#3F5F2A">Meals and commuting up to this amount a day don’t count</span></div>
       <div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:48px;text-align:center">$${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div>
     </div>
     <button class="cap lime bigbtn" data-act="setup-next" ${w >= 50 ? '' : 'disabled'}><div class="top">Next: find where money leaks</div></button>
@@ -2979,7 +2979,7 @@ function renderGuide() {
     <div class="bar-top"><h1>How to play</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     <div class="gstack">
       <div class="gcard g-orange"><span class="n">1</span><div><h3>Every week, draw 8 and keep 3</h3><p>The 3 rule cards you keep all work this week, e.g. "No takeout today". Each one shows how much multiplier you earn for holding it.</p></div>${scaled(CARDS['01'], 0.35)}</div>
-      <div class="gcard g-lav"><span class="n">2</span><div><h3>Every entry tells you right away</h3><p>See before you save whether a card will break. A broken card stops counting for the day; stop spending and you get half back, and it returns at midnight. Weekly cards stay broken until Sunday and lose more multiplier if you overspend.</p></div><span class="gv">Broke!</span></div>
+      <div class="gcard g-lav"><span class="n">2</span><div><h3>Every entry tells you right away</h3><p>See whether a card will break before you save. A broken card stops counting for the day; stop spending and you get half its multiplier back, and it returns at midnight. Weekly cards stay broken until Sunday and lose more multiplier if you keep overspending.</p></div><span class="gv">Broke!</span></div>
       <div class="gcard g-lime"><span class="n">3</span><div><h3>Money left × multiplier = score</h3><p>The multiplier starts at 1 and each held card adds to it. Reach the weekly target to pass and earn stars; missing it costs nothing.</p></div><span class="gv">30×6</span></div>
     </div>
     <button class="cap lime bigbtn" data-act="close"><div class="top">Got it</div></button>`);
@@ -3006,7 +3006,7 @@ function renderSettings() {
     <details class="about"><summary>About this demo</summary>
     <div class="set-row"><div><b>How to play</b><small>The rules in three steps</small></div><button class="mini" data-act="help">Watch</button></div>
     <div class="set-row"><div><b>Replay home tips</b><small>The 4 bubbles shown on first visit to home</small></div><button class="mini" data-act="coach-reset">Watch again</button></div>
-    <div class="set-row"><div><b>Start over</b><small>Back to the launch screen and clear everything logged in the demo</small></div><button class="mini" data-act="restart">Start over</button></div>
+    <div class="set-row"><div><b>Start over</b><small>Return to the launch screen and clear all demo data</small></div><button class="mini" data-act="restart">Start over</button></div>
 </details>
     <button class="go" data-act="settings-save" ${w >= 50 && w !== S.base ? '' : 'disabled'}>${w === S.base ? `It’s already $${S.base}` : `Change to $${w}`}</button>`);
 }
@@ -3120,7 +3120,7 @@ function renderBankLink() {
     : `<ol class="bk-steps">
         <li><b>You still play every purchase.</b><span>Log it yourself and see what breaks before you buy. That’s the game.</span></li>
         <li><b>The bank checks the night.</b><span>Read-only: date, merchant and amount. We can’t move money, and you can disconnect any time.</span></li>
-        <li><b>Forgot one? You’ll catch it.</b><span>Before tonight is scored you add what you missed. Logging before the bank shows it keeps your honest streak: 7 nights earns a free Glue bottle.</span></li>
+        <li><b>Forgot one? You’ll catch it.</b><span>Add anything you missed before tonight is scored. Logging a purchase before it shows up at the bank keeps your honest streak: 7 nights earns a free Glue bottle.</span></li>
       </ol>
       <h2>Choose your bank <small>Demo account, no real login</small></h2>
       <div class="imp-banks">${['Chase', 'Bank of America', 'Wells Fargo', 'Capital One', 'Apple Card'].map(b => `<button class="imp-bank" data-act="bank-pick" data-bank="${b}"><i>${b[0]}</i><b>${b}</b><span aria-hidden="true">›</span></button>`).join('')}</div>`;
@@ -3134,7 +3134,7 @@ function renderBankCheck() {
   const breaks = tx => { const before = evaluate(S.today), after = evaluate([...S.today, { cat: tx.cat, amt: tx.amt }]); return after.cards.filter((x, k) => x.state === 'broken' && before.cards[k].state !== 'broken').map(x => CARDS[x.no].name); };
   sheet('Bank check', `
     <div class="bar-top"><h1>Bank check</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
-    ${rows.length ? `<p class="note left" style="margin:0">${esc(name)} shows ${rows.length} purchase${rows.length > 1 ? 's' : ''} you didn’t log. Add what’s yours so tonight’s score is true; skip what isn’t.</p>` : '<div class="bk-done"><i>✓</i><b>All caught up</b><p>Everything the bank saw is in your log.</p></div>'}
+    ${rows.length ? `<p class="note left" style="margin:0">${esc(name)} shows ${rows.length} purchase${rows.length > 1 ? 's' : ''} you didn’t log. Add what’s yours so tonight’s score is accurate, and skip the rest.</p>` : '<div class="bk-done"><i>✓</i><b>All caught up</b><p>Everything the bank saw is in your log.</p></div>'}
     <div class="imp-list">${rows.map(tx => { const br = breaks(tx); return `<div class="imp-row bk-row">${catBadge(tx.cat)}<span class="imp-main"><b>${esc(tx.desc)}</b><small>${cat(tx.cat).name}</small>${br.length ? `<em class="bk-br">Breaks ${br.join(', ')}</em>` : ''}</span><span class="px imp-amt">$${tx.amt}</span><span class="bk-btns"><button class="mini on" data-act="bank-add" data-id="${tx.id}">Add</button><button class="mini" data-act="bank-no" data-id="${tx.id}">Not mine</button></span></div>`; }).join('')}</div>
     <button class="go" data-act="bank-continue" ${rows.length ? 'disabled' : ''}>${rows.length ? `${rows.length} left to check` : 'Continue to tonight'}</button>`);
 }
@@ -3248,7 +3248,7 @@ function inboxItems(ev = evaluate(S.today)) {
     btns: [[`data-rv="${i}:buy"`, 'Still want it', ''], [`data-rv="${i}:skip"`, 'Skip, save', 'lime']] }));
   if (S.day === 6) out.push({ key: `sun-${S.week}`, kind: 'sunday', title: 'Today is the last day of the week', text: 'Tonight, tap "End today" to see the weekly summary: score, stars, graduation, which card to carry over, and next week’s stake.', btns: [['data-act="end"', 'End today, see the weekly summary', 'lime']] });
   else if (S.prefs.evening && S.clock >= S.prefs.eveningAt) out.push({ key: `eve-${k}`, kind: 'evening', title: `${fmtClock(S.clock)} · Done logging?`, text: `Tonight’s estimate ${ev.score} pts. When you’re done, tap "End today" for the receipt; if you forget, midnight ends the day for you.`, btns: [['data-act="end"', 'End today', 'lime']] });
-  if (ev.left <= 0) out.push({ key: `over-${k}`, kind: 'stop', title: ev.left < 0 ? `You’re already over by $${-ev.left}` : `Today’s $${ev.daily} is used up exactly`, text: `Tonight is 0 pts.${ev.left < 0 ? 'Overage comes out of tomorrow’s allowance; ' : 'Spending more comes out of tomorrow’s allowance, '}every dollars you spend now is tomorrow’s money. Put what you want on the wish list first.` });
+  if (ev.left <= 0) out.push({ key: `over-${k}`, kind: 'stop', title: ev.left < 0 ? `You’re already over by $${-ev.left}` : `Today’s $${ev.daily} is used up exactly`, text: `Tonight is 0 pts. Anything you spend now comes out of tomorrow’s allowance. Put what you want on the wish list first.` });
   else if (ev.cards.every(c => c.state !== 'on')) out.push({ key: `broke-${k}`, kind: 'stop', title: 'All three cards broke today', text: `Mult is back to ×${ev.mult}, but the money left still counts: stay under ${money(ev.left)} and tonight you still get ${ev.score} pts. All cards come back at midnight.` });
   if (S.prefs.ruleAlerts) alerts(ev).forEach(a => out.push({ key: `al-${k}-${a}`, kind: 'alert', title: `${fmtClock(S.clock)} · Rule reminder`, text: a }));
   if (S.wish.length) out.push({ key: `wl-${k}-${S.wish.length}`, kind: 'memo', title: 'Wish list', text: `It holds ${S.wish.length} items; tomorrow you’ll be asked if you still want them. They don’t count as spending and break no cards.` });
@@ -3265,7 +3265,7 @@ function renderInbox() {
   sheet('Notifications', `
     <div class="bar-top"><h1>Notifications</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     ${items.map(i => `<div class="ibox ${i.kind}"><span class="iic">${icon[i.kind]}</span><div><b>${i.title}</b><p>${i.text}</p>${i.btns ? `<div class="ibtns">${i.btns.map(([attr, label, cls]) => `<button class="rvbtn ${cls}" ${attr}>${label}</button>`).join('')}</div>` : ''}</div></div>`).join('')
-      || '<p class="note">Nothing new. Rule reminders, evening reminders and the wish list all show up here instead of taking space on the home screen.</p>'}`);
+      || '<p class="note">Nothing new. Rule reminders, evening reminders and your wish list show up here.</p>'}`);
   const bell = app.querySelector('.pf'); if (bell) { const b = bell.querySelector('.badge'); if (b) b.remove(); }
 }
 // what the phone notification would look like; in the real app this is a system push
@@ -3280,7 +3280,7 @@ function renderClock() {
     <div class="bar-top"><h1>Demo: change time</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     <div class="clocks">${TIMES.map(t => `<button class="cap ${Math.abs(t.c - S.clock) < 0.05 ? 'orange' : ''}" data-clock="${t.c}"><div class="top"><b class="px">${fmtClock(t.c)}</b><span>${t.name}</span></div></button>`).join('')}
       <button class="cap lime" data-act="jump-sunday"><div class="top"><b class="px">Sunday</b><span>Jump to Sunday night · end the day to see the weekly summary</span></div></button>
-      <button class="cap dark" data-clock="midnight"><div class="top"><b class="px">00:00</b><span>Midnight · if you don’t end the day, it ends automatically</span></div></button></div>`);
+      <button class="cap dark" data-clock="midnight"><div class="top"><b class="px">00:00</b><span>Midnight · the day ends automatically</span></div></button></div>`);
 }
 // first open of a new day: how yesterday scored, the wishlist that has waited 24 hours, and today's cards
 function renderMorning() {
