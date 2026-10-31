@@ -751,6 +751,16 @@ button.hcard:active > div { transform: translateY(2px); }
 .head .bell::before { content: ""; position: absolute; inset: 0; background: #FFD21F; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
 .head .bell svg { position: relative; z-index: 1; width: 24px; height: 24px; fill: #111; }
 .head .bell .badge { right: -2px; top: -2px; z-index: 2; }
+.pf-card { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 22px; background: #F3F3F6; }
+.pf-card b { display: block; font-size: 16px; font-weight: 900; } .pf-card small { font-size: 12px; color: var(--sub); }
+.pf-av { flex: none; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; position: relative; filter: drop-shadow(0 3px 0 rgba(17,17,17,0.22)); } .pf-av::before { content: ""; position: absolute; inset: 0; background: #FFD21F; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); } .pf-av svg { position: relative; }
+.pf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; } .pf-stats > div { padding: 10px 12px; border-radius: 18px; background: #F3F3F6; display: flex; flex-direction: column; gap: 2px; } .pf-stats b { font-size: 20px; font-weight: 500; } .pf-stats small { font-size: 11px; color: var(--sub); font-weight: 700; }
+.pf-badges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 8px; }
+.pf-b { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.pf-shape { width: 64px; height: 64px; position: relative; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 3px 0 rgba(17,17,17,0.2)); } .pf-shape::before { content: ""; position: absolute; inset: 0; background: var(--c); clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); } .pf-shape svg { position: relative; }
+.pf-b b { font-size: 12px; font-weight: 900; } .pf-b small { font-size: 11px; color: var(--sub); line-height: 1.3; }
+.pf-b:not(.on) .pf-shape { filter: none; opacity: 0.55; } .pf-b:not(.on) .pf-shape::before { background: #DADAE0; } .pf-b:not(.on) .pf-shape svg { opacity: 0.35; } .pf-b:not(.on) b { color: var(--mute); }
+.pf-link { width: 100%; border: 0; text-align: left; align-items: center; } .pf-go { color: var(--mute); font-size: 22px; } .pf-n { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--pink); color: #FFF; font-family: var(--f-px); font-size: 12px; display: inline-flex; align-items: center; justify-content: center; }
 .bell { position: relative; display: flex; align-items: center; justify-content: center; }
 .bell .badge { position: absolute; right: -4px; top: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--pink); border: 2px solid #FFF; color: #FFF; font-family: var(--f-px); font-size: 11px; display: flex; align-items: center; justify-content: center; }
 .bell.ring svg { animation: ring 1.2s ease 2; transform-origin: 50% 10%; }
@@ -1879,8 +1889,7 @@ function homeHTML() {
   return `
     <div class="head">
       <button class="daypill" data-act="clock" aria-label="Week ${S.week} ${DAYS[S.day]}, now ${fmtClock(S.clock)}, tap to change the demo time"><span class="px" style="font-size:12px;display:flex;justify-content:space-between">Week ${S.week} · ${DAYS[S.day]}<span class="clock">${fmtClock(S.clock)} ▾</span></span><span class="dots" aria-hidden="true">${dots}</span></button>
-      <button class="honest ${S.bank ? '' : 'off'}" data-act="bank-link" aria-label="${S.bank ? `Honest nights ${(S.honest || 0) % 7} of 7, tap for details` : 'Honest nights: connect a bank to start'}"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-7"/></svg><b>${S.bank ? (S.honest || 0) % 7 : 0}/7</b></button>
-      ${bellHTML(ev)}
+      ${profileHTML(ev)}
       <button class="cookie" data-act="star" aria-label="Stars ${S.stars}, tap for the guide and settings"><span class="n">${S.stars}</span><span class="l">★ Stars</span></button>
     </div>
     <div class="hero herocrt ${ev.left < 0 ? 'over' : ''}">${crtHTML(ev)}</div>
@@ -1940,7 +1949,7 @@ app.addEventListener('scroll', e => {
 // replaces the old one-minute guide: tips on the real home screen, the first time it opens
 const COACH = [
   { sel: '.hold', title: 'Your 3 cards', text: 'Hold one to earn its multiplier. If it breaks, it sits out until midnight.' },
-  { sel: '.bell', title: 'Reminders', text: 'They live in the bell, so the home screen stays clean.' },
+  { sel: '.pf', title: 'Your profile', text: 'Badges, notifications and settings live here.' },
   { sel: '.hero', title: 'Today’s score', text: 'Money left today × multiplier. Spend less and hold more cards.' },
   { sel: '.cv-log', title: 'Log a spend', text: 'See which card it would break before you save.' },
   { sel: '.endbtn', title: 'End the day', text: 'Tap here for today’s receipt. Midnight does it for you if you forget.' }
@@ -2989,6 +2998,47 @@ function renderImport() {
     ${body}${cta}`);
 }
 
+
+/* ---------- profile: who you are in the game, badges, notifications, bank and settings in one place ---------- */
+const PERSON = '<svg width="24" height="24" viewBox="0 0 24 24" fill="#111" aria-hidden="true"><circle cx="12" cy="8" r="4.5"/><path d="M3.5 21c0-4.800 3.800-7.500 8.500-7.500s8.500 2.700 8.500 7.500z"/></svg>';
+function profileHTML(ev) {
+  const unseen = inboxItems(ev).filter(i => !S.seen.has(i.key)).length;
+  return `<button class="help bell pf" data-act="profile" aria-label="Profile${unseen ? `, ${unseen} new notification${unseen > 1 ? 's' : ''}` : ''}">${PERSON}${unseen ? `<span class="badge">${unseen}</span>` : ''}</button>`;
+}
+const BI = {
+  check: '<path d="M5 12.500l4.500 4.500L19 7" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
+  flame: '<path d="M12 3c1.500 4 6 5.500 6 11a6 6 0 01-12 0c0-2.500 1.500-4 2.500-5.500 1.200 1 1.500 2.300 1.200 3.800C11.500 10 12.500 6 12 3z" fill="#111"/>',
+  zero: '<circle cx="12" cy="12" r="6.500" fill="none" stroke="#111" stroke-width="3.500"/>',
+  grad: '<path d="M12 3l9 5-9 5-9-5zM6.500 11.500v4.500c0 1.500 2.500 3 5.500 3s5.500-1.500 5.500-3v-4.500" fill="#111" stroke="#111" stroke-width="1.500" stroke-linejoin="round"/>',
+  star: '<path d="M12 3l2.600 5.600 6 .8-4.400 4.200 1.100 6L12 16.600 6.700 19.600l1.100-6L3.400 9.400l6-.8z" fill="#111"/>',
+  up: '<path d="M12 20V6M6 12l6-6 6 6" fill="none" stroke="#111" stroke-width="3.200" stroke-linecap="round" stroke-linejoin="round"/>'
+};
+function badgeList() {
+  const hb = Math.max(S.honestBest || 0, S.honest || 0), sd = streakDays();
+  return [
+    { name: 'Honest week', desc: '7 honest nights in a row', got: hb >= 7, prog: `${Math.min(7, hb)}/7`, color: '#E4FF1A', icon: BI.check },
+    { name: 'On a roll', desc: '3 days holding every card', got: sd >= 3, prog: `${Math.min(3, sd)}/3`, color: '#FF8A1F', icon: BI.flame },
+    { name: 'Zero day', desc: 'A day with no extra spending', got: S.history.some(h => h.extra === 0 && !h.unlogged), prog: '0/1', color: '#8FD3FF', icon: BI.zero },
+    { name: 'Habit buster', desc: 'Graduate a rule card', got: S.grad.length >= 1, prog: '0/1', color: '#FF4D6A', icon: BI.grad },
+    { name: 'Star saver', desc: 'Earn 3 stars', got: S.starsTotal >= 3, prog: `${Math.min(3, S.starsTotal)}/3`, color: '#C9C3FF', icon: BI.star },
+    { name: 'Stake climber', desc: 'Pass a week and raise the stake', got: (S.maxStake || 0) >= 1, prog: '0/1', color: '#6EE59A', icon: BI.up }
+  ];
+}
+function renderProfile() {
+  const ev = evaluate(S.today), unseen = inboxItems(ev).filter(i => !S.seen.has(i.key)).length, bl = badgeList(), got = bl.filter(b => b.got).length;
+  const link = (act, title, sub, right = '') => `<button class="set-row pf-link" data-act="${act}"><div><b>${title}</b><small>${sub}</small></div>${right}<span class="pf-go" aria-hidden="true">›</span></button>`;
+  sheet('Profile', `
+    <div class="bar-top"><h1>Profile</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
+    <div class="pf-card"><span class="pf-av">${PERSON}</span><div><b>Week ${S.week} · ${STAKES[S.stake].name}</b><small>Base mult ×${S.baseMult} · ${S.grad.length} habit${S.grad.length === 1 ? '' : 's'} graduated</small></div></div>
+    <div class="pf-stats"><div><b class="px">★ ${S.stars}</b><small>Stars</small></div><div><b class="px">${(S.honest || 0) % 7}/7</b><small>Honest nights</small></div><div><b class="px">${streakDays()}</b><small>Day streak</small></div></div>
+    <h2>Badges <small>${got} of ${bl.length}</small></h2>
+    <div class="pf-badges">${bl.map(b => `<div class="pf-b ${b.got ? 'on' : ''}" style="--c:${b.color}"><span class="pf-shape"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">${b.icon}</svg></span><b>${b.name}</b><small>${b.got ? b.desc : b.prog}</small></div>`).join('')}</div>
+    <h2>Account</h2>
+    ${link('inbox', 'Notifications', unseen ? `${unseen} new` : 'Nothing new', unseen ? `<span class="pf-n">${unseen}</span>` : '')}
+    ${S.bank ? `<div class="set-row"><div><b>${esc(S.bank.name)}</b><small>Checks your log every night</small></div><button class="mini" data-act="bank-off-profile">Disconnect</button></div>` : link('bank-link', 'Connect a bank', 'Catches purchases you forget to log')}
+    ${link('settings', 'Settings', 'Budget and reminders')}`);
+}
+
 /* ---------- the bank is the referee: you still log every purchase, the bank checks the night ---------- */
 const FEED_POOL = [['Starbucks #12345', 6], ['DoorDash*Chipotle', 32], ['Uber *Trip', 18], ['Amazon.com*2K4LM', 42], ['Dunkin’ #3321', 4], ['Whole Foods Market', 62], ['MTA*NYCT PAYGO', 3], ['Lyft *Ride', 15]];
 const sampleFeed = () => FEED_POOL.slice().sort(() => Math.random() - 0.5).slice(0, 4).map(([desc, amt], i) => ({ id: i, desc, amt, cat: guessCat(desc), state: 'open' }));
@@ -3150,7 +3200,7 @@ function renderInbox() {
     <div class="bar-top"><h1>Notifications</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     ${items.map(i => `<div class="ibox ${i.kind}"><span class="iic">${icon[i.kind]}</span><div><b>${i.title}</b><p>${i.text}</p>${i.btns ? `<div class="ibtns">${i.btns.map(([attr, label, cls]) => `<button class="rvbtn ${cls}" ${attr}>${label}</button>`).join('')}</div>` : ''}</div></div>`).join('')
       || '<p class="note">Nothing new. Rule reminders, evening reminders and the wish list all show up here instead of taking space on the home screen.</p>'}`);
-  const bell = app.querySelector('.bell'); if (bell) { bell.classList.remove('ring'); const b = bell.querySelector('.badge'); if (b) b.remove(); }
+  const bell = app.querySelector('.pf'); if (bell) { const b = bell.querySelector('.badge'); if (b) b.remove(); }
 }
 // what the phone notification would look like; in the real app this is a system push
 function pushNote(title, body) {
@@ -3359,7 +3409,7 @@ function endDay() {
   S.history.push(h);
   // honest streak: a night with nothing the bank had to catch; five in a row earns a star
   if (S.bank) {
-    const caught = S.today.some(e => e.caught); S.honest = caught ? 0 : (S.honest || 0) + 1;
+    const caught = S.today.some(e => e.caught); S.honest = caught ? 0 : (S.honest || 0) + 1; S.honestBest = Math.max(S.honestBest || 0, S.honest);
     S.bank.feed = sampleFeed();
     // a week of honest nights earns a free bottle of glue (the same one the shop sells); two weeks also earn a star
     if (!caught && S.honest % 7 === 0) {
@@ -3427,6 +3477,8 @@ app.addEventListener('click', e => {
   if (t.dataset.quota) { essQuota = Math.min(100, Math.max(0, essQuota + +t.dataset.quota)); replaceSheet(top, top.getAttribute('aria-label') === 'Settings' ? renderSettings : renderSetup); return; }
   if (act === 'setup-skip') { S.base = BASE; swapSheet(top, () => { renderTable(true); app.appendChild(top); renderWeak(); }); return; }
   if (act === 'import') { IMP = { mode: 'habits', src: 'bank', rows: null, busy: false }; renderImport(); return; }
+  if (act === 'profile') { renderProfile(); return; }
+  if (act === 'bank-off-profile') { S.bank = null; replaceSheet(top, renderProfile); toast('Bank disconnected'); return; }
   if (act === 'bank-link') { if (S.bank) { renderSettings(); return; } BNK = { step: 'intro' }; renderBankLink(); return; }
   if (act === 'bank-pick') { BNK = { step: 'busy', bank: t.dataset.bank }; replaceSheet(top, renderBankLink); setTimeout(() => { S.bank = { name: BNK.bank, feed: sampleFeed() }; S.honest = S.honest || 0; BNK.step = 'done'; const cur = lastSheet(); if (cur && cur.getAttribute('aria-label') === 'Bank') replaceSheet(cur, renderBankLink); }, reducedMotion() ? 0 : 1300); return; }
   if (act === 'bank-off') { S.bank = null; replaceSheet(top, renderSettings); toast('Bank disconnected'); return; }
