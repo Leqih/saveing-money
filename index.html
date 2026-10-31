@@ -745,6 +745,11 @@ button.hcard:active > div { transform: translateY(2px); }
 .sunday .cap { margin-top: 4px; } .sunday .cap > .top { text-align: center; font-weight: 900; font-size: 14px; padding: 12px; color: #111; }
 /* notices: a bell with an unseen count in the header, the list in its own sheet */
 .honest { flex: none; height: 44px; padding: 0 10px; border-radius: 22px; border: 2px solid var(--ink); background: var(--lime); color: var(--ink); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 3px 0 #9DB000; } .honest b { font-family: var(--f-px); font-weight: 500; font-size: 14px; }
+/* the bell is a scalloped badge like the star badge beside it */
+.head .bell { width: 56px; height: 56px; border-radius: 0; background: none; box-shadow: none; filter: drop-shadow(0 3px 0 rgba(17,17,17,0.22)); }
+.head .bell::before { content: ""; position: absolute; inset: 0; background: #FFD21F; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
+.head .bell svg { position: relative; z-index: 1; width: 24px; height: 24px; fill: #111; }
+.head .bell .badge { right: -2px; top: -2px; z-index: 2; }
 .bell { position: relative; display: flex; align-items: center; justify-content: center; }
 .bell .badge { position: absolute; right: -4px; top: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--pink); border: 2px solid #FFF; color: #FFF; font-family: var(--f-px); font-size: 11px; display: flex; align-items: center; justify-content: center; }
 .bell.ring svg { animation: ring 1.2s ease 2; transform-origin: 50% 10%; }
