@@ -63,7 +63,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--cobalt); ou
 #app.scrolled .minibar { opacity: 1; transform: none; pointer-events: auto; }
 .minibar .mt { font-family: var(--f-px); font-size: 14px; font-weight: 600; }
 .minibar .mr { display: flex; align-items: center; gap: 6px; }
-.minibar .mm { height: 28px; padding: 0 10px; border-radius: 14px; background: #C9C3FF; color: #2B2470; font-family: var(--f-display); font-size: 14px; display: flex; align-items: center; }
+.minibar .mm { height: 28px; padding: 0 10px; border-radius: 14px; background: #C9C3FF; color: #111111; font-family: var(--f-display); font-size: 14px; display: flex; align-items: center; }
 .minibar .ms { height: 28px; padding: 0 10px; border-radius: 14px; background: var(--ink); color: var(--lime); font-family: var(--f-px); font-size: 12px; display: flex; align-items: center; }
 /* sheets keep their title and close button pinned the same way */
 .sheet .bar-top { position: sticky; top: calc(-1 * var(--top)); z-index: 6; margin: calc(-1 * var(--top)) -18px 0; padding: calc(var(--top) - 4px) 18px 10px; background: var(--paper); transition: box-shadow 0.18s ease; }
@@ -88,7 +88,7 @@ button.cap:active { transform: translateY(3px); }
 .dots b { font-weight: 400; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
 .dots b.now { background: var(--orange); color: #fff; }
 .help { width: 44px; height: 44px; flex-shrink: 0; border-radius: 22px; border: 0; background: #26262B; color: #fff; font-family: var(--f-display); font-size: 16px; box-shadow: inset 0 -3px 0 rgba(0,0,0,0.4); }
-.cookie { width: 66px; height: 66px; flex-shrink: 0; border: 0; padding: 0; background: #C9C3FF; color: #2B2470; display: flex; flex-direction: column; align-items: center; justify-content: center; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
+.cookie { width: 66px; height: 66px; flex-shrink: 0; border: 0; padding: 0; background: #C9C3FF; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
 .cookie .n { font-family: var(--f-px); font-size: 20px; font-weight: 600; line-height: 1; }
 .cookie .l { font-size: 11px; font-weight: 900; }
 
@@ -158,7 +158,7 @@ button.chip:active { transform: translateY(2px); }
 .lbl { font-size: 12px; font-weight: 900; color: var(--sub); margin-bottom: -4px; }
 .quick { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
 .amount { border-radius: 28px 60px 60px 28px; background: var(--lav); padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; }
-.amount b { font-family: var(--f-display); font-weight: 400; font-size: 44px; color: #2B2470; line-height: 1; }
+.amount b { font-family: var(--f-display); font-weight: 400; font-size: 44px; color: #111111; line-height: 1; }
 .field { display: flex; gap: 6px; }
 .in { flex: 1; min-width: 0; height: 44px; border-radius: 14px; border: 2px solid var(--rule); padding: 0 14px; font: inherit; font-size: 14px; background: #fff; color: var(--ink); }
 .in:focus { outline: none; border-color: var(--cobalt); }
@@ -272,7 +272,7 @@ button.chip:active { transform: translateY(2px); }
 .rc h3 { margin: 0 0 4px; font-size: 14px; font-weight: 900; letter-spacing: 0.2px; }
 .rc p { margin: 0; font-size: 14px; line-height: 1.65; }
 .rc .n { position: absolute; left: -10px; top: -12px; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #FFF; font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center; transform: rotate(-8deg); box-shadow: 0 0 0 3px #FFF; }
-.rquote::after { content: "\201D"; position: absolute; right: 16px; top: -6px; font-family: var(--f-display); font-size: 64px; line-height: 1; color: #2B2470; opacity: 0.18; }
+.rquote::after { content: "\201D"; position: absolute; right: 16px; top: -6px; font-family: var(--f-display); font-size: 64px; line-height: 1; color: #111111; opacity: 0.18; }
 .rbig { font-family: var(--f-display); font-weight: 400; font-size: 20px; }
 .g-white { background: #FFF; border: 2px solid var(--ink); }
 .g-ink { background: #111; color: #FFF; } .g-ink .n { background: var(--lime); color: var(--ink); }
@@ -293,7 +293,7 @@ button.chip:active { transform: translateY(2px); }
 .gcard h3 { margin: 0 0 4px; font-size: 16px; font-weight: 900; }
 .gcard p { margin: 0; font-size: 12px; line-height: 1.6; }
 .gcard .n { position: absolute; left: -6px; top: -12px; width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: #fff; font-family: var(--f-display); font-size: 14px; display: flex; align-items: center; justify-content: center; transform: rotate(-8deg); }
-.g-orange { background: var(--orange); color: #fff; } .g-lav { background: var(--lav); color: #2B2470; } .g-lime { background: var(--lime); }
+.g-orange { background: var(--orange); color: #fff; } .g-lav { background: var(--lav); color: #111111; } .g-lime { background: var(--lime); }
 .gv { font-family: var(--f-display); font-size: 28px; white-space: nowrap; }
 
 /* launch: chat bubbles asking the awkward money questions, answered by the pack; the ball is an inflated multiplier */
@@ -484,7 +484,7 @@ button.daypill { border: 0; text-align: left; width: auto; }
 @keyframes crack { 0%, 100% { transform: none; } 20% { transform: rotate(-6deg); } 40% { transform: rotate(5deg); } 60% { transform: rotate(-3deg); } }
 @keyframes glow { 0% { filter: none; } 40% { filter: drop-shadow(0 0 10px #E4FF1A) brightness(1.08); } 100% { filter: none; } }
 button.hcard:active > div { transform: translateY(2px); }
-.multc { justify-self: center; width: 84px; height: 84px; background: #C9C3FF; color: #2B2470; display: flex; flex-direction: column; align-items: center; justify-content: center; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
+.multc { justify-self: center; width: 84px; height: 84px; background: #C9C3FF; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
 .multc small { font-size: 11px; font-weight: 900; }
 .multc b { font-family: var(--f-display); font-weight: 400; font-size: 28px; line-height: 1; }
 .hold-lbl { font-size: 12px; font-weight: 900; color: var(--sub); margin-bottom: -4px; }
@@ -799,7 +799,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .vtext small { font-size: 12px; font-weight: 900; color: var(--lime); line-height: 1.4; }
 .vline.bad .vtext b { color: #FF8FA3; } .vline.bad .vtext small { color: #FFD0D8; }
 .vline.good .vtext b { color: var(--lime); }
-.vmult { flex-shrink: 0; width: 64px; height: 64px; background: #C9C3FF; color: #2B2470; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
+.vmult { flex-shrink: 0; width: 64px; height: 64px; background: #C9C3FF; color: #111111; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
 .vmult b { font-family: var(--f-display); font-weight: 400; font-size: 20px; }
 .vmult small, .vmult s { font-size: 11px; font-weight: 900; color: inherit; opacity: 0.75; }
 .vline.good .vmult { background: var(--lime); color: var(--ink); }
@@ -2467,7 +2467,7 @@ function renderLog() {
   const pad = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map(k => `<button class="cap ${/[C⌫]/.test(k) ? 'dark' : ''}" data-key="${k}" aria-label="${k === '⌫' ? 'Delete one digit' : k === 'C' ? 'Clear' : k}"><div class="top">${k}</div></button>`).join('');
   sheet(editing ? 'Edit entry' : 'Log', `
     <div class="bar-top"><h1>${editing ? 'Edit entry' : 'Log'}</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
-    <div class="amount"><b>¥${amt}</b><span class="px" style="color:#4A4390;font-size:12px;text-align:right">${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
+    <div class="amount"><b>¥${amt}</b><span class="px" style="color:#5E5E66;font-size:12px;text-align:right">${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
     <div class="cats">${cats}</div>
     ${draft.adding ? `<div class="newcat">
       <div class="field"><input class="in" id="newcat" maxlength="5" value="${esc(draft.newName || '')}" placeholder="Name, e.g. Game top-up" aria-label="New category name"><button class="mini" data-act="addcat">Add</button></div>
@@ -3019,7 +3019,7 @@ function renderMorning() {
     </div></div>
     ${a ? `<div class="alert" role="note"><span class="bell">${BELL}</span><p>${a}</p><span class="tag">Watch today</span></div>` : ''}
     <div class="cap"><div class="top" style="display:flex;flex-direction:column;gap:8px">
-      <div style="display:flex;justify-content:space-between;align-items:baseline"><b>Yesterday · ${DAYS[y.day]}</b><button class="linkbtn" data-day="${y.day}" style="padding:0;color:#5B4FC8;font-size:12px">See receipt →</button></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><b>Yesterday · ${DAYS[y.day]}</b><button class="linkbtn" data-day="${y.day}" style="padding:0;color:#111111;text-decoration:underline;font-size:12px">See receipt →</button></div>
       <div class="ystat"><div><small>Score</small><b>${y.score}</b></div><div><small>Mult</small><b>×${y.mult}</b></div><div><small>Held</small><b>${kept}/${y.cards.length}</b></div></div>
     </div></div>
     ${rv ? `<div class="wish"><span class="px" style="font-size:12px;opacity:0.85">Wish list · waited 24 hours</span><span style="font-weight:900;font-size:16px">Still want these?</span>${rv}</div>`
