@@ -749,11 +749,15 @@ button.hcard:active > div { transform: translateY(2px); }
 /* the bell is a scalloped badge like the star badge beside it */
 .head .bell { width: 56px; height: 56px; border-radius: 0; background: none; box-shadow: none; filter: drop-shadow(0 3px 0 rgba(17,17,17,0.22)); }
 .head .bell::before { content: ""; position: absolute; inset: 0; background: #FFD21F; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
-.head .bell svg { position: relative; z-index: 1; width: 24px; height: 24px; fill: #111; }
+.head .bell::before { background: radial-gradient(circle at 34% 28%, #FFF08A 0%, #FFD21F 48%, #F2A100 100%); }
+.pf-coin { position: relative; z-index: 1; width: 34px; height: 34px; border-radius: 50%; border: 2.5px solid #111; background: radial-gradient(circle at 36% 28%, #FFFBE0, #FFE46B); box-shadow: inset -3px -3px 0 rgba(17,17,17,0.12), 0 2px 0 rgba(17,17,17,0.25); display: flex; align-items: flex-end; justify-content: center; overflow: hidden; }
+.pf-coin svg { width: 22px; height: 22px; margin-bottom: -3px; }
+.head .pf::after { content: attr(data-lv); position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%); z-index: 2; padding: 1px 7px; border-radius: 8px; background: #111; color: var(--lime); font-family: var(--f-px); font-size: 11px; line-height: 14px; }
 .head .bell .badge { right: -2px; top: -2px; z-index: 2; }
 .pf-card { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 22px; background: #F3F3F6; }
 .pf-card b { display: block; font-size: 16px; font-weight: 900; } .pf-card small { font-size: 12px; color: var(--sub); }
 .pf-av { flex: none; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; position: relative; filter: drop-shadow(0 3px 0 rgba(17,17,17,0.22)); } .pf-av::before { content: ""; position: absolute; inset: 0; background: #FFD21F; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); } .pf-av svg { position: relative; }
+.pf-av { width: 64px; height: 64px; } .pf-av::before { background: radial-gradient(circle at 34% 28%, #FFF08A 0%, #FFD21F 48%, #F2A100 100%); }
 .pf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; } .pf-stats > div { padding: 10px 12px; border-radius: 18px; background: #F3F3F6; display: flex; flex-direction: column; gap: 2px; } .pf-stats b { font-size: 20px; font-weight: 500; } .pf-stats small { font-size: 11px; color: var(--sub); font-weight: 700; }
 .pf-badges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 8px; }
 .pf-b { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
@@ -3003,7 +3007,7 @@ function renderImport() {
 const PERSON = '<svg width="24" height="24" viewBox="0 0 24 24" fill="#111" aria-hidden="true"><circle cx="12" cy="8" r="4.5"/><path d="M3.5 21c0-4.800 3.800-7.500 8.500-7.500s8.500 2.700 8.500 7.500z"/></svg>';
 function profileHTML(ev) {
   const unseen = inboxItems(ev).filter(i => !S.seen.has(i.key)).length;
-  return `<button class="help bell pf" data-act="profile" aria-label="Profile${unseen ? `, ${unseen} new notification${unseen > 1 ? 's' : ''}` : ''}">${PERSON}${unseen ? `<span class="badge">${unseen}</span>` : ''}</button>`;
+  return `<button class="help bell pf" data-act="profile" data-lv="W${S.week}" aria-label="Profile${unseen ? `, ${unseen} new notification${unseen > 1 ? 's' : ''}` : ''}"><i class="pf-coin">${PERSON}</i>${unseen ? `<span class="badge">${unseen}</span>` : ''}</button>`;
 }
 const BI = {
   check: '<path d="M5 12.500l4.500 4.500L19 7" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
@@ -3029,7 +3033,7 @@ function renderProfile() {
   const link = (act, title, sub, right = '') => `<button class="set-row pf-link" data-act="${act}"><div><b>${title}</b><small>${sub}</small></div>${right}<span class="pf-go" aria-hidden="true">›</span></button>`;
   sheet('Profile', `
     <div class="bar-top"><h1>Profile</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
-    <div class="pf-card"><span class="pf-av">${PERSON}</span><div><b>Week ${S.week} · ${STAKES[S.stake].name}</b><small>Base mult ×${S.baseMult} · ${S.grad.length} habit${S.grad.length === 1 ? '' : 's'} graduated</small></div></div>
+    <div class="pf-card"><span class="pf-av"><i class="pf-coin" style="width:40px;height:40px">${PERSON}</i></span><div><b>Week ${S.week} · ${STAKES[S.stake].name}</b><small>Base mult ×${S.baseMult} · ${S.grad.length} habit${S.grad.length === 1 ? '' : 's'} graduated</small></div></div>
     <div class="pf-stats"><div><b class="px">★ ${S.stars}</b><small>Stars</small></div><div><b class="px">${(S.honest || 0) % 7}/7</b><small>Honest nights</small></div><div><b class="px">${streakDays()}</b><small>Day streak</small></div></div>
     <h2>Badges <small>${got} of ${bl.length}</small></h2>
     <div class="pf-badges">${bl.map(b => `<div class="pf-b ${b.got ? 'on' : ''}" style="--c:${b.color}"><span class="pf-shape"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">${b.icon}</svg></span><b>${b.name}</b><small>${b.got ? b.desc : b.prog}</small></div>`).join('')}</div>
