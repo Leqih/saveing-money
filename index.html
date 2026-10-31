@@ -744,7 +744,8 @@ button.hcard:active > div { transform: translateY(2px); }
 .sunday span { font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.85); }
 .sunday .cap { margin-top: 4px; } .sunday .cap > .top { text-align: center; font-weight: 900; font-size: 14px; padding: 12px; color: #111; }
 /* notices: a bell with an unseen count in the header, the list in its own sheet */
-.honest { flex: none; height: 44px; padding: 0 10px; border-radius: 22px; border: 2px solid var(--ink); background: var(--lime); color: var(--ink); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 3px 0 #9DB000; } .honest b { font-family: var(--f-px); font-weight: 500; font-size: 14px; }
+.honest { flex: none; height: 44px; padding: 0 10px; border-radius: 22px; border: 2px solid var(--ink); background: var(--lime); color: var(--ink); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 3px 0 #9DB000; } .honest.off { background: #EDEDF1; border: 2px dashed #B5B5BC; color: var(--mute); box-shadow: none; }
+.honest b { font-family: var(--f-px); font-weight: 500; font-size: 14px; }
 /* the bell is a scalloped badge like the star badge beside it */
 .head .bell { width: 56px; height: 56px; border-radius: 0; background: none; box-shadow: none; filter: drop-shadow(0 3px 0 rgba(17,17,17,0.22)); }
 .head .bell::before { content: ""; position: absolute; inset: 0; background: #FFD21F; clip-path: polygon(100% 50%,91.5% 61.1%,93.3% 75%,80.4% 80.4%,75% 93.3%,61.1% 91.5%,50% 100%,38.9% 91.5%,25% 93.3%,19.6% 80.4%,6.7% 75%,8.5% 61.1%,0% 50%,8.5% 38.9%,6.7% 25%,19.6% 19.6%,25% 6.7%,38.9% 8.5%,50% 0%,61.1% 8.5%,75% 6.7%,80.4% 19.6%,93.3% 25%,91.5% 38.9%); }
@@ -1878,7 +1879,7 @@ function homeHTML() {
   return `
     <div class="head">
       <button class="daypill" data-act="clock" aria-label="Week ${S.week} ${DAYS[S.day]}, now ${fmtClock(S.clock)}, tap to change the demo time"><span class="px" style="font-size:12px;display:flex;justify-content:space-between">Week ${S.week} · ${DAYS[S.day]}<span class="clock">${fmtClock(S.clock)} ▾</span></span><span class="dots" aria-hidden="true">${dots}</span></button>
-      ${S.bank ? `<button class="honest" data-act="bank-link" aria-label="Honest nights ${(S.honest || 0) % 7} of 7, tap for details"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-7"/></svg><b>${(S.honest || 0) % 7}/7</b></button>` : ''}
+      <button class="honest ${S.bank ? '' : 'off'}" data-act="bank-link" aria-label="${S.bank ? `Honest nights ${(S.honest || 0) % 7} of 7, tap for details` : 'Honest nights: connect a bank to start'}"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-7"/></svg><b>${S.bank ? (S.honest || 0) % 7 : 0}/7</b></button>
       ${bellHTML(ev)}
       <button class="cookie" data-act="star" aria-label="Stars ${S.stars}, tap for the guide and settings"><span class="n">${S.stars}</span><span class="l">★ Stars</span></button>
     </div>
