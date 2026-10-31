@@ -1932,7 +1932,6 @@ function renderStarSheet() {
   const w = weekInfo();
   sheet('Stars', `<div class="bar-top"><h1>Stars & This Week</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     <div class="cookie" style="width:104px;height:104px;align-self:center;position:relative"><span class="n" style="font-size:28px">${S.stars}</span><span class="l" style="font-size:12px">★ Stars</span></div>
-    <p class="note" style="text-align:center">Reach the target for ★, 1.7× for ★★, 2.6× for ★★★. Enough stars unlock new cards and can be spent in the shop.</p>
     <div class="cap meter"><div class="top">
       <div class="row"><span>Weekly Score <span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></span><span class="px">${w.prior} / ${w.target}</span></div>
       <div class="bar"><i style="width:${w.pct}%"></i></div>
@@ -2109,7 +2108,6 @@ function flowHTML(tabs) {
     ${tabs}
     <div class="lg-chips">${chips}</div>
     ${groups || '<p class="note">No spending in this category yet.</p>'}
-    <p class="note">Tap today’s entries to edit or delete; tap a date to see that day’s receipt.</p>
     <button class="linkbtn" data-act="bank-link">${S.bank ? `Bank: ${S.bank.name} · honest nights ${(S.honest || 0) % 7}/7` : 'Connect a bank to catch forgotten purchases ›'}</button>`;
 }
 
@@ -2169,8 +2167,7 @@ function billHTML() {
     <div style="display:flex;flex-direction:column;gap:10px">
       <h2>Top three categories</h2>
       ${top3.map(([id, v], i) => `<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="font-weight:900">${cat(id).name}</span><span class="px">$${v} · ${Math.round(v / Math.max(1, spent) * 100)}%</span></div><div aria-hidden="true" style="height:12px;width:${Math.round(v / max * 100)}%;border-radius:3px;background:repeating-linear-gradient(90deg,${stripes[i]} 0 12px,transparent 12px 15px)"></div></div>`).join('') || '<p class="note left">No spending outside the allowance this month yet.</p>'}
-    </div>
-    <p class="note left">Each square is that day’s real spending outside the allowance. Tap a day for the receipt.</p>`;
+    </div>`;
 }
 function catsHTML(recs, spent, tabs) {
   const rows = monthByCat(recs), total = Math.max(1, rows.reduce((a, r) => a + r[1], 0));
@@ -2192,8 +2189,7 @@ function catsHTML(recs, spent, tabs) {
   }).join('');
   return `<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="margin:0;font-weight:900;font-size:28px">Where it went</h1><span class="px" style="font-size:12px;color:#5E5E66">Outside the allowance $${spent.toLocaleString()}</span></div>
     ${tabs}
-    <div style="display:flex;flex-direction:column;margin-top:6px">${html || '<p class="note">No spending outside the allowance this month yet.</p>'}</div>
-    <p class="note left" style="margin-top:12px">This is real money; meals and commuting within the essentials allowance aren’t counted.</p>`;
+    <div style="display:flex;flex-direction:column;margin-top:6px">${html || '<p class="note">No spending outside the allowance this month yet.</p>'}</div>`;
 }
 
 // deck: every card as an icon tile, with filters (ToyDeck)
@@ -2241,7 +2237,7 @@ function deckHTML() {
       <span style="font-weight:900;font-size:12px;margin-right:2px">Stakes</span>
       ${STAKES.map((s, i) => `<span class="cv-pill" style="${i === S.stake ? `background:${s.bg};border-color:${i ? s.bg : "#111"};color:${s.fg}` : ""}">${s.name}${i < S.stake || i <= (S.maxStake || 0) && i !== S.stake ? " ✓" : ""}</span>`).join("")}
     </div>
-    <p class="note left">Every week ${DEALN()} cards are dealt from your unlocked cards and you keep ${HOLDN()}. Graduated cards leave the deck and raise your base multiplier by +1 (it now starts at ${S.baseMult} ). Tap a card to see how it works.</p>`}`;
+    <p class="note left">Graduated cards leave the deck and add +1 to your base multiplier (now ×${S.baseMult}).</p>`}`;
 }
 
 /* ---------- weekly draw: deal 5, keep 3 ---------- */
@@ -2317,7 +2313,7 @@ function renderDraw() {
   const plateBg = sel.length ? coreOf(sel[sel.length - 1]) : '#34343A', plateFg = sel.length ? TYPES[CARDS[sel[sel.length - 1]].plus].chipText : '#FFF';
   sheet('Draw rule cards', `
     <div class="bar-top"><h1>Week ${S.week}</h1>${draft.opened ? `<span class="dkc-count ${draft.landed ? 'bounce' : ''}">Dealt ${inHand.length}</span>` : ''}<span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
-    <p class="draw-lead">The ${need} cards you keep all work this week; hold them to add multiplier${S.weekStart > 0 ? `<span class="chipk" style="background:var(--lime)">Only ${weekDays()} days</span>` : ''}</p>
+    <p class="draw-lead">Keep ${need} cards this week${S.weekStart > 0 ? `<span class="chipk" style="background:var(--lime)">Only ${weekDays()} days</span>` : ''}</p>
     <div class="hand ${draft.opened ? 'open' : ''} ${draft.dealIn ? 'dealing' : ''}"><div class="hand-in">${stage}</div></div>
     ${info}
     <div class="drawfoot ${draft.landed ? 'pulse' : ''}">
@@ -2832,8 +2828,7 @@ function renderDay(i, week = S.week) {
   const h = S.history.find(x => x.week === week && x.day === i);
   if (!h) return;
   const d = dateOf(week, i);
-  sheet(`${DAYS[i]}Receipt`, `<div class="bar-top"><h1>${MON[d.getMonth()]} ${d.getDate()} · ${DAYS[i]}</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>${receiptHTML(h)}
-    <p class="note">Each day ends with a receipt: this week’s are in the home tiles, older ones in the ledger calendar.</p>`);
+  sheet(`${DAYS[i]}Receipt`, `<div class="bar-top"><h1>${MON[d.getMonth()]} ${d.getDate()} · ${DAYS[i]}</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>${receiptHTML(h)}`);
 }
 function renderRule(no) {
   const c = CARDS[no], log = S.cardLog[no], heldNow = S.held.includes(no);
@@ -2921,7 +2916,6 @@ function renderSetup() {
   sheet('Set budget', `
     ${progHTML(1)}
     <h1 style="margin:4px 0 0;font-weight:900;font-size:28px;line-height:1.25">Let’s work out<br>what you can spend a week</h1>
-    <p class="note left" style="color:#5E5E66;font-size:12px">This is only a starting point; you can change it any time.</p>
     ${field('income', 'Monthly income', '')}${field('fixed', 'Fixed costs', 'Rent, phone, subscriptions')}${field('save', 'Monthly savings', 'Save first, spend later')}
     <div style="position:relative;height:128px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
       <div style="width:300px;max-width:88%;height:104px;border-radius:52px;background:#FFD54A;transform:rotate(-5deg);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 10px 18px rgba(20,20,30,0.15)">
@@ -2977,7 +2971,6 @@ function renderFreq() {
   sheet('Weekly Frequency', `
     ${progHTML(3)}
     <h1 style="margin:4px 0 0;font-weight:900;font-size:28px;line-height:1.25">How often a week<br>do they happen?</h1>
-    <p class="note left" style="color:#5E5E66;font-size:12px">Only used to estimate your first week; no need to be exact.</p>
     <div class="fk-list">${rows}</div>
     <button class="cap lime bigbtn" data-act="weak-go" style="margin-top:4px"><div class="top">Draw cards</div></button>`);
 }
@@ -3014,7 +3007,7 @@ function renderSettings() {
     <div class="set-row"><div><b>How to play</b><small>The rules in three steps</small></div><button class="mini" data-act="help">Watch</button></div>
     <div class="set-row"><div><b>Replay home tips</b><small>The 4 bubbles shown on first visit to home</small></div><button class="mini" data-act="coach-reset">Watch again</button></div>
     <div class="set-row"><div><b>Start over</b><small>Back to the launch screen and clear everything logged in the demo</small></div><button class="mini" data-act="restart">Start over</button></div>
-    <p class="note">Demo data lives only on this page and disappears when you close it.</p></details>
+</details>
     <button class="go" data-act="settings-save" ${w >= 50 && w !== S.base ? '' : 'disabled'}>${w === S.base ? `It’s already $${S.base}` : `Change to $${w}`}</button>`);
 }
 
@@ -3208,7 +3201,6 @@ function monthTurn(prev, now) {
   if (prev.getMonth() === now.getMonth() || !monthStats(prev.getFullYear(), prev.getMonth()).days) return;
   sheet('Monthly review', `<div class="bar-top"><h1>${MON[prev.getMonth()]} review</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     ${reviewHTML(prev.getFullYear(), prev.getMonth())}
-    <p class="note">You can always find this later under Ledger → Review.${now.getDay() === 1 ? "" : " This week’s summary comes later, on Sunday night when you end the day."}</p>
     <button class="cap lime bigbtn" data-act="close"><div class="top">Start ${MON[now.getMonth()]}</div></button>`);
 }
 
@@ -3286,7 +3278,6 @@ function pushNote(title, body) {
 function renderClock() {
   sheet('Change time', `
     <div class="bar-top"><h1>Demo: change time</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
-    <p class="note left">In real use this follows your phone’s clock. Here you can see what reminders arrive at different times.</p>
     <div class="clocks">${TIMES.map(t => `<button class="cap ${Math.abs(t.c - S.clock) < 0.05 ? 'orange' : ''}" data-clock="${t.c}"><div class="top"><b class="px">${fmtClock(t.c)}</b><span>${t.name}</span></div></button>`).join('')}
       <button class="cap lime" data-act="jump-sunday"><div class="top"><b class="px">Sunday</b><span>Jump to Sunday night · end the day to see the weekly summary</span></div></button>
       <button class="cap dark" data-clock="midnight"><div class="top"><b class="px">00:00</b><span>Midnight · if you don’t end the day, it ends automatically</span></div></button></div>`);
@@ -3412,7 +3403,6 @@ function renderMonday() {
       <div class="r"><span>Wallet</span><span>★ ${S.stars} Stars</span></div>
       ${S.debt ? `<div class="r"><span>Overdrawn on Sunday $${S.debt}, taken today</span><span>−$${Math.min(S.debt, dailyBudget())}</span></div>` : ''}
     </div>
-    <p class="note left">A new week starts with picking cards. Before drawing you can visit the shop: unlock cards early, guarantee a card this week, add a slot, buy glue. The shop is only open Monday morning.</p>
     <button class="cap bigbtn" data-act="shop"><div class="top">Visit the shop · ★ ${S.stars}</div></button>
     <button class="go" data-act="draw-now">Draw now</button>`);
 }
