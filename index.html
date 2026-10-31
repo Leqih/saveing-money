@@ -744,6 +744,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .sunday span { font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.85); }
 .sunday .cap { margin-top: 4px; } .sunday .cap > .top { text-align: center; font-weight: 900; font-size: 14px; padding: 12px; color: #111; }
 /* notices: a bell with an unseen count in the header, the list in its own sheet */
+.honest { flex: none; height: 44px; padding: 0 10px; border-radius: 22px; border: 2px solid var(--ink); background: var(--lime); color: var(--ink); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 3px 0 #9DB000; } .honest b { font-family: var(--f-px); font-weight: 500; font-size: 14px; }
 .bell { position: relative; display: flex; align-items: center; justify-content: center; }
 .bell .badge { position: absolute; right: -4px; top: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--pink); border: 2px solid #FFF; color: #FFF; font-family: var(--f-px); font-size: 11px; display: flex; align-items: center; justify-content: center; }
 .bell.ring svg { animation: ring 1.2s ease 2; transform-origin: 50% 10%; }
@@ -1872,6 +1873,7 @@ function homeHTML() {
   return `
     <div class="head">
       <button class="daypill" data-act="clock" aria-label="Week ${S.week} ${DAYS[S.day]}, now ${fmtClock(S.clock)}, tap to change the demo time"><span class="px" style="font-size:12px;display:flex;justify-content:space-between">Week ${S.week} · ${DAYS[S.day]}<span class="clock">${fmtClock(S.clock)} ▾</span></span><span class="dots" aria-hidden="true">${dots}</span></button>
+      ${S.bank ? `<button class="honest" data-act="bank-link" aria-label="Honest nights ${(S.honest || 0) % 7} of 7, tap for details"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 7.5l3 3 6-7"/></svg><b>${(S.honest || 0) % 7}/7</b></button>` : ''}
       ${bellHTML(ev)}
       <button class="cookie" data-act="star" aria-label="Stars ${S.stars}, tap for the guide and settings"><span class="n">${S.stars}</span><span class="l">★ Stars</span></button>
     </div>
@@ -3419,7 +3421,7 @@ app.addEventListener('click', e => {
   if (t.dataset.quota) { essQuota = Math.min(100, Math.max(0, essQuota + +t.dataset.quota)); replaceSheet(top, top.getAttribute('aria-label') === 'Settings' ? renderSettings : renderSetup); return; }
   if (act === 'setup-skip') { S.base = BASE; swapSheet(top, () => { renderTable(true); app.appendChild(top); renderWeak(); }); return; }
   if (act === 'import') { IMP = { mode: 'habits', src: 'bank', rows: null, busy: false }; renderImport(); return; }
-  if (act === 'bank-link') { BNK = { step: 'intro' }; renderBankLink(); return; }
+  if (act === 'bank-link') { if (S.bank) { renderSettings(); return; } BNK = { step: 'intro' }; renderBankLink(); return; }
   if (act === 'bank-pick') { BNK = { step: 'busy', bank: t.dataset.bank }; replaceSheet(top, renderBankLink); setTimeout(() => { S.bank = { name: BNK.bank, feed: sampleFeed() }; S.honest = S.honest || 0; BNK.step = 'done'; const cur = lastSheet(); if (cur && cur.getAttribute('aria-label') === 'Bank') replaceSheet(cur, renderBankLink); }, reducedMotion() ? 0 : 1300); return; }
   if (act === 'bank-off') { S.bank = null; replaceSheet(top, renderSettings); toast('Bank disconnected'); return; }
   if (act === 'bank-add' || act === 'bank-no') {
