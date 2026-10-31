@@ -1072,6 +1072,9 @@ button.hcard:active > div { transform: translateY(2px); }
 .gh.poof { animation: ghPoof 0.9s ease-out both; fill: #FFF; }
 @keyframes ghPoof { 0% { transform: scale(1); opacity: 1; } 100% { transform: translateY(-34px) scale(1.8); opacity: 0; } }
 .crt-wave { position: absolute; left: 0; bottom: 0; width: 100%; color: #F2578F; z-index: 2; filter: drop-shadow(0 0 6px rgba(255, 79, 160, 0.8)); transition: height 0.7s cubic-bezier(.3,1.3,.5,1); }
+.crt-alt { position: absolute; inset: 0; z-index: 2; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: radial-gradient(ellipse at 50% 40%, #2A1220 0%, #12060E 70%, #070308 100%); }
+.crt[data-mode="score"] .alt-score, .crt[data-mode="hold"] .alt-hold { display: flex; animation: crtOn .28s steps(4); }
+@keyframes crtOn { 0% { opacity: 0; filter: brightness(3); transform: scaleY(.04); } 100% { opacity: 1; filter: none; transform: none; } }
 .crt-glare { position: absolute; left: 10%; top: 6%; width: 38%; height: 26%; border-radius: 50%; background: radial-gradient(ellipse, rgba(255, 255, 255, 0.16), transparent 70%); transform: rotate(-12deg); z-index: 4; pointer-events: none; }
 .crt-base { display: flex; align-items: center; gap: 8px; height: 40px; margin: 0; padding: 0 14px; border-radius: 4px 4px 14px 14px; background: linear-gradient(180deg, #D8D1C3, #BDB5A5); box-shadow: inset 0 2px 0 rgba(255,255,255,0.5), inset 0 -3px 0 rgba(120, 100, 70, 0.35), 0 8px 0 rgba(120, 0, 0, 0.22); }
 .crt-base .slot { width: 22px; height: 8px; border-radius: 2px; background: #9C9486; box-shadow: inset 0 1px 0 rgba(0,0,0,0.4); } .crt-base .slot.w { width: 34px; margin-right: auto; }
@@ -1923,6 +1926,8 @@ function crtHTML(ev) {
         <span class="crt-sub"><i>▶</i> Spent $${ev.d.extra} / $${ev.daily}${S.debt ? ` · overdrawn $${Math.min(S.debt, dailyBudget())}` : ''}</span>
         <span class="crt-ghosts">${ghosts}</span>
         ${wave}
+        <span class="crt-alt alt-score"><span class="crt-ttl">TODAY’S SCORE</span><span class="crt-money">${ev.score}</span><span class="crt-sub">$${ev.base} left × mult ${ev.mult}</span></span>
+        <span class="crt-alt alt-hold"><span class="crt-ttl">CARDS HOLDING</span><span class="crt-money">${ev.cards.filter(c => c.state === 'on').length}/${ev.cards.length}</span><span class="crt-sub">Spent $${ev.d.extra} / $${ev.daily}</span></span>
         <span class="crt-glare"></span>
       </span>
     </span>
@@ -3593,8 +3598,9 @@ app.addEventListener('click', e => {
   const kb = e.target.closest('.kb');
   if (kb && act === 'crt') {
     kb.classList.remove('hit'); void kb.offsetWidth; kb.classList.add('hit');
-    const e = evaluate(S.today);
-    toast(kb.classList.contains('o') ? `Score: $${e.base} × mult ${e.mult} = ${e.score} pts` : `Spent $${e.d.extra} of $${e.daily} · ${S.held.filter(no => e.cards.find(c => c.no === no && c.state === 'on')).length}/${S.held.length} cards holding`);
+    const crt = kb.closest('.crt'), m = kb.classList.contains('o') ? 'score' : 'hold';
+    crt.dataset.mode = crt.dataset.mode === m ? '' : m; clearTimeout(crt._t);
+    if (crt.dataset.mode) crt._t = setTimeout(() => { crt.dataset.mode = ''; }, 4000);
     return;
   }
   if (act === 'crt') { const c = t.closest('.crt'); c.classList.remove('blip'); void c.offsetWidth; c.classList.add('blip'); return; }
