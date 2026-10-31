@@ -1496,6 +1496,27 @@ const ILL = {
   '17': p => `<path d="M82 76V54Q82 34 102 34H138Q158 34 158 54V76" fill="none" stroke="${p.I}" stroke-width="11" stroke-linecap="round"/>
     <rect x="36" y="90" width="168" height="104" rx="26" fill="${p.P}"/><rect x="30" y="68" width="180" height="38" rx="16" fill="${p.D}"/><rect x="104" y="90" width="32" height="30" rx="8" fill="${p.Y}"/>
     <rect x="62" y="132" width="116" height="42" rx="12" fill="${p.W}"/><path d="M76 146H122M76 160H106" stroke="${p.L}" stroke-width="7" stroke-linecap="round"/><path d="M152 168q-14-8-8-18q6-4 8 2q2-6 8-2q6 10-8 18z" fill="${p.P}"/>${sp(212, 70, 8, p.Y)}`,
+  '02': p => `<ellipse cx="116" cy="186" rx="78" ry="12" fill="${p.D}"/><path d="M58 92H172V150Q172 188 136 188H94Q58 188 58 150Z" fill="${p.P}"/><path d="M58 92H172V106H58Z" fill="${p.D}" opacity=".4"/>
+    <path d="M172 112H190Q208 112 208 132Q208 152 186 152H172" fill="none" stroke="${p.D}" stroke-width="13" stroke-linecap="round"/><ellipse cx="115" cy="92" rx="57" ry="11" fill="${p.D}"/><ellipse cx="115" cy="93" rx="46" ry="6.500" fill="${p.I}"/>
+    <path d="M86 70Q76 54 90 40M116 72Q106 52 120 34M146 70Q138 56 150 44" fill="none" stroke="${p.I}" stroke-width="7" stroke-linecap="round" opacity=".85"/>
+    <rect x="94" y="116" width="14" height="38" rx="7" fill="${p.W}"/><rect x="122" y="116" width="14" height="38" rx="7" fill="${p.W}"/>${sp(206, 56, 10, p.Y)}${sp(30, 120, 7, p.Y)}`,
+  '08': p => `<rect x="44" y="150" width="108" height="26" rx="13" fill="${p.D}"/><rect x="44" y="144" width="108" height="26" rx="13" fill="${p.Y}"/><rect x="56" y="118" width="108" height="26" rx="13" fill="${p.D}"/><rect x="56" y="112" width="108" height="26" rx="13" fill="${p.Y}"/><rect x="40" y="86" width="108" height="26" rx="13" fill="${p.D}"/><rect x="40" y="80" width="108" height="26" rx="13" fill="${p.Y}"/>
+    <path d="M70 92H118M84 124H134M70 156H124" stroke="${p.D}" stroke-width="5" stroke-linecap="round" opacity=".45"/>
+    <circle cx="176" cy="132" r="38" fill="${p.D}"/><circle cx="176" cy="126" r="38" fill="${p.Y}" stroke="${p.I}" stroke-width="6"/><circle cx="176" cy="126" r="25" fill="none" stroke="${p.D}" stroke-width="3" stroke-dasharray="4 5"/><text x="176" y="140" text-anchor="middle" font-family="Archivo Black, Arial Black, sans-serif" font-size="38" fill="${p.I}">¢</text>${sp(204, 48, 10, p.W)}${sp(30, 46, 7, p.Y)}`,
+  '09': p => `<rect x="94" y="184" width="52" height="14" rx="7" fill="${p.D}"/><rect x="113" y="62" width="14" height="128" rx="7" fill="${p.P}"/><rect x="30" y="52" width="180" height="14" rx="7" fill="${p.D}"/>
+    <path d="M52 66L30 128M52 66L74 128M188 66L166 128M188 66L210 128" stroke="${p.I}" stroke-width="3.500" stroke-linecap="round"/><path d="M20 128H84A32 32 0 0 1 20 128Z" fill="${p.P}"/><path d="M156 128H220A32 32 0 0 1 156 128Z" fill="${p.P}"/>
+    <circle cx="44" cy="120" r="9" fill="${p.Y}"/><circle cx="62" cy="122" r="7" fill="${p.Y}"/><circle cx="186" cy="120" r="9" fill="${p.Y}"/><circle cx="204" cy="122" r="7" fill="${p.Y}"/>
+    <circle cx="120" cy="54" r="14" fill="${p.Y}" stroke="${p.I}" stroke-width="5"/>${sp(214, 36, 9, p.Y)}${sp(26, 34, 7, p.W)}`,
+  '11': p => `<rect x="40" y="94" width="160" height="96" rx="12" fill="${p.W}"/><rect x="52" y="106" width="136" height="72" rx="8" fill="${p.L}"/><path d="M66 106L110 178M120 106L164 178" stroke="${p.W}" stroke-width="6" opacity=".55"/>
+    <rect x="94" y="122" width="52" height="50" rx="10" fill="${p.Y}"/><path d="M106 124V116Q106 104 120 104Q134 104 134 116V124" fill="none" stroke="${p.I}" stroke-width="6" stroke-linecap="round"/><path d="M104 142H136" stroke="${p.I}" stroke-width="5" stroke-linecap="round"/>
+    ${[0, 1, 2, 3, 4].map(i => `<rect x="${32 + i * 35}" y="48" width="35" height="46" fill="${i % 2 ? p.W : p.P}"/><circle cx="${49.500 + i * 35}" cy="94" r="17.500" fill="${i % 2 ? p.W : p.P}"/>`).join('')}<rect x="32" y="40" width="175" height="12" rx="6" fill="${p.D}"/>${sp(214, 120, 9, p.Y)}`,
+  '12': p => `<path d="M30 88H98L90 186Q89 194 81 194H47Q39 194 38 186Z" fill="${p.P}"/><rect x="24" y="76" width="80" height="16" rx="8" fill="${p.D}"/><path d="M76 74L92 34" stroke="${p.Y}" stroke-width="10" stroke-linecap="round"/>
+    <path d="M110 108H178L170 190Q169 198 161 198H127Q119 198 118 190Z" fill="${p.D}"/><rect x="104" y="96" width="80" height="16" rx="8" fill="${p.P}"/><path d="M156 94L172 54" stroke="${p.W}" stroke-width="10" stroke-linecap="round"/>
+    <rect x="40" y="116" width="48" height="40" rx="9" fill="${p.W}"/><path d="M52 132H76M52 144H68" stroke="${p.L}" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="196" cy="58" r="30" fill="${p.Y}" stroke="${p.I}" stroke-width="6"/><text x="196" y="72" text-anchor="middle" font-family="Archivo Black, Arial Black, sans-serif" font-size="40" fill="${p.I}">2</text>`,
+  '14': p => `<path d="M56 192Q42 108 108 50Q166 12 204 28Q206 96 150 150Q112 184 56 192Z" fill="${p.P}"/><path d="M56 192Q126 110 196 36" fill="none" stroke="${p.D}" stroke-width="8" stroke-linecap="round"/>
+    <path d="M92 150L70 138M110 128L84 112M128 106L102 88M146 84L124 68M120 160L100 152M140 138L120 128M160 116L142 106" stroke="${p.L}" stroke-width="5" stroke-linecap="round"/>
+    <path d="M208 120Q214 134 224 140M30 80Q24 92 14 96" fill="none" stroke="${p.I}" stroke-width="5" stroke-linecap="round" opacity=".6"/>${sp(36, 44, 10, p.Y)}${sp(216, 74, 8, p.W)}${sp(190, 188, 7, p.Y)}`,
   '13': p => `<path d="M60 70L82 34L104 66Z" fill="${p.D}"/><ellipse cx="116" cy="134" rx="90" ry="64" fill="${p.P}"/><ellipse cx="116" cy="150" rx="66" ry="36" fill="${p.L}" opacity=".55"/>
     <rect x="52" y="172" width="34" height="30" rx="12" fill="${p.D}"/><rect x="148" y="172" width="34" height="30" rx="12" fill="${p.D}"/><ellipse cx="206" cy="132" rx="22" ry="26" fill="${p.D}"/><circle cx="200" cy="124" r="4" fill="${p.W}"/><circle cx="208" cy="140" r="4" fill="${p.W}"/>
     <rect x="86" y="76" width="56" height="10" rx="5" fill="${p.D}"/><path d="M28 124Q10 108 24 96Q36 92 36 106" fill="none" stroke="${p.D}" stroke-width="9" stroke-linecap="round"/>
@@ -1504,11 +1525,10 @@ const ILL = {
 const illo = (no, core, off) => { const p = palOf(core, off); return `<circle cx="120" cy="108" r="96" fill="${p.stage}" opacity="${off ? 0.6 : 0.55}"/><ellipse cx="120" cy="208" rx="64" ry="8" fill="${p.D}" opacity=".22"/>${ILL[no](p)}`; };
 // state: 'on' holds, 'broken' cracked for today (or the week), 'pending' asleep until something is done
 function cardHTML(c, state = 'on') {
-  const t = TYPES[c.plus], art = ART[c.no], off = state !== 'on';
+  const t = TYPES[c.plus], off = state !== 'on';
   const face = t.dark ? INK : PAPER, ink = t.dark ? PAPER : INK;
   const shape = off ? (t.dark ? '#5A5A5E' : '#B9B6AD') : ink;
   const core = off ? '#CFCCC2' : t.core;
-  const eye = art.ec === 'body' ? shape : face;
   const sub = t.dark ? 'rgba(236,234,227,0.7)' : '#5E5E66';
   const dot = n => (c.diff >= n ? ink : (t.dark ? 'rgba(236,234,227,0.25)' : '#CFCCC2'));
   const ry = off ? 1.4 : 8;
@@ -1557,7 +1577,7 @@ const CARDS = {
   '04': { no: '04', name: 'Walker', plus: 1, diff: 1, cond: 'No rideshares today', eg: 'One Uber or Lyft ride breaks this card for the day. Subway and bus count as commuting and are fine.',
     broken: d => d.has('taxi'), why: d => `Rideshare today $${d.sum('taxi')}` },
   // holding Zero Day already holds these four (online buys are outside the allowance even from the wishlist), so they can't be kept alongside it
-  '05': { no: '05', name: 'Zero Day', plus: 4, diff: 3, clash: ['01', '04', '13', '07'], cond: 'Nothing outside the allowance today', eg: 'Only meals and commuting keep it alive; one coffee breaks it. The hardest, and the most rewarding.',
+  '05': { no: '05', name: 'Zero Day', plus: 4, diff: 3, clash: ['01', '04', '13', '07', '02', '08', '09', '11'], cond: 'Nothing outside the allowance today', eg: 'Only meals and commuting keep it alive; one coffee breaks it. The hardest, and the most rewarding.',
     broken: d => d.extra > 0, why: d => `Spent outside the allowance $${d.extra}` },
   // one entry a day wakes it, so holding it says nothing about a habit changing: it never graduates
   '10': { no: '10', name: 'Bookkeeper', plus: 1, diff: 1, noGrad: true, cond: 'Log at least one entry today', eg: 'Asleep until you log something; the first entry wakes it. Meals and commuting count.',
@@ -1574,6 +1594,21 @@ const CARDS = {
     broken: d => d.extraCount > 1, why: d => `Outside the allowance today: ${d.extraCount} purchases`, near: d => d.extraCount === 1 ? 'That’s one purchase outside the allowance already; one more breaks One-Shot' : null },
   '17': { no: '17', name: 'Lunchbox', plus: 1, diff: 1, unlock: 12, cond: 'Meals today under $30', eg: 'Packed lunch or canteen keeps it alive; a $40 lunch breaks it. Delivered meals count as takeout, not meals.',
     broken: d => d.sum('meal') > 30, why: d => `Meals today $${d.sum('meal')}`, near: d => d.sum('meal') > 20 && d.sum('meal') <= 30 ? `Meals today already $${d.sum('meal')}, spend $${31 - d.sum('meal')}  more and Lunchbox breaks` : null },
+  '02': { no: '02', name: 'Coffee Break', plus: 1, diff: 1, unlock: 4, clash: ['05'], cond: 'At most one coffee or boba today', eg: 'One latte is fine; a second one breaks it for the day. Back at midnight.',
+    broken: d => d.teaToday > 1, why: d => `${d.teaToday} coffee runs today`, near: d => d.teaToday === 1 ? 'One coffee already today; a second breaks Coffee Break' : null },
+  '08': { no: '08', name: 'Small Change', plus: 1, diff: 1, unlock: 5, clash: ['05'], cond: 'No single purchase over $25 outside the allowance', eg: 'Several small buys are fine; one big one breaks it. Split nothing, just skip the big one.',
+    broken: d => d.maxExtra > 25, why: d => `One purchase of $${d.maxExtra}`, near: d => d.maxExtra > 15 && d.maxExtra <= 25 ? `Your biggest buy today is $${d.maxExtra}; anything over $25 breaks Small Change` : null },
+  '09': { no: '09', name: 'Even Keel', plus: 1, diff: 1, unlock: 7, clash: ['05'], cond: 'Spend less than half your allowance outside it today', eg: 'On a $50 day that means $25 or less on extras. Go over and it breaks for the day.',
+    broken: d => d.extra > dailyBudget() / 2, why: d => `Outside the allowance $${d.extra} (half is $${Math.round(dailyBudget() / 2)})`, near: d => d.extra > dailyBudget() * 0.35 && d.extra <= dailyBudget() / 2 ? `Outside the allowance $${d.extra}, past $${Math.round(dailyBudget() / 2)} Even Keel breaks` : null },
+  '11': { no: '11', name: 'Window Shopper', plus: 1, diff: 1, unlock: 8, clash: ['05'], cond: 'Online buys under $30 today', eg: 'Browse all you like; put $30 or more in the cart and it breaks. Pairs well with the wish list.',
+    broken: d => d.sum('online') > 30, why: d => `Online today $${d.sum('online')}`, near: d => d.sum('online') > 20 && d.sum('online') <= 30 ? `Online today already $${d.sum('online')}; over $30 breaks Window Shopper` : null },
+  '12': { no: '12', name: 'Two-Cup Week', plus: 2, diff: 2, weekly: true, unlock: 10, clash: ['03'], cond: 'No more than 2 coffee or boba runs this week', eg: 'The 3rd cup breaks it until Sunday, and every cup after that costs another −1 mult that day. The stricter Coffee Quota.',
+    broken: d => d.weekTea > 2, why: d => `You’ve had ${d.weekTea} cups`, near: d => d.weekTea === 2 ? '2 cups already this week. One more breaks Two-Cup Week.' : null,
+    penalty: d => Math.max(0, d.weekTea - Math.max(3, d.teaBefore)) },
+  '14': { no: '14', name: 'Weekly Light', plus: 3, diff: 3, weekly: true, unlock: 13, clash: ['15'], cond: 'Outside spending this week stays under a third of the week’s allowance', eg: 'The hard version of Weekly Cap. Break it and it stays broken until Sunday; each extra $20 after that costs −1 mult that day.',
+    broken: d => d.weekExtra > Math.round(d.weekCap * 2 / 3), why: d => `Outside the allowance this week $${d.weekExtra} (cap $${Math.round(d.weekCap * 2 / 3)})`,
+    near: d => d.weekExtra > d.weekCap * 0.5 ? `Outside the allowance this week $${d.weekExtra}, over $${Math.round(d.weekCap * 2 / 3)} Weekly Light breaks` : null,
+    penalty: d => d.weekBefore > Math.round(d.weekCap * 2 / 3) ? Math.ceil(d.extra / 20) : 0 },
   '13': { no: '13', name: 'Piggy Bank', plus: 2, diff: 2, unlock: 6, cond: 'At most $20 outside the allowance today', eg: 'A coffee is fine; add a takeout and it breaks.',
     broken: d => d.extra > 20, why: d => `Spent outside the allowance $${d.extra}`, near: d => d.extra > 10 && d.extra <= 20 ? `Outside the allowance today already $${d.extra}, spend $${21 - d.extra}  more and Piggy Bank breaks` : null }
 };
@@ -1604,7 +1639,7 @@ function facts(list, teaBefore, assumeLogged, weekBefore = 0) {
     weekBefore, weekExtra: weekBefore + extra, weekCap: Math.round(moneyWeek() / 2), extraCount: list.filter(x => !cat(x.cat).ess).length,
     count: assumeLogged ? Math.max(1, list.length) : list.length, extra,
     night: list.some(x => x.night), nightSum: list.filter(x => x.night).reduce((a, x) => a + x.amt, 0),
-    teaBefore, weekTea: teaBefore + teaOf(list), directOnline: list.some(x => x.cat === 'online' && !x.fromWish),
+    teaBefore, weekTea: teaBefore + teaOf(list), teaToday: teaOf(list), maxExtra: Math.max(0, ...list.filter(x => !cat(x.cat).ess).map(x => x.amt)), directOnline: list.some(x => x.cat === 'online' && !x.fromWish),
     has: id => list.some(x => x.cat === id), sum: id => list.filter(x => x.cat === id).reduce((a, x) => a + x.amt, 0)
   };
 }
