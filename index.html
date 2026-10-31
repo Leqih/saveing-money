@@ -2242,6 +2242,13 @@ function openShow(sh) {
   const cx = (r.left + r.width / 2 - sr0.left) / z, cy = (r.top - sr0.top) / z + 220 + sh.scrollTop;
   // the row slides in from the right in its real order (front card first, then its neighbours), one after another, never piled up
   const cards = [...stack.querySelectorAll('.sc2')].filter(c => +c.dataset.k >= -1 && +c.dataset.k <= 2).sort((a, b) => +a.dataset.k - +b.dataset.k);
+  // the cards are dealt out of the pack: the front one pops up first, then its neighbours slide out from behind it, one after another
+  [...stack.querySelectorAll('.sc2')].forEach(el => {
+    const k = +el.dataset.k, finalT = el.style.transform, finalO = el.style.opacity === '' ? 1 : +el.style.opacity;
+    if (Math.abs(k) > 2) return;
+    const front = k === 0, from = front ? 'translate(0px, 46px) rotate(-6deg) scale(0.68)' : 'translate(0px, 22px) rotate(0deg) scale(0.86)';
+    el.animate([{ transform: from, opacity: 0 }, { transform: finalT, opacity: finalO }], { duration: front ? 640 : 560, delay: front ? 40 : 320 + Math.abs(k) * 110 + (k < 0 ? 60 : 0), easing: 'cubic-bezier(.2,1.3,.4,1)', fill: 'backwards' });
+  });
   const fc = cards.find(c => +c.dataset.k === 0); if (fc) { const g = document.createElement('i'); g.className = 'cardshine'; fc.appendChild(g); setTimeout(() => g.remove(), 1700); }
   // confetti canvas
   const cv = document.createElement('canvas'); cv.className = 'confcv'; cv.width = sr.width * 2; cv.height = sr.height * 2; cv.style.cssText = `position:absolute;left:0;top:${sh.scrollTop}px;width:${sr.width}px;height:${sr.height}px;pointer-events:none;z-index:120`;
