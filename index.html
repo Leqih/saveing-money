@@ -374,9 +374,8 @@ button.chip:active { transform: translateY(2px); }
 .cv-log { flex-grow: 1; border: 0; border-radius: 16px; background: linear-gradient(180deg, #3FA0FF 0%, #0A6CFF 100%); color: #FFF; box-shadow: inset 0 0 0 3px rgba(255,255,255,0.3), inset 0 0 12px 3px rgba(255,255,255,0.45); display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--f-px); font-weight: 600; font-size: 16px; letter-spacing: 2px; transition: transform 0.2s cubic-bezier(.3,1.7,.5,1); }
 .cv-log:active { transform: scale(0.95); }
 /* the tab strip stays put while the page scrolls under it, and picking a tab never shifts its neighbours */
-/* the page keeps its own stacking order, so its pinned tab strip can never paint over a sheet */
-.screen { isolation: isolate; }
-.screen > [role=tablist] { position: sticky; top: calc(var(--top) - 4px); z-index: 20; box-shadow: 0 0 0 6px #FFF; }
+/* the pinned tab strip sits below sheets (z 10) and the coach dim (z 6) */
+.screen > [role=tablist] { position: sticky; top: calc(var(--top) - 4px); z-index: 4; box-shadow: 0 0 0 6px #FFF; }
 .cv-tab { height: 30px; padding: 0 8px; flex: 0 1 auto; min-width: 0; border: 0; border-radius: 10px; background: transparent; font-weight: 900; font-size: 14px; color: #B5B5BC; white-space: nowrap; }
 .cv-tab.on { padding: 0 8px; background: #E4FF1A; box-shadow: 0 0 0 3px #F4FF9E; color: #111; }
 /* Entries ledger: category filter chips, then one white card per day with a row per expense */
@@ -453,8 +452,15 @@ button.cv-cell:active .cv-icon { transform: translateY(2px); }
 .coach-dim { position: absolute; inset: 0; z-index: 6; background: rgba(17,17,17,0.45); }
 .coach-on { position: relative; z-index: 7; }
 .coach { position: absolute; left: 18px; right: 18px; z-index: 8; background: #111; color: #FFF; border-radius: 18px; padding: 12px 14px; font-size: 14px; line-height: 1.5; box-shadow: 0 14px 24px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 8px; animation: up 0.2s ease; }
-.coach::before { content: ""; position: absolute; left: 44px; top: -8px; border: 8px solid transparent; border-top: 0; border-bottom-color: #111; }
+.coach::before { content: ""; position: absolute; left: var(--ax, 44px); top: -8px; border: 8px solid transparent; border-top: 0; border-bottom-color: #111; }
 .coach.above::before { top: auto; bottom: -8px; border-bottom: 0; border-top: 8px solid #111; }
+.coach { animation: coachIn 0.38s cubic-bezier(.3,1.5,.5,1) both; }
+@keyframes coachIn { from { opacity: 0; transform: translateY(8px) scale(0.94); } }
+.coach-dim { animation: dimIn 0.25s ease both; } @keyframes dimIn { from { opacity: 0; } }
+.coach .ct { font-family: var(--f-px); font-weight: 500; font-size: 14px; letter-spacing: 1px; color: var(--lime); }
+.coach .cdots { display: flex; gap: 5px; } .coach .cdots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.28); } .coach .cdots i.on { background: var(--lime); width: 18px; border-radius: 4px; }
+.coach-on { outline: 3px solid var(--lime); outline-offset: 5px; animation: coachRing 1.4s ease-in-out infinite; }
+@keyframes coachRing { 50% { outline-offset: 9px; outline-color: rgba(228,255,26,0.45); } }
 .coach .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .coach .ok { height: 36px; padding: 0 14px; border-radius: 12px; border: 0; background: var(--lime); color: #111; font-weight: 900; font-size: 12px; }
 .coach .skip { border: 0; background: none; color: rgba(255,255,255,0.6); font-size: 12px; padding: 6px; }
@@ -1900,11 +1906,11 @@ app.addEventListener('scroll', e => {
 }, true);
 // replaces the old one-minute guide: tips on the real home screen, the first time it opens
 const COACH = [
-  { sel: '.hold', text: 'These are the 3 cards you kept this week. Hold one to earn its multiplier; if it breaks, it stops counting for the day and comes back at midnight.' },
-  { sel: '.bell', text: 'Reminders live in the bell so they never crowd the home screen. A number shows when there is something new: evening reminders, mealtime reminders, wish list check-ins.' },
-  { sel: '.hero', text: 'Today’s score = money left today × multiplier. Spend less and hold more cards for a higher score.' },
-  { sel: '.cv-log', text: 'Spent money? Log it here. Before you save you can see whether a card will break and how the multiplier changes.' },
-  { sel: '.endbtn', text: 'Finish logging in the evening and tap here for today’s receipt. If you forget, midnight ends the day automatically.' }
+  { sel: '.hold', title: 'Your 3 cards', text: 'Hold one to earn its multiplier. If it breaks, it sits out until midnight.' },
+  { sel: '.bell', title: 'Reminders', text: 'They live in the bell, so the home screen stays clean.' },
+  { sel: '.hero', title: 'Today’s score', text: 'Money left today × multiplier. Spend less and hold more cards.' },
+  { sel: '.cv-log', title: 'Log a spend', text: 'See which card it would break before you save.' },
+  { sel: '.endbtn', title: 'End the day', text: 'Tap here for today’s receipt. Midnight does it for you if you forget.' }
 ];
 function showCoach() {
   if (S.view !== 'home' || !S.held.length || S.coach >= COACH.length || lastSheet()) return;
@@ -1917,10 +1923,14 @@ function showCoach() {
   if (nav) nav.style.zIndex = 7;
   const a = app.getBoundingClientRect(), r = el.getBoundingClientRect();
   const above = r.bottom - a.top + 140 > a.height;
+  // the pointer follows the target, whatever side of the screen it is on
+  const ax = Math.max(22, Math.min(a.width - 36 - 38, Math.round(r.left + r.width / 2 - a.left - 18 - 8)));
+  const dots = COACH.map((_, k) => `<i class="${k === S.coach ? 'on' : ''}"></i>`).join('');
   app.insertAdjacentHTML('beforeend', `<div class="coach-dim" aria-hidden="true"></div>
-    <div class="coach ${above ? 'above' : ''}" role="dialog" aria-label="Tip" style="${above ? `bottom:${Math.round(a.bottom - r.top + 12)}px` : `top:${Math.round(r.bottom - a.top + 12)}px`}">
+    <div class="coach ${above ? 'above' : ''}" role="dialog" aria-label="Tip" style="--ax:${ax}px;${above ? `bottom:${Math.round(a.bottom - r.top + 14)}px` : `top:${Math.round(r.bottom - a.top + 14)}px`}">
+      <b class="ct">${c.title}</b>
       <span>${c.text}</span>
-      <div class="row"><button class="skip" data-act="coach-skip">Skip tips</button><button class="ok" data-act="coach-next">${S.coach < COACH.length - 1 ? `Got it ${S.coach + 1}/${COACH.length}` : 'Let’s go'}</button></div>
+      <div class="row"><button class="skip" data-act="coach-skip">Skip tips</button><span class="cdots" aria-hidden="true">${dots}</span><button class="ok" data-act="coach-next">${S.coach < COACH.length - 1 ? 'Next' : 'Let’s go'}</button></div>
     </div>`);
 }
 function clearCoach() {
