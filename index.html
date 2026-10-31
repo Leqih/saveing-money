@@ -656,7 +656,11 @@ button.hcard:active > div { transform: translateY(2px); }
 .stakes { display: flex; flex-direction: column; gap: 6px; }
 .stake { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 12px; border-radius: 16px; border: 2px solid #E2E2E8; background: #FFF; font-size: 12px; font-weight: 900; text-align: left; }
 .stake.on { border-color: #111; background: #F4FFC2; }
-.carry { display: flex; gap: 10px; }
+.carry { display: flex; justify-content: space-between; gap: 8px; padding: 6px 4px 0; }
+.carry .hcard { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.carry .hcard.on { transform: translateY(-4px); }
+.carry .hcard.on > div:first-child { outline: 4px solid var(--lime); outline-offset: 3px; border-radius: 16px; }
+.carry .hcard.on > span { background: var(--lime); }
 .hcard.off > div { opacity: 0.55; }
 .carry-tag { position: absolute; left: -6px; top: -8px; z-index: 2; padding: 1px 8px; border-radius: 8px; background: #111; color: var(--lime); font-size: 11px; font-weight: 900; transform: rotate(-6deg); }
 .gradcard { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 22px; background: #C9FF4A; background-image: linear-gradient(45deg, #B6F02A 25%, transparent 25%, transparent 75%, #B6F02A 75%), linear-gradient(45deg, #B6F02A 25%, transparent 25%, transparent 75%, #B6F02A 75%); background-size: 16px 16px; background-position: 0 0, 8px 8px; }
@@ -1528,7 +1532,8 @@ const clashIn = (no, sel) => sel.find(x => x !== no && clashes(no, x));
 const clashNames = no => Object.keys(CARDS).filter(x => clashes(no, x)).map(x => CARDS[x].name);
 const BASE = 350;
 // slots can grow to four in the shop; the deal is always two more than you keep
-const HOLDN = () => S.slots, DEALN = () => S.slots + 2;
+// eight cards are dealt every week (or the whole pool while fewer are unlocked); you keep as many as you have slots
+const HOLDN = () => S.slots, DEALN = () => Math.max(S.slots, Math.min(8, S.unlocked.length));
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CATS = [
@@ -1614,7 +1619,7 @@ const NOW = new Date();
 const JOIN = (NOW.getDay() + 6) % 7;
 const START = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - JOIN);
 let S = {
-  week: 1, day: JOIN, weekStart: JOIN, held: [], stars: 0, unlocked: ['01', '06', '03', '04', '05', '10', '15'], lastWeek: [], estimated: false, firstDraw: true,
+  week: 1, day: JOIN, weekStart: JOIN, held: [], stars: 0, unlocked: ['01', '06', '03', '04', '05', '10', '15', '07'], lastWeek: [], estimated: false, firstDraw: true,
   base: BASE, setup: { income: 6000, fixed: 2500, save: 2000 }, weak: [], freq: {}, coach: 0, view: 'home', billTab: 'flow', cardLog: {},
   baseMult: 1, grad: [], stake: 0, nextStake: 0, carry: null, debt: 0, starsTotal: 0, slots: 3, glue: 0, glued: null, pinned: [],
   prefs: { evening: true, eveningAt: 21.5, ruleAlerts: true, morning: true },
@@ -1838,7 +1843,7 @@ function homeHTML() {
       <button class="cookie" data-act="star" aria-label="Stars ${S.stars}, tap for the guide and settings"><span class="n">${S.stars}</span><span class="l">★ Stars</span></button>
     </div>
     <div class="hero herocrt ${ev.left < 0 ? 'over' : ''}">${crtHTML(ev)}</div>
-    ${S.held.length ? holdHTML(ev) : `<button class="rulebar" data-act="draw"><div class="rtext" style="grid-column:1/-1"><small>This week’s cards</small><b>Not drawn yet</b><span>Tap to draw 5 and keep 3</span></div></button>`}
+    ${S.held.length ? holdHTML(ev) : `<button class="rulebar" data-act="draw"><div class="rtext" style="grid-column:1/-1"><small>This week’s cards</small><b>Not drawn yet</b><span>Tap to draw this week’s cards</span></div></button>`}
     <div class="wkrow">
       <div class="cap meter wkmini"><div class="top">
         <div class="row"><span>Today’s ledger</span><span class="px">${money(sumToday)}</span></div>
@@ -2099,7 +2104,7 @@ function deckHTML() {
       <span style="font-weight:900;font-size:12px;margin-right:2px">Stakes</span>
       ${STAKES.map((s, i) => `<span class="cv-pill" style="${i === S.stake ? `background:${s.bg};border-color:${i ? s.bg : "#111"};color:${s.fg}` : ""}">${s.name}${i < S.stake || i <= (S.maxStake || 0) && i !== S.stake ? " ✓" : ""}</span>`).join("")}
     </div>
-    <p class="note left">Every Monday 5 cards are dealt from your unlocked cards and you keep 3. Graduated cards leave the deck and raise your base multiplier by +1 (it now starts at ${S.baseMult} ). Tap a card to see how it works.</p>`}`;
+    <p class="note left">Every week ${DEALN()} cards are dealt from your unlocked cards and you keep ${HOLDN()}. Graduated cards leave the deck and raise your base multiplier by +1 (it now starts at ${S.baseMult} ). Tap a card to see how it works.</p>`}`;
 }
 
 /* ---------- weekly draw: deal 5, keep 3 ---------- */
@@ -2162,7 +2167,7 @@ function renderDraw() {
       <svg class="bag-strip" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><path d="${BAG_STRIP}" fill="#3DCBFF"/><path d="M12 28H188" stroke="#FFF" stroke-width="2" stroke-dasharray="6 6" vector-effect="non-scaling-stroke" opacity=".9"/></svg>
       <svg class="pk-arrow" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M5 5L21 21M24 8v16H8" fill="none" stroke="#FFE600" stroke-width="7" stroke-linecap="square"/></svg>
       <span class="pk-badge" aria-hidden="true"><svg width="62" height="62" viewBox="0 0 62 62"><circle cx="31" cy="31" r="28" fill="#FFF" stroke="#111" stroke-width="3"/><g class="pk-face" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"><path d="M17 22h9M36 22h9M31 14v14"/><path d="M19 37c4 9 20 9 24 0"/></g></svg></span>
-      <span class="pk-labs"><span class="pk-lab px">WEEK ${String(S.week).padStart(2, '0')}</span><b class="pk-lab pk-title">Draw ${DEALN()}, keep ${HOLDN()}</b><span class="pk-lab pk-count">${draft.hand.length} rule cards · hold to add multiplier</span></span>
+      <span class="pk-labs"><span class="pk-lab px">WEEK ${String(S.week).padStart(2, '0')}</span><b class="pk-lab pk-title">This week’s pack</b><span class="pk-lab pk-count">${draft.hand.length} rule cards</span></span>
     </div>
     <span class="pk-tear" aria-hidden="true">Hold the top → drag right to tear</span>`;
   const stage = draft.opened ? `<div class="stack ${draft.slide ? 'slide' + draft.slide : ''}">${cards}</div>
@@ -2174,7 +2179,7 @@ function renderDraw() {
   const slots = Array.from({ length: need }, (_, i) => sel[i] ? `<button class="dslot ${draft.landed === sel[i] || draft.landed === 'all' ? 'land' : ''}" data-unpick="${sel[i]}" style="background:${tintOf(sel[i])}" aria-label="${CARDS[sel[i]].name}, tap to put back">${artIcon(sel[i], 22)}</button>` : '<span class="dslot empty"></span>').join('');
   const plateBg = sel.length ? coreOf(sel[sel.length - 1]) : '#34343A', plateFg = sel.length ? TYPES[CARDS[sel[sel.length - 1]].plus].chipText : '#FFF';
   sheet('Draw rule cards', `
-    <div class="bar-top"><h1>Week ${S.week} · Draw ${DEALN()}, keep ${HOLDN()}</h1>${draft.opened ? `<span class="dkc-count ${draft.landed ? 'bounce' : ''}">Dealt ${inHand.length}</span>` : ''}<span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
+    <div class="bar-top"><h1>Week ${S.week}</h1>${draft.opened ? `<span class="dkc-count ${draft.landed ? 'bounce' : ''}">Dealt ${inHand.length}</span>` : ''}<span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
     <p class="draw-lead">The ${need} cards you keep all work this week; hold them to add multiplier${S.weekStart > 0 ? `<span class="chipk" style="background:var(--lime)">Only ${weekDays()} days</span>` : ''}</p>
     <div class="hand ${draft.opened ? 'open' : ''} ${draft.dealIn ? 'dealing' : ''}"><div class="hand-in">${stage}</div></div>
     ${info}
@@ -2726,7 +2731,7 @@ function renderLaunch() {
     <div class="l-abs bub bgb o" style="--d:640ms;--f:5.6s" aria-hidden="true"></div>
     <div class="l-abs bub b1" style="--d:80ms;--f:5.2s"><span>Where did this week’s<br>money go?</span></div>
     <div class="l-abs bub b2" style="--d:280ms;--f:6s"><span>Ordered<br>takeout again?</span></div>
-    <div class="l-abs bub b3" style="--d:520ms;--f:5.4s"><span>Draw 5 rule cards,<br>keep 3 to stay on track</span></div>
+    <div class="l-abs bub b3" style="--d:520ms;--f:5.4s"><span>Draw 8 rule cards,<br>keep 3 to stay on track</span></div>
     <div class="l-abs ball" style="--d:820ms" aria-label="Mult ×6"><svg width="132" height="128" viewBox="0 0 120 116" aria-hidden="true"><defs>
       <radialGradient id="jB" cx=".5" cy=".62" r=".72"><stop offset="0" stop-color="#FFD0EE"/><stop offset=".45" stop-color="#FF6CC4"/><stop offset=".85" stop-color="#F0189A"/><stop offset="1" stop-color="#C80C7A"/></radialGradient>
       <radialGradient id="jC" cx=".5" cy=".95" r=".5"><stop offset="0" stop-color="#FFE9F7" stop-opacity=".9"/><stop offset="1" stop-color="#FFE9F7" stop-opacity="0"/></radialGradient>
@@ -2836,7 +2841,7 @@ function renderGuide() {
   sheet('How to play', `
     <div class="bar-top"><h1>How to play</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     <div class="gstack">
-      <div class="gcard g-orange"><span class="n">1</span><div><h3>Every Monday, draw 5 and keep 3</h3><p>The 3 rule cards you keep all work this week, e.g. "No takeout today". Each one shows how much multiplier you earn for holding it.</p></div>${scaled(CARDS['01'], 0.35)}</div>
+      <div class="gcard g-orange"><span class="n">1</span><div><h3>Every week, draw 8 and keep 3</h3><p>The 3 rule cards you keep all work this week, e.g. "No takeout today". Each one shows how much multiplier you earn for holding it.</p></div>${scaled(CARDS['01'], 0.35)}</div>
       <div class="gcard g-lav"><span class="n">2</span><div><h3>Every entry tells you right away</h3><p>See before you save whether a card will break. A broken card stops counting for the day; stop spending and you get half back, and it returns at midnight. Weekly cards stay broken until Sunday and lose more multiplier if you overspend.</p></div><span class="gv">Broke!</span></div>
       <div class="gcard g-lime"><span class="n">3</span><div><h3>Money left × multiplier = score</h3><p>The multiplier starts at 1 and each held card adds to it. Reach the weekly target to pass and earn stars; missing it costs nothing.</p></div><span class="gv">30×6</span></div>
     </div>
@@ -3094,12 +3099,16 @@ function renderWeek() {
     <h2>Score each day <small>Tap a day for the receipt</small></h2>
     ${tilesHTML()}
     <button class="go" data-act="week-plan">Next: plan next week</button>` : `<div class="bar-top"><h1>Plan next week</h1><span class="chipk" style="background:${st.bg};color:${st.fg}">${st.name}</span></div>
-    ${S.carry ? `<h2>Carry one card to next week <small>It’s guaranteed to be in next week’s 5</small></h2>
-    <div class="carry">${R.perCard.filter(p => !S.grad.includes(p.no)).map(p => `<button class="hcard ${S.carry === p.no ? 'on' : 'off'}" data-carry="${p.no}" aria-pressed="${S.carry === p.no}">${scaled(CARDS[p.no], 0.4)}<span>${S.carry === p.no ? 'Carried ✓' : 'Tap to carry'}</span></button>`).join('')}</div>` : ''}
-    <h2>Next week’s stake</h2>
+    ${S.carry ? `<h2>Carry one card <small>It’s in next week’s deal</small></h2>
+    <div class="carry">${R.perCard.filter(p => !S.grad.includes(p.no)).map(p => `<button class="hcard ${S.carry === p.no ? 'on' : 'off'}" data-carry="${p.no}" aria-pressed="${S.carry === p.no}">${scaled(CARDS[p.no], 0.46)}<span>${S.carry === p.no ? 'Carried ✓' : 'Tap to carry'}</span></button>`).join('')}</div>` : ''}
+    <h2>Stake <small>${R.pass ? 'Raise it for more stars, or keep it' : 'No penalty for missing; lower it if it felt hard'}</small></h2>
     <div class="stakes">${stakeOpts.map(stakeBtn).join('')}</div>
     ${R.fresh.map(x => `<div class="unlock">${scaled(x, 0.3)}<div><b style="font-size:12px">New card unlocked</b><div style="font-weight:900;font-size:20px">${x.name}</div><p class="note left">${x.cond}. It may be dealt from now on.</p></div></div>`).join('')}
-    <p class="note">Next you deal this week’s cards. The shop stays open under Deck › Shop.<br>${R.pass ? 'Want a challenge? Raise the stake for more stars. If not, keep the current stake.' : 'Missing the target costs nothing and you don’t start over. Next week, keep cards that are easier to hold, or lower the stake.'}</p>
+    <div class="impact plan">
+      <div class="r"><span>Next week</span><span>Week ${S.week + 1} · ${STAKES[S.nextStake].name}</span></div>
+      <div class="r"><span>Deal</span><span>${DEALN()} cards, keep ${S.slotPending ? 4 : HOLDN()}</span></div>
+      <div class="r"><span>Carried</span><span>${S.carry ? CARDS[S.carry].name : 'None'}</span></div>
+    </div>
     ${reconHTML(R)}
     <button class="linkbtn" data-act="week-back">‹ Back to this week’s results</button>`}`);
 }
@@ -3400,7 +3409,7 @@ app.addEventListener('click', e => {
     shopRe(top); toast(o.kind === 'unlock' ? `Unlocked “${CARDS[o.no].name}”` : `Guaranteed next week: “${CARDS[o.no].name}”`); return;
   }
   if (act === 'reroll') { S.stars -= PRICE.reroll; rollShop(); shopRe(top); return; }
-  if (act === 'slot') { S.stars -= PRICE.slot; if (top) S.slots = 4; else S.slotPending = true; shopRe(top); toast('From next week: 6 dealt, keep 4, target +25%'); return; }
+  if (act === 'slot') { S.stars -= PRICE.slot; if (top) S.slots = 4; else S.slotPending = true; shopRe(top); toast('From next week: keep 4 cards, target +25%'); return; }
   if (act === 'glue-buy') { S.stars -= PRICE.glue; S.glue += 1; shopRe(top); toast('Bought a bottle of glue; tap a broken card to use it'); return; }
   if (act === 'shop-done') { startWeek(); S.pinned = []; return; }
   if (act === 'glue') {
