@@ -174,9 +174,10 @@ button.chip:active { transform: translateY(2px); }
   .sheet:has(.logfoot) { gap: 10px; }
   .sheet:has(.logfoot) .amount { padding: 8px 20px; } .sheet:has(.logfoot) .amount b { font-size: 40px; }
   .sheet:has(.logfoot) .pad { gap: 6px; } .sheet:has(.logfoot) .pad .cap { height: 42px; padding: 3px 3px 6px; }
-  .sheet:has(.logfoot) .logfoot { padding-bottom: 28px; gap: 8px; }
+  .sheet:has(.logfoot) .logfoot { gap: 8px; }
   .sheet:has(.logfoot) .logfoot .actions .cap > .top, .sheet:has(.logfoot) .logfoot .go { min-height: 46px; }
 }
+@media (max-height: 780px) { .sheet:has(.logfoot) .pad .cap { height: 38px; } .sheet:has(.logfoot) .amount { padding: 4px 20px; } }
 @media (max-height: 700px) { .sheet:has(.logfoot) { overflow-y: auto; } }
 .newcat { border-radius: 18px; background: #F3F3F6; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
 .toggle { display: flex; gap: 6px; }
@@ -348,7 +349,8 @@ button.chip:active { transform: translateY(2px); }
 @keyframes bubFloat { 50% { translate: 0 -7px; } }
 @keyframes ballIn { from { opacity: 0; transform: scale(0.2) rotate(-40deg); } }
 @keyframes ballBob { 50% { translate: 0 -9px; } }
-.l-foot { left: 24px; right: 24px; bottom: 34px; display: flex; flex-direction: column; gap: 12px; }
+.l-foot { left: 24px; right: 24px; bottom: 40px; display: flex; flex-direction: column; gap: 12px; }
+.l-foot .linkbtn { position: absolute; left: 50%; bottom: -34px; transform: translateX(-50%); white-space: nowrap; padding: 4px 8px; }
 .l-foot h1 { margin: 0; font-weight: 900; font-size: 28px; line-height: 1.2; color: #FFF; }
 .launch .linkbtn { color: #FFF; opacity: 0.85; }
 .l-foot p { margin: 0; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.88); }
@@ -3097,14 +3099,14 @@ function renderWeek() {
     <h2>Next week’s stake</h2>
     <div class="stakes">${stakeOpts.map(stakeBtn).join('')}</div>
     ${R.fresh.map(x => `<div class="unlock">${scaled(x, 0.3)}<div><b style="font-size:12px">New card unlocked</b><div style="font-weight:900;font-size:20px">${x.name}</div><p class="note left">${x.cond}. It may be dealt from now on.</p></div></div>`).join('')}
-    <p class="note">That’s it for tonight; open the shop and draw new cards tomorrow (Monday) morning.<br>${R.pass ? 'Want a challenge? Raise the stake for more stars. If not, keep the current stake.' : 'Missing the target costs nothing and you don’t start over. Next week, keep cards that are easier to hold, or lower the stake.'}</p>
+    <p class="note">Next you deal this week’s cards. The shop stays open under Deck › Shop.<br>${R.pass ? 'Want a challenge? Raise the stake for more stars. If not, keep the current stake.' : 'Missing the target costs nothing and you don’t start over. Next week, keep cards that are easier to hold, or lower the stake.'}</p>
     ${reconHTML(R)}
     <button class="linkbtn" data-act="week-back">‹ Back to this week’s results</button>`}`);
 }
 // before Monday, the week's log is checked against what the payment apps say was really spent; a log missing a lot loses the stars
 const RECON_RATIO = 1.2, RECON_SLACK = 30;
 function reconHTML(R) {
-  const go = '<button class="cap lime bigbtn" data-act="to-monday"><div class="top">OK, on to Monday morning</div></button>';
+  const go = `<button class="cap lime bigbtn" data-act="to-monday"><div class="top">Start week ${S.week + 1} · draw cards</div></button>`;
   if (!R.got && !R.recon) return go;
   if (R.recon) return `<div class="callout">${R.recon.voided ? `Reconcile off by ¥${R.recon.actual - R.logged}: actually ¥${R.recon.actual}, only logged ¥${R.logged}. This week’s ${starStr(R.recon.voided)} don’t count; score unchanged.` : R.recon.skipped ? `Not reconciled; this week’s stars are halved, ${R.got ? `you get only ${starStr(R.got)}` : 'none left'}.` : `Matches: actually ¥${R.recon.actual}, logged ¥${R.logged}. Stars kept ✓`}</div>${go}`;
   return `<h2>Reconcile <small>The last step before stars</small></h2>
@@ -3387,7 +3389,8 @@ app.addEventListener('click', e => {
     replaceSheet(top, renderWeek); return;
   }
   if (act === 'week-plan' || act === 'week-back') { S.weekStep = act === 'week-plan' ? 2 : 1; swapSheet(top, renderWeek, false, act === 'week-back'); return; }
-  if (act === 'to-monday') { S.clock = 8.5; swapSheet(top, renderMonday); return; }
+  // the new week opens straight on the deal; the shop is a tab in Deck, always open
+  if (act === 'to-monday') { swapSheet(top, () => { startWeek(); S.pinned = []; }); return; }
   if (act === 'shop') { rollShop(); swapSheet(top, renderShop); return; }
   if (act === 'draw-now') { top.remove(); startWeek(); S.pinned = []; return; }
   if (t.dataset.buy) {
