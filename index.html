@@ -2011,7 +2011,7 @@ function flowHTML(tabs) {
     <div class="lg-chips">${chips}</div>
     ${groups || '<p class="note">No spending in this category yet.</p>'}
     <p class="note">Tap today’s entries to edit or delete; tap a date to see that day’s receipt.</p>
-    <button class="linkbtn" data-act="bank-link">${S.bank ? `Bank: ${S.bank.name} · honest streak ${S.honest || 0}` : 'Connect a bank to catch forgotten purchases ›'}</button>`;
+    <button class="linkbtn" data-act="bank-link">${S.bank ? `Bank: ${S.bank.name} · honest nights ${(S.honest || 0) % 7}/7` : 'Connect a bank to catch forgotten purchases ›'}</button>`;
 }
 
 // bill: calendar month with keycap day cells (ToyBill) and where it went (ToyCats); always real money
@@ -2905,7 +2905,7 @@ function renderSettings() {
     ${field('income', 'Monthly income', '')}${field('fixed', 'Fixed costs', 'Rent, phone, subscriptions')}${field('save', 'Monthly savings', 'Save first, spend later')}
     <div class="set-row"><div><b>Essentials allowance</b><small>Meals and commuting within this amount a day don’t count</small></div><div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:44px;text-align:center">$${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div></div>
     <h2>Bank</h2>
-    ${S.bank ? `<div class="set-row"><div><b>${esc(S.bank.name)}</b><small>Checks your log every night · honest streak ${S.honest || 0}</small></div><button class="mini" data-act="bank-off">Disconnect</button></div>` : `<div class="set-row"><div><b>Connect a bank</b><small>It catches purchases you forget to log. You still log everything yourself.</small></div><button class="mini" data-act="bank-link">Connect</button></div>`}
+    ${S.bank ? `<div class="set-row"><div><b>${esc(S.bank.name)}</b><small>Checks your log every night · honest nights ${(S.honest || 0) % 7}/7 for a free Glue</small></div><button class="mini" data-act="bank-off">Disconnect</button></div>` : `<div class="set-row"><div><b>Connect a bank</b><small>It catches purchases you forget to log. You still log everything yourself.</small></div><button class="mini" data-act="bank-link">Connect</button></div>`}
     <h2>Reminders</h2>
     ${sw('evening', 'Evening reminder to end the day', 'Also shows a “Done logging?” card on the home screen')}
     ${p.evening ? `<div class="set-row"><div><b>Reminder time</b><small>Send a notification at that time</small></div><div class="seg3">${[20.5, 21.5, 22].map(c => `<button data-evat="${c}" aria-pressed="${p.eveningAt === c}">${fmtClock(c)}</button>`).join('')}</div></div>` : ''}
@@ -2995,7 +2995,7 @@ function renderBankLink() {
     : `<ol class="bk-steps">
         <li><b>You still play every purchase.</b><span>Log it yourself and see what breaks before you buy. That’s the game.</span></li>
         <li><b>The bank checks the night.</b><span>Read-only: date, merchant and amount. We can’t move money, and you can disconnect any time.</span></li>
-        <li><b>Forgot one? You’ll catch it.</b><span>Before tonight is scored you add what you missed. Logging before the bank shows it keeps your honest streak: 5 days earns ★.</span></li>
+        <li><b>Forgot one? You’ll catch it.</b><span>Before tonight is scored you add what you missed. Logging before the bank shows it keeps your honest streak: 7 nights earns a free Glue bottle.</span></li>
       </ol>
       <h2>Choose your bank <small>Demo account, no real login</small></h2>
       <div class="imp-banks">${['Chase', 'Bank of America', 'Wells Fargo', 'Capital One', 'Apple Card'].map(b => `<button class="imp-bank" data-act="bank-pick" data-bank="${b}"><i>${b[0]}</i><b>${b}</b><span aria-hidden="true">›</span></button>`).join('')}</div>`;
@@ -3353,7 +3353,12 @@ function endDay() {
   if (S.bank) {
     const caught = S.today.some(e => e.caught); S.honest = caught ? 0 : (S.honest || 0) + 1;
     S.bank.feed = sampleFeed();
-    if (!caught && S.honest % 5 === 0) { S.stars += 1; S.starsTotal += 1; setTimeout(() => toast('5 honest days in a row · +1 ★'), 600); }
+    // a week of honest nights earns a free bottle of glue (the same one the shop sells); two weeks also earn a star
+    if (!caught && S.honest % 7 === 0) {
+      const star = S.honest % 14 === 0; if (star) { S.stars += 1; S.starsTotal += 1; }
+      const glue = S.glue < 3; if (glue) S.glue += 1;
+      setTimeout(() => toast(`${S.honest} honest days${glue ? ' · free Glue bottle' : ''}${star ? ' · +1 ★' : ''}`), 600);
+    }
   }
   const owed = Math.max(0, h.extra + S.debt - dailyBudget());
   S.debt = Math.min(debtCap(), owed);
