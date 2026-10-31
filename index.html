@@ -1082,6 +1082,9 @@ button.hcard:active > div { transform: translateY(2px); }
 .crt-base .kb::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: radial-gradient(circle at 60% 70%, rgba(0,0,0,0.16), rgba(0,0,0,0) 70%); box-shadow: inset 0 1px 2px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.7); }
 .crt-base .kb::after { content: ""; position: absolute; left: 5px; top: 3px; width: 8px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.85); transform: rotate(-30deg); filter: blur(0.3px); }
 .crt-base .kb.o { background: radial-gradient(circle at 34% 28%, #FFE2CC 0 8%, #FF9A5C 10%, #F2601F 62%, #C4400C 100%); box-shadow: 0 0 0 2.5px #A8480F, 0 0 0 4px #5D574C, 0 1px 0 4px rgba(255,255,255,0.35), 0 3px 0 2px #4D483F, 0 5px 5px rgba(0,0,0,0.3), inset 0 -3px 3px rgba(120,30,0,0.35), inset 0 2px 1px rgba(255,255,255,0.7); }
+.crt-base .kb { transition: transform .08s, box-shadow .08s; cursor: pointer; }
+.crt-base .kb.hit { animation: kbpress .22s ease-out; }
+@keyframes kbpress { 40% { transform: translateY(3px); box-shadow: 0 0 0 2.5px #8E8678, 0 0 0 4px #5D574C, 0 1px 0 4px rgba(255,255,255,0.2), 0 0 0 2px #4D483F, inset 0 3px 4px rgba(0,0,0,0.3); } }
 .crt-base .kb.o::before { background: radial-gradient(circle at 60% 70%, rgba(120,30,0,0.35), rgba(0,0,0,0) 70%); }
 .crt.blip .crt-scr { animation: crtBlip 0.5s ease; }
 @keyframes crtBlip { 0% { transform: scaleY(0.06); filter: brightness(3); } 40% { transform: scaleY(1.04); filter: brightness(1.6); } 100% { transform: none; filter: none; } }
@@ -3587,6 +3590,13 @@ app.addEventListener('click', e => {
   if (act === 'to-top') { app.querySelector('.screen').scrollTo({ top: 0, behavior: 'smooth' }); return; }
   if (act === 'coach-next') { S.coach += 1; clearCoach(); showCoach(); return; }
   if (act === 'coach-skip') { S.coach = COACH.length; clearCoach(); return; }
+  const kb = e.target.closest('.kb');
+  if (kb && act === 'crt') {
+    kb.classList.remove('hit'); void kb.offsetWidth; kb.classList.add('hit');
+    const e = evaluate(S.today);
+    toast(kb.classList.contains('o') ? `Score: $${e.base} × mult ${e.mult} = ${e.score} pts` : `Spent $${e.d.extra} of $${e.daily} · ${S.held.filter(no => e.cards.find(c => c.no === no && c.state === 'on')).length}/${S.held.length} cards holding`);
+    return;
+  }
   if (act === 'crt') { const c = t.closest('.crt'); c.classList.remove('blip'); void c.offsetWidth; c.classList.add('blip'); return; }
   if (act === 'week') { renderWeekSheet(); return; }
   if (act === 'goflow') { S.view = 'bill'; S.billTab = 'flow'; renderTable(); return; }
