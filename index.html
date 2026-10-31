@@ -1431,7 +1431,8 @@ const TYPES = {
   1: { label: '+1 mult', core: '#2E8BFF', chipText: '#FFFFFF', dark: false },
   2: { label: '+2 mult', core: '#FF4D6A', chipText: '#FFFFFF', dark: false },
   3: { label: '+3 mult', core: '#A55BFF', chipText: '#FFFFFF', dark: true },
-  4: { label: '+4 mult', core: '#FF8A00', chipText: '#111111', dark: true }
+  4: { label: '+4 mult', core: '#FF8A00', chipText: '#111111', dark: true },
+  5: { label: '+5 mult', core: '#FF3D8A', chipText: '#FFFFFF', dark: true }
 };
 const rr = (x, y, w, h, r) => `M${x + r} ${y}H${x + w - r}A${r} ${r} 0 0 1 ${x + w} ${y + r}V${y + h - r}A${r} ${r} 0 0 1 ${x + w - r} ${y + h}H${x + r}A${r} ${r} 0 0 1 ${x} ${y + h - r}V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z`;
 const ci = (x, y, r) => `M${x - r} ${y}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
@@ -1517,6 +1518,28 @@ const ILL = {
   '14': p => `<path d="M56 192Q42 108 108 50Q166 12 204 28Q206 96 150 150Q112 184 56 192Z" fill="${p.P}"/><path d="M56 192Q126 110 196 36" fill="none" stroke="${p.D}" stroke-width="8" stroke-linecap="round"/>
     <path d="M92 150L70 138M110 128L84 112M128 106L102 88M146 84L124 68M120 160L100 152M140 138L120 128M160 116L142 106" stroke="${p.L}" stroke-width="5" stroke-linecap="round"/>
     <path d="M208 120Q214 134 224 140M30 80Q24 92 14 96" fill="none" stroke="${p.I}" stroke-width="5" stroke-linecap="round" opacity=".6"/>${sp(36, 44, 10, p.Y)}${sp(216, 74, 8, p.W)}${sp(190, 188, 7, p.Y)}`,
+  '18': p => `<path d="M120 24L196 48V112Q196 168 120 202Q44 168 44 112V48Z" fill="${p.D}" transform="translate(0 8)"/><path d="M120 24L196 48V112Q196 168 120 202Q44 168 44 112V48Z" fill="${p.P}"/><path d="M120 40L180 58V112Q180 154 120 182Z" fill="${p.L}" opacity=".35"/>
+    <circle cx="120" cy="108" r="40" fill="${p.W}"/><path d="M100 108L115 123L142 92" fill="none" stroke="${p.P}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>${sp(206, 30, 10, p.Y)}${sp(30, 90, 7, p.Y)}`,
+  '19': p => `<rect x="52" y="30" width="136" height="164" rx="20" fill="${p.D}" transform="translate(6 8)" opacity=".45"/><rect x="52" y="30" width="136" height="164" rx="20" fill="${p.W}"/><rect x="52" y="30" width="136" height="34" rx="20" fill="${p.P}"/><rect x="52" y="50" width="136" height="14" fill="${p.P}"/>
+    ${[78, 104, 130].map((y, i) => `<circle cx="80" cy="${y + 36}" r="10" fill="${p.P}"/><path d="M75 ${y + 36}L79 ${y + 40}L86 ${y + 31}" fill="none" stroke="${p.W}" stroke-width="3.500" stroke-linecap="round" stroke-linejoin="round"/><rect x="100" y="${y + 31}" width="${[70, 54, 62][i]}" height="10" rx="5" fill="${p.L}"/>`).join('')}
+    ${[76, 108, 140, 172].map(x => `<rect x="${x - 6}" y="20" width="12" height="26" rx="6" fill="${p.I}"/>`).join('')}${sp(204, 80, 9, p.Y)}`,
+  '20': p => `<rect x="20" y="82" width="86" height="60" rx="30" fill="none" stroke="${p.P}" stroke-width="16"/><rect x="77" y="98" width="86" height="60" rx="30" fill="none" stroke="${p.D}" stroke-width="16"/><rect x="134" y="82" width="86" height="60" rx="30" fill="none" stroke="${p.P}" stroke-width="16"/>
+    <path d="M120 40L104 70H128L112 100" fill="none" stroke="${p.Y}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>${sp(36, 40, 9, p.Y)}${sp(208, 44, 9, p.Y)}${sp(190, 186, 8, p.W)}`,
+  '21': p => `<g transform="rotate(-14 84 118)"><rect x="36" y="70" width="96" height="96" rx="22" fill="${p.D}" transform="translate(0 7)"/><rect x="36" y="70" width="96" height="96" rx="22" fill="${p.W}" stroke="${p.I}" stroke-width="6"/><circle cx="62" cy="96" r="9" fill="${p.I}"/><circle cx="106" cy="96" r="9" fill="${p.I}"/><circle cx="84" cy="118" r="9" fill="${p.I}"/><circle cx="62" cy="140" r="9" fill="${p.I}"/><circle cx="106" cy="140" r="9" fill="${p.I}"/></g>
+    <g transform="rotate(16 160 110)"><rect x="116" y="62" width="84" height="84" rx="20" fill="${p.D}" transform="translate(0 7)"/><rect x="116" y="62" width="84" height="84" rx="20" fill="${p.Y}" stroke="${p.I}" stroke-width="6"/><circle cx="144" cy="90" r="8" fill="${p.I}"/><circle cx="172" cy="118" r="8" fill="${p.I}"/></g>${sp(206, 40, 11, p.Y)}${sp(30, 44, 8, p.W)}`,
+  '22': p => `<path d="M120 22L146 78L208 86L162 128L174 190L120 160L66 190L78 128L32 86L94 78Z" fill="${p.D}" transform="translate(0 8)"/><path d="M120 22L146 78L208 86L162 128L174 190L120 160L66 190L78 128L32 86L94 78Z" fill="${p.Y}" stroke="${p.I}" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M120 150C102 134 92 124 92 112C92 102 100 96 108 96C113 96 118 99 120 104C122 99 127 96 132 96C140 96 148 102 148 112C148 124 138 134 120 150Z" fill="${p.P}"/>${sp(214, 40, 9, p.W)}${sp(26, 150, 8, p.Y)}`,
+  '23': p => `<rect x="112" y="84" width="12" height="108" rx="6" fill="${p.I}"/><path d="M28 98A92 82 0 0 1 208 98Z" fill="${p.P}"/><path d="M28 98A92 82 0 0 1 74 28L98 98Z" fill="${p.W}"/><path d="M118 98L118 16A92 82 0 0 1 164 28L118 98Z" fill="${p.W}"/><path d="M28 98Q44 112 59 98Q74 112 89 98Q104 112 118 98Q132 112 148 98Q164 112 178 98Q194 112 208 98" fill="none" stroke="${p.D}" stroke-width="5"/>
+    <circle cx="196" cy="34" r="20" fill="${p.Y}"/><path d="M60 196Q120 176 190 196" fill="none" stroke="${p.D}" stroke-width="8" stroke-linecap="round" opacity=".5"/>${sp(36, 40, 9, p.Y)}`,
+  '24': p => `<circle cx="60" cy="52" r="26" fill="${p.D}"/><circle cx="180" cy="52" r="26" fill="${p.D}"/><circle cx="120" cy="120" r="76" fill="${p.D}" transform="translate(0 7)"/><circle cx="120" cy="120" r="76" fill="${p.P}"/><circle cx="120" cy="120" r="58" fill="${p.W}"/>
+    ${Array.from({ length: 12 }, (_, k) => { const a = k / 12 * Math.PI * 2; return `<path d="M${(120 + Math.cos(a) * 48).toFixed(1)} ${(120 + Math.sin(a) * 48).toFixed(1)}L${(120 + Math.cos(a) * 54).toFixed(1)} ${(120 + Math.sin(a) * 54).toFixed(1)}" stroke="${p.I}" stroke-width="4" stroke-linecap="round"/>`; }).join('')}
+    <path d="M120 120V82M120 120L146 134" stroke="${p.I}" stroke-width="8" stroke-linecap="round"/><circle cx="120" cy="120" r="7" fill="${p.Y}"/><path d="M92 200L74 214M148 200L166 214" stroke="${p.I}" stroke-width="8" stroke-linecap="round"/>${sp(212, 100, 8, p.Y)}`,
+  '25': p => `<path d="M82 152H158L148 200H92Z" fill="${p.D}"/><rect x="74" y="140" width="92" height="18" rx="9" fill="${p.P}"/><path d="M120 140V92" stroke="${p.D}" stroke-width="8" stroke-linecap="round"/>
+    <path d="M120 100C70 100 52 56 56 28C100 28 130 52 120 100Z" fill="${p.P}"/><path d="M120 100C150 94 176 74 184 48C150 44 122 62 120 100Z" fill="${p.L}"/><path d="M120 100Q100 70 70 42" fill="none" stroke="${p.W}" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+    <ellipse cx="120" cy="206" rx="52" ry="7" fill="${p.D}" opacity=".25"/>${sp(200, 60, 9, p.Y)}${sp(32, 130, 7, p.Y)}`,
+  '26': p => `<ellipse cx="120" cy="188" rx="86" ry="14" fill="${p.D}" opacity=".5"/>
+    ${[-62, -32, 32, 62].map(a => `<ellipse cx="120" cy="124" rx="24" ry="62" fill="${p.L}" transform="rotate(${a} 120 176)"/>`).join('')}${[-30, 30].map(a => `<ellipse cx="120" cy="116" rx="26" ry="68" fill="${p.P}" transform="rotate(${a} 120 176)"/>`).join('')}<ellipse cx="120" cy="108" rx="28" ry="72" fill="${p.D}"/><ellipse cx="120" cy="108" rx="14" ry="50" fill="${p.P}" opacity=".6"/>
+    <circle cx="120" cy="40" r="10" fill="${p.Y}"/>${sp(40, 56, 9, p.Y)}${sp(202, 66, 9, p.W)}`,
   '13': p => `<path d="M60 70L82 34L104 66Z" fill="${p.D}"/><ellipse cx="116" cy="134" rx="90" ry="64" fill="${p.P}"/><ellipse cx="116" cy="150" rx="66" ry="36" fill="${p.L}" opacity=".55"/>
     <rect x="52" y="172" width="34" height="30" rx="12" fill="${p.D}"/><rect x="148" y="172" width="34" height="30" rx="12" fill="${p.D}"/><ellipse cx="206" cy="132" rx="22" ry="26" fill="${p.D}"/><circle cx="200" cy="124" r="4" fill="${p.W}"/><circle cx="208" cy="140" r="4" fill="${p.W}"/>
     <rect x="86" y="76" width="56" height="10" rx="5" fill="${p.D}"/><path d="M28 124Q10 108 24 96Q36 92 36 106" fill="none" stroke="${p.D}" stroke-width="9" stroke-linecap="round"/>
@@ -1609,6 +1632,25 @@ const CARDS = {
     broken: d => d.weekExtra > Math.round(d.weekCap * 2 / 3), why: d => `Outside the allowance this week $${d.weekExtra} (cap $${Math.round(d.weekCap * 2 / 3)})`,
     near: d => d.weekExtra > d.weekCap * 0.5 ? `Outside the allowance this week $${d.weekExtra}, over $${Math.round(d.weekCap * 2 / 3)} Weekly Light breaks` : null,
     penalty: d => d.weekBefore > Math.round(d.weekCap * 2 / 3) ? Math.ceil(d.extra / 20) : 0 },
+  '18': { no: '18', name: 'Honest Day', plus: 2, diff: 2, unlock: 6, cond: 'Log everything yourself: nothing for the bank to catch', eg: 'Needs a connected bank and sleeps without one. If the bank finds a purchase you never logged, this card breaks for the day.',
+    pending: d => !d.bankLinked, broken: d => d.caughtCount > 0, why: d => d.bankLinked ? `The bank caught ${d.caughtCount} purchase${d.caughtCount > 1 ? 's' : ''} you didn’t log` : 'Connect a bank to wake it' },
+  '19': { no: '19', name: 'Full Ledger', plus: 2, diff: 1, unlock: 4, noGrad: true, cond: 'Log at least three entries today, meals and commuting count', eg: 'Asleep until the third entry. Logging the small stuff is the whole point.',
+    pending: d => d.entryCount < 3, why: d => `${d.entryCount} of 3 entries logged` },
+  '20': { no: '20', name: 'Chain Reaction', plus: 1, diff: 2, chain: true, unlock: 8, cond: '+1 for every other card in your hand that holds today', eg: 'Never breaks, but it only pays when the rest of your hand holds: with three cards it is worth up to +2.',
+    why: () => '' },
+  '21': { no: '21', name: 'High Roller', plus: 5, diff: 3, noGlue: true, unlock: 14, clash: ['05'], cond: 'Spend nothing outside the allowance: +5. Spend anything: −2', eg: 'The big gamble. Glue can’t fix it, and there is no stop-loss. It either pays +5 or costs you 2 multiplier tonight.',
+    broken: d => d.extra > 0, why: d => `Spent outside the allowance $${d.extra}`, penalty: () => 2 },
+  '22': { no: '22', name: 'Wish Keeper', plus: 2, diff: 1, unlock: 7, cond: 'Put one thing on the wish list today', eg: 'Asleep until you wish-list something instead of buying it. Skip it tomorrow morning and you keep the money.',
+    pending: d => d.wishToday === 0, why: () => 'Nothing on the wish list yet today' },
+  '23': { no: '23', name: 'Weekend Brake', plus: 3, diff: 2, unlock: 9, cond: 'Saturday and Sunday: at most $40 outside the allowance', eg: 'Asleep Monday to Friday. On the weekend it holds as long as the extras stay under $40 a day.',
+    pending: d => !d.weekend, broken: d => d.extra > 40, why: d => d.weekend ? `Outside the allowance $${d.extra} (limit $40)` : 'Wakes on Saturday', near: d => d.extra > 25 && d.extra <= 40 ? `Outside the allowance $${d.extra}, past $40 Weekend Brake breaks` : null },
+  '24': { no: '24', name: 'Weekday Guard', plus: 1, diff: 1, unlock: 5, cond: 'Monday to Friday: at most $15 outside the allowance', eg: 'Asleep on the weekend. On a weekday it holds while extras stay under $15.',
+    pending: d => d.weekend, broken: d => d.extra > 15, why: d => d.weekend ? 'Wakes on Monday' : `Outside the allowance $${d.extra} (limit $15)`, near: d => d.extra > 8 && d.extra <= 15 ? `Outside the allowance $${d.extra}, past $15 Weekday Guard breaks` : null },
+  '25': { no: '25', name: 'Minimalist', plus: 3, diff: 3, unlock: 11, cond: 'At most two entries today, meals and commuting included', eg: 'Spend rarely, log rarely. Three entries and it breaks for the day.',
+    broken: d => d.entryCount > 2, why: d => `${d.entryCount} entries today`, near: d => d.entryCount === 2 ? 'Two entries already; a third breaks Minimalist' : null },
+  '26': { no: '26', name: 'Monk Week', plus: 4, diff: 3, weekly: true, unlock: 16, clash: ['15', '14'], cond: 'Outside spending this week stays under $20 in total', eg: 'The strictest weekly card. Break it and it stays broken until Sunday; each extra $10 after that costs −1 mult that day.',
+    broken: d => d.weekExtra > 20, why: d => `Outside the allowance this week $${d.weekExtra} (cap $20)`, near: d => d.weekExtra > 12 ? `Outside the allowance this week $${d.weekExtra}, over $20 Monk Week breaks` : null,
+    penalty: d => d.weekBefore > 20 ? Math.ceil(d.extra / 10) : 0 },
   '13': { no: '13', name: 'Piggy Bank', plus: 2, diff: 2, unlock: 6, cond: 'At most $20 outside the allowance today', eg: 'A coffee is fine; add a takeout and it breaks.',
     broken: d => d.extra > 20, why: d => `Spent outside the allowance $${d.extra}`, near: d => d.extra > 10 && d.extra <= 20 ? `Outside the allowance today already $${d.extra}, spend $${21 - d.extra}  more and Piggy Bank breaks` : null }
 };
@@ -1633,9 +1675,11 @@ const overOf = list => Math.max(0, essOf(list) - essQuota);
 const extraOf = list => list.filter(x => !cat(x.cat).ess).reduce((a, x) => a + x.amt, 0) + overOf(list);
 const teaOf = list => list.filter(x => x.cat === 'tea').length;
 
-function facts(list, teaBefore, assumeLogged, weekBefore = 0) {
+function facts(list, teaBefore, assumeLogged, weekBefore = 0, dayIdx = S.day) {
   const extra = extraOf(list);
   return {
+    // the day of the week (0 = Mon), whether a bank is linked, what the bank had to catch, and wish-list use today
+    dow: dayIdx, weekend: dayIdx >= 5, bankLinked: !!S.bank, caughtCount: list.filter(x => x.caught).length, wishToday: S.wish.length, entryCount: list.length,
     weekBefore, weekExtra: weekBefore + extra, weekCap: Math.round(moneyWeek() / 2), extraCount: list.filter(x => !cat(x.cat).ess).length,
     count: assumeLogged ? Math.max(1, list.length) : list.length, extra,
     night: list.some(x => x.night), nightSum: list.filter(x => x.night).reduce((a, x) => a + x.amt, 0),
@@ -1645,17 +1689,17 @@ function facts(list, teaBefore, assumeLogged, weekBefore = 0) {
 }
 // weekBefore: money spent outside the allowance earlier this week, for cards that look at the whole week
 const weekExtraSoFar = () => weekHist().reduce((a, h) => a + h.extra, 0);
-function evaluate(list, held = S.held, teaBefore = S.teaWeek, assumeLogged = false, daily = todayBudget(), weekBefore = weekExtraSoFar()) {
-  const d = facts(list, teaBefore, assumeLogged, weekBefore);
+function evaluate(list, held = S.held, teaBefore = S.teaWeek, assumeLogged = false, daily = todayBudget(), weekBefore = weekExtraSoFar(), dayIdx = S.day) {
+  const d = facts(list, teaBefore, assumeLogged, weekBefore, dayIdx);
   const cards = held.map(no => {
     const c = CARDS[no];
     let state = c.pending && c.pending(d) ? 'pending' : c.broken && c.broken(d) ? 'broken' : 'on';
     // glue from the shop mends one cracked card for the rest of today
-    if (state === 'broken' && held === S.held && S.glued && S.glued.week === S.week && S.glued.day === S.day && S.glued.no === no) state = 'on';
+    if (state === 'broken' && !c.noGlue && held === S.held && S.glued && S.glued.week === S.week && S.glued.day === S.day && S.glued.no === no) state = 'on';
     // gain is what the card adds to today's multiplier: its +n while it holds, half back (stop-loss) when a daily card
     // cracked and nothing outside the allowance was spent after it, or a minus for a weekly card overrun again today
     let gain = state === 'on' ? c.plus : 0, saved = false;
-    if (state === 'broken' && c.weekly && c.penalty) gain = -c.penalty(d);
+    if (state === 'broken' && c.penalty) gain = -c.penalty(d);
     else if (state === 'broken' && Math.floor(c.plus / 2) > 0) {
       const at = list.findIndex((_, i) => c.broken(facts(list.slice(0, i + 1), teaBefore, assumeLogged, weekBefore)));
       saved = at >= 0 && extraOf(list) === extraOf(list.slice(0, at + 1));
@@ -1663,6 +1707,8 @@ function evaluate(list, held = S.held, teaBefore = S.teaWeek, assumeLogged = fal
     }
     return { no, state, gain, saved, why: state === 'on' ? '' : c.why(d), near: state === 'on' && c.near ? c.near(d) : null };
   });
+  // a chain card is worth its +n for every other card that holds today
+  cards.forEach(x => { const c = CARDS[x.no]; if (c.chain && x.state === 'on') x.gain = c.plus * cards.filter(y => y !== x && y.state === 'on').length; });
   const mult = Math.max(1, S.baseMult + cards.reduce((a, x) => a + x.gain, 0));
   const base = Math.max(0, daily - d.extra);
   return { d, cards, mult, base, daily, left: daily - d.extra, score: base * mult };
@@ -1690,8 +1736,8 @@ function simulate(held, days, start) {
   let tea = 0, spent = 0, total = 0;
   const per = {}; held.forEach(n => { per[n] = 0; });
   const list = days.slice(start);
-  list.forEach(day => {
-    const ev = evaluate(day, held, tea, true, dailyBudget(), spent);
+  list.forEach((day, k) => {
+    const ev = evaluate(day, held, tea, true, dailyBudget(), spent, start + k);
     tea += teaOf(day); spent += ev.d.extra; total += ev.score;
     ev.cards.forEach(c => { if (c.state === 'on') per[c.no]++; });
   });
@@ -1837,7 +1883,7 @@ function holdHTML(ev) {
   const n = ev.cards.length, sc = n > 3 ? 0.34 : 0.4, tilt = [-7, 4, -3, 6], notes = ['#FFD3E2', '#CFE8FF', '#FFF3B0', '#D8F5C8'];
   const cards = ev.cards.map((c, i) => {
     const card = CARDS[c.no];
-    const label = c.state === 'on' ? `+${card.plus} Held` : c.state === 'pending' ? 'Asleep' : brokenLabel(c);
+    const label = c.state === 'on' ? `+${gainOf(c)} Held` : c.state === 'pending' ? 'Asleep' : brokenLabel(c);
     return `<button class="hcard ${c.state}" data-info="${c.no}" style="--p:${n > 1 ? i / (n - 1) : 0};--cw:${Math.round(240 * sc)}px;--r:${tilt[i % 4]}deg;--z:${i + 1}" aria-label="${card.name}, ${label}${c.why ? ':' + c.why : ''}">${scaled(card, sc, c.state)}<span style="--nb:${coreOf(c.no)};--nt:${TYPES[card.plus].chipText}">${label}</span></button>`;
   }).join('');
   const okN = ev.cards.filter(c => c.state === 'on').length;
@@ -2760,9 +2806,9 @@ async function playStage(sh) {
         if (g) { mult = Math.max(1, mult + g); await countTo($('pm'), mult, 350); }
         continue;
       }
-      await playHeld(el, `+${card.plus}`);
-      el.classList.add('pop'); mult += card.plus;
-      tag(el, `+${card.plus}`, 'good');
+      await playHeld(el, `+${gainOf(c)}`);
+      el.classList.add('pop'); mult += gainOf(c);
+      tag(el, `+${gainOf(c)}`, 'good');
       await countTo($('pm'), mult, 350);
     }
   }
@@ -2793,7 +2839,7 @@ function renderRule(no) {
   const cur = heldNow ? evaluate(S.today).cards.find(x => x.no === no) : null;
   const hasData = S.lastWeek.some(d => d.length), sim = hasData && !heldNow ? simulate([no], S.lastWeek, S.weekStart) : null;
   const state = cur ? (cur.state === 'on' ? `Still holding today, mult +${c.plus}.${cur.near ? cur.near + '.' : ''}` : cur.state === 'pending' ? 'Still asleep: log one entry today to wake it.' : `Broke today: ${cur.why}.${c.weekly ? `Stays broken until Sunday.${cur.gain < 0 ? `Over again today, mult ${gainStr(cur.gain)}.` : ''}` : `${cur.saved ? `After it broke you spent nothing more outside the allowance: stop-loss +${cur.gain}.` : ''}Back at midnight.`}`) : '';
-  const stopLoss = c.weekly ? '' : Math.floor(c.plus / 2) ? `Spend nothing more outside the allowance today and get half the multiplier back tonight (+${Math.floor(c.plus / 2)}).` : 'This card is only +1; it can’t be earned back once broken.';
+  const stopLoss = c.penalty && !c.weekly ? 'No stop-loss, and glue can’t fix it: it costs 2 multiplier tonight.' : c.weekly ? '' : Math.floor(c.plus / 2) ? `Spend nothing more outside the allowance today and get half the multiplier back tonight (+${Math.floor(c.plus / 2)}).` : 'This card is only +1; it can’t be earned back once broken.';
   const core = coreOf(no), notUnlocked = !S.unlocked.includes(no) && !S.grad.includes(no) && c.unlock;
   const grad = c.noGrad ? `${log ? `Used for ${log.weeks} weeks, held ${log.held}/${log.days} days. ` : ''}Log one entry and it’s held; it never graduates.` : S.grad.includes(no) ? 'Already graduated: base mult +1.' : `Hold 6/7 days for ${GRAD_WEEKS} weeks to graduate: base mult +1 for good.`;
   const prog = !c.noGrad && !S.grad.includes(no) ? `<span class="rprog">${Array.from({ length: GRAD_WEEKS }, (_, q) => `<i class="${log && q < (log.streak || 0) ? 'on' : ''}"></i>`).join('')}<em>${log ? log.streak || 0 : 0}/${GRAD_WEEKS}</em></span>` : '';
