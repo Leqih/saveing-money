@@ -567,6 +567,13 @@ button.hcard:active > div { transform: translateY(2px); }
 .seg { display: flex; gap: 4px; padding: 4px; border-radius: 16px; background: #F0F0F4; }
 .seg > button { flex: 1 1 0; height: 38px; border: 0; border-radius: 12px; background: transparent; font-size: 14px; font-weight: 900; color: var(--mute); }
 .seg > button[aria-selected="true"] { background: #FFF; color: var(--ink); box-shadow: 0 2px 0 #D4D4DB; }
+.bk-steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; counter-reset: b; }
+.bk-steps li { position: relative; padding: 12px 14px 12px 52px; border-radius: 18px; background: #F3F3F6; display: flex; flex-direction: column; gap: 2px; counter-increment: b; }
+.bk-steps li::before { content: counter(b); position: absolute; left: 14px; top: 12px; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: var(--lime); display: flex; align-items: center; justify-content: center; font-family: var(--f-px); font-size: 14px; }
+.bk-steps b { font-size: 14px; font-weight: 900; } .bk-steps span { font-size: 12px; color: var(--sub); line-height: 1.45; }
+.bk-done { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 56px 12px; text-align: center; } .bk-done i { width: 56px; height: 56px; border-radius: 50%; background: var(--lime); box-shadow: 0 5px 0 #9DB000; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 28px; font-weight: 900; } .bk-done p { margin: 0; font-size: 14px; color: var(--sub); line-height: 1.5; }
+.bk-row { flex-wrap: wrap; } .bk-row .imp-main { flex: 1 1 120px; } .bk-btns { flex-basis: 100%; display: flex; gap: 8px; justify-content: flex-end; padding-top: 2px; }
+.bk-br { align-self: flex-start; font-style: normal; font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 8px; background: var(--pink); color: #FFF; }
 .imp-busy { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 80px 0; text-align: center; } .imp-busy i { width: 44px; height: 44px; border-radius: 50%; border: 5px solid #E4E4EA; border-top-color: var(--cobalt); animation: spin 0.8s linear infinite; } .imp-busy small { color: var(--sub); font-size: 12px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .imp-banks { display: flex; flex-direction: column; gap: 8px; }
@@ -1983,7 +1990,7 @@ function flowHTML(tabs) {
     .map(([id, name, v]) => `<button class="lg-chip ${f === id ? 'on' : ''}" data-flowcat="${id}" aria-pressed="${f === id}">${id === 'all' ? '' : `<i style="background:${CAT_COLOR[id] || '#D4D4DB'}"></i>`}${name}<b>$${v}</b></button>`).join('');
   const row = it => {
     const x = it.x, ess = !!cat(x.cat).ess;
-    const tags = [ess ? 'Essential' : '', x.night ? 'after 10 pm' : '', x.fromWish ? 'waited 24 hours' : '', it.wish ? 'Wish list · asked tomorrow' : ''].filter(Boolean).join(' · ');
+    const tags = [ess ? 'Essential' : '', x.caught ? 'caught by bank' : '', x.night ? 'after 10 pm' : '', x.fromWish ? 'waited 24 hours' : '', it.wish ? 'Wish list · asked tomorrow' : ''].filter(Boolean).join(' · ');
     const sub = [x.note ? cat(x.cat).name : '', tags].filter(Boolean).join(' · ');
     const inner = `${catBadge(x.cat)}<span class="lg-main"><b>${x.note ? esc(x.note) : cat(x.cat).name}</b>${sub ? `<small>${sub}</small>` : ''}${it.breaks ? `<em>Broke ${it.breaks.join(', ')}</em>` : ''}</span><span class="lg-amt ${it.breaks ? 'hit' : ''} ${it.wish ? 'wished' : ''}">${it.wish ? '' : '−'}$${x.amt}</span>`;
     return it.edit != null ? `<button class="lg-row" data-edit="${it.edit}" aria-label="${entryName(x)} ${x.amt} dollars, tap to edit">${inner}</button>` : `<div class="lg-row">${inner}</div>`;
@@ -2004,7 +2011,7 @@ function flowHTML(tabs) {
     <div class="lg-chips">${chips}</div>
     ${groups || '<p class="note">No spending in this category yet.</p>'}
     <p class="note">Tap today’s entries to edit or delete; tap a date to see that day’s receipt.</p>
-    <button class="linkbtn" data-act="import-log">Import from your bank ›</button>`;
+    <button class="linkbtn" data-act="bank-link">${S.bank ? `Bank: ${S.bank.name} · honest streak ${S.honest || 0}` : 'Connect a bank to catch forgotten purchases ›'}</button>`;
 }
 
 // bill: calendar month with keycap day cells (ToyBill) and where it went (ToyCats); always real money
@@ -2897,6 +2904,8 @@ function renderSettings() {
     <div class="set-row"><div><b>Weekly allowance</b><small id="setup-formula">${w >= 50 ? setupFormula(s) : 'Weekly allowance must be at least $50'}</small></div><b class="px" id="setup-week" style="font-size:20px">${money(w)}</b></div>
     ${field('income', 'Monthly income', '')}${field('fixed', 'Fixed costs', 'Rent, phone, subscriptions')}${field('save', 'Monthly savings', 'Save first, spend later')}
     <div class="set-row"><div><b>Essentials allowance</b><small>Meals and commuting within this amount a day don’t count</small></div><div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:44px;text-align:center">$${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div></div>
+    <h2>Bank</h2>
+    ${S.bank ? `<div class="set-row"><div><b>${esc(S.bank.name)}</b><small>Checks your log every night · honest streak ${S.honest || 0}</small></div><button class="mini" data-act="bank-off">Disconnect</button></div>` : `<div class="set-row"><div><b>Connect a bank</b><small>It catches purchases you forget to log. You still log everything yourself.</small></div><button class="mini" data-act="bank-link">Connect</button></div>`}
     <h2>Reminders</h2>
     ${sw('evening', 'Evening reminder to end the day', 'Also shows a “Done logging?” card on the home screen')}
     ${p.evening ? `<div class="set-row"><div><b>Reminder time</b><small>Send a notification at that time</small></div><div class="seg3">${[20.5, 21.5, 22].map(c => `<button data-evat="${c}" aria-pressed="${p.eveningAt === c}">${fmtClock(c)}</button>`).join('')}</div></div>` : ''}
@@ -2954,7 +2963,7 @@ function renderImport() {
   const I = IMP, tabs = [['bank', 'Connect bank'], ['paste', 'Paste CSV']];
   const rows = I.rows || [], on = rows.filter(r => r.on), total = on.reduce((a, r) => a + r.amt, 0);
   const body = I.busy ? `<div class="imp-busy"><i></i><b>Connecting to ${esc(I.bank)}…</b><small>Reading the last few days of transactions</small></div>`
-    : rows.length ? `<p class="note left" style="margin:0">${I.src === 'bank' ? 'Sample data from a demo account. ' : ''}We guessed a category for each purchase. Tap one to change it, or untick what you don’t want.</p>
+    : rows.length ? `<p class="note left" style="margin:0">${I.src === 'bank' ? 'Sample data from a demo account. ' : ''}Used only to guess your habits. Nothing is logged. Tap a category to change it, or untick what you don’t want.</p>
       <div class="imp-list">${rows.map((r, i) => `<div class="imp-row ${r.on ? '' : 'off'}">
         <button class="imp-chk" data-impi="${i}" aria-pressed="${r.on}" aria-label="Include ${esc(r.desc)}"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3"/></svg></button>
         ${catBadge(r.cat)}
@@ -2965,11 +2974,44 @@ function renderImport() {
       <div class="actions"><button class="cap" data-act="imp-sample"><div class="top">Try a sample</div></button><button class="go" data-act="imp-parse">Read it</button></div>`
     : `<p class="note left" style="margin:0">Pick your bank. In the real app this is a secure link through your bank; here it loads a demo account.</p>
       <div class="imp-banks">${['Chase', 'Bank of America', 'Wells Fargo', 'Capital One', 'Apple Card'].map(b => `<button class="imp-bank" data-act="imp-bank" data-bank="${b}"><i>${b[0]}</i><b>${b}</b><span aria-hidden="true">›</span></button>`).join('')}</div>`;
-  const cta = rows.length && !I.busy ? `<button class="go" data-act="imp-add" ${on.length ? '' : 'disabled'}>${I.mode === 'habits' ? 'Use these to find my habits' : `Add ${on.length} to today · $${total}`}</button>` : '';
+  const cta = rows.length && !I.busy ? `<button class="go" data-act="imp-add" ${on.length ? '' : 'disabled'}>Use these to find my habits</button>` : '';
   sheet('Import', `
     <div class="bar-top"><h1>Import</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     ${rows.length || I.busy ? '' : `<div class="seg" role="tablist" aria-label="Source">${tabs.map(([k, n]) => `<button role="tab" aria-selected="${I.src === k}" data-act="imp-tab" data-src="${k}">${n}</button>`).join('')}</div>`}
     ${body}${cta}`);
+}
+
+/* ---------- the bank is the referee: you still log every purchase, the bank checks the night ---------- */
+const FEED_POOL = [['Starbucks #12345', 6], ['DoorDash*Chipotle', 32], ['Uber *Trip', 18], ['Amazon.com*2K4LM', 42], ['Dunkin’ #3321', 4], ['Whole Foods Market', 62], ['MTA*NYCT PAYGO', 3], ['Lyft *Ride', 15]];
+const sampleFeed = () => FEED_POOL.slice().sort(() => Math.random() - 0.5).slice(0, 4).map(([desc, amt], i) => ({ id: i, desc, amt, cat: guessCat(desc), state: 'open' }));
+// a purchase you logged yourself matches the bank's by amount (within a dollar); anything left over was forgotten
+const loggedAs = tx => S.today.some(e => !e.caught && Math.abs(e.amt - tx.amt) <= 1);
+const bankCaught = () => S.bank ? S.bank.feed.filter(tx => tx.state === 'open' && !loggedAs(tx)) : [];
+let BNK = null;
+function renderBankLink() {
+  const B = BNK;
+  const body = B.step === 'busy' ? `<div class="imp-busy"><i></i><b>Connecting to ${esc(B.bank)}…</b><small>Read-only link</small></div>`
+    : B.step === 'done' ? `<div class="bk-done"><i>✓</i><b>${esc(B.bank)} is connected</b><p>Keep logging as you go. Tonight, before the cards are scored, we check your log against the bank.</p></div>`
+    : `<ol class="bk-steps">
+        <li><b>You still play every purchase.</b><span>Log it yourself and see what breaks before you buy. That’s the game.</span></li>
+        <li><b>The bank checks the night.</b><span>Read-only: date, merchant and amount. We can’t move money, and you can disconnect any time.</span></li>
+        <li><b>Forgot one? You’ll catch it.</b><span>Before tonight is scored you add what you missed. Logging before the bank shows it keeps your honest streak: 5 days earns ★.</span></li>
+      </ol>
+      <h2>Choose your bank <small>Demo account, no real login</small></h2>
+      <div class="imp-banks">${['Chase', 'Bank of America', 'Wells Fargo', 'Capital One', 'Apple Card'].map(b => `<button class="imp-bank" data-act="bank-pick" data-bank="${b}"><i>${b[0]}</i><b>${b}</b><span aria-hidden="true">›</span></button>`).join('')}</div>`;
+  sheet('Bank', `
+    <div class="bar-top"><h1>${B.step === 'done' ? 'Connected' : 'Connect a bank'}</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
+    ${body}${B.step === 'done' ? '<button class="go" data-act="close">Got it</button>' : ''}`);
+}
+// before the night is scored: purchases the bank saw that you never logged
+function renderBankCheck() {
+  const rows = bankCaught(), name = S.bank.name;
+  const breaks = tx => { const before = evaluate(S.today), after = evaluate([...S.today, { cat: tx.cat, amt: tx.amt }]); return after.cards.filter((x, k) => x.state === 'broken' && before.cards[k].state !== 'broken').map(x => CARDS[x.no].name); };
+  sheet('Bank check', `
+    <div class="bar-top"><h1>Bank check</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
+    ${rows.length ? `<p class="note left" style="margin:0">${esc(name)} shows ${rows.length} purchase${rows.length > 1 ? 's' : ''} you didn’t log. Add what’s yours so tonight’s score is true; skip what isn’t.</p>` : '<div class="bk-done"><i>✓</i><b>All caught up</b><p>Everything the bank saw is in your log.</p></div>'}
+    <div class="imp-list">${rows.map(tx => { const br = breaks(tx); return `<div class="imp-row bk-row">${catBadge(tx.cat)}<span class="imp-main"><b>${esc(tx.desc)}</b><small>${cat(tx.cat).name}</small>${br.length ? `<em class="bk-br">Breaks ${br.join(', ')}</em>` : ''}</span><span class="px imp-amt">$${tx.amt}</span><span class="bk-btns"><button class="mini on" data-act="bank-add" data-id="${tx.id}">Add</button><button class="mini" data-act="bank-no" data-id="${tx.id}">Not mine</button></span></div>`; }).join('')}</div>
+    <button class="go" data-act="bank-continue" ${rows.length ? 'disabled' : ''}>${rows.length ? `${rows.length} left to check` : 'Continue to tonight'}</button>`);
 }
 
 /* ---------- monthly review ---------- */
@@ -3307,6 +3349,12 @@ function renderShop() {
 function endDay() {
   const h = dayRecord();
   S.history.push(h);
+  // honest streak: a night with nothing the bank had to catch; five in a row earns a star
+  if (S.bank) {
+    const caught = S.today.some(e => e.caught); S.honest = caught ? 0 : (S.honest || 0) + 1;
+    S.bank.feed = sampleFeed();
+    if (!caught && S.honest % 5 === 0) { S.stars += 1; S.starsTotal += 1; setTimeout(() => toast('5 honest days in a row · +1 ★'), 600); }
+  }
   const owed = Math.max(0, h.extra + S.debt - dailyBudget());
   S.debt = Math.min(debtCap(), owed);
   // whatever tomorrow can't absorb raises this week's target: every dollars still has to be won back by saving
@@ -3365,7 +3413,16 @@ app.addEventListener('click', e => {
   }
   if (t.dataset.quota) { essQuota = Math.min(100, Math.max(0, essQuota + +t.dataset.quota)); replaceSheet(top, top.getAttribute('aria-label') === 'Settings' ? renderSettings : renderSetup); return; }
   if (act === 'setup-skip') { S.base = BASE; swapSheet(top, () => { renderTable(true); app.appendChild(top); renderWeak(); }); return; }
-  if (act === 'import' || act === 'import-log') { IMP = { mode: act === 'import' ? 'habits' : 'log', src: 'bank', rows: null, busy: false }; renderImport(); return; }
+  if (act === 'import') { IMP = { mode: 'habits', src: 'bank', rows: null, busy: false }; renderImport(); return; }
+  if (act === 'bank-link') { BNK = { step: 'intro' }; renderBankLink(); return; }
+  if (act === 'bank-pick') { BNK = { step: 'busy', bank: t.dataset.bank }; replaceSheet(top, renderBankLink); setTimeout(() => { S.bank = { name: BNK.bank, feed: sampleFeed() }; S.honest = S.honest || 0; BNK.step = 'done'; const cur = lastSheet(); if (cur && cur.getAttribute('aria-label') === 'Bank') replaceSheet(cur, renderBankLink); }, reducedMotion() ? 0 : 1300); return; }
+  if (act === 'bank-off') { S.bank = null; replaceSheet(top, renderSettings); toast('Bank disconnected'); return; }
+  if (act === 'bank-add' || act === 'bank-no') {
+    const tx = S.bank.feed.find(x => x.id === +t.dataset.id);
+    if (act === 'bank-add') { tx.state = 'added'; S.today.push({ cat: tx.cat, amt: tx.amt, note: tx.desc.slice(0, 12), caught: true }); } else tx.state = 'dismissed';
+    replaceSheet(top, renderBankCheck); return;
+  }
+  if (act === 'bank-continue') { swapSheet(top, renderEnd); return; }
   if (act === 'imp-tab') { IMP.src = t.dataset.src; replaceSheet(top, renderImport); return; }
   if (act === 'imp-bank') { IMP.busy = true; IMP.bank = t.dataset.bank; replaceSheet(top, renderImport); setTimeout(() => { IMP.busy = false; IMP.rows = parseTx(SAMPLE_BANK); const cur = lastSheet(); if (cur && cur.getAttribute('aria-label') === 'Import') replaceSheet(cur, renderImport); }, reducedMotion() ? 0 : 1300); return; }
   if (act === 'imp-sample') { IMP.rows = parseTx(SAMPLE_BANK); replaceSheet(top, renderImport); return; }
@@ -3373,13 +3430,8 @@ app.addEventListener('click', e => {
   if (t.dataset.impi != null) { const r = IMP.rows[+t.dataset.impi]; r.on = !r.on; replaceSheet(top, renderImport); return; }
   if (act === 'imp-add') {
     const picked = IMP.rows.filter(r => r.on);
-    if (IMP.mode === 'habits') {
-      const found = new Set(picked.map(r => r.cat)); S.weak = WEAK.filter(w => w.id !== 'night' && w.id !== 'weekend' && found.has(w.id)).map(w => w.id);
-      closeSheet(top, () => { const w = app.querySelector('.sheet[aria-label="Weak spots"]'); if (w) replaceSheet(w, renderWeak); toast(S.weak.length ? `Found ${S.weak.length} spending habit${S.weak.length > 1 ? 's' : ''} to guard` : 'No usual suspects in there, nice'); });
-    } else {
-      picked.forEach(r => S.today.push({ cat: r.cat, amt: r.amt, note: r.desc.slice(0, 12) }));
-      closeSheet(top, () => { renderTable(); toast(`Added ${picked.length} to today`); });
-    }
+    const found = new Set(picked.map(r => r.cat)); S.weak = WEAK.filter(w => w.id !== 'night' && w.id !== 'weekend' && found.has(w.id)).map(w => w.id);
+    closeSheet(top, () => { const w = app.querySelector('.sheet[aria-label="Weak spots"]'); if (w) replaceSheet(w, renderWeak); toast(S.weak.length ? `Found ${S.weak.length} spending habit${S.weak.length > 1 ? 's' : ''} to guard` : 'No usual suspects in there, nice'); });
     return;
   }
   if (act === 'trend') { toast('The trends page isn’t ready; see the calendar and categories for now'); return; }
@@ -3494,7 +3546,7 @@ app.addEventListener('click', e => {
   if (act === 'wish') { S.wish.push({ cat: logCat(), amt: parseInt(draft.amt, 10), note: draft.note }); renderTable(); toast('Moved to the wish list; we’ll ask again tomorrow · no card broke'); return; }
   if (act === 'wish-buy') { const x = S.revisit.shift(); const before = evaluate(S.today); S.today.push({ ...x, night: false, fromWish: true }); renderTable(); verdict(before, evaluate(S.today)); return; }
   if (act === 'wish-skip') { const x = S.revisit.shift(); renderTable(); toast(`saved $${x.amt}`); return; }
-  if (act === 'end') { if (!S.held.length) { toast('Draw this week’s cards first'); return; } renderEnd(); return; }
+  if (act === 'end') { if (!S.held.length) { toast('Draw this week’s cards first'); return; } if (bankCaught().length) renderBankCheck(); else renderEnd(); return; }
   if (act === 'end-ok') { t.disabled = true; playStage(top); return; }
   if (act === 'play-next') { t.disabled = true; endDay(); return; }
   if (act === 'unlogged-yes' || act === 'unlogged-no') {
