@@ -422,7 +422,8 @@ button.cv-day:active { transform: translateY(2px); }
 .cv-icon { position: relative; width: 72px; height: 72px; border-radius: 18px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), inset 0 -6px 0 rgba(0,0,0,0.14), 0 6px 10px -4px rgba(20,20,30,0.25); }
 button.cv-cell:active .cv-icon { transform: translateY(2px); }
 .cv-name { font-size: 12px; font-weight: 900; text-align: center; }
-.cv-lock { background-color: #EFEFF2; background-image: linear-gradient(45deg, #DCDCE2 25%, transparent 25%, transparent 75%, #DCDCE2 75%), linear-gradient(45deg, #DCDCE2 25%, transparent 25%, transparent 75%, #DCDCE2 75%); background-size: 12px 12px; background-position: 0 0, 6px 6px; box-shadow: none; }
+.cv-lock { background: #E3E1D9; box-shadow: inset 0 2px 0 rgba(255,255,255,0.45), inset 0 -6px 0 rgba(0,0,0,0.08); }
+.cv-star { position: absolute; right: -4px; bottom: -4px; padding: 2px 6px; border-radius: 8px; background: #8A8A92; color: #fff; font-size: 11px; }
 .cv-grad { position: absolute; right: -8px; top: -8px; padding: 1px 6px; font-family: var(--f-px); font-size: 11px; color: #2F8A00; white-space: nowrap; background-color: #C9FF4A; background-image: linear-gradient(45deg, #A8F000 25%, transparent 25%, transparent 75%, #A8F000 75%), linear-gradient(45deg, #A8F000 25%, transparent 25%, transparent 75%, #A8F000 75%); background-size: 8px 8px; background-position: 0 0, 4px 4px; transform: rotate(8deg); }
 .cv-own { position: absolute; left: -4px; bottom: -4px; width: 20px; height: 20px; border-radius: 50%; background: #111; border: 2px solid #FFF; display: flex; align-items: center; justify-content: center; }
 .cv-pill { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 12px; background: #FFF; border: 2px solid #E2E2E8; font-family: var(--f-px); font-size: 14px; color: #8A8A92; }
@@ -2211,7 +2212,7 @@ function deckHTML() {
     const own = log ? '<span class="cv-own"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 5l2 2 4-4" stroke="#FFF" stroke-width="1.8" fill="none"/></svg></span>' : '';
     return isOpen
       ? `<button class="cv-cell" data-info="${x.no}" aria-label="${x.name}, +${x.plus} Mult${log ? `, held ${log.held}/${log.days} days` : ''}"><div class="cv-icon" style="background:${tintOf(x.no)}">${artIcon(x.no, 54)}${badge}${own}</div><span class="cv-name">${x.name} <span class="px" style="font-weight:400">+${x.plus}</span></span></button>`
-      : `<button class="cv-cell" data-info="${x.no}" aria-label="${x.name}, unlocks at ${x.unlock} stars"><div class="cv-icon cv-lock"><span class="px" style="font-size:16px;color:#8A8A92">★${x.unlock}</span></div><span class="cv-name" style="color:#8A8A92">${x.name}</span></button>`;
+      : `<button class="cv-cell" data-info="${x.no}" aria-label="${x.name}, unlocks at ${x.unlock} stars"><div class="cv-icon cv-lock"><svg width="54" height="50" viewBox="0 0 240 224" aria-hidden="true">${ILL[x.no](palOf(coreOf(x.no), true))}</svg><span class="cv-star px">★${x.unlock}</span></div><span class="cv-name" style="color:#8A8A92">${x.name}</span></button>`;
   }).join('');
   const last = S.lastResult;
   const banner = last && last.grads.length
