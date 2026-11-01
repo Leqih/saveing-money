@@ -34,7 +34,7 @@ const CARDS = {
   '08': { no: '08', name: 'Small Change', plus: 1, diff: 1, unlock: 5, clash: ['05'], cond: 'No single extra purchase over $25', eg: 'Several small purchases are fine, but one big one breaks it.',
     broken: d => d.maxExtra > 25, why: d => `One purchase of $${d.maxExtra}`, near: d => d.maxExtra > 15 && d.maxExtra <= 25 ? `Your biggest buy today is $${d.maxExtra}; anything over $25 breaks Small Change` : null },
   '09': { no: '09', name: 'Even Keel', plus: 1, diff: 1, unlock: 7, clash: ['05'], cond: 'Spend less than half your daily allowance on extras', eg: 'On a $50 day, that’s $25 or less on extras. Go over and it breaks for the day.',
-    broken: d => d.extra > dailyBudget() / 2, why: d => `Extras today: $${d.extra} (half is $${Math.round(dailyBudget() / 2)})`, near: d => d.extra > dailyBudget() * 0.35 && d.extra <= dailyBudget() / 2 ? `Extras today: $${d.extra}, past $${Math.round(dailyBudget() / 2)} Even Keel breaks` : null },
+    broken: d => d.extra > d.allowance / 2, why: d => `Extras today: $${d.extra} (half is $${Math.round(d.allowance / 2)})`, near: d => d.extra > d.allowance * 0.35 && d.extra <= d.allowance / 2 ? `Extras today: $${d.extra}, past $${Math.round(d.allowance / 2)} Even Keel breaks` : null },
   '11': { no: '11', name: 'Window Shopper', plus: 1, diff: 1, unlock: 8, clash: ['05'], cond: 'Online orders under $30 today', eg: 'Browse all you like, but a $30+ online order breaks it. Pairs well with the wish list.',
     broken: d => d.sum('online') > 30, why: d => `Online today: $${d.sum('online')}`, near: d => d.sum('online') > 20 && d.sum('online') <= 30 ? `Online today already $${d.sum('online')}; over $30 breaks Window Shopper` : null },
   '12': { no: '12', name: 'Two-Cup Week', plus: 2, diff: 2, weekly: true, unlock: 10, clash: ['03'], cond: 'No more than 2 coffee or boba runs a week', eg: 'The 3rd cup breaks it until Sunday, and each cup after that costs another −1 mult that day. A stricter Coffee Quota.',
@@ -70,9 +70,6 @@ const clashes = (a, b) => (CARDS[a].clash || []).includes(b) || (CARDS[b].clash 
 const clashIn = (no, sel) => sel.find(x => x !== no && clashes(no, x));
 const clashNames = no => Object.keys(CARDS).filter(x => clashes(no, x)).map(x => CARDS[x].name);
 const BASE = 350;
-// slots can grow to four in the shop
-// eight cards are dealt every week (or the whole pool while fewer are unlocked); you keep as many as you have slots
-const HOLDN = () => S.slots, DEALN = () => Math.max(S.slots, Math.min(8, S.unlocked.length));
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CATS = [
@@ -87,33 +84,37 @@ const overOf = list => Math.max(0, essOf(list) - essQuota);
 const extraOf = list => list.filter(x => !cat(x.cat).ess).reduce((a, x) => a + x.amt, 0) + overOf(list);
 const teaOf = list => list.filter(x => x.cat === 'tea').length;
 
-function facts(list, teaBefore, assumeLogged, weekBefore = 0, dayIdx = S.day) {
-  const extra = extraOf(list);
+/* scoring is pure: a day's entries plus a context object in, the verdict out. Nothing here reads the game state S;
+   dayContext() in state.js builds the context from it, and tests/rules.test.js builds its own.
+   ctx: held (card numbers), daily (allowance left today), allowance (the full daily allowance), baseMult,
+        teaBefore (cups earlier this week), weekBefore (extras earlier this week), weekCap (half the week's money),
+        dayIdx (0 = Mon), bankLinked, wishToday (wish-list items today), assumeLogged (count the day as logged),
+        glued (the card number glue mended today, or null) */
+function facts(list, ctx) {
+  const extra = extraOf(list), weekBefore = ctx.weekBefore || 0, teaBefore = ctx.teaBefore || 0;
   return {
     // the day of the week (0 = Mon), whether a bank is linked, what the bank had to catch, and wish-list use today
-    dow: dayIdx, weekend: dayIdx >= 5, bankLinked: !!S.bank, caughtCount: list.filter(x => x.caught).length, wishToday: S.wish.length, entryCount: list.length,
-    weekBefore, weekExtra: weekBefore + extra, weekCap: Math.round(moneyWeek() / 2), extraCount: list.filter(x => !cat(x.cat).ess).length,
-    count: assumeLogged ? Math.max(1, list.length) : list.length, extra,
+    dow: ctx.dayIdx, weekend: ctx.dayIdx >= 5, bankLinked: !!ctx.bankLinked, caughtCount: list.filter(x => x.caught).length, wishToday: ctx.wishToday || 0, entryCount: list.length,
+    weekBefore, weekExtra: weekBefore + extra, weekCap: ctx.weekCap, allowance: ctx.allowance, extraCount: list.filter(x => !cat(x.cat).ess).length,
+    count: ctx.assumeLogged ? Math.max(1, list.length) : list.length, extra,
     night: list.some(x => x.night), nightSum: list.filter(x => x.night).reduce((a, x) => a + x.amt, 0),
     teaBefore, weekTea: teaBefore + teaOf(list), teaToday: teaOf(list), maxExtra: Math.max(0, ...list.filter(x => !cat(x.cat).ess).map(x => x.amt)), directOnline: list.some(x => x.cat === 'online' && !x.fromWish),
     has: id => list.some(x => x.cat === id), sum: id => list.filter(x => x.cat === id).reduce((a, x) => a + x.amt, 0)
   };
 }
-// weekBefore: money spent outside the allowance earlier this week, for cards that look at the whole week
-const weekExtraSoFar = () => weekHist().reduce((a, h) => a + h.extra, 0);
-function evaluate(list, held = S.held, teaBefore = S.teaWeek, assumeLogged = false, daily = todayBudget(), weekBefore = weekExtraSoFar(), dayIdx = S.day) {
-  const d = facts(list, teaBefore, assumeLogged, weekBefore, dayIdx);
-  const cards = held.map(no => {
+function scoreDay(list, ctx) {
+  const d = facts(list, ctx);
+  const cards = ctx.held.map(no => {
     const c = CARDS[no];
     let state = c.pending && c.pending(d) ? 'pending' : c.broken && c.broken(d) ? 'broken' : 'on';
     // glue from the shop mends one cracked card for the rest of today
-    if (state === 'broken' && !c.noGlue && held === S.held && S.glued && S.glued.week === S.week && S.glued.day === S.day && S.glued.no === no) state = 'on';
+    if (state === 'broken' && !c.noGlue && ctx.glued === no) state = 'on';
     // gain is what the card adds to today's multiplier: its +n while it holds, half back (stop-loss) when a daily card
     // cracked and nothing outside the allowance was spent after it, or a minus for a weekly card overrun again today
     let gain = state === 'on' ? c.plus : 0, saved = false;
-    if (state === 'broken' && c.penalty) gain = -c.penalty(d);
+    if (state === 'broken' && c.penalty) { const p = c.penalty(d); gain = p ? -p : 0; }
     else if (state === 'broken' && Math.floor(c.plus / 2) > 0) {
-      const at = list.findIndex((_, i) => c.broken(facts(list.slice(0, i + 1), teaBefore, assumeLogged, weekBefore)));
+      const at = list.findIndex((_, i) => c.broken(facts(list.slice(0, i + 1), ctx)));
       saved = at >= 0 && extraOf(list) === extraOf(list.slice(0, at + 1));
       if (saved) gain = Math.floor(c.plus / 2);
     }
@@ -121,10 +122,25 @@ function evaluate(list, held = S.held, teaBefore = S.teaWeek, assumeLogged = fal
   });
   // a chain card is worth its +n for every other card that holds today
   cards.forEach(x => { const c = CARDS[x.no]; if (c.chain && x.state === 'on') x.gain = c.plus * cards.filter(y => y !== x && y.state === 'on').length; });
-  const mult = Math.max(1, S.baseMult + cards.reduce((a, x) => a + x.gain, 0));
-  const base = Math.max(0, daily - d.extra);
-  return { d, cards, mult, base, daily, left: daily - d.extra, score: base * mult };
+  const mult = Math.max(1, ctx.baseMult + cards.reduce((a, x) => a + x.gain, 0));
+  const base = Math.max(0, ctx.daily - d.extra);
+  return { d, cards, mult, base, daily: ctx.daily, left: ctx.daily - d.extra, score: base * mult };
 }
+// money spent past today's allowance comes out of tomorrow's, but tomorrow gives up at most half of it;
+// whatever is left over raises the week's target instead (OVERFLOW_PTS a dollar)
+function carryDebt(extra, debt, daily) {
+  const owed = Math.max(0, extra + debt - daily), next = Math.min(Math.round(daily / 2), owed);
+  return { debt: next, overflow: owed - next };
+}
+const OVERFLOW_PTS = 3;
+// calibrated by simulating spenders on a $50/day allowance: someone spending ~80% of it on extras passes about half
+// the time, ~45% splits between two and three stars, ~20% always gets three, and overspending never passes.
+// Each graduated card (baseMult above 1) and a fourth slot raise the bar a quarter each
+function targetFor({ daily, days, stakeK, baseMult, slots, overflow }) {
+  const grad = 1 + 0.25 * (baseMult - 1), slot = slots > 3 ? 1.25 : 1;
+  return Math.round((daily * days * 1.5 * stakeK * grad * slot + (overflow || 0) * OVERFLOW_PTS) / 10) * 10;
+}
+const starsFrom = (score, target) => score >= target * 2.6 ? 3 : score >= target * 1.7 ? 2 : score >= target ? 1 : 0;
 // days saved before stop-loss existed carry no gain, so fall back to all-or-nothing
 const gainOf = c => c.gain ?? (c.state === 'on' ? CARDS[c.no].plus : 0);
 const gainStr = g => g > 0 ? `+${g}` : g < 0 ? `−${-g}` : '—';
@@ -132,26 +148,3 @@ const brokenLabel = c => c.saved ? `Stop-loss +${c.gain}` : c.gain < 0 ? `Broken
 // cracked cards that lost multiplier without a new crack: the stop-loss given up, or one more cup past the quota
 const slipped = (before, after) => after.cards.filter((x, k) => x.state === 'broken' && before.cards[k].state === 'broken' && x.gain < before.cards[k].gain);
 const slipWhy = x => x.gain < 0 ? `${CARDS[x.no].name} now costs ${gainStr(x.gain)}` : `${CARDS[x.no].name}’s stop-loss is gone`;
-// which entry first cracked each card, so lists can point at the culprit
-function breakers(list, held = S.held, teaBefore = S.teaWeek, weekBefore = weekExtraSoFar()) {
-  const out = {};
-  let prev = evaluate([], held, teaBefore, true, undefined, weekBefore);
-  list.forEach((x, i) => {
-    const now = evaluate(list.slice(0, i + 1), held, teaBefore, true, undefined, weekBefore);
-    now.cards.forEach((c, k) => { if (c.state === 'broken' && prev.cards[k].state !== 'broken') (out[i] = out[i] || []).push(CARDS[c.no].name); });
-    prev = now;
-  });
-  return out;
-}
-// run a week of receipts through a set of held cards: total score and how many days each card would have held
-function simulate(held, days, start) {
-  let tea = 0, spent = 0, total = 0;
-  const per = {}; held.forEach(n => { per[n] = 0; });
-  const list = days.slice(start);
-  list.forEach((day, k) => {
-    const ev = evaluate(day, held, tea, true, dailyBudget(), spent, start + k);
-    tea += teaOf(day); spent += ev.d.extra; total += ev.score;
-    ev.cards.forEach(c => { if (c.state === 'on') per[c.no]++; });
-  });
-  return { total, per, days: list.length };
-}

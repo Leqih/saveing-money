@@ -56,19 +56,45 @@ const todayBudget = () => Math.max(0, dailyBudget() - S.debt);
 // tomorrow gives up at most half its allowance, so one blown day can't zero out the rest of the week
 const debtCap = () => Math.round(dailyBudget() / 2);
 const weekDays = () => 7 - S.weekStart;
-// calibrated by simulating spenders on a $50/day allowance: someone spending ~80% of it on extras passes about half
-// the time, ~45% splits between two and three stars, ~20% always gets three, and overspending never passes
 // stakes raise the bar after a pass, the way Balatro moves from white to black stake
 // star: what a pass's stars are multiplied by on this stake (rounded), rather than a flat bonus per stake
 const STAKES = [{ name: 'White Stake', k: 1, star: 1, bg: '#FFFFFF', fg: '#111' }, { name: 'Red Stake', k: 1.25, star: 1.25, bg: '#FF4D6A', fg: '#FFF' }, { name: 'Blue Stake', k: 1.5, star: 1.5, bg: '#2E8BFF', fg: '#FFF' }, { name: 'Black Stake', k: 1.8, star: 2, bg: '#111', fg: '#E4FF1A' }];
-// each graduation adds a permanent +1, so the bar rises a quarter per graduated card to keep the week a challenge
-const gradK = () => 1 + 0.25 * (S.baseMult - 1);
-// a fourth slot adds roughly another card's multiplier every day, so it raises the bar a quarter too
-const slotK = () => S.slots > 3 ? 1.25 : 1;
-// overspending past what tomorrow can absorb raises this week's bar instead (see endDay)
-const OVERFLOW_PTS = 3;
-const weekTarget = () => Math.round((dailyBudget() * weekDays() * 1.5 * STAKES[S.stake].k * gradK() * slotK() + (S.overflow || 0) * OVERFLOW_PTS) / 10) * 10;
+const weekTarget = () => targetFor({ daily: dailyBudget(), days: weekDays(), stakeK: STAKES[S.stake].k, baseMult: S.baseMult, slots: S.slots, overflow: S.overflow });
 const scorePrior = () => weekHist().reduce((a, h) => a + h.score, 0);
 const moneyWeek = () => Math.round(S.base * weekDays() / 7);
 const spentWeek = () => weekHist().reduce((a, h) => a + h.extra, 0) + extraOf(S.today);
-const starsFrom = (score, target) => score >= target * 2.6 ? 3 : score >= target * 1.7 ? 2 : score >= target ? 1 : 0;
+// weekBefore: money spent outside the allowance earlier this week, for cards that look at the whole week
+const weekExtraSoFar = () => weekHist().reduce((a, h) => a + h.extra, 0);
+// the scoring context for today as the game stands; glue only counts for this week's real hand
+function dayContext(held = S.held, teaBefore = S.teaWeek, assumeLogged = false, daily = todayBudget(), weekBefore = weekExtraSoFar(), dayIdx = S.day) {
+  const glued = held === S.held && S.glued && S.glued.week === S.week && S.glued.day === S.day ? S.glued.no : null;
+  return { held, teaBefore, assumeLogged, daily, weekBefore, dayIdx, glued, baseMult: S.baseMult, allowance: dailyBudget(), weekCap: Math.round(moneyWeek() / 2), bankLinked: !!S.bank, wishToday: S.wish.length };
+}
+// the game-aware entry point used everywhere else: same arguments as always, scored by the pure scoreDay
+const evaluate = (list, ...args) => scoreDay(list, dayContext(...args));
+// slots can grow to four in the shop
+// eight cards are dealt every week (or the whole pool while fewer are unlocked); you keep as many as you have slots
+const HOLDN = () => S.slots, DEALN = () => Math.max(S.slots, Math.min(8, S.unlocked.length));
+// which entry first cracked each card, so lists can point at the culprit
+function breakers(list, held = S.held, teaBefore = S.teaWeek, weekBefore = weekExtraSoFar()) {
+  const out = {};
+  let prev = evaluate([], held, teaBefore, true, undefined, weekBefore);
+  list.forEach((x, i) => {
+    const now = evaluate(list.slice(0, i + 1), held, teaBefore, true, undefined, weekBefore);
+    now.cards.forEach((c, k) => { if (c.state === 'broken' && prev.cards[k].state !== 'broken') (out[i] = out[i] || []).push(CARDS[c.no].name); });
+    prev = now;
+  });
+  return out;
+}
+// run a week of receipts through a set of held cards: total score and how many days each card would have held
+function simulate(held, days, start) {
+  let tea = 0, spent = 0, total = 0;
+  const per = {}; held.forEach(n => { per[n] = 0; });
+  const list = days.slice(start);
+  list.forEach((day, k) => {
+    const ev = evaluate(day, held, tea, true, dailyBudget(), spent, start + k);
+    tea += teaOf(day); spent += ev.d.extra; total += ev.score;
+    ev.cards.forEach(c => { if (c.state === 'on') per[c.no]++; });
+  });
+  return { total, per, days: list.length };
+}

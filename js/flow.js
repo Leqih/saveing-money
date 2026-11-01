@@ -13,10 +13,10 @@ function endDay() {
       setTimeout(() => toast(`${S.honest} honest days${glue ? ' · free Glue bottle' : ''}${star ? ' · +1 ★' : ''}`), 600);
     }
   }
-  const owed = Math.max(0, h.extra + S.debt - dailyBudget());
-  S.debt = Math.min(debtCap(), owed);
+  const carry = carryDebt(h.extra, S.debt, dailyBudget());
+  S.debt = carry.debt;
   // whatever tomorrow can't absorb raises this week's target: every dollar still has to be won back by saving
-  h.overflow = owed - S.debt; S.overflow = (S.overflow || 0) + h.overflow;
+  h.overflow = carry.overflow; S.overflow = (S.overflow || 0) + h.overflow;
   S.teaWeek += teaOf(S.today);
   S.revisit = S.wish; S.wish = [];
   S.today = [];

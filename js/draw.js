@@ -248,6 +248,16 @@ function fitDevice() {
   d.style.zoom = String(Math.floor(Math.max(0.55, Math.min(1.12, (innerHeight - 48) / d.offsetHeight)) * 1000) / 1000);
 }
 addEventListener('resize', fitDevice); fitDevice();
+// over the phone the mouse shows as a fingertip (see .touch-dot); it follows the pointer and presses in while the button is down
+{
+  const dot = document.querySelector('.touch-dot'), phone = document.querySelector('.phone');
+  // the translate property, not transform: transform is applied after scale, so pressing would shrink the position too
+  const place = e => { dot.style.translate = `${e.clientX}px ${e.clientY}px`; };
+  phone.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; place(e); dot.style.setProperty('--z', document.querySelector('.device').style.zoom || 1); dot.classList.add('on'); });
+  phone.addEventListener('pointerleave', () => dot.classList.remove('on', 'down'));
+  addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && e.target instanceof Node && phone.contains(e.target)) { place(e); dot.classList.add('down'); } });
+  addEventListener('pointerup', () => dot.classList.remove('down'));
+}
 document.querySelector('.device').addEventListener('click', e => { if (e.target.closest('.dbtn.k')) quickJump(); });
 document.querySelector('.device').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.dbtn.k')) { e.preventDefault(); quickJump(); } });
 app.addEventListener('pointerdown', e => {

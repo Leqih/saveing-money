@@ -1,0 +1,8 @@
+{
+  "name": "penny-round",
+  "private": true,
+  "description": "A card-game take on tracking spending. No build step: open index.html.",
+  "scripts": {
+    "test": "node --test tests/"
+  }
+}
