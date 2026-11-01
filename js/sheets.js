@@ -309,7 +309,13 @@ function shopBody() {
     </div>
     <div class="sglue"><div><b>Glue × ${S.glue}</b><small>Tap a broken card to glue it back, for that day only. Up to 3 bottles.</small></div><button class="cap lime" data-act="glue-buy" ${S.glue < 3 && can(PRICE.glue) ? '' : 'disabled'}><div class="top">★ ${PRICE.glue} Buy one</div></button></div>
     <div class="smine"><span style="font-weight:900;font-size:14px">My slots</span><div style="display:flex;align-items:center">${rings}<span class="px" style="margin-left:12px;font-size:20px">${S.held.length}/${S.slots}</span></div></div>
-    <div class="sbubble"><svg width="100%" height="118" viewBox="0 0 350 118" preserveAspectRatio="none" aria-hidden="true"><path d="M40 6H300a36 36 0 0 1 36 36v20a36 36 0 0 1-36 36H112l-26 16 6-16H40a36 36 0 0 1-36-36V42a36 36 0 0 1 36-36z" fill="#FF9BC4" stroke="#FF3B1F" stroke-width="5" stroke-linejoin="round"/></svg>
-      <div class="sstar">Next week</div>
-      <div class="stext"><b>Week ${S.week + 1} · ${STAKES[S.nextStake].name}</b><span>${S.carry ? `Carry “${CARDS[S.carry].name}”` : 'No carry'}${S.pinned.length ? `, guaranteed: ${S.pinned.map(no => CARDS[no].name).join(', ')}` : ''}; draw ${DEALN()}, keep ${HOLDN()}.</span></div></div>`;
+    <div class="snext">
+      <div class="snext-top"><span class="snext-tag px">Next week</span><span class="chipk" style="background:${STAKES[S.nextStake].bg};color:${STAKES[S.nextStake].fg}">${STAKES[S.nextStake].name}</span></div>
+      <b>Week ${S.week + 1}</b>
+      <div class="snext-rows">
+        <span><small>Carry</small>${S.carry ? `<i style="background:${tintOf(S.carry)}">${artIcon(S.carry, 18)}</i>${CARDS[S.carry].name}` : 'None'}</span>
+        <span><small>Deal</small>Draw ${DEALN()}, keep ${S.slotPending ? 4 : HOLDN()}</span>
+        ${S.pinned.length ? `<span><small>Guaranteed</small>${S.pinned.map(no => CARDS[no].name).join(', ')}</span>` : ''}
+      </div>
+    </div>`;
 }
