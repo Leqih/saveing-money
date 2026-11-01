@@ -1631,7 +1631,7 @@ const CARDS = {
   '16': { no: '16', name: 'One-Shot', plus: 2, diff: 2, unlock: 9, clash: ['05'], cond: 'At most one purchase outside the allowance today', eg: 'A coffee is fine, but a second purchase breaks it. Save up and buy it all at once.',
     broken: d => d.extraCount > 1, why: d => `Extras today: ${d.extraCount} purchases`, near: d => d.extraCount === 1 ? 'That’s one extra purchase already. One more breaks One-Shot' : null },
   '17': { no: '17', name: 'Lunchbox', plus: 1, diff: 1, unlock: 12, cond: 'Meals today under $30', eg: 'A packed lunch or cafeteria meal keeps it going, but a $40 lunch breaks it. Delivery counts as takeout, not meals.',
-    broken: d => d.sum('meal') > 30, why: d => `Meals today: $${d.sum('meal')}`, near: d => d.sum('meal') > 20 && d.sum('meal') <= 30 ? `Meals today already $${d.sum('meal')}, spend $${31 - d.sum('meal')}  more and Lunchbox breaks` : null },
+    broken: d => d.sum('meal') > 30, why: d => `Meals today: $${d.sum('meal')}`, near: d => d.sum('meal') > 20 && d.sum('meal') <= 30 ? `Meals today already $${d.sum('meal')}, spend $${31 - d.sum('meal')} more and Lunchbox breaks` : null },
   '02': { no: '02', name: 'Coffee Break', plus: 1, diff: 1, unlock: 4, clash: ['05'], cond: 'At most one coffee or boba today', eg: 'One latte is fine; a second breaks it for the day. It’s back at midnight.',
     broken: d => d.teaToday > 1, why: d => `${d.teaToday} coffee runs today`, near: d => d.teaToday === 1 ? 'One coffee already today. A second breaks Coffee Break' : null },
   '08': { no: '08', name: 'Small Change', plus: 1, diff: 1, unlock: 5, clash: ['05'], cond: 'No single extra purchase over $25', eg: 'Several small purchases are fine, but one big one breaks it.',
@@ -1734,7 +1734,7 @@ const gainStr = g => g > 0 ? `+${g}` : g < 0 ? `−${-g}` : '—';
 const brokenLabel = c => c.saved ? `Stop-loss +${c.gain}` : c.gain < 0 ? `Broken ${gainStr(c.gain)}` : 'Broken';
 // cracked cards that lost multiplier without a new crack: the stop-loss given up, or one more cup past the quota
 const slipped = (before, after) => after.cards.filter((x, k) => x.state === 'broken' && before.cards[k].state === 'broken' && x.gain < before.cards[k].gain);
-const slipWhy = x => x.gain < 0 ? `${CARDS[x.no].name}another cup` : `${CARDS[x.no].name}stop-loss is gone`;
+const slipWhy = x => x.gain < 0 ? `${CARDS[x.no].name} now costs ${gainStr(x.gain)}` : `${CARDS[x.no].name}’s stop-loss is gone`;
 // which entry first cracked each card, so lists can point at the culprit
 function breakers(list, held = S.held, teaBefore = S.teaWeek, weekBefore = weekExtraSoFar()) {
   const out = {};
@@ -1811,7 +1811,7 @@ const weeklyFrom = s => Math.round((s.income - s.fixed - s.save) / 4.3);
 
 const weekHist = () => S.history.filter(h => h.week === S.week);
 const dailyBudget = () => Math.round(S.base / 7);
-// money spent past today's allowance comes out of tomorrow's, so every dollars still counts after a blown day
+// money spent past today's allowance comes out of tomorrow's, so every dollar still counts after a blown day
 const todayBudget = () => Math.max(0, dailyBudget() - S.debt);
 // tomorrow gives up at most half its allowance, so one blown day can't zero out the rest of the week
 const debtCap = () => Math.round(dailyBudget() / 2);
@@ -1839,6 +1839,9 @@ const money = n => (n < 0 ? '−$' + Math.abs(n) : '$' + n);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const entryName = x => `${cat(x.cat).name}${x.note && x.note !== cat(x.cat).name ? ' · ' + esc(x.note) : ''}`;
 const starStr = n => '★'.repeat(n);
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+// end a line with exactly one stop, whether or not it already has one
+const sentence = s => /[.!?]$/.test(s) ? s : s + '.';
 function toast(msg) { app.querySelectorAll('.toast').forEach(t => t.remove()); const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; app.appendChild(t); setTimeout(() => t.remove(), 2600); }
 // every confirm button sits in the same place as the launch screen's: pinned at the bottom, 24px in from the sides
 function pinFoot(sh) {
@@ -2045,7 +2048,7 @@ app.addEventListener('scroll', e => {
 }, true);
 // replaces the old one-minute guide: tips on the real home screen, the first time it opens
 const COACH = [
-  { sel: '.hold', title: 'Your 3 cards', text: 'Hold a card to earn its multiplier. If it breaks, it’s out until midnight.' },
+  { sel: '.hold', title: 'Your cards', text: 'Hold a card to earn its multiplier. If it breaks, it’s out until midnight.' },
   { sel: '.pf', title: 'Your profile', text: 'Badges, notifications and settings live here.' },
   { sel: '.hero', title: 'Today’s score', text: 'Money left today × multiplier. Spend less and hold more cards.' },
   { sel: '.cv-log', title: 'Log a spend', text: 'See which card an entry would break before you save it.' },
@@ -2220,7 +2223,7 @@ function deckHTML() {
   const dots = open.slice(0, 4).map(x => `<span style="width:34px;height:34px;border-radius:50%;border:4px solid ${coreOf(x.no)};background:${tintOf(x.no)};margin-left:-10px;box-shadow:0 0 0 2px #FFF;display:flex;align-items:center;justify-content:center">${artIcon(x.no, 18)}</span>`).join('');
   const cells = shown.map(x => {
     const isOpen = S.unlocked.includes(x.no) || S.grad.includes(x.no), log = S.cardLog[x.no];
-    const badge = S.grad.includes(x.no) ? '<span class="cv-grad">Graduated</span>' : S.held.includes(x.no) ? '<span class="cv-grad">This week</span>' : log && log.streak && !x.noGrad ?`<span class="cv-grad">Graduated ${log.streak}/${GRAD_WEEKS}</span>` : '';
+    const badge = S.grad.includes(x.no) ? '<span class="cv-grad">Graduated</span>' : S.held.includes(x.no) ? '<span class="cv-grad">This week</span>' : log && log.streak && !x.noGrad ?`<span class="cv-grad">Streak ${log.streak}/${GRAD_WEEKS}</span>` : '';
     const own = log ? '<span class="cv-own"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 5l2 2 4-4" stroke="#FFF" stroke-width="1.8" fill="none"/></svg></span>' : '';
     return isOpen
       ? `<button class="cv-cell" data-info="${x.no}" aria-label="${x.name}, +${x.plus} Mult${log ? `, held ${log.held}/${log.days} days` : ''}"><div class="cv-icon" style="background:${tintOf(x.no)}">${artIcon(x.no, 54)}${badge}${own}</div><span class="cv-name">${x.name} <span class="px" style="font-weight:400">+${x.plus}</span></span></button>`
@@ -2230,7 +2233,7 @@ function deckHTML() {
   const banner = last && last.grads.length
     ? { no: last.grads[0], title: `“${CARDS[last.grads[0]].name}” graduated`, sub: `Held 6/7 days or more for ${GRAD_WEEKS} weeks in a row; this habit is gone.`, tail: `Base multiplier +1 for good; it now starts at ${S.baseMult}, and the target score rises too` }
     : last
-    ? { no: last.best, title: `Last week${last.pass ? 'passed' : 'missed'} · ${last.score} / ${last.target} pts`, sub: last.pass ? `Earned ${starStr(last.stars)}, now ${S.stars} stars total. Best held: “${CARDS[last.best].name}”` : 'No penalty for missing. Pick cards that are easier to hold this week.', tail: last.fresh ? `New card unlocked: ${last.fresh}` : next ? `Just ${Math.max(0, next.unlock - S.stars)} more stars to unlock: ${next.name}` : '' }
+    ? { no: last.best, title: `Last week ${last.pass ? 'passed' : 'missed'} · ${last.score} / ${last.target} pts`, sub: last.pass ? `${last.stars ? `Earned ${starStr(last.stars)}` : 'No stars kept after the reconcile'}, now ${plural(S.stars, 'star')} total. Best held: “${CARDS[last.best].name}”` : 'No penalty for missing. Pick cards that are easier to hold this week.', tail: last.fresh ? `New card unlocked: ${last.fresh}` : next ? `Just ${plural(Math.max(0, next.unlock - S.starsTotal), 'more star')} to unlock: ${next.name}` : '' }
     : next ? { no: next.no, title: `Next unlock: ${next.name}`, sub: next.cond, tail: `Just ${Math.max(0, next.unlock - S.starsTotal)} stars`, have: S.starsTotal, need: next.unlock } : null;
   return `<div style="display:flex;justify-content:space-between;align-items:center">
       <div><h1 style="margin:0;font-weight:900;font-size:28px">Deck</h1><p class="px" style="margin:2px 0 0;font-size:12px;color:#5E5E66">Week ${S.week} · ★ ${S.stars}</p></div>
@@ -2629,7 +2632,7 @@ function renderLog() {
   // the one line that matters, pinned above the save button so it is never scrolled away
   const tone = !amt ? '' : broke.length || slip.length ? 'bad' : 'good';
   const head = !amt ? 'Enter an amount to see if a card breaks'
-    : broke.length ? (broke.length > 2 ? `Breaks ${broke.length} cards` : `Will break: ${broke.join(', ')}`) : slip.length ? (slip.length > 1 ? `Mult drops ${slip.length} ways` : `Mult drops: ${slip[0]}`) : woke.length ? `${woke.join(', ')}will wake ✓` : 'No rule touched ✓';
+    : broke.length ? (broke.length > 2 ? `Breaks ${broke.length} cards` : `Will break: ${broke.join(', ')}`) : slip.length ? (slip.length > 1 ? `Mult drops ${slip.length} ways` : `Mult drops: ${slip[0]}`) : woke.length ? `${woke.join(', ')} will wake ✓` : 'No rule touched ✓';
   const sub = !amt ? `Left to spend today ${money(before.left)} · tonight ${before.score} pts`
     : `Tonight ${before.score} → ${after.score} pts · left ${money(after.left)}`;
   // before an amount is typed nothing can break, so only hint at the wishlist once there is something to save
@@ -2641,13 +2644,14 @@ function renderLog() {
   sheet(editing ? 'Edit entry' : 'Log', `
     <div class="bar-top"><h1>${editing ? 'Edit entry' : 'Log'}</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
     <div class="amount"><b>$${amt}</b><span class="px" style="color:#5E5E66;font-size:12px;text-align:right">${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
+    ${quicks ? `<div class="quick" role="group" aria-label="Favorites">${quicks}</div>` : ''}
     <div class="cats">${cats}</div>
     <div class="field"><input class="in" id="note" maxlength="12" value="${esc(draft.note || '')}" placeholder="What was it? (optional)" aria-label="Note">
       ${draft.cat === 'meal' ? `<button class="mini ${draft.delivery ? 'on' : ''}" data-delivery="${draft.delivery ? 0 : 1}" aria-pressed="${!!draft.delivery}">Delivered</button>` : ''}
       <button class="mini ${draft.night ? 'on' : ''}" data-night="${draft.night ? 0 : 1}" aria-pressed="${!!draft.night}">after 10 pm</button>
       <button class="mini" data-act="savequick">Save favorite</button></div>
     ${draft.adding ? `<div class="newcat">
-      <div class="field"><input class="in" id="newcat" maxlength="5" value="${esc(draft.newName || '')}" placeholder="Name, e.g. Game top-up" aria-label="New category name"><button class="mini" data-act="addcat">Add</button></div>
+      <div class="field"><input class="in" id="newcat" maxlength="16" value="${esc(draft.newName || '')}" placeholder="Name, e.g. Game top-up" aria-label="New category name"><button class="mini" data-act="addcat">Add</button></div>
       <div class="toggle"><button aria-pressed="${!draft.newEss}" data-newess="0">Outside the allowance</button><button aria-pressed="${!!draft.newEss}" data-newess="1">Essential</button></div>
     </div>` : `<div class="pad">${pad}</div>`}
     <div class="logfoot">
@@ -2662,7 +2666,7 @@ function renderLog() {
       </div>`}
     </div>`);
 }
-// hold a favorite for half a second to log it without opening the keypad
+// redraw the log sheet in place after a pick, keeping its scroll
 const refreshLog = () => replaceSheet(lastSheet(), renderLog);
 // a delivered meal is takeout, not a meal: it doesn't hide inside the meal allowance or dodge Takeout Nemesis
 const logCat = () => draft.cat === 'meal' && draft.delivery ? 'takeout' : draft.cat;
@@ -2684,7 +2688,7 @@ function verdict(before, after) {
       <div class="fb-cards">${shown.map(x => `<div class="${broke.length ? 'shake' : 'pop'}">${scaled(CARDS[x.no], 0.5, broke.length ? 'broken' : 'on')}</div>`).join('')}</div>
       <b>${broke.length ? `${shown.map(x => CARDS[x.no].name).join(', ')} broke!` : `${shown.map(x => CARDS[x.no].name).join(', ')} woke up ✓`}</b>
       <div class="fb-sts" aria-label="Mult ×${before.mult} to ×${after.mult}, tonight’s estimate ${before.score} to ${after.score} pts"><span class="st-g"><i>Mult</i><b>×${before.mult}→×${after.mult}</b></span><span class="st-b"><b>${before.score}→${after.score}</b><i>Tonight’s pts</i></span></div>
-      <small>${broke.length ? (after.cards.every(x => x.state !== "on") ? (after.left > 0 ? `All three broke, mult ×${after.mult}. The money left still counts: keep ${money(after.left)} and tonight is ${after.score} pts.` : `All three broke, and today’s money is gone too.`) : shown.some(x => CARDS[x.no].weekly) ? "Weekly cards stay broken until Sunday; every extra cup then costs another −1 mult that day." : shown.some(x => x.saved) ? `Stop-loss: spend nothing more outside the allowance today and the broken card gives back half its multiplier tonight. Back at midnight.` : "Back at midnight. Your other cards can still hold today.") : "The more cards you hold today, the higher the score."}${after.left < 0 ? ` You’re already over by $${-after.left}, taken from tomorrow’s allowance.` : ""}</small>
+      <small>${broke.length ? (after.cards.every(x => x.state !== "on") ? (after.left > 0 ? `Every card broke, mult ×${after.mult}. The money left still counts: keep ${money(after.left)} and tonight is ${after.score} pts.` : `Every card broke, and today’s money is gone too.`) : shown.some(x => CARDS[x.no].weekly) ? "Weekly cards stay broken until Sunday, and going over again costs more multiplier on the day it happens." : shown.some(x => x.saved) ? `Stop-loss: spend nothing more outside the allowance today and the broken card gives back half its multiplier tonight. Back at midnight.` : "Back at midnight. Your other cards can still hold today.") : "The more cards you hold today, the higher the score."}${after.left < 0 ? ` You’re already over by $${-after.left}, taken from tomorrow’s allowance.` : ""}</small>
       <button class="ok" data-act="fb-close">Got it</button>
     </div></div></div>
   </div>`);
@@ -2707,7 +2711,7 @@ function receiptHTML(h, preview) {
     <div class="r"><span>Allowed today</span><span>$${h.daily}</span></div>
     <div class="r"><span>Spent outside the allowance</span><span>$${h.extra}</span></div>
     <div class="r"><span>Money left = base score</span><span>${h.base}</span></div>
-    <hr><div class="r"><span>Mult starts at ${h.baseMult || 1} ${(h.baseMult || 1) > 1 ? ` (graduated ${h.baseMult - 1} )` : ""}</span><span>${h.baseMult || 1}</span></div>${cards}<hr>
+    <hr><div class="r"><span>Mult starts at ${h.baseMult || 1}${(h.baseMult || 1) > 1 ? ` (graduated ${h.baseMult - 1})` : ""}</span><span>${h.baseMult || 1}</span></div>${cards}<hr>
     <div class="tot"><span class="px">${h.base} × ${h.mult}</span><b>${h.score} pts</b></div>
     ${h.extra > h.daily ? `<p class="note left" style="margin:4px 0 0">Over by $${h.extra - h.daily}, tomorrow takes at most $${debtCap()}${h.extra - h.daily > debtCap() ? `; the extra $${h.extra - h.daily - debtCap()} each add to this week’s target +${OVERFLOW_PTS}` : ''}.</p>` : ""}
     ${receiptStickers(h)}
@@ -2802,12 +2806,12 @@ async function playStage(sh) {
   await pause(300);
   if (h.unlogged) {
     line('Nothing logged today', 'Base score starts at 0');
-    line('Tomorrow morning you’ll be asked: if you really spent nothing, the base score is restored; cards add no multiplier', '', 'off');
+    line(`${S.day === 6 ? 'Before the weekly summary' : 'Tomorrow morning'} you’ll be asked: if you really spent nothing, the base score is restored; cards add no multiplier`, '', 'off');
   } else {
     line(`Allowed $${h.daily} · spent outside $${h.extra}`, `Base ${h.base}`);
     await countTo($('pb'), h.base, 600);
     let mult = S.baseMult;
-    if (S.baseMult > 1) line(`Graduated cards start the multiplier at ${S.baseMult} `, `×${S.baseMult}`);
+    if (S.baseMult > 1) line(`Graduated cards start the multiplier at ${S.baseMult}`, `×${S.baseMult}`);
     for (const c of h.cards) {
       const card = CARDS[c.no], el = sh.querySelector(`.sc[data-no="${c.no}"]`);
       await pause(160);
@@ -2844,13 +2848,16 @@ function renderDay(i, week = S.week) {
   const h = S.history.find(x => x.week === week && x.day === i);
   if (!h) return;
   const d = dateOf(week, i);
-  sheet(`${DAYS[i]}Receipt`, `<div class="bar-top"><h1>${MON[d.getMonth()]} ${d.getDate()} · ${DAYS[i]}</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>${receiptHTML(h)}`);
+  sheet(`${DAYS[i]} receipt`, `<div class="bar-top"><h1>${MON[d.getMonth()]} ${d.getDate()} · ${DAYS[i]}</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>${receiptHTML(h)}`);
 }
 function renderRule(no) {
   const c = CARDS[no], log = S.cardLog[no], heldNow = S.held.includes(no);
   const cur = heldNow ? evaluate(S.today).cards.find(x => x.no === no) : null;
   const hasData = S.lastWeek.some(d => d.length), sim = hasData && !heldNow ? simulate([no], S.lastWeek, S.weekStart) : null;
-  const state = cur ? (cur.state === 'on' ? `Still holding today, mult +${c.plus}.${cur.near ? cur.near + '.' : ''}` : cur.state === 'pending' ? 'Still asleep: log one entry today to wake it.' : `Broke today: ${cur.why}.${c.weekly ? `Stays broken until Sunday.${cur.gain < 0 ? `Over again today, mult ${gainStr(cur.gain)}.` : ''}` : `${cur.saved ? `After it broke you spent nothing more outside the allowance: stop-loss +${cur.gain}.` : ''}Back at midnight.`}`) : '';
+  const state = !cur ? '' : (cur.state === 'on' ? [`Still holding today, mult +${c.plus}.`, cur.near && sentence(cur.near)]
+    : cur.state === 'pending' ? ['Still asleep: log one entry today to wake it.']
+    : [sentence(`Broke today: ${cur.why}`), ...(c.weekly ? ['Stays broken until Sunday.', cur.gain < 0 && `Over again today, mult ${gainStr(cur.gain)}.`]
+      : [cur.saved && `After it broke you spent nothing more outside the allowance: stop-loss +${cur.gain}.`, 'Back at midnight.'])]).filter(Boolean).join(' ');
   const stopLoss = c.penalty && !c.weekly ? 'No stop-loss, and glue can’t fix it: it costs 3 multiplier tonight.' : c.weekly ? '' : Math.floor(c.plus / 2) ? `Spend nothing more outside the allowance today and get half the multiplier back tonight (+${Math.floor(c.plus / 2)}).` : 'This card is only +1; it can’t be earned back once broken.';
   const core = coreOf(no), notUnlocked = !S.unlocked.includes(no) && !S.grad.includes(no) && c.unlock;
   const grad = c.noGrad ? `${log ? `Used for ${log.weeks} weeks, held ${log.held}/${log.days} days. ` : ''}Log one entry and it’s held; it never graduates.` : S.grad.includes(no) ? 'Already graduated: base mult +1.' : `Hold 6/7 days for ${GRAD_WEEKS} weeks to graduate: base mult +1 for good.`;
@@ -2874,7 +2881,7 @@ function renderRule(no) {
       <span class="rcook"><b>+${c.plus}</b><small>Mult</small></span>
       <span class="rhint px">TAP TO FLIP</span>
     </div>
-    ${cur && cur.state === 'broken' ? (S.glue ? `<button class="cap lime bigbtn" data-act="glue" data-no="${no}"><div class="top">Glue it back ( ${S.glue} left)</div></button>` : '') : ''}`);
+    ${cur && cur.state === 'broken' ? (S.glue ? `<button class="cap lime bigbtn" data-act="glue" data-no="${no}"><div class="top">Glue it back (${S.glue} left)</div></button>` : '') : ''}`);
   sh.classList.add('rulec'); sh.style.setProperty('--rc', core);
 }
 
@@ -2980,7 +2987,7 @@ function renderFreq() {
   const fullOf = w => w.id === 'weekend' ? ['About $50', 'About $80', '$120+'] : FREQ.map(f => f.label);
   const DISH = ['#F25550', '#111111', '#F1B94B', '#3F86D6', '#4CB05A', '#E97FB1'];
   const GLYPH = ['<svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 3a9 9 0 000 18z" fill="#111111"/></svg>', '<svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#111111"/></svg>', '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 12V3a9 9 0 11-9 9z" fill="#111111"/></svg>'];
-  const rows = picks.map((w, r) => { const cur = S.freq[w.id] ?? 1; return `<div class="fk-row" role="group" aria-label="${w.name}${w.id === 'weekend' ? ' spending' : 'Weekly Frequency'}">
+  const rows = picks.map((w, r) => { const cur = S.freq[w.id] ?? 1; return `<div class="fk-row" role="group" aria-label="${w.name}${w.id === 'weekend' ? ' spending' : ' weekly frequency'}">
       <span class="fk-name"><i class="dish" style="--d:${DISH[r % 6]}"></i>${w.name}</span>
       <div class="fk-well">${labelsOf(w).map((l, i) => `<button class="fk-cap ${cur === i ? 'on' : ''}" data-freq="${w.id}:${i}" aria-label="${fullOf(w)[i]}" aria-pressed="${cur === i}"><i class="fk-dish">${GLYPH[i]}<small>${l}</small></i></button>`).join('')}</div>
     </div>`; }).join('');
@@ -3021,7 +3028,7 @@ function renderSettings() {
     ${sw('morning', 'Morning "Good morning" card', 'Yesterday’s score, wish list, what you can spend today')}
     <details class="about"><summary>About this demo</summary>
     <div class="set-row"><div><b>How to play</b><small>The rules in three steps</small></div><button class="mini" data-act="help">Watch</button></div>
-    <div class="set-row"><div><b>Replay home tips</b><small>The 4 bubbles shown on first visit to home</small></div><button class="mini" data-act="coach-reset">Watch again</button></div>
+    <div class="set-row"><div><b>Replay home tips</b><small>The tips shown on your first visit to home</small></div><button class="mini" data-act="coach-reset">Watch again</button></div>
     <div class="set-row"><div><b>Start over</b><small>Return to the launch screen and clear all demo data</small></div><button class="mini" data-act="restart">Start over</button></div>
 </details>
     <button class="go" data-act="settings-save" ${w >= 50 && w !== S.base ? '' : 'disabled'}>${w === S.base ? `It’s already $${S.base}` : `Change to $${w}`}</button>`);
@@ -3193,11 +3200,11 @@ function reviewHTML(y, m) {
   const chart = `<div class="mchart" role="img" aria-label="Spending outside the allowance for each logged day"><i class="mline" style="bottom:${Math.round(per / top * 84)}px"><em>Allowance $${per}</em></i>${st.recs.map(o => `<span class="mbar ${o.h.extra === 0 ? 'zero' : o.h.extra > per ? 'over' : ''}" style="height:${o.h.extra === 0 ? 6 : Math.max(8, Math.round(o.h.extra / top * 84))}px" title="${MON[o.d.getMonth()]} ${o.d.getDate()}: $${o.h.extra}"></span>`).join('')}</div>
     <div class="mrange"><span>${MON[st.recs[0].d.getMonth()]} ${st.recs[0].d.getDate()}</span><span>${MON[st.recs[st.recs.length - 1].d.getMonth()]} ${st.recs[st.recs.length - 1].d.getDate()}</span></div>`;
   return `
-    <div class="mhero ${saved >= 0 ? '' : 'over'}"><span class="px">${MON[m]} · ${st.days} days logged</span><b>${saved >= 0 ? 'Saved' : 'Over'} $${Math.abs(saved)}</b><small>Spent outside the allowance $${st.spent}, across these ${st.days} days you could spend $${st.allowed}</small></div>
+    <div class="mhero ${saved >= 0 ? '' : 'over'}"><span class="px">${MON[m]} · ${plural(st.days, 'day')} logged</span><b>${saved >= 0 ? 'Saved' : 'Over'} $${Math.abs(saved)}</b><small>Spent outside the allowance $${st.spent}, across ${st.days === 1 ? 'that day' : `these ${st.days} days`} you could spend $${st.allowed}</small></div>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
       ${cap('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', 'Daily average', `$${Math.round(st.spent / st.days)}`)}
-      ${cap('#B8D000', 'linear-gradient(180deg,#F2FF7A 0%,#E4FF1A 100%)', 'Zero-spend days', `${st.zero} days`)}
-      ${cap('#D12E2E', 'linear-gradient(180deg,#FF7A7A 0%,#FF4B4B 100%)', 'All 3 held', `${st.allHeld} days`)}
+      ${cap('#B8D000', 'linear-gradient(180deg,#F2FF7A 0%,#E4FF1A 100%)', 'Zero-spend days', plural(st.zero, 'day'))}
+      ${cap('#D12E2E', 'linear-gradient(180deg,#FF7A7A 0%,#FF4B4B 100%)', 'All cards held', plural(st.allHeld, 'day'))}
     </div>
     <h2>Day by day <small>Spent outside the allowance</small></h2>
     ${chart}
@@ -3228,7 +3235,7 @@ function alerts(ev) {
     const k = CARDS[x.no];
     if (x.state === 'pending') { out.push(`${k.name} is still asleep: log one entry today to wake it (+${k.plus}).`); return; }
     if (x.state !== 'on') return;
-    if (x.near) { out.push(x.near + '.'); return; }
+    if (x.near) { out.push(sentence(x.near)); return; }
     if (x.no === '01' && ((c >= 11 && c < 13.5) || (c >= 17 && c < 19.5))) out.push(`Mealtime: order takeout and Takeout Nemesis breaks, mult − ${k.plus}.`);
     if (x.no === '06' && c >= 21 && c < 22) out.push(`In ${Math.round((22 - c) * 60)} min it’s 10 pm; after that, one cent breaks Night Cat.`);
     if (x.no === '06' && c >= 22) out.push('It’s past 10 pm; spending now breaks Night Cat (−2). Put what you want on the wish list.');
@@ -3243,9 +3250,9 @@ function stopHTML(ev) {
   if (!S.held.length) return '';
   const need = weekTarget() - scorePrior();
   if (ev.left <= 0) return `<div class="stoploss"><span class="tag">Stop-loss</span><b>${ev.left < 0 ? `You’re already over by $${-ev.left}` : `Today’s $${ev.daily} is used up exactly`}</b>
-    <p>Tonight is 0 pts.${ev.left < 0 ? `The overage comes out of tomorrow’s $${dailyBudget()}, ` : "Spending more comes out of tomorrow’s allowance, "}every dollars you spend now is tomorrow’s money.</p>
+    <p>Tonight is 0 pts.${ev.left < 0 ? `The overage comes out of tomorrow’s $${dailyBudget()}, ` : "Spending more comes out of tomorrow’s allowance, "}so every dollar you spend now is tomorrow’s money.</p>
     <button class="cap lime" data-act="log"><div class="top">Put what you want on the wish list first</div></button></div>`;
-  if (ev.cards.every(c => c.state !== 'on')) return `<div class="stoploss"><span class="tag">Stop-loss</span><b>All three cards broke today</b>
+  if (ev.cards.every(c => c.state !== 'on')) return `<div class="stoploss"><span class="tag">Stop-loss</span><b>Every card broke today</b>
     <p>Mult is back to ×${ev.mult}, but the money left still counts: stay under ${money(ev.left)} and tonight you still get <b>${ev.score} pts</b>. All cards come back at midnight${need > 0 ? `; you still need ${need} pts this week` : ''}.</p></div>`;
   return '';
 }
@@ -3265,7 +3272,7 @@ function inboxItems(ev = evaluate(S.today)) {
   if (S.day === 6) out.push({ key: `sun-${S.week}`, kind: 'sunday', title: 'Today is the last day of the week', text: 'Tonight, tap "End today" to see the weekly summary: score, stars, graduation, which card to carry over, and next week’s stake.', btns: [['data-act="end"', 'End today, see the weekly summary', 'lime']] });
   else if (S.prefs.evening && S.clock >= S.prefs.eveningAt) out.push({ key: `eve-${k}`, kind: 'evening', title: `${fmtClock(S.clock)} · Done logging?`, text: `Tonight’s estimate ${ev.score} pts. When you’re done, tap "End today" for the receipt; if you forget, midnight ends the day for you.`, btns: [['data-act="end"', 'End today', 'lime']] });
   if (ev.left <= 0) out.push({ key: `over-${k}`, kind: 'stop', title: ev.left < 0 ? `You’re already over by $${-ev.left}` : `Today’s $${ev.daily} is used up exactly`, text: `Tonight is 0 pts. Anything you spend now comes out of tomorrow’s allowance. Put what you want on the wish list first.` });
-  else if (ev.cards.every(c => c.state !== 'on')) out.push({ key: `broke-${k}`, kind: 'stop', title: 'All three cards broke today', text: `Mult is back to ×${ev.mult}, but the money left still counts: stay under ${money(ev.left)} and tonight you still get ${ev.score} pts. All cards come back at midnight.` });
+  else if (ev.cards.every(c => c.state !== 'on')) out.push({ key: `broke-${k}`, kind: 'stop', title: 'Every card broke today', text: `Mult is back to ×${ev.mult}, but the money left still counts: stay under ${money(ev.left)} and tonight you still get ${ev.score} pts. All cards come back at midnight.` });
   if (S.prefs.ruleAlerts) alerts(ev).forEach(a => out.push({ key: `al-${k}-${a}`, kind: 'alert', title: `${fmtClock(S.clock)} · Rule reminder`, text: a }));
   if (S.wish.length) out.push({ key: `wl-${k}-${S.wish.length}`, kind: 'memo', title: 'Wish list', text: `It holds ${S.wish.length} items; tomorrow you’ll be asked if you still want them. They don’t count as spending and break no cards.` });
   return out;
@@ -3355,7 +3362,9 @@ function settleWeek() {
   const carryable = perCard.filter(p => !S.grad.includes(p.no));
   S.carry = carryable.length ? carryable.slice().sort((a, b) => b.held / Math.max(1, b.days) - a.held / Math.max(1, a.days))[0].no : null;
   S.nextStake = S.stake; S.weekStep = 1;
-  S.weekResult = { total, target, pass, got, before, perCard, grads, fresh, real: moneyWeek(), spent: hist.reduce((a, h) => a + h.extra, 0), logged: hist.reduce((a, h) => a + h.entries.reduce((b, x) => b + x.amt, 0), 0) };
+  // days still unlogged say nothing about what was really spent, so their allowance is left out of "saved"
+  const blind = hist.filter(h => h.unlogged).length;
+  S.weekResult = { total, target, pass, got, before, perCard, grads, fresh, blind, real: Math.round(S.base * (weekDays() - blind) / 7), spent: hist.reduce((a, h) => a + h.extra, 0), logged: hist.reduce((a, h) => a + h.entries.reduce((b, x) => b + x.amt, 0), 0) };
 }
 function renderWeek() {
   const R = S.weekResult, st = STAKES[S.stake];
@@ -3367,16 +3376,16 @@ function renderWeek() {
   const step = S.weekStep || 1;
   sheet('Weekly summary', `
     ${step === 1 ? `<div class="bar-top"><h1>Week ${S.week} over</h1><span class="chipk" style="background:${st.bg};color:${st.fg}">${st.name}</span></div>
-    <span class="bigstamp ${R.pass ? '' : 'no'}">${R.pass ? 'Passed' : 'missed'}</span>
+    <span class="bigstamp ${R.pass ? '' : 'no'}">${R.pass ? 'Passed' : 'Missed'}</span>
     <div class="impact">
       <div class="r"><span>Weekly Score</span><span class="${R.pass ? 'good' : 'hot'}">${R.total} / ${R.target}</span></div>
       <div class="r"><span>Stars</span><span>${R.got ? `+${starStr(R.got)} Total ${S.stars}` : `None this week, total ${R.before}`}</span></div>
       <div class="r"><span>How stars work</span><span>Target ★ · 1.7× ★★ · 2.6× ★★★${S.stake ? ` · ${st.name} Stars ×${st.star}` : ''}</span></div>
     </div>
-    ${R.grads.map(no => `<div class="gradcard"><div class="gimg">${scaled(CARDS[no], 0.3)}<span class="cv-grad">Graduated</span></div><div><b>“${CARDS[no].name}” graduated!</b><p>Held 6/7 days or more for ${GRAD_WEEKS} weeks in a row: this habit is gone. It leaves the deck and gives you a permanent base multiplier +1: from now on the multiplier starts at <b>${S.baseMult}</b> , and the weekly target score rises 25%.</p></div></div>`).join('')}
-    <h2>How the three cards did <small>Hold 6/7 days for ${GRAD_WEEKS} weeks to graduate</small></h2>
-    <div class="pillrow">${R.perCard.map(p => `<span class="pill ${p.held >= p.days * 0.7 ? 'ok' : p.held >= p.days * 0.4 ? 'mid' : 'no'}">${CARDS[p.no].name} ${p.held}/${p.days} days${S.grad.includes(p.no) ? ' · Graduated' : p.streak ? ` · Graduated ${p.streak}/${GRAD_WEEKS}` : ''}</span>`).join('')}</div>
-    <div class="cap ${R.real - R.spent >= 0 ? 'lime' : 'orange'}"><div class="top" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-weight:900">${R.real - R.spent >= 0 ? 'Real money saved this week' : 'Real money over this week'}</span><span style="font-family:var(--f-display);font-size:28px">$${Math.abs(R.real - R.spent)}</span></div></div>
+    ${R.grads.map(no => `<div class="gradcard"><div class="gimg">${scaled(CARDS[no], 0.3)}<span class="cv-grad">Graduated</span></div><div><b>“${CARDS[no].name}” graduated!</b><p>Held 6/7 days or more for ${GRAD_WEEKS} weeks in a row: this habit is gone. It leaves the deck and gives you a permanent base multiplier +1: from now on the multiplier starts at <b>${S.baseMult}</b>, and the weekly target score rises 25%.</p></div></div>`).join('')}
+    <h2>How your cards did <small>Hold 6/7 days for ${GRAD_WEEKS} weeks to graduate</small></h2>
+    <div class="pillrow">${R.perCard.map(p => `<span class="pill ${p.held >= p.days * 0.7 ? 'ok' : p.held >= p.days * 0.4 ? 'mid' : 'no'}">${CARDS[p.no].name} ${p.held}/${p.days} days${S.grad.includes(p.no) ? ' · Graduated' : p.streak ? ` · Streak ${p.streak}/${GRAD_WEEKS}` : ''}</span>`).join('')}</div>
+    <div class="cap ${R.real - R.spent >= 0 ? 'lime' : 'orange'}"><div class="top" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-weight:900">${R.real - R.spent >= 0 ? 'Real money saved this week' : 'Real money over this week'}${R.blind ? `<small style="display:block;font-weight:500;font-size:11px">${R.blind} unlogged ${R.blind === 1 ? 'day' : 'days'} left out</small>` : ''}</span><span style="font-family:var(--f-display);font-size:28px">$${Math.abs(R.real - R.spent)}</span></div></div>
     <h2>Score each day <small>Tap a day for the receipt</small></h2>
     ${tilesHTML()}
     <button class="go" data-act="week-plan">Next: plan next week</button>` : `<div class="bar-top"><h1>Plan next week</h1><span class="chipk" style="background:${st.bg};color:${st.fg}">${st.name}</span></div>
@@ -3439,7 +3448,7 @@ function shopPick() {
   const by = {};
   weekHist().forEach(h => h.entries.filter(x => !cat(x.cat).ess).forEach(x => { if (CAT_CARD[x.cat]) by[x.cat] = (by[x.cat] || 0) + x.amt; }));
   const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
-  return top ? { no: CAT_CARD[top[0]], why: `Last week${cat(top[0]).name}Spent $${top[1]}` } : null;
+  return top ? { no: CAT_CARD[top[0]], why: `Last week you spent $${top[1]} on ${cat(top[0]).name}` } : null;
 }
 const PRICE = { reroll: 1, slot: 5, slotWas: 6, glue: 2 };
 function shopBody(browse) {
@@ -3500,16 +3509,22 @@ function endDay() {
   }
   const owed = Math.max(0, h.extra + S.debt - dailyBudget());
   S.debt = Math.min(debtCap(), owed);
-  // whatever tomorrow can't absorb raises this week's target: every dollars still has to be won back by saving
+  // whatever tomorrow can't absorb raises this week's target: every dollar still has to be won back by saving
   h.overflow = owed - S.debt; S.overflow = (S.overflow || 0) + h.overflow;
   S.teaWeek += teaOf(S.today);
   S.revisit = S.wish; S.wish = [];
   S.today = [];
-  if (S.day === 6) { settleWeek(); renderTable(); renderWeek(); return; }
+  // Sunday has no next morning to ask on, so an unlogged Sunday is asked about before the week is settled
+  if (S.day === 6) { renderTable(); if (h.unlogged) renderSunUnlogged(h); else { settleWeek(); renderWeek(); } return; }
   S.day += 1; S.clock = 8.5;
   renderTable();
   if (S.prefs.morning) renderMorning(); else toast(`${DAYS[S.day]} · allowed today $${todayBudget()}`);
   monthTurn(dateOf(S.week, S.day - 1), dateOf(S.week, S.day));
+}
+function renderSunUnlogged(h) {
+  sheet('Sunday check', `
+    <div class="bar-top"><h1>Sun · before the summary</h1></div>
+    <div class="unlogged"><b>Nothing logged today</b><span>Did you really spend nothing? An unlogged day counts as 0 pts. If you really spent nothing, it’s restored to a zero-spend score of ${h.potential.score} pts (base multiplier only; cards add nothing on an unlogged day).</span><div class="ibtns"><button class="rvbtn lime" data-act="sun-unlogged-yes">Really spent nothing</button><button class="rvbtn" data-act="sun-unlogged-no">Forgot to log</button></div></div>`);
 }
 function startWeek() {
   const lastDay = dateOf(S.week, 6);
@@ -3655,7 +3670,7 @@ app.addEventListener('click', e => {
     const before = alerts(evaluate(S.today))[0];
     S.clock = +t.dataset.clock; renderTable();
     const a = alerts(evaluate(S.today))[0];
-    if (S.prefs.evening && S.clock >= S.prefs.eveningAt) pushNote('Done logging?', `It’s ${fmtClock(S.clock)}, tonight’s estimate ${evaluate(S.today).score} pts. When you’re done, tap "End today" pts. When you’re done, tap “End today” and look at the receipt.`);
+    if (S.prefs.evening && S.clock >= S.prefs.eveningAt) pushNote('Done logging?', `It’s ${fmtClock(S.clock)}, tonight’s estimate ${evaluate(S.today).score} pts. When you’re done, tap “End today” and look at the receipt.`);
     else if (S.prefs.ruleAlerts && a && a !== before) pushNote('Your cards', a);
     return;
   }
@@ -3670,7 +3685,8 @@ app.addEventListener('click', e => {
   if (act === 'push-close') { t.closest('.push').remove(); return; }
   if (t.dataset.edit) { const i = +t.dataset.edit, x = S.today[i]; draft = { amt: String(x.amt), cat: x.cat, night: !!x.night, note: x.note || '', edit: i, fromWish: x.fromWish }; renderLog(); return; }
   if (t.dataset.hquick) { if (!S.held.length) { toast('Draw this week’s cards first'); return; } const q = S.quicks[+t.dataset.hquick]; draft = { amt: '', cat: q.cat, night: S.clock >= 22, note: q.label === cat(q.cat).name ? '' : q.label }; renderLog(); return; }
-  if (t.dataset.quick) { const q = S.quicks[+t.dataset.quick]; Object.assign(draft, { cat: q.cat, note: q.label === cat(q.cat).name ? '' : q.label }); refreshLog(); return; }
+  // a favorite picks the category and note, and fills its usual amount when none is typed yet
+  if (t.dataset.quick) { const q = S.quicks[+t.dataset.quick]; Object.assign(draft, { cat: q.cat, note: q.label === cat(q.cat).name ? '' : q.label }, q.amt && !draft.amt ? { amt: String(q.amt) } : {}); refreshLog(); return; }
   if (t.dataset.cat) { draft.cat = t.dataset.cat; refreshLog(); return; }
   if (t.dataset.night) { draft.night = t.dataset.night === '1'; refreshLog(); return; }
   if (t.dataset.delivery) { draft.delivery = t.dataset.delivery === '1'; refreshLog(); return; }
@@ -3686,8 +3702,9 @@ app.addEventListener('click', e => {
   }
   if (act === 'savequick') {
     const label = draft.note || cat(logCat()).name;
-    if (!S.quicks.some(q => q.label === label && q.cat === logCat())) { S.quicks.unshift({ label, cat: logCat() }); S.quicks = S.quicks.slice(0, 8); }
-    refreshLog(); toast(`Saved: ${label}, tap it next time and just enter the amount`); return;
+    const amt = parseInt(draft.amt, 10) || undefined;
+    if (!S.quicks.some(q => q.label === label && q.cat === logCat())) { S.quicks.unshift({ label, cat: logCat(), amt }); S.quicks = S.quicks.slice(0, 8); }
+    refreshLog(); toast(`Saved: ${label}; it’s at the top of Log next time`); return;
   }
   if (act === 'save') {
     const entry = { cat: logCat(), amt: parseInt(draft.amt, 10), night: !!draft.night, note: draft.note, fromWish: draft.fromWish };
@@ -3708,6 +3725,13 @@ app.addEventListener('click', e => {
     y.resolved = true;
     renderTable(); renderMorning(); lastSheet().style.animation = 'none';
     toast(act === 'unlogged-yes' ? `Filled in ${y.score} pts` : 'That day counts as 0 pts. Log a quick entry whenever you spend later');
+    return;
+  }
+  if (act === 'sun-unlogged-yes' || act === 'sun-unlogged-no') {
+    const y = S.history[S.history.length - 1];
+    if (act === 'sun-unlogged-yes') Object.assign(y, y.potential, { unlogged: false });
+    y.resolved = true;
+    top.remove(); settleWeek(); renderTable(); renderWeek();
     return;
   }
   if (act === 'recon' || act === 'recon-skip') {
