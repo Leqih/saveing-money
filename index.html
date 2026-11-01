@@ -182,6 +182,11 @@ button.chip:active { transform: translateY(2px); }
 @media (max-height: 780px) { .sheet:has(.logfoot) .pad .cap { height: 38px; } .sheet:has(.logfoot) .amount { padding: 4px 20px; } }
 @media (max-height: 700px) { .sheet:has(.logfoot) { overflow-y: auto; } }
 .newcat { border-radius: 18px; background: #F3F3F6; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+/* the form sits over the keypad's box so opening it moves nothing */
+.padwrap { position: relative; }
+.padwrap .newcat { position: absolute; inset: 0; overflow-y: auto; }
+.amount .mini { height: 32px; }
+.set-row.off { opacity: 0.4; }
 .toggle { display: flex; gap: 6px; }
 .toggle button { flex: 1; height: 38px; border-radius: 19px; border: 2px solid var(--rule); background: #fff; font-weight: 900; font-size: 12px; }
 .toggle button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
@@ -365,7 +370,7 @@ button.chip:active { transform: translateY(2px); }
 .cv-nav > button[data-tab] span { color: #111; }
 .cv-nav > button[data-tab] span { height: 0; opacity: 0; overflow: hidden; transition: height 0.2s, opacity 0.2s; }
 .cv-nav > button.on span { height: 11px; margin-top: 3px; opacity: 1; }
-.cv-nav > button.on { transform: translateY(-3px) scale(1.07); }
+.cv-nav > button.on { transform: none; }
 .cv-nav > button.on svg { animation: iconPop 0.5s cubic-bezier(.3,1.8,.5,1); }
 @keyframes iconPop { 0% { transform: scale(0.6) rotate(-14deg); } 100% { transform: none; } }
 .screen.enter { animation: tabIn 0.34s cubic-bezier(.2,1,.3,1); }
@@ -695,7 +700,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .stake.on { border-color: var(--lime-edge); background: #F4FFC2; }
 .carry { display: flex; justify-content: space-between; gap: 8px; padding: 6px 4px 0; }
 .carry .hcard { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.carry .hcard.on { transform: translateY(-4px); }
+.carry .hcard.on { transform: none; }
 .carry .hcard.on > div:first-child { outline: 4px solid var(--lime); outline-offset: 3px; border-radius: 16px; }
 .carry .hcard.on > span { background: var(--lime); }
 .hcard.off > div { opacity: 0.55; }
@@ -1337,7 +1342,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .kp-cap .dish.light { --d: #F6F4F0; color: #111111; }
 .kp-cap .dish.light svg { margin-bottom: -1px; }
 .kp-left .kp-cap:nth-child(2) .dish b { color: #FFF; }
-.kp-cap.on .dish { transform: translateY(3px); box-shadow: inset 0 3px 5px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.4), 0 1px 0 rgba(0,0,0,0.2); }
+.kp-cap.on .dish { box-shadow: inset 0 3px 5px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.4), 0 1px 0 rgba(0,0,0,0.2); }
 .kp-left .kp-cap.on { background: linear-gradient(180deg, #E8E5DF, #D5D2CB); box-shadow: inset 0 3px 6px rgba(0,0,0,0.18); }
 .kp-right .kp-cap.on { background: linear-gradient(180deg, #E4E1DB, #D2CFC8); box-shadow: inset 0 3px 6px rgba(0,0,0,0.18); }
 .kp-cap:active .dish { transform: translateY(3px) scale(0.96); }
@@ -1369,20 +1374,20 @@ button.hcard:active > div { transform: translateY(2px); }
 .fk-dish { width: 62px; height: 62px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-style: normal; background: radial-gradient(circle at 42% 28%, #FFFFFF 0%, #F6F4F0 55%, #DCD9D2 100%); box-shadow: inset 0 -3px 4px rgba(0,0,0,0.16), inset 0 2px 2px rgba(255,255,255,0.9), 0 4px 0 #BDBAB1, 0 8px 8px -2px rgba(0,0,0,0.3); transition: transform 0.2s cubic-bezier(.3,1.8,.5,1), box-shadow 0.12s, background 0.2s; }
 .fk-dish small { font-size: 11px; font-weight: 900; color: #111111; line-height: 1; margin-top: 1px; }
 .fk-cap.on { background: linear-gradient(180deg, #E4E1DB, #D2CFC8); box-shadow: inset 0 3px 6px rgba(0,0,0,0.2); }
-.fk-cap.on .fk-dish { transform: translateY(3px); background: radial-gradient(circle at 42% 28%, #D6F2A0 0%, #A8E04A 55%, #7DBB22 100%); box-shadow: inset 0 3px 5px rgba(0,0,0,0.25), 0 1px 0 rgba(0,0,0,0.2); }
+.fk-cap.on .fk-dish { background: radial-gradient(circle at 42% 28%, #D6F2A0 0%, #A8E04A 55%, #7DBB22 100%); box-shadow: inset 0 3px 5px rgba(0,0,0,0.25), 0 1px 0 rgba(0,0,0,0.2); }
 .fk-cap:active .fk-dish { transform: translateY(4px) scale(0.95); }
 .fk-cap.pop .fk-dish { animation: fkPop 0.45s cubic-bezier(.3,1.9,.5,1); }
 @keyframes fkPop { 0% { transform: translateY(-4px) scale(1.12); } 100% { transform: translateY(3px); } }
 /* weak-spot options wear the same white slab as the income field: pale gradient face, a grey lip underneath, soft drop; chosen = pressed in, no outline */
 .cv-opt { border-radius: 16px; background: linear-gradient(180deg, #FAFAFC 0%, #EDEDF1 100%); box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.75), inset 0 -2px 0 rgba(0,0,0,0.04), 0 8px 0 #CFCFD6, 0 14px 16px -8px rgba(20,20,30,0.3); margin-bottom: 8px; transition: transform 0.14s ease-out, box-shadow 0.14s ease-out; }
-.cv-opt[aria-pressed="true"] { outline: none; background: linear-gradient(180deg, #EDEDF1 0%, #E2E2E8 100%); transform: translateY(6px); box-shadow: inset 0 3px 5px rgba(0,0,0,0.12), 0 2px 0 #CFCFD6, 0 4px 6px -4px rgba(20,20,30,0.3); }
+.cv-opt[aria-pressed="true"] { outline: none; background: linear-gradient(180deg, #EDEDF1 0%, #E2E2E8 100%); box-shadow: inset 0 3px 5px rgba(0,0,0,0.12), 0 2px 0 #CFCFD6, 0 4px 6px -4px rgba(20,20,30,0.3); }
 .cv-opt:active { transform: translateY(5px); }
 /* frequency keys use the same white slab as the income field and the weak-spot options */
 .fk-well { gap: 10px; padding: 0 0 8px; border-radius: 0; background: none; box-shadow: none; }
 .fk-cap { height: 92px; border-radius: 16px; flex-direction: column; gap: 4px; background: linear-gradient(180deg, #FAFAFC 0%, #EDEDF1 100%); box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.75), inset 0 -2px 0 rgba(0,0,0,0.04), 0 8px 0 #CFCFD6, 0 14px 16px -8px rgba(20,20,30,0.3); transition: transform 0.14s ease-out, box-shadow 0.14s ease-out; }
 .fk-dish { width: auto; height: auto; border-radius: 0; background: none !important; box-shadow: none !important; gap: 4px; transform: none !important; }
 .fk-dish small { font-size: 12px; margin: 0; }
-.fk-cap.on { background: linear-gradient(180deg, #EDEDF1 0%, #E2E2E8 100%); transform: translateY(6px); box-shadow: inset 0 3px 5px rgba(0,0,0,0.12), 0 2px 0 #CFCFD6, 0 4px 6px -4px rgba(20,20,30,0.3); }
+.fk-cap.on { background: linear-gradient(180deg, #EDEDF1 0%, #E2E2E8 100%); box-shadow: inset 0 3px 5px rgba(0,0,0,0.12), 0 2px 0 #CFCFD6, 0 4px 6px -4px rgba(20,20,30,0.3); }
 .fk-cap.on .fk-dish svg path, .fk-cap.on .fk-dish svg circle { fill: #3F7BE8; }
 .fk-cap:active { transform: translateY(5px); }
 .fk-cap.pop { animation: fkPop2 0.4s cubic-bezier(.3,1.9,.5,1); }
@@ -2643,17 +2648,16 @@ function renderLog() {
   const pad = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map(k => `<button class="cap ${/[C⌫]/.test(k) ? 'dark' : ''}" data-key="${k}" aria-label="${k === '⌫' ? 'Delete one digit' : k === 'C' ? 'Clear' : k}"><div class="top">${k}</div></button>`).join('');
   sheet(editing ? 'Edit entry' : 'Log', `
     <div class="bar-top"><h1>${editing ? 'Edit entry' : 'Log'}</h1><button class="x" data-act="close" aria-label="Close"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg></button></div>
-    <div class="amount"><b>$${amt}</b><span class="px" style="color:#5E5E66;font-size:12px;text-align:right">${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
+    <div class="amount"><b>$${amt}</b>${draft.cat === 'meal' ? `<button class="mini ${draft.delivery ? 'on' : ''}" data-delivery="${draft.delivery ? 0 : 1}" aria-pressed="${!!draft.delivery}">Delivered</button>` : ''}<span class="px" style="color:#5E5E66;font-size:12px;text-align:right">${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
     ${quicks ? `<div class="quick" role="group" aria-label="Favorites">${quicks}</div>` : ''}
     <div class="cats">${cats}</div>
     <div class="field"><input class="in" id="note" maxlength="24" value="${esc(draft.note || '')}" placeholder="What was it? (optional)" aria-label="Note">
-      ${draft.cat === 'meal' ? `<button class="mini ${draft.delivery ? 'on' : ''}" data-delivery="${draft.delivery ? 0 : 1}" aria-pressed="${!!draft.delivery}">Delivered</button>` : ''}
       <button class="mini ${draft.night ? 'on' : ''}" data-night="${draft.night ? 0 : 1}" aria-pressed="${!!draft.night}">after 10 pm</button>
       <button class="mini" data-act="savequick">Save favorite</button></div>
-    ${draft.adding ? `<div class="newcat">
+    <div class="padwrap"><div class="pad" ${draft.adding ? 'inert style="visibility:hidden"' : ''}>${pad}</div>${draft.adding ? `<div class="newcat">
       <div class="field"><input class="in" id="newcat" maxlength="16" value="${esc(draft.newName || '')}" placeholder="Name, e.g. Game top-up" aria-label="New category name"><button class="mini" data-act="addcat">Add</button></div>
       <div class="toggle"><button aria-pressed="${!draft.newEss}" data-newess="0">Outside the allowance</button><button aria-pressed="${!!draft.newEss}" data-newess="1">Essential</button></div>
-    </div>` : `<div class="pad">${pad}</div>`}
+    </div>` : ''}</div>
     <div class="logfoot">
       <div class="vline ${tone}"><div class="vtext"><b>${head}</b><span class="px">${sub}</span>${extra ? `<small>${extra}</small>` : ''}</div>
         <div class="vmult" aria-label="Mult ×${amt ? after.mult : before.mult}">${amt && after.mult !== before.mult ? `<s>×${before.mult}</s>` : '<small>Mult</small>'}<b>×${amt ? after.mult : before.mult}</b></div></div>
@@ -3024,7 +3028,7 @@ function renderSettings() {
     ${S.bank ? `<div class="set-row"><div><b>${esc(S.bank.name)}</b><small>Checks your log every night · honest nights ${(S.honest || 0) % 7}/7 for a free Glue</small></div><button class="mini" data-act="bank-off">Disconnect</button></div>` : `<div class="set-row"><div><b>Connect a bank</b><small>It catches purchases you forget to log. You still log everything yourself.</small></div><button class="mini" data-act="bank-link">Connect</button></div>`}
     <h2>Reminders</h2>
     ${sw('evening', 'Evening reminder to end the day', 'Also shows a “Done logging?” card on the home screen')}
-    ${p.evening ? `<div class="set-row"><div><b>Reminder time</b><small>Send a notification at that time</small></div><div class="seg3">${[20.5, 21.5, 22].map(c => `<button data-evat="${c}" aria-pressed="${p.eveningAt === c}">${fmtClock(c)}</button>`).join('')}</div></div>` : ''}
+    <div class="set-row ${p.evening ? '' : 'off'}"><div><b>Reminder time</b><small>Send a notification at that time</small></div><div class="seg3">${[20.5, 21.5, 22].map(c => `<button data-evat="${c}" aria-pressed="${p.eveningAt === c}" ${p.evening ? '' : 'disabled'}>${fmtClock(c)}</button>`).join('')}</div></div>
     ${sw('ruleAlerts', 'Rule reminders before you spend', 'E.g. mealtime reminds Takeout Nemesis, 21:30 reminds Night Cat')}
     ${sw('morning', 'Morning "Good morning" card', 'Yesterday’s score, wish list, what you can spend today')}
     <details class="about"><summary>About this demo</summary>
