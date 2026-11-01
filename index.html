@@ -880,7 +880,8 @@ button.hcard:active > div { transform: translateY(2px); }
 /* recommended set on the draw page */
 .linkbtn { border: 0; background: none; font-family: var(--f-px); font-size: 12px; color: #5E5E66; padding: 6px; }
 
-.toast { position: absolute; left: 50%; top: var(--top); transform: translateX(-50%); z-index: 30; max-width: calc(100% - 32px); padding: 8px 14px; border-radius: 14px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 900; box-shadow: 0 10px 20px rgba(0,0,0,0.25); text-align: center; }
+/* a little clear of the Dynamic Island, so the black pill doesn't read as part of it */
+.toast { position: absolute; left: 50%; top: calc(var(--top) + 10px); transform: translateX(-50%); z-index: 30; max-width: calc(100% - 32px); padding: 8px 14px; border-radius: 14px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 900; box-shadow: 0 10px 20px rgba(0,0,0,0.25); text-align: center; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 /* shrink the whole mockup on short windows so the phone fits without scrolling the page */
 @media (max-height: 960px) and (min-width: 441px) { .device { zoom: 0.9; } }
@@ -2642,7 +2643,7 @@ function renderLog() {
     <div class="amount"><b>$${amt}</b><span class="px" style="color:#5E5E66;font-size:12px;text-align:right">${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
     ${quicks ? `<div class="quick" role="group" aria-label="Favorites">${quicks}</div>` : ''}
     <div class="cats">${cats}</div>
-    <div class="field"><input class="in" id="note" maxlength="12" value="${esc(draft.note || '')}" placeholder="What was it? (optional)" aria-label="Note">
+    <div class="field"><input class="in" id="note" maxlength="24" value="${esc(draft.note || '')}" placeholder="What was it? (optional)" aria-label="Note">
       ${draft.cat === 'meal' ? `<button class="mini ${draft.delivery ? 'on' : ''}" data-delivery="${draft.delivery ? 0 : 1}" aria-pressed="${!!draft.delivery}">Delivered</button>` : ''}
       <button class="mini ${draft.night ? 'on' : ''}" data-night="${draft.night ? 0 : 1}" aria-pressed="${!!draft.night}">after 10 pm</button>
       <button class="mini" data-act="savequick">Save favorite</button></div>
@@ -2813,7 +2814,7 @@ async function playStage(sh) {
       await pause(160);
       if (c.state !== 'on') {
         const g = gainOf(c);
-        tag(el, c.state === 'pending' ? 'zzz' : 'Broke', 'bad');
+        tag(el, c.state === 'pending' ? 'zzz' : c.saved ? `Stop-loss ${gainStr(g)}` : 'Broke', c.saved ? 'good' : 'bad');
         await playBroke(el, g);
         line(`${card.name} · ${c.why}${c.saved ? ' · stop-loss' : ''}`, gainStr(g), g > 0 ? '' : 'off');
         if (g) { mult = Math.max(1, mult + g); await countTo($('pm'), mult, 350); }
@@ -3546,7 +3547,10 @@ app.addEventListener('input', e => {
     const w = weeklyFrom(S.setup);
     tickMoney(document.getElementById('setup-week'), w);
     document.getElementById('setup-formula').textContent = w >= 50 ? setupFormula(S.setup) : 'Weekly allowance must be at least $50; adjust the numbers above';
-    const nx = document.querySelector("[data-act=setup-next], [data-act=settings-save]"); if (nx) nx.disabled = w < 50;
+    const nx = document.querySelector("[data-act=setup-next], [data-act=settings-save]");
+    // settings only saves a real change: the same allowance as now keeps the button off
+    if (nx && nx.dataset.act === 'settings-save') { nx.disabled = w < 50 || w === S.base; nx.textContent = w === S.base ? `It’s already $${S.base}` : `Change to $${w}`; }
+    else if (nx) nx.disabled = w < 50;
   }
   if (e.target.id === 'note') draft.note = e.target.value.trim();
   if (e.target.id === 'newcat') draft.newName = e.target.value.trim();
@@ -3577,7 +3581,7 @@ app.addEventListener('click', e => {
   if (act === 'bank-off') { S.bank = null; replaceSheet(top, renderSettings); toast('Bank disconnected'); return; }
   if (act === 'bank-add' || act === 'bank-no') {
     const tx = S.bank.feed.find(x => x.id === +t.dataset.id);
-    if (act === 'bank-add') { tx.state = 'added'; S.today.push({ cat: tx.cat, amt: tx.amt, note: tx.desc.slice(0, 12), caught: true }); } else tx.state = 'dismissed';
+    if (act === 'bank-add') { tx.state = 'added'; S.today.push({ cat: tx.cat, amt: tx.amt, note: tx.desc.slice(0, 24), caught: true }); } else tx.state = 'dismissed';
     replaceSheet(top, renderBankCheck); return;
   }
   if (act === 'bank-continue') { swapSheet(top, renderEnd); return; }
