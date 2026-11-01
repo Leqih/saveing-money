@@ -248,15 +248,22 @@ function fitDevice() {
   d.style.zoom = String(Math.floor(Math.max(0.55, Math.min(1.12, (innerHeight - 48) / d.offsetHeight)) * 1000) / 1000);
 }
 addEventListener('resize', fitDevice); fitDevice();
-// over the phone the mouse shows as a fingertip (see .touch-dot); it follows the pointer and presses in while the button is down
+// over the phone the mouse is drawn as a finger (see .touch-dot / .touch-press): a small dot while it moves,
+// a touch bubble while the button is held. Both are placed with the translate property so nothing else can scale their position
 {
-  const dot = document.querySelector('.touch-dot'), phone = document.querySelector('.phone');
-  // the translate property, not transform: transform is applied after scale, so pressing would shrink the position too
-  const place = e => { dot.style.translate = `${e.clientX}px ${e.clientY}px`; };
-  phone.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; place(e); dot.style.setProperty('--z', document.querySelector('.device').style.zoom || 1); dot.classList.add('on'); });
-  phone.addEventListener('pointerleave', () => dot.classList.remove('on', 'down'));
-  addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && e.target instanceof Node && phone.contains(e.target)) { place(e); dot.classList.add('down'); } });
-  addEventListener('pointerup', () => dot.classList.remove('down'));
+  const dot = document.querySelector('.touch-dot'), press = document.querySelector('.touch-press'), phone = document.querySelector('.phone');
+  const place = e => {
+    const z = document.querySelector('.device').style.zoom || 1;
+    for (const el of [dot, press]) { el.style.translate = `${e.clientX}px ${e.clientY}px`; el.style.setProperty('--z', z); }
+  };
+  const lift = () => { dot.classList.remove('down'); press.classList.remove('down'); };
+  phone.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; place(e); dot.classList.add('on'); });
+  phone.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { dot.classList.remove('on'); lift(); } });
+  addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && e.target instanceof Node && phone.contains(e.target)) { place(e); dot.classList.add('down'); press.classList.add('down'); } });
+  // a drag keeps the bubble under the pointer even when it leaves the phone, the way a captured touch does
+  addEventListener('pointermove', e => { if (press.classList.contains('down')) place(e); });
+  addEventListener('pointerup', lift);
+  addEventListener('pointercancel', lift);
 }
 document.querySelector('.device').addEventListener('click', e => { if (e.target.closest('.dbtn.k')) quickJump(); });
 document.querySelector('.device').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.dbtn.k')) { e.preventDefault(); quickJump(); } });
