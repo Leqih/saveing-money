@@ -20,7 +20,8 @@
   --f-mono: var(--f-px);
   color-scheme: light;
 }
-html, body { height: 100%; }
+/* no default body margin: the phone is sized to fill the window exactly, so 8px of margin made the page scroll */
+html, body { height: 100%; margin: 0; }
 body {
   background: var(--desk);
   background-image: linear-gradient(var(--desk-line) 1px, transparent 1px), linear-gradient(90deg, var(--desk-line) 1px, transparent 1px);
@@ -2510,7 +2511,8 @@ function quickJump() {
 function fitDevice() {
   const d = document.querySelector('.device');
   if (innerWidth <= 440) { d.style.zoom = ''; return; }
-  d.style.zoom = Math.max(0.55, Math.min(1.12, (innerHeight - 48) / d.offsetHeight)).toFixed(3);
+  // round down so the scaled phone never ends a fraction of a pixel past the window
+  d.style.zoom = String(Math.floor(Math.max(0.55, Math.min(1.12, (innerHeight - 48) / d.offsetHeight)) * 1000) / 1000);
 }
 addEventListener('resize', fitDevice); fitDevice();
 document.querySelector('.device').addEventListener('click', e => { if (e.target.closest('.dbtn.k')) quickJump(); });
@@ -2621,7 +2623,8 @@ function renderLog() {
   const c = cat(draft.cat);
   const base = editing ? S.today.filter((_, i) => i !== draft.edit) : S.today;
   const before = evaluate(S.today);
-  const after = evaluate([...base, { cat: logCat(), amt, night: !!draft.night, fromWish: draft.fromWish }]);
+  // with no amount typed there is nothing to preview, even if the after-10-pm switch is on
+  const after = amt ? evaluate([...base, { cat: logCat(), amt, night: !!draft.night, fromWish: draft.fromWish }]) : before;
   const broke = after.cards.filter((x, k) => x.state === 'broken' && before.cards[k].state !== 'broken').map(x => CARDS[x.no].name);
   const woke = after.cards.filter((x, k) => x.state === 'on' && before.cards[k].state === 'pending').map(x => CARDS[x.no].name);
   const near = after.cards.map(x => x.near).filter(Boolean)[0];
