@@ -1425,7 +1425,7 @@ button.hcard:active > div { transform: translateY(2px); }
     <li><b>Play the night.</b> Tap <span class="px">End today</span> and watch your cards go up against the multiplier.</li>
     <li><b>Spend stars.</b> Deck › Shop is always open.</li>
   </ol>
-  <p class="foot">Demo data lives only on this page and disappears when you close it.</p>
+  <p class="foot">Your progress is saved in this browser. Settings › Start over clears it.</p>
 </aside>
 <div class="device">
   <span class="dbtn l action k" role="button" tabindex="0" title="Skip setup and jump home; press again to flip pages" aria-label="Skip setup and jump home; press again to flip pages"></span><span class="dbtn l vup k" role="button" tabindex="0" title="Skip setup and jump home; press again to flip pages" aria-label="Skip setup and jump home; press again to flip pages"></span><span class="dbtn l vdown k" role="button" tabindex="0" title="Skip setup and jump home; press again to flip pages" aria-label="Skip setup and jump home; press again to flip pages"></span>
@@ -1767,7 +1767,8 @@ function simulate(held, days, start) {
 // a new user joins on whatever weekday today is; week 1 runs from that day to Sunday as a short week
 const NOW = new Date();
 const JOIN = (NOW.getDay() + 6) % 7;
-const START = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - JOIN);
+// a saved game brings back its own week-1 Monday (see loadState)
+let START = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - JOIN);
 let S = {
   week: 1, day: JOIN, weekStart: JOIN, held: [], stars: 0, unlocked: ['01', '06', '03', '04', '05', '10', '15', '07'], lastWeek: [], estimated: false, firstDraw: true,
   base: BASE, setup: { income: 6000, fixed: 2500, save: 2000 }, weak: [], freq: {}, coach: 0, view: 'home', billTab: 'flow', cardLog: {},
@@ -3357,7 +3358,7 @@ function settleWeek() {
   if (pass) S.maxStake = Math.max(S.maxStake || 0, Math.min(STAKES.length - 1, S.stake + 1));
   const carryable = perCard.filter(p => !S.grad.includes(p.no));
   S.carry = carryable.length ? carryable.slice().sort((a, b) => b.held / Math.max(1, b.days) - a.held / Math.max(1, a.days))[0].no : null;
-  S.nextStake = S.stake; S.weekStep = 1;
+  S.nextStake = S.stake; S.weekStep = 1; S.weekOpen = true;
   // days still unlogged say nothing about what was really spent, so their allowance is left out of "saved"
   const blind = hist.filter(h => h.unlogged).length;
   S.weekResult = { total, target, pass, got, before, perCard, grads, fresh, blind, real: Math.round(S.base * (weekDays() - blind) / 7), spent: hist.reduce((a, h) => a + h.extra, 0), logged: hist.reduce((a, h) => a + h.entries.reduce((b, x) => b + x.amt, 0), 0) };
@@ -3511,7 +3512,7 @@ function endDay() {
   S.revisit = S.wish; S.wish = [];
   S.today = [];
   // Sunday has no next morning to ask on, so an unlogged Sunday is asked about before the week is settled
-  if (S.day === 6) { renderTable(); if (h.unlogged) renderSunUnlogged(h); else { settleWeek(); renderWeek(); } return; }
+  if (S.day === 6) { renderTable(); if (h.unlogged) { S.sunCheck = true; renderSunUnlogged(h); } else { settleWeek(); renderWeek(); } return; }
   S.day += 1; S.clock = 8.5;
   renderTable();
   if (S.prefs.morning) renderMorning(); else toast(`${DAYS[S.day]} · allowed today $${todayBudget()}`);
@@ -3530,6 +3531,7 @@ function startWeek() {
   // an overspent Sunday still comes out of Monday's allowance, so the week boundary is no free night out
   S.stake = S.nextStake; S.overflow = 0;
   if (S.slotPending) { S.slots = 4; S.slotPending = false; }
+  S.weekOpen = false;
   S.week += 1; S.day = 0; S.weekStart = 0; S.held = []; S.teaWeek = 0; S.firstDraw = false; S.estimated = false;
   draft = {};
   renderTable(); renderDraw();
@@ -3632,7 +3634,7 @@ app.addEventListener('click', e => {
   if (t.dataset.evat) { S.prefs.eveningAt = +t.dataset.evat; replaceSheet(top, renderSettings); return; }
   if (act === 'settings-save') { S.base = weeklyFrom(S.setup); replaceSheet(top, renderSettings); toast(`Weekly allowance set to $${S.base}, $${dailyBudget()}`); return; }
   if (act === 'coach-reset') { S.coach = 0; S.view = 'home'; top.remove(); renderTable(); return; }
-  if (act === 'restart') { location.reload(); return; }
+  if (act === 'restart') { clearState(); location.reload(); return; }
   if (act === 'star') { renderStarSheet(); return; }
   // settings can change what home shows, so redraw it on the way out
   if (act === 'close') { const lbl = top.getAttribute('aria-label'); closeSheet(top, lbl === 'Settings' ? renderTable : null); return; }
@@ -3726,7 +3728,7 @@ app.addEventListener('click', e => {
   if (act === 'sun-unlogged-yes' || act === 'sun-unlogged-no') {
     const y = S.history[S.history.length - 1];
     if (act === 'sun-unlogged-yes') Object.assign(y, y.potential, { unlogged: false });
-    y.resolved = true;
+    y.resolved = true; S.sunCheck = false;
     top.remove(); settleWeek(); renderTable(); renderWeek();
     return;
   }
@@ -3763,8 +3765,42 @@ app.addEventListener('click', e => {
   if (act === 'next-week') { startWeek(); return; }
 });
 
-renderTable();
-renderLaunch();
+/* ---------- keep the demo across reloads ---------- */
+// one saved game per browser; it starts once cards are held, so a half-done setup simply starts over
+const SAVE_KEY = 'penny-round-v1';
+let wiping = false;
+function saveState() {
+  if (wiping || (!S.held.length && !S.history.length)) return;
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ S: { ...S, seen: [...S.seen] }, start: START.getTime(), essQuota, cats: CATS.filter(c => c.id.startsWith('u')) })); } catch (err) { /* private mode or a full store: the demo still runs, it just won't survive a reload */ }
+}
+function loadState() {
+  try {
+    const d = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
+    if (!d || !d.S) return false;
+    S = { ...S, ...d.S, seen: new Set(d.S.seen || []) };
+    (S.gradLog || []).forEach(g => { g.date = new Date(g.date); });
+    START = new Date(d.start); essQuota = d.essQuota ?? essQuota;
+    (d.cats || []).forEach(c => { if (!CATS.some(x => x.id === c.id)) CATS.push(c); });
+    return true;
+  } catch (err) { return false; }
+}
+function clearState() { wiping = true; try { localStorage.removeItem(SAVE_KEY); } catch (err) { /* nothing to clear */ } }
+// save shortly after anything the user does, and once more on the way out
+let saveT;
+const queueSave = () => { clearTimeout(saveT); saveT = setTimeout(saveState, 300); };
+['click', 'input', 'change', 'pointerup'].forEach(type => app.addEventListener(type, queueSave));
+document.querySelector('.device').addEventListener('click', queueSave);
+addEventListener('pagehide', saveState);
+// a reload mid-ritual reopens the sheet that was waiting on the user, so a day or a week can't be ended twice
+function resumeSheet() {
+  const y = S.history[S.history.length - 1];
+  if (S.sunCheck && y) renderSunUnlogged(y);
+  else if (S.weekOpen && S.weekResult) renderWeek();
+  else if (y && y.unlogged && !y.resolved && S.held.length) renderMorning();
+}
+
+if (loadState()) { renderTable(); resumeSheet(); toast('Welcome back · picked up where you left off'); }
+else { renderTable(); renderLaunch(); }
 </script>
 
 </html>
