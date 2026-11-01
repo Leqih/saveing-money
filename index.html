@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Penny Round</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:opsz,wght@9..40,500;9..40,700;9..40,900&family=IBM+Plex+Mono:wght@500&family=Noto+Sans+SC:wght@500;900&family=Pixelify+Sans:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:opsz,wght@9..40,500;9..40,700;9..40,900&family=IBM+Plex+Mono:wght@500&family=Pixelify+Sans:wght@400;600&display=swap">
 <style>
 /* layout: one phone-sized app column on an orange grid desk; sheets slide over the table */
 :root {
@@ -15,7 +15,7 @@
   --pink: #FF4D6A; --purple: #A55BFF; --blue: #2E8BFF; --gold: #FFD000; --cobalt: #1F6BFF; --red: #FF3B1F; --yellow: #FFD54A; --lav: #DCD8FF;
   --receipt: #F5F3EC;
   --f-display: 'Archivo Black', 'Arial Black', sans-serif;
-  --f-body: 'DM Sans', 'Noto Sans SC', 'PingFang SC', system-ui, sans-serif;
+  --f-body: 'DM Sans', system-ui, sans-serif;
   --f-px: 'Pixelify Sans', 'IBM Plex Mono', monospace;
   --f-mono: var(--f-px);
   color-scheme: light;
@@ -118,6 +118,7 @@ button.cap:active { transform: translateY(3px); }
 button.tile:active { transform: translateY(2px); }
 .tile.now { background: var(--orange); color: #fff; box-shadow: inset 0 -3px 0 var(--orange-edge); }
 .tile.future { background: transparent; box-shadow: none; border: 1.5px dashed var(--cap-edge); color: var(--mute); }
+.tile.skip { opacity: 0.5; }
 .tile.hit { box-shadow: inset 0 -3px 0 #FFB3A6; }
 .tile.zero { box-shadow: inset 0 -3px 0 var(--lime-edge); }
 
@@ -154,7 +155,7 @@ button.chip:active { transform: translateY(2px); }
 .x { width: 44px; height: 44px; flex-shrink: 0; border-radius: 15px; border: 0; padding: 0; background: var(--ink); color: var(--lime); display: flex; align-items: center; justify-content: center; transform: rotate(-4deg); box-shadow: inset 0 -4px 0 rgba(0,0,0,0.45), 0 6px 10px -4px rgba(20,20,30,0.4); transition: transform 0.12s ease; }
 .x:hover { transform: rotate(4deg) scale(1.05); } .x:active { transform: rotate(0) scale(0.94); }
 /* a chunky label stuck on a card or box: ink on lime, like the stamps */
-.sticker { position: absolute; z-index: 2; padding: 2px 10px; border-radius: 10px; background: var(--lime); color: var(--ink); border: 2px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font-size: 12px; font-weight: 900; white-space: nowrap; transform: rotate(6deg); }
+.sticker { position: absolute; z-index: 2; padding: 2px 10px; border-radius: 10px; background: var(--lime); color: var(--ink); border: 0; box-shadow: 0 3px 8px rgba(20,20,30,0.2); font-size: 12px; font-weight: 900; white-space: nowrap; transform: rotate(6deg); }
 .lbl { font-size: 12px; font-weight: 900; color: var(--sub); margin-bottom: -4px; }
 .quick { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
 .amount { border-radius: 28px 60px 60px 28px; background: var(--lav); padding: 16px 22px; display: flex; justify-content: space-between; align-items: center; }
@@ -162,7 +163,7 @@ button.chip:active { transform: translateY(2px); }
 .field { display: flex; gap: 6px; }
 .in { flex: 1; min-width: 0; height: 44px; border-radius: 14px; border: 2px solid var(--rule); padding: 0 14px; font: inherit; font-size: 14px; background: #fff; color: var(--ink); }
 .in:focus { outline: none; border-color: var(--cobalt); }
-.mini { height: 44px; padding: 0 12px; border-radius: 14px; border: 2px solid var(--ink); background: #fff; font-weight: 900; font-size: 12px; white-space: nowrap; }
+.mini { height: 44px; padding: 0 12px; border-radius: 14px; border: 2px solid var(--rule); background: #fff; font-weight: 900; font-size: 12px; white-space: nowrap; }
 .mini[disabled] { opacity: 0.35; cursor: not-allowed; }
 .cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .cats .cap > .top { text-align: center; font-weight: 900; font-size: 12px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 44px; }
@@ -222,10 +223,10 @@ button.chip:active { transform: translateY(2px); }
 .receipt .cap-t { font-family: var(--f-mono); font-size: 11px; color: var(--sub); padding-right: 90px; }
 .receipt .tot { display: flex; justify-content: space-between; align-items: baseline; }
 .receipt .tot b { font-family: var(--f-display); font-weight: 400; font-size: 28px; }
-.stamp { position: absolute; right: 14px; top: 12px; transform: rotate(8deg); padding: 4px 10px; border: 3px solid var(--ink); border-radius: 10px; font-weight: 900; font-size: 12px; background: var(--lime); }
+.stamp { position: absolute; right: 14px; top: 12px; transform: rotate(8deg); padding: 4px 10px; border: 0; border-radius: 10px; font-weight: 900; font-size: 12px; background: var(--lime); }
 .stamp.hit { background: #FFD0D8; }
 .stamp.no { background: #FFE1E1; }
-.bigstamp { align-self: center; padding: 10px 26px; border: 4px solid var(--ink); border-radius: 18px; font-weight: 900; font-size: 28px; transform: rotate(-5deg); background: var(--lime); box-shadow: 0 8px 0 rgba(0,0,0,0.12); }
+.bigstamp { align-self: center; padding: 10px 26px; border: 0; border-radius: 18px; font-weight: 900; font-size: 28px; transform: rotate(-5deg); background: var(--lime); box-shadow: 0 8px 0 rgba(0,0,0,0.12); }
 .bigstamp.no { background: #FFE1E1; }
 
 /* rule sheet: the launch screen's sticker collage, then the details as gently tilted candy cards */
@@ -285,7 +286,7 @@ button.chip:active { transform: translateY(2px); }
 .rc .n { position: absolute; left: -10px; top: -12px; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #FFF; font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center; transform: rotate(-8deg); box-shadow: 0 0 0 3px #FFF; }
 .rquote::after { content: "\201D"; position: absolute; right: 16px; top: -6px; font-family: var(--f-display); font-size: 64px; line-height: 1; color: #111111; opacity: 0.18; }
 .rbig { font-family: var(--f-display); font-weight: 400; font-size: 20px; }
-.g-white { background: #FFF; border: 2px solid var(--ink); }
+.g-white { background: #FFF; border: 2px solid var(--rule); }
 .g-ink { background: #111; color: #FFF; } .g-ink .n { background: var(--lime); color: var(--ink); }
 .rclash { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .rclash span { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px 0 4px; border-radius: 16px; background: #F3F3F6; font-size: 12px; font-weight: 900; }
@@ -349,8 +350,8 @@ button.chip:active { transform: translateY(2px); }
 @keyframes bubFloat { 50% { translate: 0 -7px; } }
 @keyframes ballIn { from { opacity: 0; transform: scale(0.2) rotate(-40deg); } }
 @keyframes ballBob { 50% { translate: 0 -9px; } }
-.l-foot { left: 24px; right: 24px; bottom: 40px; display: flex; flex-direction: column; gap: 12px; }
-.l-foot .linkbtn { position: absolute; left: 50%; bottom: -34px; transform: translateX(-50%); white-space: nowrap; padding: 4px 8px; }
+.l-foot { left: 24px; right: 24px; bottom: 54px; display: flex; flex-direction: column; gap: 12px; }
+.l-foot .linkbtn { position: absolute; left: 50%; bottom: -38px; transform: translateX(-50%); white-space: nowrap; padding: 4px 8px; }
 .l-foot h1 { margin: 0; font-weight: 900; font-size: 28px; line-height: 1.2; color: #FFF; }
 .launch .linkbtn { color: #FFF; opacity: 0.85; }
 .l-foot p { margin: 0; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.88); }
@@ -515,7 +516,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .dsum { display: flex; align-items: center; justify-content: space-between; gap: 10px; position: relative; font-size: 12px; color: var(--sub); }
 .dsum b { font-family: var(--f-display); font-weight: 400; font-size: 16px; color: var(--ink); }
 .dslots { display: flex; gap: 6px; }
-.dslot { width: 34px; height: 34px; border-radius: 11px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--ink); }
+.dslot { width: 34px; height: 34px; border-radius: 11px; display: flex; align-items: center; justify-content: center; border: 2px solid transparent; }
 .dslot.empty { border: 2px dashed #C4C4CC; background: #F6F6F8; }
 /* draw: a sealed pack tears open and the cards fan out of it like a hand */
 .hand { flex: 1 0 auto; display: flex; align-items: center; justify-content: center; min-height: 372px; margin: 0 -18px; overflow: hidden; }
@@ -651,7 +652,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .deck-plate { position: relative; border-radius: 24px 24px 20px 20px; padding: 10px 14px 12px; display: flex; flex-direction: column; gap: 8px; transition: background 0.35s, color 0.35s; box-shadow: 0 -2px 0 rgba(0,0,0,0.06); }
 .tray-hint { margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; font-weight: 900; letter-spacing: 1px; opacity: 0.9; }
 .drawdark .dsum { color: inherit; opacity: 0.95; } .drawdark .dsum b { color: inherit; }
-.drawdark .dslot { border-color: #111; } .drawdark .dslot.empty { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.1); }
+.drawdark .dslot { border-color: transparent; } .drawdark .dslot.empty { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.1); }
 .pickline { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: -6px; }
 .pickclash { font-size: 12px; color: rgba(255,255,255,0.65); }
 .drawfoot.pulse { animation: trayPulse 0.55s cubic-bezier(.3,1.8,.5,1); }
@@ -659,13 +660,14 @@ button.hcard:active > div { transform: translateY(2px); }
 .dcount { font-family: var(--f-display); font-size: 20px; margin-right: 10px; display: inline-block; }
 .dcount.bounce { animation: cbounce 0.6s cubic-bezier(.3,1.9,.5,1); }
 @keyframes cbounce { 0% { transform: scale(1); } 35% { transform: scale(1.7) translateY(-4px); } 100% { transform: scale(1); } }
-.sc2 .carry-tag { left: 14px; top: -8px; z-index: 3; }
-.sc2-rec { left: auto; right: auto; left: 50%; top: 14px; transform: translateX(-50%) rotate(-3deg); font-size: 11px; padding: 1px 10px; z-index: 3; }
-.dsum-rec { height: 30px; padding: 0 12px; border-radius: 15px; border: 2px solid var(--ink); background: var(--lime); font-size: 12px; font-weight: 900; white-space: nowrap; }
+/* the button centres the 340px-tall face in its 425px box, so the card itself starts ~42px down */
+.sc2 .carry-tag { left: 14px; top: 34px; z-index: 3; }
+.sc2-rec { left: auto; right: auto; left: 50%; top: 32px; transform: translateX(-50%) rotate(-3deg); font-size: 11px; padding: 1px 10px; z-index: 3; }
+.dsum-rec { height: 30px; padding: 0 12px; border-radius: 15px; border: 0; background: var(--lime); font-size: 12px; font-weight: 900; white-space: nowrap; }
 .sdots { position: absolute; left: 0; right: 0; top: 352px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--mute); }
 .sd { display: flex; gap: 8px; }
 .thumb { width: 36px; height: 36px; padding: 0; border-radius: 12px; border: 2px solid transparent; display: flex; align-items: center; justify-content: center; opacity: 0.55; transform: scale(0.88); transition: transform 0.25s cubic-bezier(.3,1.7,.5,1), opacity 0.2s; }
-.thumb.on { opacity: 1; transform: scale(1.12); border-color: #111; box-shadow: 0 4px 0 #111; }
+.thumb.on { opacity: 1; transform: scale(1.12); border-color: transparent; box-shadow: 0 4px 10px rgba(20,20,30,0.25); }
 .sheet.tint { transition: background 0.4s; }
 .hand.dealing .sc2 { animation: dealIn 0.95s cubic-bezier(.25,.8,.35,1) backwards; animation-delay: var(--d); }
 @keyframes dealIn { 0% { transform: translate(0, 60px) rotate(0) scale(0.3); opacity: 0; } 12% { opacity: 1; } 45% { transform: translate(var(--bx), var(--by)) rotate(var(--br)) scale(0.9); } }
@@ -686,10 +688,10 @@ button.hcard:active > div { transform: translateY(2px); }
 @keyframes shake { 0%, 100% { transform: none; } 15% { transform: translateX(-8px) rotate(-4deg); } 30% { transform: translateX(8px) rotate(4deg); } 45% { transform: translateX(-6px) rotate(-2deg); } 60% { transform: translateX(4px); } }
 .pop { animation: pop2 0.5s ease; }
 @keyframes pop2 { 0% { transform: scale(0.8); } 60% { transform: scale(1.08); } 100% { transform: none; } }
-.chipk { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 9px; border: 2px solid #111; font-size: 12px; font-weight: 900; white-space: nowrap; vertical-align: middle; }
+.chipk { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 9px; border: 2px solid rgba(17,17,17,0.1); font-size: 12px; font-weight: 900; white-space: nowrap; vertical-align: middle; }
 .stakes { display: flex; flex-direction: column; gap: 6px; }
 .stake { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 12px; border-radius: 16px; border: 2px solid #E2E2E8; background: #FFF; font-size: 12px; font-weight: 900; text-align: left; }
-.stake.on { border-color: #111; background: #F4FFC2; }
+.stake.on { border-color: var(--lime-edge); background: #F4FFC2; }
 .carry { display: flex; justify-content: space-between; gap: 8px; padding: 6px 4px 0; }
 .carry .hcard { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .carry .hcard.on { transform: translateY(-4px); }
@@ -745,7 +747,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .sunday span { font-size: 12px; line-height: 1.55; color: rgba(255,255,255,0.85); }
 .sunday .cap { margin-top: 4px; } .sunday .cap > .top { text-align: center; font-weight: 900; font-size: 14px; padding: 12px; color: #111; }
 /* notices: a bell with an unseen count in the header, the list in its own sheet */
-.honest { flex: none; height: 44px; padding: 0 10px; border-radius: 22px; border: 2px solid var(--ink); background: var(--lime); color: var(--ink); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 3px 0 #9DB000; } .honest.off { background: #EDEDF1; border: 2px dashed #B5B5BC; color: var(--mute); box-shadow: none; }
+.honest { flex: none; height: 44px; padding: 0 10px; border-radius: 22px; border: 0; background: var(--lime); color: var(--ink); display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 3px 0 #9DB000; } .honest.off { background: #EDEDF1; border: 2px dashed #B5B5BC; color: var(--mute); box-shadow: none; }
 .honest b { font-family: var(--f-px); font-weight: 500; font-size: 14px; }
 /* the bell is a scalloped badge like the star badge beside it */
 .head .pf { position: relative; width: 66px; height: 66px; flex-shrink: 0; border: 0; padding: 0; background: none; color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -825,7 +827,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .stage-x { font-family: var(--f-display); font-size: 28px; }
 .stage-cards { display: flex; justify-content: space-between; gap: 8px; padding: 6px 4px 16px; }
 .stage-cards .sc { position: relative; }
-.sc-tag { position: absolute; left: 50%; bottom: -12px; padding: 2px 10px; border: 2px solid var(--ink); border-radius: 12px; font-size: 12px; font-weight: 900; white-space: nowrap; transform: translateX(-50%) scale(0); transition: transform 0.3s cubic-bezier(.3,1.9,.5,1); background: var(--lime); color: var(--ink); z-index: 2; }
+.sc-tag { position: absolute; left: 50%; bottom: -12px; padding: 2px 10px; border: 0; border-radius: 12px; font-size: 12px; font-weight: 900; white-space: nowrap; transform: translateX(-50%) scale(0); transition: transform 0.3s cubic-bezier(.3,1.9,.5,1); background: var(--lime); color: var(--ink); z-index: 2; }
 .sheet.closing { animation: sheetOut 0.23s cubic-bezier(.4,0,1,1) both !important; }
 @keyframes sheetOut { to { transform: translateY(36px); opacity: 0; } }
 .sheet.tonight > * { animation: stageIn 0.45s cubic-bezier(.2,1,.3,1) both; }
@@ -874,7 +876,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .mini.on { background: #111; color: #FFF; }
 /* favorites fill up while held, so a long press reads as "saving" */
 .qchip { user-select: none; -webkit-user-select: none; touch-action: manipulation; }
-.qchip.on { background: var(--lime); border-color: var(--ink); }
+.qchip.on { background: var(--lime); border-color: var(--lime-edge); }
 /* recommended set on the draw page */
 .linkbtn { border: 0; background: none; font-family: var(--f-px); font-size: 12px; color: #5E5E66; padding: 6px; }
 
@@ -1004,13 +1006,13 @@ button.hcard:active > div { transform: translateY(2px); }
 .rfoot { position: relative; height: 92px; margin-top: 8px; }
 .rs { position: absolute; display: block; transform: rotate(var(--r, 0deg)); }
 .print .rs { animation: stkIn 0.55s cubic-bezier(.2,1.7,.4,1) both calc(2.65s + var(--d, 0ms)); }
-.rs-bar { left: 0; top: 6px; padding: 6px 8px 4px; background: #FFD92E; border: 2px solid #111; border-radius: 3px; }
+.rs-bar { left: 0; top: 6px; padding: 6px 8px 4px; background: #FFD92E; border: 0; border-radius: 3px; }
 .rs-bar .bars { display: flex; gap: 1.5px; height: 34px; align-items: stretch; } .rs-bar .bars i { background: #111; display: block; }
 .rs-bar small { display: block; margin-top: 2px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 1px; color: #111; }
 .rs-smile { left: 150px; top: 0; }
-.rs-tag { left: 196px; top: 10px; padding: 4px 12px 5px; background: #3FA83A; border: 2px solid #111; border-radius: 4px; color: #FFF; text-align: center; }
+.rs-tag { left: 196px; top: 10px; padding: 4px 12px 5px; background: #3FA83A; border: 0; border-radius: 4px; color: #FFF; text-align: center; }
 .rs-tag small { display: block; font-family: var(--f-mono); font-size: 11px; letter-spacing: 1px; } .rs-tag b { display: block; font-family: var(--f-display); font-weight: 400; font-size: 20px; line-height: 1; }
-.rs-say { right: -4px; top: 44px; padding: 5px 14px; background: #FFD92E; border: 2px solid #111; border-radius: 50%; font-weight: 900; font-size: 12px; color: #111; white-space: nowrap; }
+.rs-say { right: -4px; top: 44px; padding: 5px 14px; background: #FFD92E; border: 0; border-radius: 50%; font-weight: 900; font-size: 12px; color: #111; white-space: nowrap; }
 
 /* confirm buttons: one place on every sheet, the same as the launch screen */
 .sfoot { position: sticky; bottom: -24px; z-index: 4; margin: auto -18px -24px; padding: 14px 24px 40px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(180deg, rgba(255,255,255,0), #FFF 22%); }
@@ -1021,7 +1023,9 @@ button.hcard:active > div { transform: translateY(2px); }
 .sfoot .cap.lime.bigbtn > .top { flex: 1; display: flex; align-items: center; justify-content: center; background: transparent; box-shadow: none; color: #FFF; padding: 0 16px; }
 .sfoot .cap.lime.bigbtn:active { transform: translateY(2px); }
 /* a link under the button hangs in the bottom margin so the button itself never moves */
-.sfoot .linkbtn { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); white-space: nowrap; padding: 4px 8px; }
+/* the link sits above the home indicator, so a foot that has one gets a taller bottom */
+.sfoot:has(.linkbtn) { padding-bottom: 54px; }
+.sfoot .linkbtn { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); white-space: nowrap; padding: 4px 8px; }
 
 /* home: let the hero and the rule cards take the room that is left */
 .screen:has(> .head) { gap: 18px; }
@@ -1580,7 +1584,7 @@ function cardHTML(c, state = 'on') {
   return `<div style="width:240px;height:340px;box-sizing:border-box;border-radius:24px;padding:4px;background:#FFF;box-shadow:0 7px 0 ${lip},0 18px 24px -6px rgba(20,20,30,0.45);color:${ink};font-family:var(--f-body)">
   <div style="height:100%;box-sizing:border-box;border-radius:20px;padding:8px;background:${core}">
   <div style="position:relative;height:100%;border-radius:13px;background:${face};overflow:hidden">
-   <span style="position:absolute;left:8px;top:8px;width:26px;height:26px;border-radius:50%;border:2px solid ${ink};box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:11px">${c.no}</span>
+   <span style="position:absolute;left:8px;top:8px;width:26px;height:26px;border-radius:50%;background:${key};box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-family:var(--f-mono);font-size:11px">${c.no}</span>
    <span style="position:absolute;left:40px;right:40px;top:8px;height:26px;display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-size:${nameSize}px;text-transform:uppercase;white-space:nowrap;letter-spacing:0.2px">${c.name}</span>
    <span style="position:absolute;right:8px;top:8px;width:26px;height:26px;border-radius:50%;background:${off ? '#8A8A92' : t.core};color:${t.chipText};display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-size:12px">+${c.plus}</span>
    <div style="position:absolute;left:8px;right:8px;top:42px;height:160px;border-radius:12px;background:${win};box-shadow:inset 0 0 0 2px ${key};overflow:hidden">
@@ -1673,7 +1677,7 @@ const clashes = (a, b) => (CARDS[a].clash || []).includes(b) || (CARDS[b].clash 
 const clashIn = (no, sel) => sel.find(x => x !== no && clashes(no, x));
 const clashNames = no => Object.keys(CARDS).filter(x => clashes(no, x)).map(x => CARDS[x].name);
 const BASE = 350;
-// slots can grow to four in the shop; the deal is always two more than you keep
+// slots can grow to four in the shop
 // eight cards are dealt every week (or the whole pool while fewer are unlocked); you keep as many as you have slots
 const HOLDN = () => S.slots, DEALN = () => Math.max(S.slots, Math.min(8, S.unlocked.length));
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -1893,7 +1897,7 @@ function tilesHTML() {
       return `<button class="tile ${hit ? 'hit' : ''} ${all ? 'zero' : ''}" data-day="${i}" aria-label="${d} ${h.score} pts, see receipt"><span>${d}</span><b>${h.unlogged ? "Unlogged" : h.score}</b></button>`;
     }
     if (i === S.day) return `<span class="tile now"><span>${d}</span><b>Today</b></span>`;
-    if (i < S.weekStart) return `<span class="tile future"><span>${d}</span><b>Not joined</b></span>`;
+    if (i < S.weekStart) return `<span class="tile future skip" aria-label="${d}, before you joined"><span>${d}</span><b>–</b></span>`;
     return `<span class="tile future"><span>${d}</span><b>—</b></span>`;
   }).join('')}</div>`;
 }
@@ -1980,7 +1984,6 @@ function renderWeekSheet() {
 // the week score and ending the day are small, and everything else (history, stars, details) lives in its own page
 function homeHTML() {
   const ev = evaluate(S.today), w = weekInfo();
-  const dots = '';
   const br = breakers(S.today), sumToday = S.today.reduce((a, x) => a + x.amt, 0);
   const list = S.today.map((x, i) => ({ x, i })).slice(-2).map(({ x, i }) => {
     const ess = !!cat(x.cat).ess, b = br[i];
@@ -1988,7 +1991,7 @@ function homeHTML() {
   }).join('') || '<span class="note">Nothing spent today.</span>';
   return `
     <div class="head">
-      <button class="daypill" data-act="clock" aria-label="Week ${S.week} ${DAYS[S.day]}, now ${fmtClock(S.clock)}, tap to change the demo time"><span class="px" style="font-size:12px;display:flex;justify-content:space-between">Week ${S.week} · ${DAYS[S.day]}<span class="clock">${fmtClock(S.clock)} ▾</span></span><span class="dots" aria-hidden="true">${dots}</span></button>
+      <button class="daypill" data-act="clock" aria-label="Week ${S.week} ${DAYS[S.day]}, now ${fmtClock(S.clock)}, tap to change the demo time"><span class="px" style="font-size:12px;display:flex;justify-content:space-between">Week ${S.week} · ${DAYS[S.day]}<span class="clock">${fmtClock(S.clock)} ▾</span></span></button>
       ${profileHTML(ev)}
       <button class="cookie" data-act="star" aria-label="Stars ${S.stars}, tap for the guide and settings"><span class="n">${S.stars}</span><span class="l">★ Stars</span></button>
     </div>
@@ -2254,12 +2257,12 @@ function deckHTML() {
     </div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       <span style="font-weight:900;font-size:12px;margin-right:2px">Stakes</span>
-      ${STAKES.map((s, i) => `<span class="cv-pill" style="${i === S.stake ? `background:${s.bg};border-color:${i ? s.bg : "#111"};color:${s.fg}` : ""}">${s.name}${i < S.stake || i <= (S.maxStake || 0) && i !== S.stake ? " ✓" : ""}</span>`).join("")}
+      ${STAKES.map((s, i) => `<span class="cv-pill" style="${i === S.stake ? `background:${s.bg};border-color:${i ? s.bg : "#E2E2E8"};color:${s.fg}` : ""}">${s.name}${i < S.stake || i <= (S.maxStake || 0) && i !== S.stake ? " ✓" : ""}</span>`).join("")}
     </div>
     <p class="note left">Graduated cards leave the deck and add +1 to your base multiplier (now ×${S.baseMult}).</p>`}`;
 }
 
-/* ---------- weekly draw: deal 5, keep 3 ---------- */
+/* ---------- weekly draw: deal up to 8, keep 3 (or 4) ---------- */
 function firstHand() {
   const picks = [...new Set(S.weak.map(id => WEAK.find(w => w.id === id).card))].filter(no => S.unlocked.includes(no));
   const rest = S.unlocked.filter(no => !picks.includes(no)).sort(() => Math.random() - 0.5);
@@ -2300,12 +2303,6 @@ function renderDraw() {
   const rec = draft.rec = draft.rec || bestCombo(draft.hand, need, hasData), recMult = S.baseMult + rec.reduce((a, no) => a + CARDS[no].plus, 0);
   const ci = draft.ci = inHand.length ? Math.min(Math.max(draft.ci || 0, 0), inHand.length - 1) : 0;
   const focus = draft.opened ? inHand[ci] : null;
-  const pillOf = no => {
-    const c = CARDS[no], one = hasData ? simulate([no], S.lastWeek, S.weekStart) : null;
-    if (!one) return ['', ['', 'Easy', 'Careful', 'Hardest, most rewarding'][c.diff]];
-    const held = one.per[no], pre = S.estimated ? 'By your estimate' : 'Last week';
-    return held >= one.days * 0.7 ? ['ok', `${pre} · holdable ${held}/${one.days} days`] : held >= one.days * 0.4 ? ['mid', `${pre} · half and half ${held}/${one.days} days`] : ['no', `${pre} · hard to hold ${held}/${one.days} days`];
-  };
   const cards = inHand.map((no, i) => {
     const tag = no === S.carry && !S.firstDraw ? 'Carried' : clashIn(no, sel) ? 'Overlap' : '';
     return `<button class="sc2" data-pick="${no}" data-i="${i}" aria-label="${CARDS[no].name} +${CARDS[no].plus}${i === ci ? ', tap to keep, or drag down' : ', tap to bring it to the front'}"
@@ -2318,13 +2315,12 @@ function renderDraw() {
       <svg class="bag-body" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bagG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF3D00"/><stop offset="1" stop-color="#FF6B3A"/></linearGradient><clipPath id="bagC"><path d="${BAG_BODY}"/></clipPath></defs><path d="${BAG_BODY}" fill="url(#bagG)"/><g clip-path="url(#bagC)"><path d="M-10 214C14 186 62 186 90 222C112 196 160 196 214 226V256H-10Z" fill="#3DCBFF"/></g></svg>
       <svg class="bag-strip" viewBox="0 0 200 250" preserveAspectRatio="none" aria-hidden="true"><path d="${BAG_STRIP}" fill="#3DCBFF"/><path d="M12 28H188" stroke="#FFF" stroke-width="2" stroke-dasharray="6 6" vector-effect="non-scaling-stroke" opacity=".9"/></svg>
       <svg class="pk-arrow" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path d="M5 5L21 21M24 8v16H8" fill="none" stroke="#FFE600" stroke-width="7" stroke-linecap="square"/></svg>
-      <span class="pk-badge" aria-hidden="true"><svg width="62" height="62" viewBox="0 0 62 62"><circle cx="31" cy="31" r="28" fill="#FFF" stroke="#111" stroke-width="3"/><g class="pk-face" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"><path d="M17 22h9M36 22h9M31 14v14"/><path d="M19 37c4 9 20 9 24 0"/></g></svg></span>
+      <span class="pk-badge" aria-hidden="true"><svg width="62" height="62" viewBox="0 0 62 62"><circle cx="31" cy="31" r="28" fill="#FFF"/><g class="pk-face" fill="none" stroke="#111" stroke-width="3" stroke-linecap="round"><path d="M17 22h9M36 22h9M31 14v14"/><path d="M19 37c4 9 20 9 24 0"/></g></svg></span>
       <span class="pk-labs"><span class="pk-lab px">WEEK ${String(S.week).padStart(2, '0')}</span><b class="pk-lab pk-title">This week’s pack</b><span class="pk-lab pk-count">${draft.hand.length} rule cards</span></span>
     </div>
     <span class="pk-tear" aria-hidden="true">Hold the top → drag right to tear</span>`;
   const stage = draft.opened ? `<div class="stack ${draft.slide ? 'slide' + draft.slide : ''}">${cards}</div>
     ${burst ? `<span class="burst" aria-hidden="true">${burst}</span>` : ''}` : pack;
-  const info = ''; const _unused = focus ? (st => `<div class="pickline"><span class="pill ${st[0]}">${st[1]}</span>${clashNames(focus).length ? `<span class="pickclash">Can’t keep with ${clashNames(focus).join(', ')} at the same time</span>` : ''}</div>`)(pillOf(focus)) : '';
   // the footer keeps the picks, what they add up to and the button on screen however far the cards scroll
   const multSel = S.baseMult + sel.reduce((a, no) => a + CARDS[no].plus, 0);
   const sum = sel.length === need && hasData ? (sim => `about <b>${sim.total}</b> pts / target ${weekTarget()}`)(simulate(sel, S.lastWeek, S.weekStart)) : sel.length ? `All held <b>×${multSel}</b>` : (draft.opened ? `<button class="dsum-rec" data-act="use-rec">Best ${rec.length} · ×${recMult}</button>` : 'Tear open the pack');
@@ -2334,7 +2330,6 @@ function renderDraw() {
     <div class="bar-top"><h1>Week ${S.week}</h1>${draft.opened ? `<span class="dkc-count ${draft.landed ? 'bounce' : ''}">Dealt ${inHand.length}</span>` : ''}<span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
     <p class="draw-lead">Keep ${need} cards this week${S.weekStart > 0 ? `<span class="chipk" style="background:var(--lime)">Only ${weekDays()} days</span>` : ''}</p>
     <div class="hand ${draft.opened ? 'open' : ''} ${draft.dealIn ? 'dealing' : ''}"><div class="hand-in">${stage}</div></div>
-    ${info}
     <div class="drawfoot ${draft.landed ? 'pulse' : ''}">
       <div class="deck-strips" aria-hidden="true">${sel.slice(0, -1).map((no, j, a) => `<i style="background:${coreOf(no)};bottom:${(a.length - 1 - j) * 8}px;left:${22 + (a.length - j) * 8}px;right:${22 + (a.length - j) * 8}px"></i>`).join('')}</div>
       <div class="deck-plate" style="background:${draft.plate ? draft.plate[0] : plateBg};color:${draft.plate ? draft.plate[1] : plateFg}">
@@ -2723,7 +2718,7 @@ function receiptStickers(h) {
   const bars = Array.from({ length: 22 }, (_, i) => `<i style="width:${[1, 2, 1, 3, 1, 1, 2][(i * 5 + h.day) % 7]}px"></i>`).join('');
   return `<div class="rfoot" aria-hidden="true">
     <span class="rs rs-bar" style="--r:-4deg;--d:0ms"><span class="bars">${bars}</span><small>RC-W${String(h.week).padStart(2, '0')}D${h.day + 1}-${String(h.score).padStart(3, '0')}</small></span>
-    <span class="rs rs-smile" style="--r:8deg;--d:140ms"><svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#FF7BB8" stroke="#111" stroke-width="2.4"/><path d="M11 17q3-4 6 0M23 17q3-4 6 0M12 25q8 8 16 0" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+    <span class="rs rs-smile" style="--r:8deg;--d:140ms"><svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#FF7BB8"/><path d="M11 17q3-4 6 0M23 17q3-4 6 0M12 25q8 8 16 0" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round"/></svg></span>
     <span class="rs rs-tag" style="--r:3deg;--d:280ms"><small>TOTAL</small><b>${h.score}</b></span>
     <span class="rs rs-say" style="--r:-7deg;--d:420ms">${say}</span>
   </div>`;
@@ -2909,10 +2904,10 @@ function renderLaunch() {
       <path d="M34 10H86C104 10 112 18 112 36V80C112 98 104 106 86 106H34C16 106 8 98 8 80V36C8 18 16 10 34 10Z" fill="none" stroke="url(#jE)" stroke-width="2.200"/>
       <ellipse cx="17" cy="50" rx="2.400" ry="9" fill="#FFF" opacity=".75" filter="url(#jBl)"/><circle cx="98" cy="40" r="2.600" fill="#FFF" opacity=".85"/><circle cx="92" cy="49" r="1.300" fill="#FFF" opacity=".7"/>
       <text x="60" y="66" font-family="Archivo Black, Arial Black, sans-serif" font-size="40" text-anchor="middle" fill="#FFF" stroke="#FFF" stroke-width="1.500" stroke-linejoin="round" filter="url(#jT)">×6</text>
-      <text x="60" y="87" font-family="Noto Sans SC, sans-serif" font-size="11" font-weight="900" fill="#FFF" fill-opacity=".92" text-anchor="middle" letter-spacing="1">Mult</text></svg></div>
-    <div class="l-abs stk pill30" style="--r:-7deg;--d:900ms;--f:5.8s;left:128px;top:36px">$30 <small>/wk</small></div>
-    <div class="l-abs stk ring" style="--r:12deg;--d:1000ms;right:20px;top:20px" aria-hidden="true"><svg width="74" height="74" viewBox="0 0 96 96"><defs><path id="launch-ring" d="M48 48m-36 0a36 36 0 1 1 72 0a36 36 0 1 1-72 0"/></defs><circle cx="48" cy="48" r="46" fill="#FFF"/><circle cx="48" cy="48" r="25" fill="#111"/><path d="M48 31C50 43 53 46 65 48C53 50 50 53 48 65C46 53 43 50 31 48C43 46 46 43 48 31Z" fill="#FF4D6A"/><text font-family="Noto Sans SC, sans-serif" font-size="9.5" font-weight="900" fill="#8A8A92" letter-spacing="2"><textPath href="#launch-ring">ORIGINAL · PENNY ROUND · WEEK 1 ·</textPath></text></svg></div>
-    <div class="l-abs stk cbub" style="--r:8deg;--d:760ms;--f:4.8s;left:252px;top:66px" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="#FFF"/><circle cx="15" cy="15" r="9.500" fill="none" stroke="#A855F7" stroke-width="2.200"/><path d="M11.500 10.500L15 15.500M18.500 10.500L15 15.500M15 15.500V21M11.500 17.500h7M11.500 14h7" fill="none" stroke="#A855F7" stroke-width="2" stroke-linecap="round"/></svg></div>
+      <text x="60" y="87" font-family="DM Sans, sans-serif" font-size="11" font-weight="900" fill="#FFF" fill-opacity=".92" text-anchor="middle" letter-spacing="1">Mult</text></svg></div>
+    <div class="l-abs stk pill30" style="--r:-7deg;--d:900ms;--f:5.8s;left:262px;top:206px">$30 <small>/wk</small></div>
+    <div class="l-abs stk ring" style="--r:12deg;--d:1000ms;right:20px;top:64px" aria-hidden="true"><svg width="74" height="74" viewBox="0 0 96 96"><defs><path id="launch-ring" d="M48 48m-36 0a36 36 0 1 1 72 0a36 36 0 1 1-72 0"/></defs><circle cx="48" cy="48" r="46" fill="#FFF"/><circle cx="48" cy="48" r="25" fill="#111"/><path d="M48 31C50 43 53 46 65 48C53 50 50 53 48 65C46 53 43 50 31 48C43 46 46 43 48 31Z" fill="#FF4D6A"/><text font-family="DM Sans, sans-serif" font-size="9.5" font-weight="900" fill="#8A8A92" letter-spacing="2"><textPath href="#launch-ring">ORIGINAL · PENNY ROUND · WEEK 1 ·</textPath></text></svg></div>
+    <div class="l-abs stk cbub" style="--r:8deg;--d:760ms;--f:4.8s;left:252px;top:66px" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="#FFF"/><circle cx="15" cy="15" r="9.500" fill="none" stroke="#A855F7" stroke-width="2.200"/><text x="15" y="20.500" text-anchor="middle" font-family="Archivo Black, Arial Black, sans-serif" font-size="14" fill="#A855F7">$</text></svg></div>
     <div class="l-abs stk burst" style="--r:-10deg;--d:1100ms;--f:6.2s;left:8px;top:248px" aria-hidden="true"><svg width="76" height="76" viewBox="0 0 76 76"><polygon points="38.0,2.0 44.0,11.7 53.6,5.6 54.8,16.9 66.1,15.6 62.3,26.3 73.1,30.0 65.0,38.0 73.1,46.0 62.3,49.7 66.1,60.4 54.8,59.1 53.6,70.4 44.0,64.3 38.0,74.0 32.0,64.3 22.4,70.4 21.2,59.1 9.9,60.4 13.7,49.7 2.9,46.0 11.0,38.0 2.9,30.0 13.7,26.3 9.9,15.6 21.2,16.9 22.4,5.6 32.0,11.7" fill="#A4FF2E" stroke="#FFF" stroke-width="3.500" stroke-linejoin="round"/></svg><b>Over!</b></div>
     <div class="l-abs stk epill" style="--r:-4deg;--d:1200ms;--f:5s;left:226px;top:352px" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="14" fill="#FFD92E"/><ellipse cx="10.500" cy="12" rx="1.500" ry="2.200" fill="#111"/><ellipse cx="19.500" cy="12" rx="1.500" ry="2.200" fill="#111"/><ellipse cx="15" cy="20" rx="2.600" ry="3.400" fill="#111"/></svg><b>!!!?!</b></div>
     <svg class="l-abs stk sp" style="--r:0deg;--d:1300ms;left:334px;top:226px;width:30px" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 11 8 12 0Z" fill="#FFF"/></svg>
@@ -2986,7 +2981,8 @@ function renderFreq() {
   const labelsOf = w => w.id === 'weekend' ? ['$50', '$80', '$120+'] : ['1–2×', '3–5×', 'Every day'];
   const fullOf = w => w.id === 'weekend' ? ['About $50', 'About $80', '$120+'] : FREQ.map(f => f.label);
   const DISH = ['#F25550', '#111111', '#F1B94B', '#3F86D6', '#4CB05A', '#E97FB1'];
-  const GLYPH = ['<svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 3a9 9 0 000 18z" fill="#111111"/></svg>', '<svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#111111"/></svg>', '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 12V3a9 9 0 11-9 9z" fill="#111111"/></svg>'];
+  // the dish fills up with how often: half, three quarters, full
+  const GLYPH = ['<svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 3a9 9 0 000 18z" fill="#111111"/></svg>', '<svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 12V3a9 9 0 11-9 9z" fill="#111111"/></svg>', '<svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#111111"/></svg>'];
   const rows = picks.map((w, r) => { const cur = S.freq[w.id] ?? 1; return `<div class="fk-row" role="group" aria-label="${w.name}${w.id === 'weekend' ? ' spending' : ' weekly frequency'}">
       <span class="fk-name"><i class="dish" style="--d:${DISH[r % 6]}"></i>${w.name}</span>
       <div class="fk-well">${labelsOf(w).map((l, i) => `<button class="fk-cap ${cur === i ? 'on' : ''}" data-freq="${w.id}:${i}" aria-label="${fullOf(w)[i]}" aria-pressed="${cur === i}"><i class="fk-dish">${GLYPH[i]}<small>${l}</small></i></button>`).join('')}</div>
