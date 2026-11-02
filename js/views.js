@@ -1,13 +1,18 @@
 /* ---------- views ---------- */
 const app = document.getElementById('app');
-const money = n => (n < 0 ? '−$' + Math.abs(n) : '$' + n);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const entryName = x => `${cat(x.cat).name}${x.note && x.note !== cat(x.cat).name ? ' · ' + esc(x.note) : ''}`;
 const starStr = n => '★'.repeat(n);
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 // end a line with exactly one stop, whether or not it already has one
 const sentence = s => /[.!?]$/.test(s) ? s : s + '.';
-function toast(msg) { app.querySelectorAll('.toast').forEach(t => t.remove()); const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; app.appendChild(t); setTimeout(() => t.remove(), 2600); }
+// undo: the data-act of an Undo button to show beside the message; the toast then stays a little longer
+function toast(msg, undo) {
+  app.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  if (undo) { const b = document.createElement('button'); b.className = 'toast-undo'; b.dataset.act = undo; b.textContent = 'Undo'; t.appendChild(b); }
+  app.appendChild(t); setTimeout(() => t.remove(), undo ? 4500 : 2600);
+}
 // every confirm button sits in the same place as the launch screen's: pinned at the bottom, 24px in from the sides
 function pinFoot(sh) {
   if (sh.classList.contains('launch') || sh.querySelector('.drawfoot')) return;
@@ -95,15 +100,15 @@ function crtHTML(ev) {
       <span class="crt-scr">
         <span class="crt-top"><span class="crt-ttl">${ev.left < 0 ? 'Over today' : 'Left to spend today'}</span><span class="crt-streak ${streak ? 'on' : ''}"><svg width="10" height="12" viewBox="0 0 12 14" aria-hidden="true"><path d="M6 0c1 3 5 4.500 5 8.500A5 5 0 011 8.500C1 6.500 2.500 5.500 3 4c1 .8 1.200 1.800 1 2.800C5.500 6 6.200 3 6 0z" fill="currentColor"/></svg>Streak ${streak} ${streak === 1 ? 'day' : 'days'}</span></span>
         <span class="crt-money">${money(ev.left)}</span>
-        <span class="crt-sub"><i>▶</i> Spent $${ev.d.extra} / $${ev.daily}${S.debt ? ` · overdrawn $${Math.min(S.debt, dailyBudget())}` : ''}</span>
+        <span class="crt-sub"><i>▶</i> Spent ${money(ev.d.extra)} / ${money(ev.daily)}${S.debt ? ` · overdrawn ${money(Math.min(S.debt, dailyBudget()))}` : ''}</span>
         <span class="crt-ghosts">${ghosts}</span>
         ${wave}
-        <span class="crt-alt alt-score"><span class="crt-ttl">TODAY’S SCORE</span><span class="crt-money">${ev.score}</span><span class="crt-sub">$${ev.base} left × mult ${ev.mult}</span></span>
-        <span class="crt-alt alt-hold"><span class="crt-ttl">CARDS HOLDING</span><span class="crt-money">${ev.cards.filter(c => c.state === 'on').length}/${ev.cards.length}</span><span class="crt-sub">Spent $${ev.d.extra} / $${ev.daily}</span></span>
+        <span class="crt-alt alt-score"><span class="crt-ttl">TODAY’S SCORE</span><span class="crt-money">${ev.score}</span><span class="crt-sub">${money(ev.base)} left × mult ${ev.mult}</span></span>
+        <span class="crt-alt alt-hold"><span class="crt-ttl">CARDS HOLDING</span><span class="crt-money">${ev.cards.filter(c => c.state === 'on').length}/${ev.cards.length}</span><span class="crt-sub">Spent ${money(ev.d.extra)} / ${money(ev.daily)}</span></span>
         <span class="crt-glare"></span>
       </span>
     </span>
-    <span class="crt-base"><span class="lcd"><b>Today’s score ${ev.score}</b><i>left $${ev.base} × mult ${ev.mult}</i></span><i class="kb o"></i><i class="kb"></i></span>
+    <span class="crt-base"><span class="lcd"><b>Today’s score ${ev.score}</b><i>left ${money(ev.base)} × mult ${ev.mult}</i></span><i class="kb o"></i><i class="kb"></i></span>
   </button>`;
 }
 function weekInfo() {
@@ -139,7 +144,7 @@ function homeHTML() {
   const br = breakers(S.today), sumToday = S.today.reduce((a, x) => a + x.amt, 0);
   const list = S.today.map((x, i) => ({ x, i })).slice(-2).map(({ x, i }) => {
     const ess = !!cat(x.cat).ess, b = br[i];
-    return `<button class="chip ${ess ? 'ess' : b ? 'hit' : 'hot'}" data-edit="${i}" aria-label="${entryName(x)} ${x.amt} dollars, tap to edit"><span class="cl">${entryName(x)}${ess ? ' · essential' : ''}${b ? ` · broke ${b.join(', ')}` : ''}</span> <b>$${x.amt}</b></button>`;
+    return `<button class="chip ${ess ? 'ess' : b ? 'hit' : 'hot'}" data-edit="${i}" aria-label="${entryName(x)} ${x.amt} dollars, tap to edit"><span class="cl">${entryName(x)}${ess ? ' · essential' : ''}${b ? ` · broke ${b.join(', ')}` : ''}</span> <b>${money(x.amt)}</b></button>`;
   }).join('') || '<span class="note">Nothing spent today.</span>';
   return `
     <div class="head">
@@ -252,33 +257,35 @@ const catBadge = id => CAT_CARD[id] ? `<i class="lg-ico" style="background:${tin
   : `<i class="lg-ico" style="background:${CAT_COLOR[id] || '#D4D4DB'}">${esc(cat(id).name.slice(0, 1))}</i>`;
 function flowHTML(tabs) {
   const f = S.flowCat || 'all';
-  // today stays editable; past days come from history and open their receipt
+  // every entry opens for editing; past days' corrections change the ledger only, and their headers open the receipt
   const brT = breakers(S.today);
-  const days = [{ label: 'Today', date: dateOf(S.week, S.day), items: [...S.today.map((x, i) => ({ x, edit: i, breaks: brT[i] })), ...S.wish.map(x => ({ x, wish: true }))] },
-    ...S.history.slice().reverse().map(h => { const br = breakers(h.entries, h.held, h.teaBefore, h.weekBefore || 0); return { label: `${DAYS[h.day]}`, date: dateOf(h.week, h.day), cal: `${h.week}-${h.day}`, unlogged: h.unlogged, items: h.entries.map((x, i) => ({ x, breaks: br[i] })) }; })];
+  const ended = S.history.some(h => h.week === S.week && h.day === S.day);
+  const days = [...(ended ? [] : [{ label: 'Today', date: dateOf(S.week, S.day), items: [...S.today.map((x, i) => ({ x, edit: i, breaks: brT[i] })), ...S.wish.map(x => ({ x, wish: true }))] }]),
+    ...S.history.slice().reverse().map(h => { const br = breakers(h.entries, h.held, h.teaBefore, h.weekBefore || 0); return { label: `${DAYS[h.day]}`, date: dateOf(h.week, h.day), cal: `${h.week}-${h.day}`, unlogged: h.unlogged, items: h.entries.map((x, i) => ({ x, pedit: `${h.week}-${h.day}-${i}`, breaks: br[i] })) }; })];
   const all = days.flatMap(d => d.items.filter(it => !it.wish));
   const byCat = {}; all.forEach(it => { byCat[it.x.cat] = (byCat[it.x.cat] || 0) + it.x.amt; });
   const shown = all.filter(it => f === 'all' || it.x.cat === f), total = shown.reduce((a, it) => a + it.x.amt, 0);
   const chips = [['all', 'All', all.reduce((a, it) => a + it.x.amt, 0)], ...Object.entries(byCat).sort((a, b) => b[1] - a[1]).map(([id, v]) => [id, cat(id).name, v])]
-    .map(([id, name, v]) => `<button class="lg-chip ${f === id ? 'on' : ''}" data-flowcat="${id}" aria-pressed="${f === id}">${id === 'all' ? '' : `<i style="background:${CAT_COLOR[id] || '#D4D4DB'}"></i>`}${name}<b>$${v}</b></button>`).join('');
+    .map(([id, name, v]) => `<button class="lg-chip ${f === id ? 'on' : ''}" data-flowcat="${id}" aria-pressed="${f === id}">${id === 'all' ? '' : `<i style="background:${CAT_COLOR[id] || '#D4D4DB'}"></i>`}${name}<b>${money(v)}</b></button>`).join('');
   const row = it => {
     const x = it.x, ess = !!cat(x.cat).ess;
     const tags = [ess ? 'Essential' : '', x.caught ? 'caught by bank' : '', x.night ? 'after 10 pm' : '', x.fromWish ? 'waited 24 hours' : '', it.wish ? 'Wish list · decide tomorrow' : ''].filter(Boolean).join(' · ');
     const sub = [x.note ? cat(x.cat).name : '', tags].filter(Boolean).join(' · ');
-    const inner = `${catBadge(x.cat)}<span class="lg-main"><b>${x.note ? esc(x.note) : cat(x.cat).name}</b>${sub ? `<small>${sub}</small>` : ''}${it.breaks ? `<em>Broke ${it.breaks.join(', ')}</em>` : ''}</span><span class="lg-amt ${it.breaks ? 'hit' : ''} ${it.wish ? 'wished' : ''}">${it.wish ? '' : '−'}$${x.amt}</span>`;
-    return it.edit != null ? `<button class="lg-row" data-edit="${it.edit}" aria-label="${entryName(x)} ${x.amt} dollars, tap to edit">${inner}</button>` : `<div class="lg-row">${inner}</div>`;
+    const inner = `${catBadge(x.cat)}<span class="lg-main"><b>${x.note ? esc(x.note) : cat(x.cat).name}</b>${sub ? `<small>${sub}</small>` : ''}${it.breaks ? `<em>Broke ${it.breaks.join(', ')}</em>` : ''}</span><span class="lg-amt ${it.breaks ? 'hit' : ''} ${it.wish ? 'wished' : ''}">${it.wish ? money(x.amt) : money(-x.amt)}</span>`;
+    return it.edit != null ? `<button class="lg-row" data-edit="${it.edit}" aria-label="${entryName(x)} ${x.amt} dollars, tap to edit">${inner}</button>`
+      : it.pedit ? `<button class="lg-row" data-pedit="${it.pedit}" aria-label="${entryName(x)} ${x.amt} dollars, tap to correct">${inner}</button>` : `<div class="lg-row">${inner}</div>`;
   };
   const groups = days.map(d => {
     const items = d.items.filter(it => f === 'all' || it.x.cat === f);
     if (!items.length && (f !== 'all' || d.label !== 'Today')) return '';
     const sum = items.filter(it => !it.wish).reduce((a, it) => a + it.x.amt, 0);
-    const head = `<span>${d.label}<small>${d.date.getMonth() + 1}/${d.date.getDate()}</small></span><span class="px">$${sum}${d.cal ? ' · receipt →' : ''}</span>`;
+    const head = `<span>${d.label}<small>${d.date.getMonth() + 1}/${d.date.getDate()}</small></span><span class="px">${money(sum)}${d.cal ? ' · receipt →' : ''}</span>`;
     return `<section class="lg-day">${d.cal ? `<button class="lg-head" data-cal="${d.cal}">${head}</button>` : `<div class="lg-head">${head}</div>`}
       <div class="lg-list">${items.map(row).join('') || `<p class="note left" style="padding:12px 14px">${d.unlogged ? 'Nothing logged this day.' : 'Nothing spent yet today. Tap Log to start.'}</p>`}</div></section>`;
   }).join('');
   return `<div style="display:flex;justify-content:space-between;align-items:center">
       <h1 style="margin:0;font-weight:900;font-size:28px">Ledger</h1>
-      <span class="px" style="height:32px;padding:0 12px;border-radius:12px;border:2px solid #E2E2E8;display:inline-flex;align-items:center;font-size:14px;color:#5E5E66">${shown.length} ${shown.length === 1 ? 'entry' : 'entries'} · $${total}</span>
+      <span class="px" style="height:32px;padding:0 12px;border-radius:12px;border:2px solid #E2E2E8;display:inline-flex;align-items:center;font-size:14px;color:#5E5E66">${shown.length} ${shown.length === 1 ? 'entry' : 'entries'} · ${money(total)}</span>
     </div>
     ${tabs}
     <div class="lg-chips">${chips}</div>
@@ -318,8 +325,8 @@ function billHTML() {
     const rec = recs.find(o => o.d.getDate() === d), isNow = d === now.getDate();
     if (!rec && !isNow) { cells.push(`<span class="cv-day future"><span>${d}</span></span>`); continue; }
     const v = rec ? rec.h.extra : todayExtra, [outer, face] = tone(v / avg);
-    const inner = `<span style="background:${face}">${d}<b>$${v}</b></span>`;
-    cells.push(rec ? `<button class="cv-day" style="background:${outer}" data-cal="${rec.h.week}-${rec.h.day}" aria-label="${MON[m]} ${d}: spent $${v}">${inner}</button>`
+    const inner = `<span style="background:${face}">${d}<b>${money(v)}</b></span>`;
+    cells.push(rec ? `<button class="cv-day" style="background:${outer}" data-cal="${rec.h.week}-${rec.h.day}" aria-label="${MON[m]} ${d}: spent ${money(v)}">${inner}</button>`
       : `<span class="cv-day now" style="background:${outer}" aria-label="Today, spent so far ${v} ">${inner}</span>`);
   }
   const top3 = monthByCat(recs).slice(0, 3), max = top3.length ? top3[0][1] : 1, stripes = ['#FF4B4B', '#FF52D9', '#A9C3D1'];
@@ -342,7 +349,7 @@ function billHTML() {
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <h2>Top three categories</h2>
-      ${top3.map(([id, v], i) => `<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="font-weight:900">${cat(id).name}</span><span class="px">$${v} · ${Math.round(v / Math.max(1, spent) * 100)}%</span></div><div aria-hidden="true" style="height:12px;width:${Math.round(v / max * 100)}%;border-radius:3px;background:repeating-linear-gradient(90deg,${stripes[i]} 0 12px,transparent 12px 15px)"></div></div>`).join('') || '<p class="note left">No spending outside the allowance this month yet.</p>'}
+      ${top3.map(([id, v], i) => `<div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="font-weight:900">${cat(id).name}</span><span class="px">${money(v)} · ${Math.round(v / Math.max(1, spent) * 100)}%</span></div><div aria-hidden="true" style="height:12px;width:${Math.round(v / max * 100)}%;border-radius:3px;background:repeating-linear-gradient(90deg,${stripes[i]} 0 12px,transparent 12px 15px)"></div></div>`).join('') || '<p class="note left">No spending outside the allowance this month yet.</p>'}
     </div>`;
 }
 function catsHTML(recs, spent, tabs) {
@@ -357,7 +364,7 @@ function catsHTML(recs, spent, tabs) {
   const html = bands.map(([id, v], i) => {
     const s = STY[i], name = id === 'rest' ? 'Other' : cat(id).name, cardNo = CAT_CARD[id];
     return `<div class="cv-band" style="height:${s.h}px;z-index:${4 - i};${i ? 'margin-top:-18px;padding-top:32px;' : ''}background:${s.bg};box-shadow:0 9px 0 ${s.sh},0 14px 20px rgba(20,20,30,0.15)">
-      <div class="cv-lbl"><span style="font-weight:900;font-size:${s.fs}px">${name}</span><span class="px" style="font-size:14px">$${v}</span>
+      <div class="cv-lbl"><span style="font-weight:900;font-size:${s.fs}px">${name}</span><span class="px" style="font-size:14px">${money(v)}</span>
         ${i === 0 && cardNo ? `<span class="px" style="align-self:flex-start;padding:1px 8px;border-radius:8px;background:#111;color:#E4FF1A;font-size:12px">Drew “${CARDS[cardNo].name}” — keep it</span>` : ''}</div>
       <span class="cv-pct" style="font-size:${s.pct}px;color:${s.pc}">${Math.round(v / total * 100)}%</span>
       ${i === 0 && cardNo ? `<div style="position:absolute;right:18px;top:14px;width:54px;height:54px;border-radius:14px;background:${tintOf(cardNo)};display:flex;align-items:center;justify-content:center;transform:rotate(10deg);box-shadow:0 0 0 3px #FFF">${artIcon(cardNo, 42)}</div>` : ''}

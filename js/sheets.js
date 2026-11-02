@@ -27,7 +27,7 @@ function renderBankCheck() {
   sheet('Bank check', `
     <div class="bar-top"><h1>Bank check</h1>${CLOSE_BTN}</div>
     ${rows.length ? `<p class="note left" style="margin:0">${esc(name)} shows ${rows.length} purchase${rows.length > 1 ? 's' : ''} you didn’t log. Add what’s yours so tonight’s score is accurate, and skip the rest.</p>` : '<div class="bk-done"><i>✓</i><b>All caught up</b><p>Everything the bank saw is in your log.</p></div>'}
-    <div class="imp-list">${rows.map(tx => { const br = breaks(tx); return `<div class="imp-row bk-row">${catBadge(tx.cat)}<span class="imp-main"><b>${esc(tx.desc)}</b><small>${cat(tx.cat).name}</small>${br.length ? `<em class="bk-br">Breaks ${br.join(', ')}</em>` : ''}</span><span class="px imp-amt">$${tx.amt}</span><span class="bk-btns"><button class="mini on" data-act="bank-add" data-id="${tx.id}">Add</button><button class="mini" data-act="bank-no" data-id="${tx.id}">Not mine</button></span></div>`; }).join('')}</div>
+    <div class="imp-list">${rows.map(tx => { const br = breaks(tx); return `<div class="imp-row bk-row">${catBadge(tx.cat)}<span class="imp-main"><b>${esc(tx.desc)}</b><small>${cat(tx.cat).name}</small>${br.length ? `<em class="bk-br">Breaks ${br.join(', ')}</em>` : ''}</span><span class="px imp-amt">${money(tx.amt)}</span><span class="bk-btns"><button class="mini on" data-act="bank-add" data-id="${tx.id}">Add</button><button class="mini" data-act="bank-no" data-id="${tx.id}">Not mine</button></span></div>`; }).join('')}</div>
     <button class="go" data-act="bank-continue" ${rows.length ? 'disabled' : ''}>${rows.length ? `${rows.length} left to check` : 'Continue to tonight'}</button>`);
 }
 
@@ -65,12 +65,12 @@ function reviewHTML(y, m) {
     : `<div class="lockrow"><svg width="18" height="20" viewBox="0 0 18 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><rect x="2" y="9" width="14" height="9" rx="3" fill="currentColor" stroke="none"/><path d="M5 9V6a4 4 0 0 1 8 0v3"/></svg><span>${st.full.length > 1 ? 'No takeout, coffee, rideshare, online or late-night spending was logged this month.' : 'Habit trends unlock after two weeks with 3+ logged days each.'}</span></div>`;
   // one bar per logged day: spending outside the allowance, red when it was more than a day's allowance, with the allowance as a dashed line
   const per = dailyBudget(), top = Math.max(per * 1.6, ...st.recs.map(o => o.h.extra), 1);
-  const chart = `<div class="mchart" role="img" aria-label="Spending outside the allowance for each logged day"><i class="mline" style="bottom:${Math.round(per / top * 84)}px"><em>Allowance $${per}</em></i>${st.recs.map(o => `<span class="mbar ${o.h.extra === 0 ? 'zero' : o.h.extra > per ? 'over' : ''}" style="height:${o.h.extra === 0 ? 6 : Math.max(8, Math.round(o.h.extra / top * 84))}px" title="${MON[o.d.getMonth()]} ${o.d.getDate()}: $${o.h.extra}"></span>`).join('')}</div>
+  const chart = `<div class="mchart" role="img" aria-label="Spending outside the allowance for each logged day"><i class="mline" style="bottom:${Math.round(per / top * 84)}px"><em>Allowance ${money(per)}</em></i>${st.recs.map(o => `<span class="mbar ${o.h.extra === 0 ? 'zero' : o.h.extra > per ? 'over' : ''}" style="height:${o.h.extra === 0 ? 6 : Math.max(8, Math.round(o.h.extra / top * 84))}px" title="${MON[o.d.getMonth()]} ${o.d.getDate()}: ${money(o.h.extra)}"></span>`).join('')}</div>
     <div class="mrange"><span>${MON[st.recs[0].d.getMonth()]} ${st.recs[0].d.getDate()}</span><span>${MON[st.recs[st.recs.length - 1].d.getMonth()]} ${st.recs[st.recs.length - 1].d.getDate()}</span></div>`;
   return `
-    <div class="mhero ${saved >= 0 ? '' : 'over'}"><span class="px">${MON[m]} · ${plural(st.days, 'day')} logged</span><b>${saved >= 0 ? 'Saved' : 'Over'} $${Math.abs(saved)}</b><small>Spent outside the allowance $${st.spent}, across ${st.days === 1 ? 'that day' : `these ${st.days} days`} you could spend $${st.allowed}</small></div>
+    <div class="mhero ${saved >= 0 ? '' : 'over'}"><span class="px">${MON[m]} · ${plural(st.days, 'day')} logged</span><b>${saved >= 0 ? 'Saved' : 'Over'} ${money(Math.abs(saved))}</b><small>Spent outside the allowance ${money(st.spent)}, across ${st.days === 1 ? 'that day' : `these ${st.days} days`} you could spend ${money(st.allowed)}</small></div>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
-      ${statCap('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', 'Daily average', `$${Math.round(st.spent / st.days)}`)}
+      ${statCap('#B7B0F0', 'linear-gradient(180deg,#ECEAFF 0%,#DCD8FF 100%)', 'Daily average', `${money(Math.round(st.spent / st.days))}`)}
       ${statCap('#B8D000', 'linear-gradient(180deg,#F2FF7A 0%,#E4FF1A 100%)', 'Zero-spend days', plural(st.zero, 'day'))}
       ${statCap('#D12E2E', 'linear-gradient(180deg,#FF7A7A 0%,#FF4B4B 100%)', 'All cards held', plural(st.allHeld, 'day'))}
     </div>
@@ -119,11 +119,11 @@ function inboxItems(ev = evaluate(S.today)) {
   const out = [];
   if (!S.held.length) return out;
   const k = `${S.week}-${S.day}`;
-  S.revisit.forEach((x, i) => out.push({ key: `rv-${k}-${i}-${x.amt}`, kind: 'wish', title: 'Wish list · waited 24 hours', text: `Yesterday you wanted ${entryName(x)} $${x.amt}, still want it?`,
+  S.revisit.forEach((x, i) => out.push({ key: `rv-${k}-${i}-${x.amt}`, kind: 'wish', title: 'Wish list · waited 24 hours', text: `Yesterday you wanted ${entryName(x)} ${money(x.amt)}, still want it?`,
     btns: [[`data-rv="${i}:buy"`, 'Still want it', ''], [`data-rv="${i}:skip"`, 'Skip, save', 'lime']] }));
   if (S.day === 6) out.push({ key: `sun-${S.week}`, kind: 'sunday', title: 'Today is the last day of the week', text: 'Tonight, tap "End today" to see the weekly summary: score, stars, graduation, which card to carry over, and next week’s stake.', btns: [['data-act="end"', 'End today, see the weekly summary', 'lime']] });
   else if (S.prefs.evening && S.clock >= S.prefs.eveningAt) out.push({ key: `eve-${k}`, kind: 'evening', title: `${fmtClock(S.clock)} · Done logging?`, text: `Tonight’s estimate ${ev.score} pts. When you’re done, tap "End today" for the receipt; if you forget, midnight ends the day for you.`, btns: [['data-act="end"', 'End today', 'lime']] });
-  if (ev.left <= 0) out.push({ key: `over-${k}`, kind: 'stop', title: ev.left < 0 ? `You’re already over by $${-ev.left}` : `Today’s $${ev.daily} is used up exactly`, text: `Tonight is 0 pts. Anything you spend now comes out of tomorrow’s allowance. Put what you want on the wish list first.` });
+  if (ev.left <= 0) out.push({ key: `over-${k}`, kind: 'stop', title: ev.left < 0 ? `You’re already over by ${money(-ev.left)}` : `Today’s ${money(ev.daily)} is used up exactly`, text: `Tonight is 0 pts. Anything you spend now comes out of tomorrow’s allowance. Put what you want on the wish list first.` });
   else if (ev.cards.every(c => c.state !== 'on')) out.push({ key: `broke-${k}`, kind: 'stop', title: 'Every card broke today', text: `Mult is back to ×${ev.mult}, but the money left still counts: stay under ${money(ev.left)} and tonight you still get ${ev.score} pts. All cards come back at midnight.` });
   if (S.prefs.ruleAlerts) alerts(ev).forEach(a => out.push({ key: `al-${k}-${a}`, kind: 'alert', title: `${fmtClock(S.clock)} · Rule reminder`, text: a }));
   if (S.wish.length) out.push({ key: `wl-${k}-${S.wish.length}`, kind: 'memo', title: 'Wish list', text: `It holds ${S.wish.length} items; tomorrow you’ll be asked if you still want them. They don’t count as spending and break no cards.` });
@@ -157,13 +157,13 @@ function renderClock() {
 function renderMorning() {
   const y = S.history[S.history.length - 1], ev = evaluate(S.today);
   const kept = y.cards.filter(c => c.state === 'on').length;
-  const rv = S.revisit.map((x, i) => `<div class="rv"><span>${entryName(x)} <b class="px">$${x.amt}</b></span><span><button class="rvbtn" data-rv="${i}:buy">Still want it</button><button class="rvbtn lime" data-rv="${i}:skip">Skip</button></span></div>`).join('');
+  const rv = S.revisit.map((x, i) => `<div class="rv"><span>${entryName(x)} <b class="px">${money(x.amt)}</b></span><span><button class="rvbtn" data-rv="${i}:buy">Still want it</button><button class="rvbtn lime" data-rv="${i}:skip">Skip</button></span></div>`).join('');
   const a = alerts(ev)[0];
   sheet('Good morning', `
     <div class="bar-top"><h1>${DAYS[S.day]} · Good morning</h1><span class="px" style="color:var(--mute)">${fmtClock(S.clock)}</span></div>
     ${(() => { const p = pendingUnlogged(); return p.length ? `<div class="unlogged"><b>${p.length > 1 ? `Nothing logged on ${p.length} days` : `Nothing logged ${p[0] === S.history[S.history.length - 1] ? 'yesterday' : 'on ' + DAYS[p[0].day]}`}</b><span>Did you really spend nothing? An unlogged day counts as 0 pts first. If you really spent nothing, ${p.length > 1 ? 'they’re' : 'it’s'} restored to a zero-spend score of ${p.reduce((a, y) => a + y.potential.score, 0)} pts (base multiplier only; cards add nothing on an unlogged day).</span><div class="ibtns"><button class="rvbtn lime" data-act="unlogged-yes">Really spent nothing</button><button class="rvbtn" data-act="unlogged-no">Forgot to log</button></div></div>` : ''; })()}
     ${S.away > 1 ? `<div class="callout">You were away for ${S.away} days, so those days ended without you. What you logged before you left is on its receipt as usual.</div>` : S.autoEnded ? '<div class="callout">Last night you didn’t tap "End today", so midnight ended the day for you; the receipt is kept as usual.</div>' : ''}
-    ${S.debt ? `<div class="callout">You overdrew yesterday by <b>$${S.debt}</b>, today you can spend $${dailyBudget()} − $${Math.min(S.debt, dailyBudget())} = <b>$${todayBudget()}</b>.${(() => { const y = S.history[S.history.length - 1]; return y && y.overflow ? `The other $${y.overflow} over is no longer carried forward; it adds to this week’s target score instead: +${y.overflow * OVERFLOW_PTS}.` : ''; })()}</div>` : ""}
+    ${S.debt ? `<div class="callout">You overdrew yesterday by <b>${money(S.debt)}</b>, today you can spend ${money(dailyBudget())} − ${money(Math.min(S.debt, dailyBudget()))} = <b>${money(todayBudget())}</b>.${(() => { const y = S.history[S.history.length - 1]; return y && y.overflow ? `The other ${money(y.overflow)} over is no longer carried forward; it adds to this week’s target score instead: +${y.overflow * OVERFLOW_PTS}.` : ''; })()}</div>` : ""}
     <div class="cap orange hero"><div class="top">
       <div class="row"><span style="font-weight:900;font-size:14px">Allowed today</span><span class="px" style="font-size:12px">Weekly Score ${scorePrior()} / ${weekTarget()}</span></div>
       <span class="money">${money(ev.left)}</span>
@@ -175,7 +175,7 @@ function renderMorning() {
       <div class="ystat"><div><small>Score</small><b>${y.score}</b></div><div><small>Mult</small><b>×${y.mult}</b></div><div><small>Held</small><b>${kept}/${y.cards.length}</b></div></div>
     </div></div>
     ${rv ? `<div class="wish"><span class="px" style="font-size:12px;opacity:0.85">Wish list · waited 24 hours</span><span style="font-weight:900;font-size:16px">Still want these?</span>${rv}</div>`
-      : S.wishSaved ? `<div class="callout">Wish list is empty, <b>saved $${S.wishSaved}</b>.</div>` : ''}
+      : S.wishSaved ? `<div class="callout">Wish list is empty, <b>saved ${money(S.wishSaved)}</b>.</div>` : ''}
     <div class="hold-lbl">${y.cards.some(c => c.state === 'broken') ? `Cards that broke yesterday came back at midnight${y.cards.some(c => c.state === 'broken' && CARDS[c.no].weekly) ? ' (weekly ones excepted)' : ''}` : 'Today’s cards'}</div>
     ${holdHTML(ev)}
     <button class="cap lime bigbtn" data-act="morning-done"><div class="top">Start today</div></button>`);
@@ -212,10 +212,13 @@ function settleWeek() {
   S.nextStake = S.stake; S.weekStep = 1; S.weekOpen = true;
   // days still unlogged say nothing about what was really spent, so their allowance is left out of "saved"
   const blind = hist.filter(h => h.unlogged).length;
-  S.weekResult = { total, target, pass, warm, got, before, perCard, grads, fresh, blind, real: Math.round(S.base * (weekDays() - blind) / 7), spent: hist.reduce((a, h) => a + h.extra, 0), logged: hist.reduce((a, h) => a + h.entries.reduce((b, x) => b + x.amt, 0), 0) };
+  S.weekResult = { total, target, pass, warm, got, before, perCard, grads, fresh, blind, real: Math.round(S.base * (weekDays() - blind) / 7), spent: hist.reduce((a, h) => a + h.extra, 0), logged: loggedOf(hist) };
 }
+const loggedOf = hist => cents(hist.reduce((a, h) => a + h.entries.reduce((b, x) => b + x.amt, 0), 0));
 function renderWeek() {
   const R = S.weekResult, st = STAKES[S.stake];
+  // corrections made in the ledger after the summary opened still count toward what was logged
+  if (!R.recon) R.logged = loggedOf(weekHist());
   const stakeOpts = R.warm ? [S.stake] : R.pass && S.stake < STAKES.length - 1 ? [S.stake + 1, S.stake] : !R.pass && S.stake > 0 ? [S.stake, S.stake - 1] : [S.stake];
   const stakeBtn = i => {
     const s = STAKES[i], tag = i > S.stake ? `Target ×${s.k}, stars for passing ×${s.star}` : i < S.stake ? `Target back to ×${s.k}` : 'Keep the current stake';
@@ -233,7 +236,7 @@ function renderWeek() {
     ${R.grads.map(no => `<div class="gradcard"><div class="gimg">${scaled(CARDS[no], 0.3)}<span class="cv-grad">Graduated</span></div><div><b>“${CARDS[no].name}” graduated!</b><p>Held 6/7 days or more for ${GRAD_WEEKS} weeks in a row: this habit is gone. It leaves the deck and gives you a permanent base multiplier +1: from now on the multiplier starts at <b>${S.baseMult}</b>, and the weekly target score rises 25%.</p></div></div>`).join('')}
     <h2>How your cards did <small>Hold 6/7 days for ${GRAD_WEEKS} weeks to graduate</small></h2>
     <div class="pillrow">${R.perCard.map(p => `<span class="pill ${p.held >= p.days * 0.7 ? 'ok' : p.held >= p.days * 0.4 ? 'mid' : 'no'}">${CARDS[p.no].name} ${p.held}/${p.days} days${S.grad.includes(p.no) ? ' · Graduated' : p.streak ? ` · Streak ${p.streak}/${GRAD_WEEKS}` : ''}</span>`).join('')}</div>
-    <div class="cap ${R.real - R.spent >= 0 ? 'lime' : 'orange'}"><div class="top" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-weight:900">${R.real - R.spent >= 0 ? 'Real money saved this week' : 'Real money over this week'}${R.blind ? `<small style="display:block;font-weight:500;font-size:11px">${R.blind} unlogged ${R.blind === 1 ? 'day' : 'days'} left out</small>` : ''}</span><span style="font-family:var(--f-display);font-size:28px">$${Math.abs(R.real - R.spent)}</span></div></div>
+    <div class="cap ${R.real - R.spent >= 0 ? 'lime' : 'orange'}"><div class="top" style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-weight:900">${R.real - R.spent >= 0 ? 'Real money saved this week' : 'Real money over this week'}${R.blind ? `<small style="display:block;font-weight:500;font-size:11px">${R.blind} unlogged ${R.blind === 1 ? 'day' : 'days'} left out</small>` : ''}</span><span style="font-family:var(--f-display);font-size:28px">${money(Math.abs(R.real - R.spent))}</span></div></div>
     <h2>Score each day <small>Tap a day for the receipt</small></h2>
     ${tilesHTML()}
     <button class="go" data-act="week-plan">Next: plan next week</button>` : `<div class="bar-top"><h1>Plan next week</h1><span class="chipk" style="background:${st.bg};color:${st.fg}">${st.name}</span></div>
@@ -255,9 +258,9 @@ const RECON_RATIO = 1.2, RECON_SLACK = 30;
 function reconHTML(R) {
   const go = `<button class="cap lime bigbtn" data-act="to-monday"><div class="top">Start week ${nextWeekNo()} · draw cards</div></button>`;
   if (!R.got && !R.recon) return go;
-  if (R.recon) return `<div class="callout">${R.recon.voided ? `Reconcile off by $${R.recon.actual - R.logged}: actually $${R.recon.actual}, only logged $${R.logged}. This week’s ${starStr(R.recon.voided)} don’t count; score unchanged.` : R.recon.skipped ? `Not reconciled; this week’s stars are halved, ${R.got ? `you get only ${starStr(R.got)}` : 'none left'}.` : `Matches: actually $${R.recon.actual}, logged $${R.logged}. Stars kept ✓`}</div>${go}`;
+  if (R.recon) return `<div class="callout">${R.recon.voided ? `Reconcile off by ${money(R.recon.actual - R.logged)}: actually ${money(R.recon.actual)}, only logged ${money(R.logged)}. This week’s ${starStr(R.recon.voided)} don’t count; score unchanged.` : R.recon.skipped ? `Not reconciled; this week’s stars are halved, ${R.got ? `you get only ${starStr(R.got)}` : 'none left'}.` : `Matches: actually ${money(R.recon.actual)}, logged ${money(R.logged)}. Stars kept ✓`}</div>${go}`;
   return `<h2>Reconcile <small>The last step before stars</small></h2>
-    <div class="impact"><p class="note left" style="margin:0">Open your bank app or Venmo and see how much you spent this week (meals and commuting too). You logged <b>$${R.logged}</b> this week. If the real amount is 20% or more above what you logged, this week’s stars don’t count.</p>
+    <div class="impact"><p class="note left" style="margin:0">Open your bank app or Venmo and see how much you spent this week (meals and commuting too). You logged <b>${money(R.logged)}</b> this week. If the real amount is 20% or more above what you logged, this week’s stars don’t count.</p>
       <div class="field"><input class="in" id="recon" inputmode="numeric" maxlength="6" placeholder="Real total, $" aria-label="How much you really spent this week"><button class="mini lime" data-act="recon">Check</button></div></div>
     <button class="linkbtn" data-act="recon-skip">Skip the check (stars halved)</button>`;
 }
@@ -279,7 +282,7 @@ function shopPick() {
   const by = {};
   weekHist().forEach(h => h.entries.filter(x => !cat(x.cat).ess).forEach(x => { if (CAT_CARD[x.cat]) by[x.cat] = (by[x.cat] || 0) + x.amt; }));
   const top = Object.entries(by).sort((a, b) => b[1] - a[1])[0];
-  return top ? { no: CAT_CARD[top[0]], why: `Last week you spent $${top[1]} on ${cat(top[0]).name}` } : null;
+  return top ? { no: CAT_CARD[top[0]], why: `Last week you spent ${money(top[1])} on ${cat(top[0]).name}` } : null;
 }
 const PRICE = { reroll: 1, slot: 5, slotWas: 6, glue: 2 };
 function shopBody() {

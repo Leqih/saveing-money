@@ -23,8 +23,15 @@ test('every card holding: score is money left times 1 plus each card', () => {
 });
 
 test('meals and commute only count once they pass the essentials allowance', () => {
-  assert.equal(scoreDay([{ cat: 'meal', amt: 45 }], ctx([])).d.extra, 0);
-  assert.equal(scoreDay([{ cat: 'meal', amt: 50 }], ctx([])).d.extra, 5);
+  assert.equal(scoreDay([{ cat: 'meal', amt: 40 }], ctx([])).d.extra, 0);
+  assert.equal(scoreDay([{ cat: 'meal', amt: 45 }], ctx([])).d.extra, 5);
+});
+
+test('amounts with cents add up exactly, and the base counts only whole dollars left', () => {
+  const ev = scoreDay([{ cat: 'tea', amt: 6.45 }, { cat: 'tea', amt: 3.1 }], ctx([]));
+  assert.equal(ev.d.extra, 9.55);
+  assert.equal(ev.left, 40.45);
+  assert.equal(ev.base, 40);
 });
 
 test('takeout breaks Takeout Nemesis, and stopping there gives half back', () => {

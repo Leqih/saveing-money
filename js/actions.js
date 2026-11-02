@@ -17,6 +17,7 @@ const toFirstDeal = top => {
 const needCards = () => { if (S.held.length) return true; toast('Draw this week’s cards first'); return false; };
 // unlogged days are either confirmed as zero-spend days (base score only) or left at 0; one answer covers them all
 const resolveUnlogged = yes => pendingUnlogged().reduce((pts, y) => { if (yes) Object.assign(y, y.potential, { unlogged: false }); y.resolved = true; return pts + y.score; }, 0);
+let undoDel = null;
 const bankTx = t => S.bank.feed.find(x => x.id === +t.dataset.id);
 
 const ACTIONS = {
@@ -28,6 +29,8 @@ const ACTIONS = {
   'setup-skip': (t, top) => { S.base = BASE; toWeak(top); },
   'weak-next': (t, top) => S.weak.length ? swapSheet(top, renderFreq) : toFirstDeal(top),
   'weak-go': (t, top) => toFirstDeal(top),
+  'weak-back': (t, top) => swapSheet(top, renderSetup, false, true),
+  'freq-back': (t, top) => swapSheet(top, renderWeak, false, true),
 
   /* import and the bank */
   'import': () => { IMP = { src: 'bank', rows: null, busy: false }; renderImport(); },
@@ -88,7 +91,12 @@ const ACTIONS = {
   /* settings */
   'settings': (t, top) => { if (top && top.getAttribute('aria-label') === 'Stars') top.remove(); renderSettings(); },
   // a new allowance starts next Monday: changing it mid-week would rescore the rest of the week on a different budget
-  'settings-save': (t, top) => { const w = weeklyFrom(S.setup); S.nextBase = w === S.base ? null : w; replaceSheet(top, renderSettings); toast(S.nextBase ? `From Monday: $${w} a week, $${Math.round(w / 7)} a day` : `Staying at $${S.base} a week`); },
+  'settings-save': (t, top) => {
+    const w = weeklyFrom(S.setup), q = S.setup.ess ?? essQuota;
+    S.nextBase = w === S.base ? null : w; S.nextQuota = q === essQuota ? null : q;
+    replaceSheet(top, renderSettings);
+    toast(S.nextBase || S.nextQuota != null ? `From Monday: ${money(w)} a week, ${money(Math.round(w / 7))} a day` : `Staying at ${money(S.base)} a week`);
+  },
   'coach-reset': (t, top) => { S.coach = 0; S.view = 'home'; top.remove(); renderTable(); },
   // one tap arms it, a second within 3 s wipes the save; anything else lets it disarm on its own
   'restart': t => {
@@ -103,7 +111,7 @@ const ACTIONS = {
   'choose': (t, top) => keepHand(top),
 
   /* logging a spend */
-  'log': () => { if (!needCards()) return; draft = { amt: '', cat: 'takeout', night: S.clock >= 22, note: '' }; renderLog(); },
+  'log': () => { if (!needCards()) return; draft = { amt: '', cat: CATS.some(c => c.id === S.lastCat) ? S.lastCat : 'meal', night: S.clock >= 22, note: '' }; renderLog(); },
   'newcat': () => { draft.adding = !draft.adding; refreshLog(); },
   'addcat': () => {
     if (!draft.newName) { toast('Give the new category a name first'); return; }
@@ -113,18 +121,31 @@ const ACTIONS = {
     refreshLog(); toast(`Added: ${cat(id).name}`);
   },
   'savequick': () => {
-    const label = draft.note || cat(logCat()).name, amt = parseInt(draft.amt, 10) || undefined;
+    const label = draft.note || cat(logCat()).name, amt = amtOf(draft.amt) || undefined;
     if (!S.quicks.some(q => q.label === label && q.cat === logCat())) { S.quicks.unshift({ label, cat: logCat(), amt }); S.quicks = S.quicks.slice(0, 8); }
     refreshLog(); toast(`Saved: ${label}; it’s at the top of Log next time`);
   },
   'save': () => {
-    const entry = { cat: logCat(), amt: parseInt(draft.amt, 10), night: !!draft.night, note: draft.note, fromWish: draft.fromWish };
+    const entry = { cat: logCat(), amt: amtOf(draft.amt), night: !!draft.night, note: draft.note, fromWish: draft.fromWish };
+    const past = pastDay();
+    if (past) { past.entries[draft.edit] = { ...past.entries[draft.edit], ...entry }; past.edited = true; renderTable(); toast(`Ledger updated · ${DAYS[past.day]}’s score stays`); return; }
     const before = evaluate(S.today);
-    if (draft.edit != null) S.today[draft.edit] = entry; else S.today.push(entry);
+    if (draft.edit != null) S.today[draft.edit] = entry; else { S.today.push(entry); S.lastCat = draft.cat; }
     renderTable(); verdict(before, evaluate(S.today));
   },
-  'del': () => { const before = evaluate(S.today); S.today.splice(draft.edit, 1); renderTable(); const after = evaluate(S.today); toast(after.mult > before.mult ? `Deleted · mult back to ×${after.mult}` : 'Deleted'); },
-  'wish': () => { S.wish.push({ cat: logCat(), amt: parseInt(draft.amt, 10), note: draft.note }); renderTable(); toast('Moved to the wish list; we’ll ask again tomorrow · no card broke'); },
+  'del': () => {
+    const past = pastDay();
+    if (past) { undoDel = { list: past.entries, at: draft.edit, x: past.entries.splice(draft.edit, 1)[0] }; past.edited = true; renderTable(); toast('Deleted from the ledger', 'undo-del'); return; }
+    const before = evaluate(S.today); undoDel = { list: S.today, week: S.week, day: S.day, at: draft.edit, x: S.today.splice(draft.edit, 1)[0] };
+    renderTable(); const after = evaluate(S.today); toast(after.mult > before.mult ? `Deleted · mult back to ×${after.mult}` : 'Deleted', 'undo-del');
+  },
+  // a deleted entry goes back where it was; one from today only while it is still that day
+  'undo-del': t => {
+    t.closest('.toast').remove(); const u = undoDel; undoDel = null;
+    if (!u || u.week != null && (u.week !== S.week || u.day !== S.day)) return;
+    u.list.splice(Math.min(u.at, u.list.length), 0, u.x); renderTable(); toast('Entry restored');
+  },
+  'wish': () => { S.wish.push({ cat: logCat(), amt: amtOf(draft.amt), note: draft.note }); S.lastCat = draft.cat; renderTable(); toast('Moved to the wish list; we’ll ask again tomorrow · no card broke'); },
   'glue': (t, top) => {
     const no = t.dataset.no; if (CARDS[no].noGlue || S.glue < 1) return;
     S.glue -= 1; S.glued = { week: S.week, day: S.day, no };
@@ -187,7 +208,11 @@ const BY_DATA = {
     const nb = app.querySelector(`.cv-opt[data-weak="${id}"]`); if (nb) nb.classList.add(wasOn ? 'unpick' : 'pick');
   },
   freq: (v, t, top) => { const [id, i] = v.split(':'); S.freq[id] = +i; replaceSheet(top, renderFreq); const nb = app.querySelector(`[data-freq="${v}"]`); if (nb) nb.classList.add('pop'); },
-  quota: (v, t, top) => { essQuota = Math.min(100, Math.max(0, essQuota + +v)); replaceSheet(top, top.getAttribute('aria-label') === 'Settings' ? renderSettings : renderSetup); },
+  quota: (v, t, top) => {
+    const q = Math.min(100, Math.max(0, (S.setup.ess ?? essQuota) + +v)), inSettings = top.getAttribute('aria-label') === 'Settings';
+    S.setup.ess = q; if (!inSettings) essQuota = q;
+    replaceSheet(top, inSettings ? renderSettings : renderSetup);
+  },
   pref: (k, t, top) => { S.prefs[k] = !S.prefs[k]; replaceSheet(top, renderSettings); },
   evat: (v, t, top) => { S.prefs.eveningAt = +v; replaceSheet(top, renderSettings); },
   impi: (i, t, top) => { const r = IMP.rows[+i]; r.on = !r.on; replaceSheet(top, renderImport); },
@@ -215,13 +240,22 @@ const BY_DATA = {
 
   /* logging a spend */
   edit: v => { const i = +v, x = S.today[i]; draft = { amt: String(x.amt), cat: x.cat, night: !!x.night, note: x.note || '', edit: i, fromWish: x.fromWish }; renderLog(); },
+  // an entry on a day that has ended: week-day-index
+  pedit: v => {
+    const [week, day, i] = v.split('-').map(Number), x = S.history.find(h => h.week === week && h.day === day).entries[i];
+    draft = { amt: String(x.amt), cat: x.cat, night: !!x.night, note: x.note || '', edit: i, fromWish: x.fromWish, past: { week, day } }; renderLog();
+  },
   // a favorite picks the category and note, and fills its usual amount when none is typed yet
   quick: v => { const q = S.quicks[+v]; Object.assign(draft, { cat: q.cat, note: q.label === cat(q.cat).name ? '' : q.label }, q.amt && !draft.amt ? { amt: String(q.amt) } : {}); refreshLog(); },
   cat: v => { draft.cat = v; refreshLog(); },
   night: v => { draft.night = v === '1'; refreshLog(); },
   delivery: v => { draft.delivery = v === '1'; refreshLog(); },
   newess: v => { draft.newEss = v === '1'; refreshLog(); },
-  key: k => { draft.amt = k === 'C' ? '' : k === '⌫' ? draft.amt.slice(0, -1) : (draft.amt + k).replace(/^0+/, '').slice(0, 4); refreshLog(); },
+  key: k => {
+    const a = k === '⌫' ? draft.amt.slice(0, -1) : k === '.' ? (draft.amt.includes('.') ? draft.amt : (draft.amt || '0') + '.') : draft.amt + k;
+    if (/^\d{0,4}(\.\d{0,2})?$/.test(a)) draft.amt = a.replace(/^0+(?=\d)/, '');
+    refreshLog();
+  },
 
   /* demo time and the wish list */
   clock: (v, t, top) => {
@@ -236,8 +270,8 @@ const BY_DATA = {
   rv: (v, t, top) => {
     const [i, how] = v.split(':'), x = S.revisit.splice(+i, 1)[0];
     let msg;
-    if (how === 'buy') { S.today.push({ ...x, night: false, fromWish: true }); msg = 'Logged · wait 24 hours before buying'; }
-    else { S.wishSaved = (S.wishSaved || 0) + x.amt; msg = `Skip it, saved $${x.amt}`; }
+    if (how === 'buy') { S.today.push({ ...x, night: false, fromWish: true }); msg = 'Logged · you gave it 24 hours first'; }
+    else { S.wishSaved = (S.wishSaved || 0) + x.amt; msg = `Skip it, saved ${money(x.amt)}`; }
     const lbl = top.getAttribute('aria-label'); renderTable(); (lbl === 'Notifications' ? renderInbox : renderMorning)(); settle(); toast(msg);
   },
 

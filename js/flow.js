@@ -24,7 +24,7 @@ function endDay() {
   if (S.day === 6) { renderTable(); if (pendingUnlogged().length) { S.sunCheck = true; renderSunUnlogged(); } else { settleWeek(); renderWeek(); } return; }
   S.day += 1; S.clock = 8.5;
   renderTable();
-  if (S.prefs.morning) renderMorning(); else toast(`${DAYS[S.day]} · allowed today $${todayBudget()}`);
+  if (S.prefs.morning) renderMorning(); else toast(`${DAYS[S.day]} · allowed today ${money(todayBudget())}`);
   monthTurn(dateOf(S.week, S.day - 1), dateOf(S.week, S.day));
 }
 function renderSunUnlogged() {
@@ -41,6 +41,7 @@ function startWeek() {
   S.stake = S.nextStake; S.overflow = 0;
   if (S.slotPending) { S.slots = 4; S.slotPending = false; }
   if (S.nextBase) { S.base = S.nextBase; S.nextBase = null; }
+  if (S.nextQuota != null) { essQuota = S.nextQuota; S.nextQuota = null; }
   S.weekOpen = false;
   // back after weeks away, the new week is the calendar's week and starts on today's weekday, a short week like a first one;
   // weeks nobody played are skipped rather than scored. A demo that ran ahead of the calendar just goes on to Monday

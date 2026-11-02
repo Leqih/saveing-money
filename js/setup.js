@@ -43,8 +43,8 @@ function renderLaunch() {
   </div>`);
   sh.classList.add('launch');
 }
-const setupFormula = s => `(${s.income} − ${s.fixed} − ${s.save}) ÷ 4.3`;
-const progHTML = step => `<div class="cv-prog"><span class="px" style="font-size:14px">${step} / 3</span><i class="pbar" style="--from:${Math.round((step - 1) / 3 * 100)}%;--to:${Math.round(step / 3 * 100)}%" aria-hidden="true"></i></div>`;
+const setupFormula = s => `(${s.income} − ${s.fixed} − ${s.save}) ÷ 4.3 − ${s.ess ?? essQuota}×7`;
+const progHTML = (step, back) => `<div class="cv-prog">${back ? `<button class="cv-back" data-act="${back}" aria-label="Back to the previous step">‹</button>` : ''}<span class="px" style="font-size:14px">${step} / 3</span><i class="pbar" style="--from:${Math.round((step - 1) / 3 * 100)}%;--to:${Math.round(step / 3 * 100)}%" aria-hidden="true"></i></div>`;
 // first use, step 1: income minus fixed costs minus savings gives the weekly allowance
 function renderSetup() {
   const s = S.setup, w = weeklyFrom(s);
@@ -63,18 +63,18 @@ function renderSetup() {
       <div aria-hidden="true" style="position:absolute;left:0;top:-6px;width:62px;height:62px;background:#6CFF2E;clip-path:polygon(50% 0%,61% 18%,82% 10%,80% 32%,100% 42%,85% 58%,95% 79%,72% 80%,62% 100%,50% 84%,38% 100%,28% 80%,5% 79%,15% 58%,0% 42%,20% 32%,18% 10%,39% 18%);display:flex;align-items:center;justify-content:center;transform:rotate(-12deg)"><span style="font-size:12px;font-weight:900;color:#0F4A00">Adjust</span></div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:76px;padding:0 12px 0 18px;border-radius:22px;background:#E3F7D5">
-      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:14px">Essentials allowance</span><span style="font-size:11px;color:#3F5F2A">Meals and commuting up to this amount a day don’t count</span></div>
-      <div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:48px;text-align:center">$${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div>
+      <div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:900;font-size:14px">Essentials allowance</span><span style="font-size:11px;color:#3F5F2A">Meals and commuting up to this a day don’t count against the allowance; it comes out of the budget first</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:48px;text-align:center">${money(S.setup.ess ?? essQuota)}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div>
     </div>
     <button class="cap lime bigbtn" data-act="setup-next" ${w >= 50 ? '' : 'disabled'}><div class="top">Next: find where money leaks</div></button>
-    <button class="linkbtn" data-act="setup-skip">Skip, use the default $${BASE}</button>`);
+    <button class="linkbtn" data-act="setup-skip">Skip, use the default ${money(BASE)}</button>`);
 }
 // step 2: weak spots decide which cards the first deal puts in front of you
 function renderWeak() {
   const picks = WEAK.filter(w => S.weak.includes(w.id));
   const first = picks.length ? CARDS[picks[0].card] : CARDS['04'];
   sheet('Weak spots', `
-    ${progHTML(2)}
+    ${progHTML(2, 'weak-back')}
     <h1 style="margin:4px 0 0;font-weight:900;font-size:28px;line-height:1.25">Where does your money<br>leak most easily?</h1>
     <p class="note left" style="color:#5E5E66;font-size:12px">Pick as many as you like. Your first deal will favor cards that guard these spots.</p>
     <div role="group" aria-label="Where you spend most easily" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
@@ -106,7 +106,7 @@ function renderFreq() {
       <div class="fk-well">${labelsOf(w).map((l, i) => `<button class="fk-cap ${cur === i ? 'on' : ''}" data-freq="${w.id}:${i}" aria-label="${fullOf(w)[i]}" aria-pressed="${cur === i}"><i class="fk-dish">${GLYPH[i]}<small>${l}</small></i></button>`).join('')}</div>
     </div>`; }).join('');
   sheet('Weekly Frequency', `
-    ${progHTML(3)}
+    ${progHTML(3, 'freq-back')}
     <h1 style="margin:4px 0 0;font-weight:900;font-size:28px;line-height:1.25">How often a week<br>do they happen?</h1>
     <div class="fk-list">${rows}</div>
     <button class="cap lime bigbtn" data-act="weak-go" style="margin-top:4px"><div class="top">Draw cards</div></button>`);
@@ -125,10 +125,10 @@ function renderGuide() {
 /* ---------- settings ---------- */
 // the save button compares against what next week will use: the pending allowance if one is set, else this week's
 function allowanceBtn(w) {
-  const planned = S.nextBase || S.base;
-  if (w < 50) return { off: true, text: `Change to $${w}` };
-  if (w === planned) return { off: true, text: S.nextBase ? `Already set for Monday` : `It’s already $${S.base}` };
-  return { off: false, text: w === S.base ? `Keep $${w} next week` : `From Monday: $${w}` };
+  const q = S.setup.ess ?? essQuota, planned = S.nextBase || S.base, plannedQ = S.nextQuota ?? essQuota;
+  if (w < 50) return { off: true, text: `Change to ${money(w)}` };
+  if (w === planned && q === plannedQ) return { off: true, text: S.nextBase || S.nextQuota != null ? `Already set for Monday` : `It’s already ${money(S.base)}` };
+  return { off: false, text: w === S.base && q === essQuota ? `Keep ${money(w)} next week` : `From Monday: ${money(w)}` };
 }
 function renderSettings() {
   const s = S.setup, w = weeklyFrom(s), p = S.prefs;
@@ -138,9 +138,9 @@ function renderSettings() {
     <div class="bar-top"><h1>Settings</h1>${CLOSE_BTN}</div>
     <h2>Budget</h2>
     <div class="set-row"><div><b>Weekly allowance</b><small id="setup-formula">${w >= 50 ? setupFormula(s) : 'Weekly allowance must be at least $50'}</small></div><b class="px" id="setup-week" style="font-size:20px">${money(w)}</b></div>
-    ${S.nextBase ? `<p class="note left">This week stays at ${money(S.base)}; ${money(S.nextBase)} starts next Monday.</p>` : ''}
+    ${S.nextBase || S.nextQuota != null ? `<p class="note left">This week stays at ${money(S.base)} with essentials ${money(essQuota)} a day; ${money(S.nextBase || S.base)} and ${money(S.nextQuota ?? essQuota)} a day start next Monday.</p>` : ''}
     ${field('income', 'Monthly income', '')}${field('fixed', 'Fixed costs', 'Rent, phone, subscriptions')}${field('save', 'Monthly savings', 'Save first, spend later')}
-    <div class="set-row"><div><b>Essentials allowance</b><small>Meals and commuting within this amount a day don’t count</small></div><div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:44px;text-align:center">$${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div></div>
+    <div class="set-row"><div><b>Essentials allowance</b><small>Meals and commuting within this amount a day don’t count</small></div><div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:44px;text-align:center">${money(S.setup.ess ?? essQuota)}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div></div>
     <h2>Bank</h2>
     ${S.bank ? `<div class="set-row"><div><b>${esc(S.bank.name)}</b><small>Checks your log every night · honest nights ${(S.honest || 0) % 7}/7 for a free Glue</small></div><button class="mini" data-act="bank-off">Disconnect</button></div>` : `<div class="set-row"><div><b>Connect a bank</b><small>It catches purchases you forget to log. You still log everything yourself.</small></div><button class="mini" data-act="bank-link">Connect</button></div>`}
     <h2>Reminders</h2>
@@ -174,13 +174,13 @@ const guessCat = d => { const t = d.toLowerCase(); const hit = GUESS.find(([, re
 function parseTx(text) {
   const rows = [];
   text.split(/\r?\n/).forEach(line => {
-    const money = [...line.matchAll(/-?\$?\(?\d{1,3}(?:,\d{3})*\.\d{2}\)?|-?\$?\d+\.\d{2}/g)]; if (!money.length) return;
-    const raw = money[money.length - 1][0], neg = /-|\(/.test(raw), n = Math.abs(parseFloat(raw.replace(/[^0-9.]/g, '')));
+    const found = [...line.matchAll(/-?\$?\(?\d{1,3}(?:,\d{3})*\.\d{2}\)?|-?\$?\d+\.\d{2}/g)]; if (!found.length) return;
+    const raw = found[found.length - 1][0], neg = /-|\(/.test(raw), n = Math.abs(parseFloat(raw.replace(/[^0-9.]/g, '')));
     const date = (line.match(/\d{1,2}\/\d{1,2}(?:\/\d{2,4})?|\d{4}-\d{2}-\d{2}/) || [''])[0];
     let desc = line.replace(raw, ' ').replace(date, ' ').replace(/["$]/g, ' ').replace(/,+/g, ' ').replace(/\s+/g, ' ').trim();
     desc = desc.replace(/^(posted|pending|purchase|sale|debit|credit)\b\s*/i, '');
     if (!desc || NOT_SPEND.test(desc.toLowerCase())) return;
-    rows.push({ date, desc: desc.slice(0, 40), amt: Math.max(1, Math.round(n)), neg });
+    rows.push({ date, desc: desc.slice(0, 40), amt: Math.max(0.01, cents(n)), neg });
   });
   const anyNeg = rows.some(r => r.neg), spend = rows.filter(r => anyNeg ? r.neg : true);
   return spend.map((r, i) => ({ id: i, date: r.date, desc: r.desc, amt: r.amt, cat: guessCat(r.desc), on: true }));
@@ -206,7 +206,7 @@ function renderImport() {
         <button class="imp-chk" data-impi="${i}" aria-pressed="${r.on}" aria-label="Include ${esc(r.desc)}"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6.5l2.5 2.5L10 3"/></svg></button>
         ${catBadge(r.cat)}
         <span class="imp-main"><b>${esc(r.desc)}</b><select class="imp-cat" data-impc="${i}" aria-label="Category for ${esc(r.desc)}">${CATS.map(c => `<option value="${c.id}" ${c.id === r.cat ? 'selected' : ''}>${c.name}</option>`).join('')}</select></span>
-        <span class="px imp-amt">$${r.amt}</span></div>`).join('')}</div>`
+        <span class="px imp-amt">${money(r.amt)}</span></div>`).join('')}</div>`
     : I.src === 'paste' ? `<p class="note left" style="margin:0">Export transactions from your bank, Apple Card, Venmo or Cash App as CSV and paste the lines here. Only purchases are used; payments and deposits are skipped.</p>
       <textarea class="imp-text" id="imp-text" rows="8" placeholder="05/12/2026,STARBUCKS #1234,-6.45&#10;05/12/2026,DOORDASH*CHIPOTLE,-32.40" aria-label="Transactions"></textarea>
       <div class="actions"><button class="cap" data-act="imp-sample"><div class="top">Try a sample</div></button><button class="go" data-act="imp-parse">Read it</button></div>`

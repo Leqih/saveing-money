@@ -387,6 +387,7 @@ button.cv-cell:active .cv-icon { transform: translateY(2px); }
 .dk-plus button[aria-pressed="true"] { background: var(--c, var(--ink)); border-color: var(--c, var(--ink)); color: var(--t, #FFF); }
 .dk-plus button[aria-pressed="true"] i { background: currentColor; }
 .cv-prog { display: flex; align-items: center; gap: 10px; }
+.cv-back { width: 32px; height: 32px; margin-left: -6px; padding: 0; border: 0; border-radius: 10px; background: none; font-size: 26px; line-height: 1; color: var(--ink); }
 .cv-prog i { flex-grow: 1; height: 10px; border-radius: 3px; }
 .cv-field { display: flex; height: 66px; border-radius: 16px; padding: 4px 4px 10px; background: #CFCFD6; box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(0,0,0,0.18), 0 12px 16px -8px rgba(20,20,30,0.3); }
 .cv-field > div { flex-grow: 1; border-radius: 12px; padding: 0 14px; background: linear-gradient(180deg, #FAFAFC 0%, #EDEDF1 100%); box-shadow: inset 0 1.5px 0 rgba(255,255,255,0.75); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -814,6 +815,7 @@ button.hcard:active > div { transform: translateY(2px); }
 .linkbtn { border: 0; background: none; font-family: var(--f-px); font-size: 12px; color: #5E5E66; padding: 6px; }
 
 /* a little clear of the Dynamic Island, so the black pill doesn't read as part of it */
+.toast-undo { margin-left: 10px; padding: 0; border: 0; background: none; color: var(--lime); font: inherit; text-decoration: underline; }
 .toast { position: absolute; left: 50%; top: calc(var(--top) + 10px); transform: translateX(-50%); z-index: 30; max-width: calc(100% - 32px); padding: 8px 14px; border-radius: 14px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 900; box-shadow: 0 10px 20px rgba(0,0,0,0.25); text-align: center; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 /* shrink the whole mockup on short windows so the phone fits without scrolling the page */

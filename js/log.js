@@ -1,7 +1,9 @@
 /* ---------- log: preview before saving, verdict after ---------- */
+// a past day's entry being corrected: the ledger changes, the day's score and cards stay as printed
+const pastDay = () => draft.past && S.history.find(h => h.week === draft.past.week && h.day === draft.past.day);
 function renderLog() {
-  const editing = draft.edit != null;
-  const amt = parseInt(draft.amt || '0', 10);
+  const editing = draft.edit != null, past = pastDay();
+  const amt = amtOf(draft.amt);
   const c = cat(draft.cat);
   const base = editing ? S.today.filter((_, i) => i !== draft.edit) : S.today;
   const before = evaluate(S.today);
@@ -18,14 +20,14 @@ function renderLog() {
   const sub = !amt ? `Left to spend today ${money(before.left)} · tonight ${before.score} pts`
     : `Tonight ${before.score} → ${after.score} pts · left ${money(after.left)}`;
   // before an amount is typed nothing can break, so only hint at the wishlist once there is something to save
-  const extra = amt && broke.length > 2 ? broke.join(' · ') : amt && after.left < 0 ? `Over by $${-after.left}, taken from tomorrow` : amt && near ? near : amt && broke.length ? 'Wish-list it instead: no card breaks, decide tomorrow' : '';
+  const extra = amt && broke.length > 2 ? broke.join(' · ') : amt && after.left < 0 ? `Over by ${money(-after.left)}, taken from tomorrow` : amt && near ? near : amt && broke.length ? 'Wish-list it instead: no card breaks, decide tomorrow' : '';
   const quicks = S.quicks.map((q, i) => `<button class="chip qchip ${draft.cat === q.cat && (draft.note || '') === (q.label === cat(q.cat).name ? '' : q.label) ? 'on' : ''}" data-quick="${i}">${esc(q.label)}</button>`).join('');
   const cats = CATS.map(k => `<button class="cap ${k.id === draft.cat ? 'orange' : ''}" aria-pressed="${k.id === draft.cat}" data-cat="${k.id}"><div class="top">${esc(k.name)}${k.ess ? '<small>Essential</small>' : ''}</div></button>`).join('')
     + `<button class="cap" data-act="newcat" aria-expanded="${!!draft.adding}"><div class="top">+ New category</div></button>`;
-  const pad = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map(k => `<button class="cap ${/[C⌫]/.test(k) ? 'dark' : ''}" data-key="${k}" aria-label="${k === '⌫' ? 'Delete one digit' : k === 'C' ? 'Clear' : k}"><div class="top">${k}</div></button>`).join('');
+  const pad = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '⌫'].map(k => `<button class="cap ${/[.⌫]/.test(k) ? 'dark' : ''}" data-key="${k}" aria-label="${k === '⌫' ? 'Delete one digit' : k === '.' ? 'Decimal point' : k}"><div class="top">${k}</div></button>`).join('');
   sheet(editing ? 'Edit entry' : 'Log', `
     <div class="bar-top"><h1>${editing ? 'Edit entry' : 'Log'}</h1>${CLOSE_BTN}</div>
-    <div class="amount"><b>$${amt}</b>${draft.cat === 'meal' ? `<button class="mini ${draft.delivery ? 'on' : ''}" data-delivery="${draft.delivery ? 0 : 1}" aria-pressed="${!!draft.delivery}">Delivered</button>` : ''}<span class="px" style="color:#5E5E66;font-size:12px;text-align:right">${DAYS[S.day]} ${fmtClock(S.clock)}<br>${cat(logCat()).name}</span></div>
+    <div class="amount"><b>$${draft.amt || 0}</b>${draft.cat === 'meal' ? `<button class="mini ${draft.delivery ? 'on' : ''}" data-delivery="${draft.delivery ? 0 : 1}" aria-pressed="${!!draft.delivery}">Delivered</button>` : ''}<span class="px" style="color:#5E5E66;font-size:12px;text-align:right">${past ? `${DAYS[past.day]} · past day` : `${DAYS[S.day]} ${fmtClock(S.clock)}`}<br>${cat(logCat()).name}</span></div>
     ${quicks ? `<div class="quick" role="group" aria-label="Favorites">${quicks}</div>` : ''}
     <div class="cats">${cats}</div>
     <div class="field"><input class="in" id="note" maxlength="24" value="${esc(draft.note || '')}" placeholder="What was it? (optional)" aria-label="Note">
@@ -36,8 +38,9 @@ function renderLog() {
       <div class="toggle"><button aria-pressed="${!draft.newEss}" data-newess="0">Outside the allowance</button><button aria-pressed="${!!draft.newEss}" data-newess="1">Essential</button></div>
     </div>` : ''}</div>
     <div class="logfoot">
-      <div class="vline ${tone}"><div class="vtext"><b>${head}</b><span class="px">${sub}</span>${extra ? `<small>${extra}</small>` : ''}</div>
-        <div class="vmult" aria-label="Mult ×${amt ? after.mult : before.mult}">${amt && after.mult !== before.mult ? `<s>×${before.mult}</s>` : '<small>Mult</small>'}<b>×${amt ? after.mult : before.mult}</b></div></div>
+      ${past ? `<div class="vline"><div class="vtext"><b>Ledger only</b><span class="px">${DAYS[past.day]}’s score stays as printed</span></div></div>`
+        : `<div class="vline ${tone}"><div class="vtext"><b>${head}</b><span class="px">${sub}</span>${extra ? `<small>${extra}</small>` : ''}</div>
+        <div class="vmult" aria-label="Mult ×${amt ? after.mult : before.mult}">${amt && after.mult !== before.mult ? `<s>×${before.mult}</s>` : '<small>Mult</small>'}<b>×${amt ? after.mult : before.mult}</b></div></div>`}
       ${editing ? `<div class="actions">
         <button class="cap dark" data-act="del"><div class="top">Delete entry</div></button>
         <button class="go" data-act="save" ${amt ? '' : 'disabled'}>Save changes</button>
@@ -49,6 +52,8 @@ function renderLog() {
 }
 // redraw the log sheet in place after a pick, keeping its scroll
 const refreshLog = () => replaceSheet(lastSheet(), renderLog);
+// what the keypad typed, as dollars and cents
+const amtOf = s => cents(parseFloat(s) || 0);
 // a delivered meal is takeout, not a meal: it doesn't hide inside the meal allowance or dodge Takeout Nemesis
 const logCat = () => draft.cat === 'meal' && draft.delivery ? 'takeout' : draft.cat;
 // the moment right after saving: a cracked card, a waking card, or a quick all-clear
@@ -58,7 +63,7 @@ function verdict(before, after) {
   if (!broke.length && !woke.length) {
     const near = after.cards.map(x => x.near).filter(Boolean)[0];
     const slip = slipped(before, after).map(slipWhy);
-    toast(slip.length ? `Logged · ${slip.join(', ')}, mult ×${before.mult} → ×${after.mult}` : after.left < 0 && after.left < before.left ? `Logged · overdrawn $${-after.left}, taken from tomorrow’s allowance` : near ? `Logged · ${near}` : `No rule touched ✓ mult is still ×${after.mult}`);
+    toast(slip.length ? `Logged · ${slip.join(', ')}, mult ×${before.mult} → ×${after.mult}` : after.left < 0 && after.left < before.left ? `Logged · overdrawn ${money(-after.left)}, taken from tomorrow’s allowance` : near ? `Logged · ${near}` : `No rule touched ✓ mult is still ×${after.mult}`);
     app.querySelectorAll('.hcard.on').forEach(n => n.classList.add('glow'));
     return;
   }
@@ -69,7 +74,7 @@ function verdict(before, after) {
       <div class="fb-cards">${shown.map(x => `<div class="${broke.length ? 'shake' : 'pop'}">${scaled(CARDS[x.no], 0.5, broke.length ? 'broken' : 'on')}</div>`).join('')}</div>
       <b>${broke.length ? `${shown.map(x => CARDS[x.no].name).join(', ')} broke!` : `${shown.map(x => CARDS[x.no].name).join(', ')} woke up ✓`}</b>
       <div class="fb-sts" aria-label="Mult ×${before.mult} to ×${after.mult}, tonight’s estimate ${before.score} to ${after.score} pts"><span class="st-g"><i>Mult</i><b>×${before.mult}→×${after.mult}</b></span><span class="st-b"><b>${before.score}→${after.score}</b><i>Tonight’s pts</i></span></div>
-      <small>${broke.length ? (after.cards.every(x => x.state !== "on") ? (after.left > 0 ? `Every card broke, mult ×${after.mult}. The money left still counts: keep ${money(after.left)} and tonight is ${after.score} pts.` : `Every card broke, and today’s money is gone too.`) : shown.some(x => CARDS[x.no].weekly) ? "Weekly cards stay broken until Sunday, and going over again costs more multiplier on the day it happens." : shown.some(x => x.saved) ? `Stop-loss: spend nothing more outside the allowance today and the broken card gives back half its multiplier tonight. Back at midnight.` : "Back at midnight. Your other cards can still hold today.") : "The more cards you hold today, the higher the score."}${after.left < 0 ? ` You’re already over by $${-after.left}, taken from tomorrow’s allowance.` : ""}</small>
+      <small>${broke.length ? (after.cards.every(x => x.state !== "on") ? (after.left > 0 ? `Every card broke, mult ×${after.mult}. The money left still counts: keep ${money(after.left)} and tonight is ${after.score} pts.` : `Every card broke, and today’s money is gone too.`) : shown.some(x => CARDS[x.no].weekly) ? "Weekly cards stay broken until Sunday, and going over again costs more multiplier on the day it happens." : shown.some(x => x.saved) ? `Stop-loss: spend nothing more outside the allowance today and the broken card gives back half its multiplier tonight. Back at midnight.` : "Back at midnight. Your other cards can still hold today.") : "The more cards you hold today, the higher the score."}${after.left < 0 ? ` You’re already over by ${money(-after.left)}, taken from tomorrow’s allowance.` : ""}</small>
       <button class="ok" data-act="fb-close">Got it</button>
     </div></div></div>
   </div>`);
@@ -80,21 +85,22 @@ function receiptHTML(h, preview) {
   const br = breakers(h.entries, h.held, h.teaBefore, h.weekBefore || 0);
   const rows = h.entries.map((x, i) => {
     const ess = !!cat(x.cat).ess;
-    return `<div class="r ${ess ? 'off' : br[i] ? 'hitc' : ''}"><span>${entryName(x)}${ess ? '<i>Essential</i>' : ''}${x.night ? '<i>after 10 pm</i>' : ''}${br[i] ? `<i class="hit">Broke ${br[i].join(', ')}</i>` : ''}</span><span>$${x.amt}</span></div>`;
+    return `<div class="r ${ess ? 'off' : br[i] ? 'hitc' : ''}"><span>${entryName(x)}${ess ? '<i>Essential</i>' : ''}${x.night ? '<i>after 10 pm</i>' : ''}${br[i] ? `<i class="hit">Broke ${br[i].join(', ')}</i>` : ''}</span><span>${money(x.amt)}</span></div>`;
   }).join('') || '<div class="r off"><span>Nothing spent this day</span><span>$0</span></div>';
   const cards = h.cards.map(c => `<div class="r ${c.state === 'on' ? '' : 'off'}"><span>${c.state === 'on' ? '' : c.state === 'pending' ? 'zzz ' : 'Broke '}${CARDS[c.no].name}${c.why ? ' · ' + c.why : ''}${c.saved ? ' · stop-loss' : ''}</span><span>${gainStr(gainOf(c))}</span></div>`).join('');
   const all = h.cards.every(c => c.state === 'on');
   return `<div class="receipt">${h.unlogged ? `<span class="stamp no">Not logged</span>` : all ? `<span class="stamp">All held</span>` : ""}
     <span class="cap-t">Week ${h.week} · ${DAYS[h.day]}</span>
     <hr>${rows}<hr>
-    ${overOf(h.entries) ? `<div class="r"><span>Essentials over the daily $${essQuota}</span><span>+$${overOf(h.entries)}</span></div>` : ''}
-    ${h.debtIn ? `<div class="r hitc"><span>Overdrawn yesterday</span><span>−$${Math.min(h.debtIn, dailyBudget())}</span></div>` : ""}
-    <div class="r"><span>Allowed today</span><span>$${h.daily}</span></div>
-    <div class="r"><span>Spent outside the allowance</span><span>$${h.extra}</span></div>
+    ${overOf(h.entries) ? `<div class="r"><span>Essentials over the daily ${money(essQuota)}</span><span>+${money(overOf(h.entries))}</span></div>` : ''}
+    ${h.debtIn ? `<div class="r hitc"><span>Overdrawn yesterday</span><span>−${money(Math.min(h.debtIn, dailyBudget()))}</span></div>` : ""}
+    <div class="r"><span>Allowed today</span><span>${money(h.daily)}</span></div>
+    <div class="r"><span>Spent outside the allowance</span><span>${money(h.extra)}</span></div>
     <div class="r"><span>Money left = base score</span><span>${h.base}</span></div>
     <hr><div class="r"><span>Mult starts at ${h.baseMult || 1}${(h.baseMult || 1) > 1 ? ` (graduated ${h.baseMult - 1})` : ""}</span><span>${h.baseMult || 1}</span></div>${cards}<hr>
     <div class="tot"><span class="px">${h.base} × ${h.mult}</span><b>${h.score} pts</b></div>
-    ${h.extra > h.daily ? `<p class="note left" style="margin:4px 0 0">Over by $${h.extra - h.daily}, tomorrow takes at most $${debtCap()}${h.extra - h.daily > debtCap() ? `; the extra $${h.extra - h.daily - debtCap()} each add to this week’s target +${OVERFLOW_PTS}` : ''}.</p>` : ""}
+    ${h.extra > h.daily ? `<p class="note left" style="margin:4px 0 0">Over by ${money(h.extra - h.daily)}, tomorrow takes at most ${money(debtCap())}${h.extra - h.daily > debtCap() ? `; the extra ${money(h.extra - h.daily - debtCap())} each add to this week’s target +${OVERFLOW_PTS}` : ''}.</p>` : ""}
+    ${h.edited ? '<p class="note left" style="margin:4px 0 0">Entries corrected after the day ended; the score stays as printed.</p>' : ''}
     ${receiptStickers(h)}
   </div>`;
 }
@@ -189,7 +195,7 @@ async function playStage(sh) {
     line('Nothing logged today', 'Base score starts at 0');
     line(`${S.day === 6 ? 'Before the weekly summary' : 'Tomorrow morning'} you’ll be asked: if you really spent nothing, the base score is restored; cards add no multiplier`, '', 'off');
   } else {
-    line(`Allowed $${h.daily} · spent outside $${h.extra}`, `Base ${h.base}`);
+    line(`Allowed ${money(h.daily)} · spent outside ${money(h.extra)}`, `Base ${h.base}`);
     await countTo($('pb'), h.base, 600);
     let mult = S.baseMult;
     if (S.baseMult > 1) line(`Graduated cards start the multiplier at ${S.baseMult}`, `×${S.baseMult}`);

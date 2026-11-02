@@ -6,7 +6,7 @@ const JOIN = (NOW.getDay() + 6) % 7;
 let START = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() - JOIN);
 let S = {
   week: 1, day: JOIN, weekStart: JOIN, held: [], stars: 0, unlocked: ['01', '06', '03', '04', '05', '10', '15', '07'], lastWeek: [], estimated: false, firstDraw: true,
-  base: BASE, setup: { income: 6000, fixed: 2500, save: 2000 }, weak: [], freq: {}, coach: 0, view: 'home', billTab: 'flow', cardLog: {},
+  base: BASE, setup: { income: 6000, fixed: 2300, save: 1000 }, weak: [], freq: {}, coach: 0, view: 'home', billTab: 'flow', cardLog: {},
   baseMult: 1, grad: [], stake: 0, nextStake: 0, carry: null, debt: 0, starsTotal: 0, slots: 3, glue: 0, glued: null, pinned: [],
   prefs: { evening: true, eveningAt: 21.5, ruleAlerts: true, morning: true },
   history: [], today: [], teaWeek: 0, wish: [], revisit: [],
@@ -48,7 +48,8 @@ const WEAK = [
   { id: 'night', name: 'Late night', card: '06', bg: '#FF4D6A', svg: `<path d="M30 2C33 22 38 27 58 30C38 33 33 38 30 58C27 38 22 33 2 30C22 27 27 22 30 2Z" fill="#111"/>${EYES}` },
   { id: 'weekend', name: 'Weekend', card: '15', bg: '#A55BFF', svg: '<path d="M6 12H54L30 54Z" fill="#111" stroke="#111" stroke-width="6" stroke-linejoin="round"/><ellipse cx="25" cy="24" rx="2.6" ry="4.5" fill="#FFF"/><ellipse cx="35" cy="24" rx="2.6" ry="4.5" fill="#FFF"/>' }
 ];
-const weeklyFrom = s => Math.round((s.income - s.fixed - s.save) / 4.3);
+// what is left each week after fixed costs and savings, less a week of essentials (meals and commuting are paid from it too)
+const weeklyFrom = (s, q = s.ess ?? essQuota) => Math.round((s.income - s.fixed - s.save) / 4.3 - q * 7);
 
 const weekHist = () => S.history.filter(h => h.week === S.week);
 // this week's days that ended with nothing logged and haven't been answered for yet (spent nothing, or forgot)

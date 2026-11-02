@@ -13,6 +13,9 @@ function loadState() {
     S = { ...S, ...d.S, seen: new Set(d.S.seen || []) };
     (S.gradLog || []).forEach(g => { g.date = new Date(g.date); });
     START = new Date(d.start); essQuota = d.essQuota ?? essQuota;
+    // saves from before the allowance counted essentials may still hold the old untouched defaults, which now
+    // leave almost nothing a week; those were never typed by the player, so they move to the new defaults
+    const s0 = S.setup; if (s0.ess == null && s0.income === 6000 && s0.fixed === 2500 && s0.save === 2000) Object.assign(s0, { fixed: 2300, save: 1000 });
     (d.cats || []).forEach(c => { if (!CATS.some(x => x.id === c.id)) CATS.push(c); });
     return true;
   } catch (err) { return false; }
