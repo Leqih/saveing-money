@@ -375,7 +375,9 @@ function deckHTML() {
   const open = all.filter(x => S.unlocked.includes(x.no)), locked = all.filter(x => !S.unlocked.includes(x.no) && !S.grad.includes(x.no));
   const f = S.deckTab || 'all';
   const gradCards = all.filter(x => S.grad.includes(x.no));
-  const shown = f === 'open' ? open : f === 'grad' ? gradCards : all;
+  // the multiplier chips above the grid filter it, and their colors double as the key to the tile colors
+  const plus = S.deckPlus || 0;
+  const shown = (f === 'open' ? open : f === 'grad' ? gradCards : all).filter(x => !plus || x.plus === plus);
   const next = locked.slice().sort((a, b) => a.unlock - b.unlock)[0];
   const dots = open.slice(0, 4).map(x => `<span style="width:34px;height:34px;border-radius:50%;border:4px solid ${coreOf(x.no)};background:${tintOf(x.no)};margin-left:-10px;box-shadow:0 0 0 2px #FFF;display:flex;align-items:center;justify-content:center">${artIcon(x.no, 18)}</span>`).join('');
   const cells = shown.map(x => {
@@ -393,7 +395,7 @@ function deckHTML() {
     ? { no: last.best, title: `Last week ${last.pass ? 'passed' : 'missed'} · ${last.score} / ${last.target} pts`, sub: last.pass ? `${last.stars ? `Earned ${starStr(last.stars)}` : 'No stars kept after the reconcile'}, now ${plural(S.stars, 'star')} total. Best held: “${CARDS[last.best].name}”` : 'No penalty for missing. Pick cards that are easier to hold this week.', tail: last.fresh ? `New card unlocked: ${last.fresh}` : next ? `Just ${plural(Math.max(0, next.unlock - S.starsTotal), 'more star')} to unlock: ${next.name}` : '' }
     : next ? { no: next.no, title: `Next unlock: ${next.name}`, sub: next.cond, tail: `Just ${Math.max(0, next.unlock - S.starsTotal)} stars`, have: S.starsTotal, need: next.unlock } : null;
   return `<div style="display:flex;justify-content:space-between;align-items:center">
-      <div><h1 style="margin:0;font-weight:900;font-size:28px">Deck</h1><p class="px" style="margin:2px 0 0;font-size:12px;color:#5E5E66">Week ${S.week} · ★ ${S.stars}</p></div>
+      <div><h1 style="margin:0;font-weight:900;font-size:28px">Deck</h1><p class="px" style="margin:2px 0 0;font-size:12px;color:#5E5E66">Week ${S.week} · ★ ${S.stars} · ${STAKES[S.stake].name}</p></div>
       <div style="display:flex;align-items:center;height:52px;padding:0 14px 0 22px;border-radius:26px;border:2px solid #E2E2E8">${dots}
         <span class="px" aria-label="Unlocked ${open.length} / ${all.length}" style="margin-left:10px;display:flex;flex-direction:column;align-items:center;font-size:14px;line-height:1"><b style="font-weight:400">${open.length}</b><i style="width:22px;height:2px;margin:3px 0;background:#111"></i><b style="font-weight:400">${all.length}</b></span></div>
     </div>
@@ -404,14 +406,10 @@ function deckHTML() {
       <span class="dk-main"><b>${banner.title}</b><small>${banner.sub}</small>${banner.need ? `<span class="dk-bar"><i style="width:${Math.min(100, Math.round(banner.have / banner.need * 100))}%"></i></span>` : ''}</span>
       <span class="dk-tail">${banner.need ? `<b class="px">★${banner.have}/${banner.need}</b>` : ''}${banner.tail && !banner.need ? `<small>${banner.tail}</small>` : ''}<svg width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></span>
     </button>` : ''}
-    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));row-gap:16px;column-gap:8px;margin-top:6px">${cells || '<p class="note">No cards here yet.</p>'}</div>
-    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-      <span style="font-weight:900;font-size:12px;margin-right:2px">Hold for</span>
-      ${[...new Set(all.map(x => x.plus))].sort().map(n => `<span class="cv-pill" style="background:${TYPES[n].core};border-color:${TYPES[n].core};color:${TYPES[n].chipText}">+${n} ${n === 1 ? 'Easy' : n === 2 ? 'Careful' : 'Hardest'}</span>`).join('')}
+    ${f === 'grad' ? `<p class="note left" style="margin:0">Graduated cards leave the deck and add +1 to your base multiplier (now ×${S.baseMult}).</p>` : ''}
+    <div class="dk-plus" role="group" aria-label="Show cards by multiplier"><span>Mult</span>
+      <button data-plus="0" aria-pressed="${!plus}">All</button>
+      ${[...new Set(all.map(x => x.plus))].sort().map(n => `<button data-plus="${n}" aria-pressed="${plus === n}" style="--c:${TYPES[n].core};--t:${TYPES[n].chipText}"><i></i>+${n}</button>`).join('')}
     </div>
-    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-      <span style="font-weight:900;font-size:12px;margin-right:2px">Stakes</span>
-      ${STAKES.map((s, i) => `<span class="cv-pill" style="${i === S.stake ? `background:${s.bg};border-color:${i ? s.bg : "#E2E2E8"};color:${s.fg}` : ""}">${s.name}${i < S.stake || i <= (S.maxStake || 0) && i !== S.stake ? " ✓" : ""}</span>`).join("")}
-    </div>
-    <p class="note left">Graduated cards leave the deck and add +1 to your base multiplier (now ×${S.baseMult}).</p>`}`;
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));row-gap:16px;column-gap:8px">${cells || `<p class="note" style="grid-column:1/-1">${plus ? `No +${plus} cards here.` : 'No cards here yet.'}</p>`}</div>`}`;
 }

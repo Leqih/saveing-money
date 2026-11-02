@@ -196,6 +196,8 @@ const BY_DATA = {
   tab: v => switchTab(v),
   bill: v => { S.billTab = v; renderTable(); },
   deck: v => { S.deckTab = v; renderTable(); },
+  // tapping the chip that is already on goes back to every card
+  plus: v => { S.deckPlus = +v === S.deckPlus ? 0 : +v; const top0 = app.querySelector('.screen').scrollTop; renderTable(); app.querySelector('.screen').scrollTop = top0; },
   flowcat: v => { S.flowCat = v; const top0 = app.querySelector('.screen').scrollTop; renderTable(); app.querySelector('.screen').scrollTop = top0; },
   cal: v => { const [w, d] = v.split('-').map(Number); renderDay(d, w); },
   day: v => renderDay(+v),
