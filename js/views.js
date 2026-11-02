@@ -372,13 +372,12 @@ function catsHTML(recs, spent, tabs) {
 function deckHTML() {
   // keys like '10' sort as integers ahead of '01', so order by card number explicitly
   const all = Object.values(CARDS).sort((a, b) => a.no.localeCompare(b.no));
-  const open = all.filter(x => S.unlocked.includes(x.no)), locked = all.filter(x => !S.unlocked.includes(x.no) && !S.grad.includes(x.no));
+  const open = all.filter(x => S.unlocked.includes(x.no));
   const f = S.deckTab || 'all';
   const gradCards = all.filter(x => S.grad.includes(x.no));
   // the multiplier chips above the grid filter it, and their colors double as the key to the tile colors
   const plus = S.deckPlus || 0;
   const shown = (f === 'open' ? open : f === 'grad' ? gradCards : all).filter(x => !plus || x.plus === plus);
-  const next = locked.slice().sort((a, b) => a.unlock - b.unlock)[0];
   const dots = open.slice(0, 4).map(x => `<span style="width:34px;height:34px;border-radius:50%;border:4px solid ${coreOf(x.no)};background:${tintOf(x.no)};margin-left:-10px;box-shadow:0 0 0 2px #FFF;display:flex;align-items:center;justify-content:center">${artIcon(x.no, 18)}</span>`).join('');
   const cells = shown.map(x => {
     const isOpen = S.unlocked.includes(x.no) || S.grad.includes(x.no), log = S.cardLog[x.no];
@@ -388,12 +387,6 @@ function deckHTML() {
       ? `<button class="cv-cell" data-info="${x.no}" aria-label="${x.name}, +${x.plus} Mult${log ? `, held ${log.held}/${log.days} days` : ''}"><div class="cv-icon" style="background:${tintOf(x.no)}">${artIcon(x.no, 54)}${badge}${own}</div><span class="cv-name">${x.name} <span class="px" style="font-weight:400">+${x.plus}</span></span></button>`
       : `<button class="cv-cell" data-info="${x.no}" aria-label="${x.name}, unlocks at ${x.unlock} stars"><div class="cv-icon cv-lock"><svg width="54" height="50" viewBox="0 0 240 224" aria-hidden="true">${ILL[x.no](palOf(coreOf(x.no), true))}</svg><span class="cv-star px">★${x.unlock}</span></div><span class="cv-name" style="color:#8A8A92">${x.name}</span></button>`;
   }).join('');
-  const last = S.lastResult;
-  const banner = last && last.grads.length
-    ? { no: last.grads[0], title: `“${CARDS[last.grads[0]].name}” graduated`, sub: `Held 6/7 days or more for ${GRAD_WEEKS} weeks in a row; this habit is gone.`, tail: `Base multiplier +1 for good; it now starts at ${S.baseMult}, and the target score rises too` }
-    : last
-    ? { no: last.best, title: `Last week ${last.pass ? 'passed' : 'missed'} · ${last.score} / ${last.target} pts`, sub: last.pass ? `${last.stars ? `Earned ${starStr(last.stars)}` : 'No stars kept after the reconcile'}, now ${plural(S.stars, 'star')} total. Best held: “${CARDS[last.best].name}”` : 'No penalty for missing. Pick cards that are easier to hold this week.', tail: last.fresh ? `New card unlocked: ${last.fresh}` : next ? `Just ${plural(Math.max(0, next.unlock - S.starsTotal), 'more star')} to unlock: ${next.name}` : '' }
-    : next ? { no: next.no, title: `Next unlock: ${next.name}`, sub: next.cond, tail: `Just ${Math.max(0, next.unlock - S.starsTotal)} stars`, have: S.starsTotal, need: next.unlock } : null;
   return `<div style="display:flex;justify-content:space-between;align-items:center">
       <div><h1 style="margin:0;font-weight:900;font-size:28px">Deck</h1><p class="px" style="margin:2px 0 0;font-size:12px;color:#5E5E66">Week ${S.week} · ★ ${S.stars} · ${STAKES[S.stake].name}</p></div>
       <div style="display:flex;align-items:center;height:52px;padding:0 14px 0 22px;border-radius:26px;border:2px solid #E2E2E8">${dots}
@@ -401,11 +394,6 @@ function deckHTML() {
     </div>
     ${tabsHTML([{ id: 'all', name: `All <span class="px" style="font-weight:400">${all.length}</span>`, on: f === 'all' }, { id: 'open', name: `Unlocked <span class="px" style="font-weight:400">${open.length}</span>`, on: f === 'open' }, { id: 'grad', name: `Graduated <span class="px" style="font-weight:400">${S.grad.length}</span>`, on: f === 'grad' }, { id: 'shop', name: 'Shop', on: f === 'shop' }], 'data-deck')}
     ${f === 'shop' ? shopBody() : `
-    ${banner ? `<button class="dk-next" data-info="${banner.no}">
-      <i class="dk-ico" style="background:${tintOf(banner.no)}">${artIcon(banner.no, 30)}</i>
-      <span class="dk-main"><b>${banner.title}</b><small>${banner.sub}</small>${banner.need ? `<span class="dk-bar"><i style="width:${Math.min(100, Math.round(banner.have / banner.need * 100))}%"></i></span>` : ''}</span>
-      <span class="dk-tail">${banner.need ? `<b class="px">★${banner.have}/${banner.need}</b>` : ''}${banner.tail && !banner.need ? `<small>${banner.tail}</small>` : ''}<svg width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 1.5L6.5 7l-5 5.5"/></svg></span>
-    </button>` : ''}
     ${f === 'grad' ? `<p class="note left" style="margin:0">Graduated cards leave the deck and add +1 to your base multiplier (now ×${S.baseMult}).</p>` : ''}
     <div class="dk-plus" role="group" aria-label="Show cards by multiplier"><span>Mult</span>
       <button data-plus="0" aria-pressed="${!plus}">All</button>
