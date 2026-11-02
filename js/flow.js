@@ -20,17 +20,18 @@ function endDay() {
   S.teaWeek += teaOf(S.today);
   S.revisit = S.wish; S.wish = [];
   S.today = [];
-  // Sunday has no next morning to ask on, so an unlogged Sunday is asked about before the week is settled
-  if (S.day === 6) { renderTable(); if (h.unlogged) { S.sunCheck = true; renderSunUnlogged(h); } else { settleWeek(); renderWeek(); } return; }
+  // Sunday has no next morning to ask on, so unlogged days still waiting are asked about before the week is settled
+  if (S.day === 6) { renderTable(); if (pendingUnlogged().length) { S.sunCheck = true; renderSunUnlogged(); } else { settleWeek(); renderWeek(); } return; }
   S.day += 1; S.clock = 8.5;
   renderTable();
   if (S.prefs.morning) renderMorning(); else toast(`${DAYS[S.day]} · allowed today $${todayBudget()}`);
   monthTurn(dateOf(S.week, S.day - 1), dateOf(S.week, S.day));
 }
-function renderSunUnlogged(h) {
+function renderSunUnlogged() {
+  const p = pendingUnlogged(), one = p.length === 1;
   sheet('Sunday check', `
     <div class="bar-top"><h1>Sun · before the summary</h1></div>
-    <div class="unlogged"><b>Nothing logged today</b><span>Did you really spend nothing? An unlogged day counts as 0 pts. If you really spent nothing, it’s restored to a zero-spend score of ${h.potential.score} pts (base multiplier only; cards add nothing on an unlogged day).</span><div class="ibtns"><button class="rvbtn lime" data-act="sun-unlogged-yes">Really spent nothing</button><button class="rvbtn" data-act="sun-unlogged-no">Forgot to log</button></div></div>`);
+    <div class="unlogged"><b>${one ? `Nothing logged ${p[0].day === 6 ? 'today' : 'on ' + DAYS[p[0].day]}` : `Nothing logged on ${p.length} days this week`}</b><span>Did you really spend nothing? An unlogged day counts as 0 pts. If you really spent nothing, ${one ? 'it’s' : 'they’re'} restored to a zero-spend score of ${p.reduce((a, y) => a + y.potential.score, 0)} pts (base multiplier only; cards add nothing on an unlogged day).</span><div class="ibtns"><button class="rvbtn lime" data-act="sun-unlogged-yes">Really spent nothing</button><button class="rvbtn" data-act="sun-unlogged-no">Forgot to log</button></div></div>`);
 }
 function startWeek() {
   const lastDay = dateOf(S.week, 6);
@@ -39,12 +40,35 @@ function startWeek() {
   // an overspent Sunday still comes out of Monday's allowance, so the week boundary is no free night out
   S.stake = S.nextStake; S.overflow = 0;
   if (S.slotPending) { S.slots = 4; S.slotPending = false; }
+  if (S.nextBase) { S.base = S.nextBase; S.nextBase = null; }
   S.weekOpen = false;
-  S.week += 1; S.day = 0; S.weekStart = 0; S.held = []; S.teaWeek = 0; S.firstDraw = false; S.estimated = false;
+  // back after weeks away, the new week is the calendar's week and starts on today's weekday, a short week like a first one;
+  // weeks nobody played are skipped rather than scored. A demo that ran ahead of the calendar just goes on to Monday
+  const real = dayNo(), w = nextWeekNo();
+  S.week = w; S.day = S.weekStart = w === Math.floor(real / 7) + 1 ? real % 7 : 0;
+  S.held = []; S.teaWeek = 0; S.firstDraw = false; S.estimated = false;
   draft = {};
   renderTable(); renderDraw();
   monthTurn(lastDay, dateOf(S.week, 0));
 }
+
+// the game only moves on when a day is ended, so coming back after days away first ends the days that went by:
+// the open day keeps what was logged, the ones after it wait as unlogged until the morning asks about them.
+// It stops at Sunday, which settles the week; the next week then starts on the calendar's day (see startWeek)
+function catchUp() {
+  const real = dayNo(), at = () => (S.week - 1) * 7 + S.day;
+  if (real <= at() || !S.held.length || S.weekOpen || S.sunCheck || app.querySelector('.sheet')) return false;
+  const from = dateOf(S.week, S.day);
+  S.away = real - at(); S.autoEnded = true;
+  while (S.day < 6 && at() < real) endDay();
+  app.querySelectorAll('.sheet').forEach(n => n.remove());
+  if (at() < real) { endDay(); return true; }
+  S.clock = clockNow(); renderTable(); renderMorning();
+  monthTurn(from, dateOf(S.week, S.day));
+  return true;
+}
+// a tab left open overnight catches up when it is looked at again
+document.addEventListener('visibilitychange', () => { if (!document.hidden) catchUp(); });
 
 app.addEventListener('change', e => { const sel = e.target.closest && e.target.closest('.imp-cat'); if (!sel) return; IMP.rows[+sel.dataset.impc].cat = sel.value; const top = sel.closest('.sheet'); replaceSheet(top, renderImport); });
 app.addEventListener('input', e => {
@@ -56,7 +80,7 @@ app.addEventListener('input', e => {
     document.getElementById('setup-formula').textContent = w >= 50 ? setupFormula(S.setup) : 'Weekly allowance must be at least $50; adjust the numbers above';
     const nx = document.querySelector("[data-act=setup-next], [data-act=settings-save]");
     // settings only saves a real change: the same allowance as now keeps the button off
-    if (nx && nx.dataset.act === 'settings-save') { nx.disabled = w < 50 || w === S.base; nx.textContent = w === S.base ? `It’s already $${S.base}` : `Change to $${w}`; }
+    if (nx && nx.dataset.act === 'settings-save') { const b = allowanceBtn(w); nx.disabled = b.off; nx.textContent = b.text; }
     else if (nx) nx.disabled = w < 50;
   }
   if (e.target.id === 'note') draft.note = e.target.value.trim();

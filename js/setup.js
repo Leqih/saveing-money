@@ -123,6 +123,13 @@ function renderGuide() {
 }
 
 /* ---------- settings ---------- */
+// the save button compares against what next week will use: the pending allowance if one is set, else this week's
+function allowanceBtn(w) {
+  const planned = S.nextBase || S.base;
+  if (w < 50) return { off: true, text: `Change to $${w}` };
+  if (w === planned) return { off: true, text: S.nextBase ? `Already set for Monday` : `It’s already $${S.base}` };
+  return { off: false, text: w === S.base ? `Keep $${w} next week` : `From Monday: $${w}` };
+}
 function renderSettings() {
   const s = S.setup, w = weeklyFrom(s), p = S.prefs;
   const field = (k, label, sub) => `<div class="cv-field"><div><label for="st-${k}">${label}${sub ? `<small>${sub}</small>` : ''}</label><input id="st-${k}" inputmode="numeric" data-setup="${k}" value="${s[k]}"></div></div>`;
@@ -131,6 +138,7 @@ function renderSettings() {
     <div class="bar-top"><h1>Settings</h1>${CLOSE_BTN}</div>
     <h2>Budget</h2>
     <div class="set-row"><div><b>Weekly allowance</b><small id="setup-formula">${w >= 50 ? setupFormula(s) : 'Weekly allowance must be at least $50'}</small></div><b class="px" id="setup-week" style="font-size:20px">${money(w)}</b></div>
+    ${S.nextBase ? `<p class="note left">This week stays at ${money(S.base)}; ${money(S.nextBase)} starts next Monday.</p>` : ''}
     ${field('income', 'Monthly income', '')}${field('fixed', 'Fixed costs', 'Rent, phone, subscriptions')}${field('save', 'Monthly savings', 'Save first, spend later')}
     <div class="set-row"><div><b>Essentials allowance</b><small>Meals and commuting within this amount a day don’t count</small></div><div style="display:flex;align-items:center;gap:8px"><button class="cv-mini" data-quota="-5" aria-label="Decrease"><span>−</span></button><span class="px" style="font-size:20px;min-width:44px;text-align:center">$${essQuota}</span><button class="cv-mini" data-quota="5" aria-label="Increase"><span>+</span></button></div></div>
     <h2>Bank</h2>
@@ -145,7 +153,7 @@ function renderSettings() {
     <div class="set-row"><div><b>Replay home tips</b><small>The tips shown on your first visit to home</small></div><button class="mini" data-act="coach-reset">Watch again</button></div>
     <div class="set-row"><div><b>Start over</b><small>Return to the launch screen and clear all demo data</small></div><button class="mini" data-act="restart">Start over</button></div>
 </details>
-    <button class="go" data-act="settings-save" ${w >= 50 && w !== S.base ? '' : 'disabled'}>${w === S.base ? `It’s already $${S.base}` : `Change to $${w}`}</button>`);
+    ${(b => `<button class="go" data-act="settings-save" ${b.off ? 'disabled' : ''}>${b.text}</button>`)(allowanceBtn(w))}`);
 }
 
 

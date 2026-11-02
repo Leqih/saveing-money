@@ -161,8 +161,8 @@ function renderMorning() {
   const a = alerts(ev)[0];
   sheet('Good morning', `
     <div class="bar-top"><h1>${DAYS[S.day]} · Good morning</h1><span class="px" style="color:var(--mute)">${fmtClock(S.clock)}</span></div>
-    ${(() => { const y = S.history[S.history.length - 1]; return y && y.unlogged && !y.resolved ? `<div class="unlogged"><b>Nothing logged yesterday</b><span>Did you really spend nothing? An unlogged day counts as 0 pts first. If you really spent nothing, it’s restored to a zero-spend score of ${y.potential.score} pts (base multiplier only; cards add nothing on an unlogged day).</span><div class="ibtns"><button class="rvbtn lime" data-act="unlogged-yes">Really spent nothing</button><button class="rvbtn" data-act="unlogged-no">Forgot to log</button></div></div>` : ''; })()}
-    ${S.autoEnded ? '<div class="callout">Last night you didn’t tap "End today", so midnight ended the day for you; the receipt is kept as usual.</div>' : ''}
+    ${(() => { const p = pendingUnlogged(); return p.length ? `<div class="unlogged"><b>${p.length > 1 ? `Nothing logged on ${p.length} days` : `Nothing logged ${p[0] === S.history[S.history.length - 1] ? 'yesterday' : 'on ' + DAYS[p[0].day]}`}</b><span>Did you really spend nothing? An unlogged day counts as 0 pts first. If you really spent nothing, ${p.length > 1 ? 'they’re' : 'it’s'} restored to a zero-spend score of ${p.reduce((a, y) => a + y.potential.score, 0)} pts (base multiplier only; cards add nothing on an unlogged day).</span><div class="ibtns"><button class="rvbtn lime" data-act="unlogged-yes">Really spent nothing</button><button class="rvbtn" data-act="unlogged-no">Forgot to log</button></div></div>` : ''; })()}
+    ${S.away > 1 ? `<div class="callout">You were away for ${S.away} days, so those days ended without you. What you logged before you left is on its receipt as usual.</div>` : S.autoEnded ? '<div class="callout">Last night you didn’t tap "End today", so midnight ended the day for you; the receipt is kept as usual.</div>' : ''}
     ${S.debt ? `<div class="callout">You overdrew yesterday by <b>$${S.debt}</b>, today you can spend $${dailyBudget()} − $${Math.min(S.debt, dailyBudget())} = <b>$${todayBudget()}</b>.${(() => { const y = S.history[S.history.length - 1]; return y && y.overflow ? `The other $${y.overflow} over is no longer carried forward; it adds to this week’s target score instead: +${y.overflow * OVERFLOW_PTS}.` : ''; })()}</div>` : ""}
     <div class="cap orange hero"><div class="top">
       <div class="row"><span style="font-weight:900;font-size:14px">Allowed today</span><span class="px" style="font-size:12px">Weekly Score ${scorePrior()} / ${weekTarget()}</span></div>
@@ -253,7 +253,7 @@ function renderWeek() {
 // before Monday, the week's log is checked against what the payment apps say was really spent; a log missing a lot loses the stars
 const RECON_RATIO = 1.2, RECON_SLACK = 30;
 function reconHTML(R) {
-  const go = `<button class="cap lime bigbtn" data-act="to-monday"><div class="top">Start week ${S.week + 1} · draw cards</div></button>`;
+  const go = `<button class="cap lime bigbtn" data-act="to-monday"><div class="top">Start week ${nextWeekNo()} · draw cards</div></button>`;
   if (!R.got && !R.recon) return go;
   if (R.recon) return `<div class="callout">${R.recon.voided ? `Reconcile off by $${R.recon.actual - R.logged}: actually $${R.recon.actual}, only logged $${R.logged}. This week’s ${starStr(R.recon.voided)} don’t count; score unchanged.` : R.recon.skipped ? `Not reconciled; this week’s stars are halved, ${R.got ? `you get only ${starStr(R.got)}` : 'none left'}.` : `Matches: actually $${R.recon.actual}, logged $${R.logged}. Stars kept ✓`}</div>${go}`;
   return `<h2>Reconcile <small>The last step before stars</small></h2>

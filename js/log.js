@@ -262,6 +262,6 @@ function renderRule(no) {
       <span class="rcook"><b>+${c.plus}</b><small>Mult</small></span>
       <span class="rhint px">TAP TO FLIP</span>
     </div>
-    ${cur && cur.state === 'broken' ? (S.glue ? `<button class="cap lime bigbtn" data-act="glue" data-no="${no}"><div class="top">Glue it back (${S.glue} left)</div></button>` : '') : ''}`);
+    ${cur && cur.state === 'broken' && !c.noGlue ? (S.glue ? `<button class="cap lime bigbtn" data-act="glue" data-no="${no}"><div class="top">Glue it back (${S.glue} left)</div></button>` : '') : ''}`);
   sh.classList.add('rulec'); sh.style.setProperty('--rc', core);
 }

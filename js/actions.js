@@ -15,8 +15,8 @@ const toFirstDeal = top => {
   draft = {}; swapSheet(top, renderDraw);
 };
 const needCards = () => { if (S.held.length) return true; toast('Draw this week’s cards first'); return false; };
-// an unlogged day is either confirmed as a zero-spend day (base score only) or left at 0
-const resolveUnlogged = yes => { const y = S.history[S.history.length - 1]; if (yes) Object.assign(y, y.potential, { unlogged: false }); y.resolved = true; return y; };
+// unlogged days are either confirmed as zero-spend days (base score only) or left at 0; one answer covers them all
+const resolveUnlogged = yes => pendingUnlogged().reduce((pts, y) => { if (yes) Object.assign(y, y.potential, { unlogged: false }); y.resolved = true; return pts + y.score; }, 0);
 const bankTx = t => S.bank.feed.find(x => x.id === +t.dataset.id);
 
 const ACTIONS = {
@@ -87,9 +87,15 @@ const ACTIONS = {
 
   /* settings */
   'settings': (t, top) => { if (top && top.getAttribute('aria-label') === 'Stars') top.remove(); renderSettings(); },
-  'settings-save': (t, top) => { S.base = weeklyFrom(S.setup); replaceSheet(top, renderSettings); toast(`Weekly allowance set to $${S.base}, $${dailyBudget()}`); },
+  // a new allowance starts next Monday: changing it mid-week would rescore the rest of the week on a different budget
+  'settings-save': (t, top) => { const w = weeklyFrom(S.setup); S.nextBase = w === S.base ? null : w; replaceSheet(top, renderSettings); toast(S.nextBase ? `From Monday: $${w} a week, $${Math.round(w / 7)} a day` : `Staying at $${S.base} a week`); },
   'coach-reset': (t, top) => { S.coach = 0; S.view = 'home'; top.remove(); renderTable(); },
-  'restart': () => { clearState(); location.reload(); },
+  // one tap arms it, a second within 3 s wipes the save; anything else lets it disarm on its own
+  'restart': t => {
+    if (t.dataset.armed) { clearState(); location.reload(); return; }
+    t.dataset.armed = '1'; t.classList.add('danger'); t.textContent = 'Tap again to erase';
+    setTimeout(() => { delete t.dataset.armed; t.classList.remove('danger'); t.textContent = 'Start over'; }, 3000);
+  },
 
   /* the weekly draw */
   'draw': () => { draft = {}; renderDraw(); },
@@ -120,7 +126,8 @@ const ACTIONS = {
   'del': () => { const before = evaluate(S.today); S.today.splice(draft.edit, 1); renderTable(); const after = evaluate(S.today); toast(after.mult > before.mult ? `Deleted · mult back to ×${after.mult}` : 'Deleted'); },
   'wish': () => { S.wish.push({ cat: logCat(), amt: parseInt(draft.amt, 10), note: draft.note }); renderTable(); toast('Moved to the wish list; we’ll ask again tomorrow · no card broke'); },
   'glue': (t, top) => {
-    const no = t.dataset.no; S.glue -= 1; S.glued = { week: S.week, day: S.day, no };
+    const no = t.dataset.no; if (CARDS[no].noGlue || S.glue < 1) return;
+    S.glue -= 1; S.glued = { week: S.week, day: S.day, no };
     top.remove(); renderTable(); toast(`Glued back, “${CARDS[no].name}” holds again today +${CARDS[no].plus}`);
   },
 
@@ -139,9 +146,9 @@ const ACTIONS = {
   'end': () => { if (!needCards()) return; if (bankCaught().length) renderBankCheck(); else renderEnd(); },
   'end-ok': (t, top) => { t.disabled = true; playStage(top); },
   'play-next': t => { t.disabled = true; endDay(); },
-  'morning-done': (t, top) => { S.autoEnded = false; S.wishSaved = 0; closeSheet(top, renderTable); },
-  'unlogged-yes': () => { const y = resolveUnlogged(true); renderTable(); renderMorning(); settle(); toast(`Filled in ${y.score} pts`); },
-  'unlogged-no': () => { resolveUnlogged(false); renderTable(); renderMorning(); settle(); toast('That day counts as 0 pts. Log a quick entry whenever you spend later'); },
+  'morning-done': (t, top) => { S.autoEnded = false; S.away = 0; S.wishSaved = 0; closeSheet(top, renderTable); },
+  'unlogged-yes': () => { const pts = resolveUnlogged(true); renderTable(); renderMorning(); settle(); toast(`Filled in ${pts} pts`); },
+  'unlogged-no': () => { const n = pendingUnlogged().length; resolveUnlogged(false); renderTable(); renderMorning(); settle(); toast(`${n > 1 ? 'Those days count' : 'That day counts'} as 0 pts. Log a quick entry whenever you spend later`); },
   'sun-unlogged-yes': (t, top) => { resolveUnlogged(true); S.sunCheck = false; top.remove(); settleWeek(); renderTable(); renderWeek(); },
   'sun-unlogged-no': (t, top) => { resolveUnlogged(false); S.sunCheck = false; top.remove(); settleWeek(); renderTable(); renderWeek(); },
 

@@ -27,10 +27,10 @@ addEventListener('pagehide', saveState);
 // a reload mid-ritual reopens the sheet that was waiting on the user, so a day or a week can't be ended twice
 function resumeSheet() {
   const y = S.history[S.history.length - 1];
-  if (S.sunCheck && y) renderSunUnlogged(y);
+  if (S.sunCheck && y) renderSunUnlogged();
   else if (S.weekOpen && S.weekResult) renderWeek();
-  else if (y && y.unlogged && !y.resolved && S.held.length) renderMorning();
+  else if (y && pendingUnlogged().length && S.held.length) renderMorning();
 }
 
-if (loadState()) { renderTable(); resumeSheet(); toast('Welcome back · picked up where you left off'); }
+if (loadState()) { renderTable(); if (!catchUp()) resumeSheet(); toast('Welcome back · picked up where you left off'); }
 else { renderTable(); renderLaunch(); }

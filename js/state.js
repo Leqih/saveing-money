@@ -16,7 +16,8 @@ let draft = {};
 S.seen = new Set();
 // time of day drives the evening reminder, rule alerts and the 22:00 default; the demo lets you jump between moments
 // before 6am the demo starts at a morning commute rather than the middle of the night
-S.clock = NOW.getHours() < 6 ? 8.5 : NOW.getHours() + NOW.getMinutes() / 60;
+const clockNow = (n = new Date()) => n.getHours() < 6 ? 8.5 : n.getHours() + n.getMinutes() / 60;
+S.clock = clockNow(NOW);
 const TIMES = [{ c: 8.5, name: 'Morning commute' }, { c: 12 + 1 / 6, name: 'Lunch' }, { c: 18.5, name: 'Dinner' }, { c: 21.5, name: 'Evening' }, { c: 22 + 2 / 3, name: 'Late night' }];
 const fmtClock = c => `${String(Math.floor(c)).padStart(2, '0')}:${String(Math.round((c % 1) * 60)).padStart(2, '0')}`;
 // with no receipts yet, "how often" answers on the weak-spot step stand in for last week
@@ -50,6 +51,12 @@ const WEAK = [
 const weeklyFrom = s => Math.round((s.income - s.fixed - s.save) / 4.3);
 
 const weekHist = () => S.history.filter(h => h.week === S.week);
+// this week's days that ended with nothing logged and haven't been answered for yet (spent nothing, or forgot)
+const pendingUnlogged = () => weekHist().filter(h => h.unlogged && !h.resolved);
+// days since week 1's Monday by the calendar, to compare with the day the game is on
+const dayNo = (d = new Date()) => Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - START) / 864e5);
+// the week after this one, or the calendar's week when weeks went by unplayed (see startWeek)
+const nextWeekNo = () => Math.max(S.week + 1, Math.floor(dayNo() / 7) + 1);
 const dailyBudget = () => Math.round(S.base / 7);
 // money spent past today's allowance comes out of tomorrow's, so every dollar still counts after a blown day
 const todayBudget = () => Math.max(0, dailyBudget() - S.debt);
