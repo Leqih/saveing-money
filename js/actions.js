@@ -22,13 +22,17 @@ const bankTx = t => S.bank.feed.find(x => x.id === +t.dataset.id);
 
 const ACTIONS = {
   /* first use */
-  'launch-go': (t, top) => swapSheet(top, renderSetup),
+  'launch-go': (t, top) => swapSheet(top, () => renderIntro(0)),
+  'intro-next': (t, top) => { const p = +top.dataset.page; if (p < INTRO.length - 1) swapSheet(top, () => renderIntro(p + 1)); else introDone(top); },
+  'intro-back': (t, top) => { const p = +top.dataset.page; if (p) swapSheet(top, () => renderIntro(p - 1), false, true); else if (S.held.length) closeSheet(top); else swapSheet(top, renderLaunch, false, true); },
+  'intro-skip': (t, top) => introDone(top),
   // skip the setup: default budget, no weak spots picked, straight to the first pack
   'launch-skip': (t, top) => { S.base = BASE; top.remove(); renderTable(); S.lastWeek = estimateWeek(); S.estimated = S.lastWeek.some(d => d.length); draft = {}; renderDraw(); },
   'setup-next': (t, top) => { S.base = weeklyFrom(S.setup); toWeak(top); },
   'setup-skip': (t, top) => { S.base = BASE; toWeak(top); },
   'weak-next': (t, top) => S.weak.length ? swapSheet(top, renderFreq) : toFirstDeal(top),
   'weak-go': (t, top) => toFirstDeal(top),
+  'setup-back': (t, top) => swapSheet(top, () => renderIntro(INTRO.length - 1), false, true),
   'weak-back': (t, top) => swapSheet(top, renderSetup, false, true),
   'freq-back': (t, top) => swapSheet(top, renderWeak, false, true),
 
@@ -84,7 +88,7 @@ const ACTIONS = {
   'push-close': t => t.closest('.push').remove(),
   'fb-close': () => app.querySelectorAll('.fb').forEach(n => n.remove()),
   'rflip': t => { const on = t.classList.toggle('back'); t.setAttribute('aria-pressed', String(on)); const ht = t.parentElement.querySelector('.rhint'); if (ht) ht.textContent = on ? 'TAP TO FLIP BACK' : 'TAP TO FLIP'; },
-  'help': () => renderGuide(),
+  'help': () => renderIntro(0),
   // settings can change what home shows, so redraw it on the way out
   'close': (t, top) => closeSheet(top, top.getAttribute('aria-label') === 'Settings' ? renderTable : null),
 

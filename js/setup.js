@@ -35,9 +35,9 @@ function renderLaunch() {
     <div class="l-abs stk fan2" style="--r:-6deg;--d:1000ms;--f:6s;left:20px;top:506px" aria-hidden="true">${['06', '03', '04'].map(no => scaled(CARDS[no], 0.22)).join('')}</div>
     <svg class="l-abs stk flower" style="--r:14deg;--d:1250ms;--f:5.4s;left:140px;top:516px;width:44px" viewBox="0 0 40 40" aria-hidden="true"><g fill="#6DFF8C" stroke="#FFF" stroke-width="2.500"><circle cx="20" cy="10" r="8"/><circle cx="20" cy="30" r="8"/><circle cx="10" cy="20" r="8"/><circle cx="30" cy="20" r="8"/></g><circle cx="20" cy="20" r="6" fill="#FFD92E"/></svg>
     <div class="l-abs l-foot">
-      <h1>Money left × cards held<br>= today’s score.</h1>
-      <p>Every entry shows right away if it breaks a rule. On Sunday, see whether you passed.</p>
-      <button class="cap lime bigbtn" data-act="launch-go"><div class="top">Start week 1</div></button>
+      <h1>Your budget,<br>played as a card game.</h1>
+      <p>Log what you spend, keep your rule cards unbroken, and every dollar you don’t spend turns into points.</p>
+      <button class="cap lime bigbtn" data-act="launch-go"><div class="top">See how it works</div></button>
       <button class="linkbtn" data-act="launch-skip">Skip setup, draw cards</button>
     </div>
   </div>`);
@@ -45,12 +45,12 @@ function renderLaunch() {
 }
 const setupFormula = s => `(${s.income} − ${s.fixed} − ${s.save}) ÷ 4.3 − ${s.ess ?? essQuota}×7`;
 const progHTML = (step, back) => `<div class="cv-prog">${back ? `<button class="cv-back" data-act="${back}" aria-label="Back to the previous step">‹</button>` : ''}<span class="px" style="font-size:14px">${step} / 3</span><i class="pbar" style="--from:${Math.round((step - 1) / 3 * 100)}%;--to:${Math.round(step / 3 * 100)}%" aria-hidden="true"></i></div>`;
-// first use, step 1: income minus fixed costs minus savings gives the weekly allowance
+// first use, step 1 (after how it works): income minus fixed costs minus savings gives the weekly allowance
 function renderSetup() {
   const s = S.setup, w = weeklyFrom(s);
   const field = (k, label, sub) => `<div class="cv-field"><div><label for="su-${k}">${label}${sub ? `<small>${sub}</small>` : ''}</label><input id="su-${k}" inputmode="numeric" data-setup="${k}" value="${s[k]}"></div></div>`;
   sheet('Set budget', `
-    ${progHTML(1)}
+    ${progHTML(1, 'setup-back')}
     <h1 style="margin:4px 0 0;font-weight:900;font-size:28px;line-height:1.25">Let’s work out<br>what you can spend a week</h1>
     ${field('income', 'Monthly income', '')}${field('fixed', 'Fixed costs', 'Rent, phone, subscriptions')}${field('save', 'Monthly savings', 'Save first, spend later')}
     <div style="position:relative;height:128px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -111,15 +111,33 @@ function renderFreq() {
     <div class="fk-list">${rows}</div>
     <button class="cap lime bigbtn" data-act="weak-go" style="margin-top:4px"><div class="top">Draw cards</div></button>`);
 }
-function renderGuide() {
-  sheet('How to play', `
-    <div class="bar-top"><h1>How to play</h1>${CLOSE_BTN}</div>
-    <div class="gstack">
-      <div class="gcard g-orange"><span class="n">1</span><div><h3>Every week, draw 8 and keep 3</h3><p>The 3 rule cards you keep all work this week, e.g. "No takeout today". Each one shows how much multiplier you earn for holding it.</p></div>${scaled(CARDS['01'], 0.35)}</div>
-      <div class="gcard g-lav"><span class="n">2</span><div><h3>Every entry tells you right away</h3><p>See whether a card will break before you save. A broken card stops counting for the day; stop spending and you get half its multiplier back, and it returns at midnight. Weekly cards stay broken until Sunday and lose more multiplier if you keep overspending.</p></div><span class="gv">Broke!</span></div>
-      <div class="gcard g-lime"><span class="n">3</span><div><h3>Money left × multiplier = score</h3><p>The multiplier starts at 1 and each held card adds to it. Reach the weekly target to pass and earn stars; missing it costs nothing.</p></div><span class="gv">30×6</span></div>
-    </div>
-    <button class="cap lime bigbtn" data-act="close"><div class="top">Got it</div></button>`);
+/* ---------- how it works: what the app is and how a day and a week play, before any numbers are asked for ---------- */
+const INTRO = [
+  { h: 'A budget you play<br>like a card game',
+    art: () => `<div class="in-allow"><span class="in-pill">${money(dailyBudget())}<small>a day for extras</small></span>
+      <div class="in-row"><b>Comes out of it</b>${['Takeout', 'Coffee', 'Rideshare', 'Online'].map(n => `<span class="chip">${n}</span>`).join('')}</div>
+      <div class="in-row"><b>Free up to ${money(essQuota)} a day</b><span class="chip ess">Meals</span><span class="chip ess">Commute</span></div></div>`,
+    pts: ['Every day you get an allowance for the extras: takeout, coffee, rides, shopping.', 'Meals and commuting are free up to a daily amount, so everyday life costs you nothing.', 'You log each purchase yourself. That moment is where the habit changes.'] },
+  { h: 'Rule cards boost<br>your multiplier',
+    art: () => `<div class="in-fan">${['01', '06', '03'].map(no => scaled(CARDS[no], 0.4)).join('')}</div>`,
+    pts: ['Every Monday, open a pack of 8 rule cards and keep 3, like “No takeout today”.', 'Each card you keep unbroken adds its +1 to +5 to your multiplier.', 'Before you save a purchase you see which card it would break. A broken card stops counting until midnight.'] },
+  { h: 'Money left × multiplier<br>= points',
+    art: () => `<div class="in-eq"><span class="in-b">$30<small>left today</small></span><i>×</i><span class="in-b m">6<small>multiplier</small></span><i>=</i><span class="in-b s">180<small>points</small></span></div>`,
+    pts: ['Every night, the money you didn’t spend times your multiplier becomes the day’s points.', 'Reach the week’s target to earn stars, and stars unlock new cards. Missing it costs nothing.', 'On Sunday you check the total against your bank, so honest logging keeps your stars.'] }
+];
+// once a game is under way the same pages explain the rules again, and closing them returns to the game
+const introDone = top => S.held.length ? closeSheet(top) : swapSheet(top, renderSetup);
+function renderIntro(page) {
+  const it = INTRO[page], last = page === INTRO.length - 1;
+  const sh = sheet('How it works', `
+    <div class="in-top"><button class="cv-back" data-act="intro-back" aria-label="Back">‹</button>
+      <span class="in-dots" aria-label="Page ${page + 1} of ${INTRO.length}">${INTRO.map((_, i) => `<i class="${i === page ? 'on' : ''}"></i>`).join('')}</span>
+      <button class="linkbtn" data-act="intro-skip">${S.held.length ? 'Close' : 'Skip'}</button></div>
+    <div class="in-art">${it.art()}</div>
+    <h1 class="in-h">${it.h}</h1>
+    <ul class="in-pts">${it.pts.map(x => `<li>${x}</li>`).join('')}</ul>
+    <button class="cap lime bigbtn" data-act="intro-next"><div class="top">${!last ? 'Next' : S.held.length ? 'Got it' : 'Set my budget'}</div></button>`);
+  sh.dataset.page = page;
 }
 
 /* ---------- settings ---------- */
