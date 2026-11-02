@@ -185,7 +185,7 @@ function renderMorning() {
 const GRAD_RATIO = 0.85, GRAD_WEEKS = 2;
 function settleWeek() {
   const total = scorePrior(), target = weekTarget(), pass = total >= target;
-  const got = pass ? Math.round(starsFrom(total, target) * STAKES[S.stake].star) : 0, before = S.stars;
+  const warm = warmup(), got = pass && !warm ? Math.round(starsFrom(total, target) * STAKES[S.stake].star) : 0, before = S.stars;
   S.stars += got; S.starsTotal += got;
   const hist = weekHist();
   const perCard = S.held.map(no => ({ no, held: hist.filter(h => h.cards.find(c => c.no === no && c.state === 'on')).length, days: hist.length }));
@@ -205,30 +205,30 @@ function settleWeek() {
   fresh.forEach(x => S.unlocked.push(x.no));
   const best = perCard.slice().sort((a, b) => b.held / Math.max(1, b.days) - a.held / Math.max(1, a.days))[0];
   S.lastResult = { pass, score: total, target, stars: got, best: best.no, fresh: fresh.map(x => x.name).join(', '), grads };
-  (S.weeks = S.weeks || []).push({ week: S.week, total, target, pass, stars: got, stake: S.stake });
-  if (pass) S.maxStake = Math.max(S.maxStake || 0, Math.min(STAKES.length - 1, S.stake + 1));
+  (S.weeks = S.weeks || []).push({ week: S.week, total, target, pass, stars: got, stake: S.stake, warm });
+  if (pass && !warm) S.maxStake = Math.max(S.maxStake || 0, Math.min(STAKES.length - 1, S.stake + 1));
   const carryable = perCard.filter(p => !S.grad.includes(p.no));
   S.carry = carryable.length ? carryable.slice().sort((a, b) => b.held / Math.max(1, b.days) - a.held / Math.max(1, a.days))[0].no : null;
   S.nextStake = S.stake; S.weekStep = 1; S.weekOpen = true;
   // days still unlogged say nothing about what was really spent, so their allowance is left out of "saved"
   const blind = hist.filter(h => h.unlogged).length;
-  S.weekResult = { total, target, pass, got, before, perCard, grads, fresh, blind, real: Math.round(S.base * (weekDays() - blind) / 7), spent: hist.reduce((a, h) => a + h.extra, 0), logged: hist.reduce((a, h) => a + h.entries.reduce((b, x) => b + x.amt, 0), 0) };
+  S.weekResult = { total, target, pass, warm, got, before, perCard, grads, fresh, blind, real: Math.round(S.base * (weekDays() - blind) / 7), spent: hist.reduce((a, h) => a + h.extra, 0), logged: hist.reduce((a, h) => a + h.entries.reduce((b, x) => b + x.amt, 0), 0) };
 }
 function renderWeek() {
   const R = S.weekResult, st = STAKES[S.stake];
-  const stakeOpts = R.pass && S.stake < STAKES.length - 1 ? [S.stake + 1, S.stake] : !R.pass && S.stake > 0 ? [S.stake, S.stake - 1] : [S.stake];
+  const stakeOpts = R.warm ? [S.stake] : R.pass && S.stake < STAKES.length - 1 ? [S.stake + 1, S.stake] : !R.pass && S.stake > 0 ? [S.stake, S.stake - 1] : [S.stake];
   const stakeBtn = i => {
     const s = STAKES[i], tag = i > S.stake ? `Target ×${s.k}, stars for passing ×${s.star}` : i < S.stake ? `Target back to ×${s.k}` : 'Keep the current stake';
     return `<button class="stake ${S.nextStake === i ? 'on' : ''}" data-stake="${i}" aria-pressed="${S.nextStake === i}"><span class="chipk" style="background:${s.bg};color:${s.fg}">${s.name}</span><span>${tag}</span></button>`;
   };
   const step = S.weekStep || 1;
   sheet('Weekly summary', `
-    ${step === 1 ? `<div class="bar-top"><h1>Week ${S.week} over</h1><span class="chipk" style="background:${st.bg};color:${st.fg}">${st.name}</span></div>
-    <span class="bigstamp ${R.pass ? '' : 'no'}">${R.pass ? 'Passed' : 'Missed'}</span>
+    ${step === 1 ? `<div class="bar-top"><h1>${R.warm ? 'Warm-up over' : `Week ${S.week} over`}</h1><span class="chipk" style="background:${st.bg};color:${st.fg}">${st.name}</span></div>
+    <span class="bigstamp ${R.pass || R.warm ? '' : 'no'}">${R.warm ? 'Warm-up' : R.pass ? 'Passed' : 'Missed'}</span>
     <div class="impact">
       <div class="r"><span>Weekly Score</span><span class="${R.pass ? 'good' : 'hot'}">${R.total} / ${R.target}</span></div>
-      <div class="r"><span>Stars</span><span>${R.got ? `+${starStr(R.got)} Total ${S.stars}` : `None this week, total ${R.before}`}</span></div>
-      <div class="r"><span>How stars work</span><span>Target ★ · 1.7× ★★ · 2.6× ★★★${S.stake ? ` · ${st.name} Stars ×${st.star}` : ''}</span></div>
+      <div class="r"><span>Stars</span><span>${R.warm ? 'Warm-up days earn none; stars start with your first full week' : R.got ? `+${starStr(R.got)} Total ${S.stars}` : `None this week, total ${R.before}`}</span></div>
+      ${R.warm ? '' : `<div class="r"><span>How stars work</span><span>Target ★ · 1.7× ★★ · 2.6× ★★★${S.stake ? ` · ${st.name} Stars ×${st.star}` : ''}</span></div>`}
     </div>
     ${R.grads.map(no => `<div class="gradcard"><div class="gimg">${scaled(CARDS[no], 0.3)}<span class="cv-grad">Graduated</span></div><div><b>“${CARDS[no].name}” graduated!</b><p>Held 6/7 days or more for ${GRAD_WEEKS} weeks in a row: this habit is gone. It leaves the deck and gives you a permanent base multiplier +1: from now on the multiplier starts at <b>${S.baseMult}</b>, and the weekly target score rises 25%.</p></div></div>`).join('')}
     <h2>How your cards did <small>Hold 6/7 days for ${GRAD_WEEKS} weeks to graduate</small></h2>
@@ -239,7 +239,7 @@ function renderWeek() {
     <button class="go" data-act="week-plan">Next: plan next week</button>` : `<div class="bar-top"><h1>Plan next week</h1><span class="chipk" style="background:${st.bg};color:${st.fg}">${st.name}</span></div>
     ${S.carry ? `<h2>Carry one card <small>It’s in next week’s deal</small></h2>
     <div class="carry">${R.perCard.filter(p => !S.grad.includes(p.no)).map(p => `<button class="hcard ${S.carry === p.no ? 'on' : 'off'}" data-carry="${p.no}" aria-pressed="${S.carry === p.no}">${scaled(CARDS[p.no], 0.46)}<span>${S.carry === p.no ? 'Carried ✓' : 'Tap to carry'}</span></button>`).join('')}</div>` : ''}
-    <h2>Stake <small>${R.pass ? 'Raise it for more stars, or keep it' : 'No penalty for missing; lower it if it felt hard'}</small></h2>
+    <h2>Stake <small>${R.warm ? 'You can raise it after your first full week' : R.pass ? 'Raise it for more stars, or keep it' : 'No penalty for missing; lower it if it felt hard'}</small></h2>
     <div class="stakes">${stakeOpts.map(stakeBtn).join('')}</div>
     ${R.fresh.map(x => `<div class="unlock">${scaled(x, 0.3)}<div><b style="font-size:12px">New card unlocked</b><div style="font-weight:900;font-size:20px">${x.name}</div><p class="note left">${x.cond}. It may be dealt from now on.</p></div></div>`).join('')}
     <div class="impact plan">
@@ -258,8 +258,8 @@ function reconHTML(R) {
   if (R.recon) return `<div class="callout">${R.recon.voided ? `Reconcile off by $${R.recon.actual - R.logged}: actually $${R.recon.actual}, only logged $${R.logged}. This week’s ${starStr(R.recon.voided)} don’t count; score unchanged.` : R.recon.skipped ? `Not reconciled; this week’s stars are halved, ${R.got ? `you get only ${starStr(R.got)}` : 'none left'}.` : `Matches: actually $${R.recon.actual}, logged $${R.logged}. Stars kept ✓`}</div>${go}`;
   return `<h2>Reconcile <small>The last step before stars</small></h2>
     <div class="impact"><p class="note left" style="margin:0">Open your bank app or Venmo and see how much you spent this week (meals and commuting too). You logged <b>$${R.logged}</b> this week. If the real amount is 20% or more above what you logged, this week’s stars don’t count.</p>
-      <div class="field"><input class="in" id="recon" inputmode="numeric" maxlength="6" placeholder="How much you really spent this week" aria-label="How much you really spent this week"><button class="mini" data-act="recon">Check</button></div></div>
-    <button class="cap bigbtn" data-act="recon-skip"><div class="top">Skip (stars halved)</div></button>`;
+      <div class="field"><input class="in" id="recon" inputmode="numeric" maxlength="6" placeholder="Real total, $" aria-label="How much you really spent this week"><button class="mini lime" data-act="recon">Check</button></div></div>
+    <button class="linkbtn" data-act="recon-skip">Skip the check (stars halved)</button>`;
 }
 
 

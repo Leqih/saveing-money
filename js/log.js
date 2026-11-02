@@ -214,7 +214,7 @@ async function playStage(sh) {
   await countTo($('ps'), h.score, 800);
   $('pw').textContent = `${prior + h.score} / ${target}`;
   $('pwb').style.width = pct(prior + h.score) + '%';
-  if (prior < target && prior + h.score >= target) line('This week’s target score reached!', 'Cleared ✓', 'sum');
+  if (prior < target && prior + h.score >= target && !warmup()) line('This week’s target score reached!', 'Cleared ✓', 'sum');
   sh.removeEventListener('pointerdown', stop); rush = false; $('sk').style.visibility = 'hidden';
   const n = $('pn'); n.style.visibility = ''; n.focus();
 }

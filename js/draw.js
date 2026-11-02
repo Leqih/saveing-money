@@ -1,6 +1,8 @@
 /* ---------- weekly draw: deal up to 8, keep 3 (or 4) ---------- */
+// the cards that guard the weak spots picked in onboarding
+const weakCards = () => [...new Set(S.weak.map(id => WEAK.find(w => w.id === id).card))];
 function firstHand() {
-  const picks = [...new Set(S.weak.map(id => WEAK.find(w => w.id === id).card))].filter(no => S.unlocked.includes(no));
+  const picks = weakCards().filter(no => S.unlocked.includes(no));
   const rest = S.unlocked.filter(no => !picks.includes(no)).sort(() => Math.random() - 0.5);
   return [...picks, ...rest].slice(0, DEALN());
 }
@@ -17,8 +19,15 @@ function combosOf(hand, n) {
 const keepN = hand => { let n = Math.min(HOLDN(), hand.length); while (n > 1 && !combosOf(hand, n).length) n--; return n; };
 function bestCombo(hand, n, hasData) {
   const combos = combosOf(hand, n);
-  const ok = combos.filter(c => !S.carry || !hand.includes(S.carry) || c.includes(S.carry));
-  const value = c => hasData ? simulate(c, S.lastWeek, S.weekStart).total : -c.reduce((a, no) => a + CARDS[no].diff * 10 - CARDS[no].plus, 0);
+  // a carried card always stays; the first deal keeps onboarding's promise instead: the weak-spot cards are in,
+  // and the hardest cards stay out of a first week (Zero Day tops any score but breaks on the first coffee)
+  const must = S.firstDraw ? weakCards().filter(no => hand.includes(no)) : S.carry && hand.includes(S.carry) ? [S.carry] : [];
+  // with more weak spots than slots (or two that overlap), keep as many of them as fit
+  const hits = c => must.filter(no => c.includes(no)).length, most = Math.max(0, ...combos.map(hits));
+  let ok = combos.filter(c => hits(c) === most);
+  if (S.firstDraw) { const easy = ok.filter(c => c.every(no => CARDS[no].diff < 3)); if (easy.length) ok = easy; }
+  // a whole week of the estimate or last week's log, even when this week is short: one quiet Sunday says little about habits
+  const value = c => hasData ? simulate(c, S.lastWeek, 0).total : -c.reduce((a, no) => a + CARDS[no].diff * 10 - CARDS[no].plus, 0);
   return ok.sort((a, b) => value(b) - value(a))[0] || combos[0] || hand.slice(0, n);
 }
 function renderDraw() {
@@ -64,7 +73,7 @@ function renderDraw() {
   const plateBg = sel.length ? coreOf(sel[sel.length - 1]) : '#34343A', plateFg = sel.length ? TYPES[CARDS[sel[sel.length - 1]].plus].chipText : '#FFF';
   sheet('Draw rule cards', `
     <div class="bar-top"><h1>Week ${S.week}</h1>${draft.opened ? `<span class="dkc-count ${draft.landed ? 'bounce' : ''}">Dealt ${inHand.length}</span>` : ''}<span class="chipk" style="background:${STAKES[S.stake].bg};color:${STAKES[S.stake].fg}">${STAKES[S.stake].name}</span></div>
-    <p class="draw-lead">Keep ${need} cards this week${S.weekStart > 0 ? `<span class="chipk" style="background:var(--lime)">Only ${weekDays()} days</span>` : ''}</p>
+    <p class="draw-lead">Keep ${need} cards this week${S.weekStart > 0 ? `<span class="chipk" style="background:var(--lime)">${warmup() ? `Warm-up · ${plural(weekDays(), 'day')}, no stars` : `Only ${weekDays()} days`}</span>` : ''}</p>
     <div class="hand ${draft.opened ? 'open' : ''} ${draft.dealIn ? 'dealing' : ''}"><div class="hand-in">${stage}</div></div>
     <div class="drawfoot ${draft.landed ? 'pulse' : ''}">
       <div class="deck-strips" aria-hidden="true">${sel.slice(0, -1).map((no, j, a) => `<i style="background:${coreOf(no)};bottom:${(a.length - 1 - j) * 8}px;left:${22 + (a.length - j) * 8}px;right:${22 + (a.length - j) * 8}px"></i>`).join('')}</div>

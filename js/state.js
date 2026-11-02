@@ -9,7 +9,7 @@ let S = {
   base: BASE, setup: { income: 6000, fixed: 2500, save: 2000 }, weak: [], freq: {}, coach: 0, view: 'home', billTab: 'flow', cardLog: {},
   baseMult: 1, grad: [], stake: 0, nextStake: 0, carry: null, debt: 0, starsTotal: 0, slots: 3, glue: 0, glued: null, pinned: [],
   prefs: { evening: true, eveningAt: 21.5, ruleAlerts: true, morning: true },
-  history: [], today: [{ cat: 'meal', amt: 8, note: 'Breakfast' }], teaWeek: 0, wish: [], revisit: [],
+  history: [], today: [], teaWeek: 0, wish: [], revisit: [],
   quicks: [{ label: 'Breakfast', cat: 'meal', amt: 8 }, { label: 'Transit', cat: 'commute', amt: 4 }, { label: 'Starbucks', cat: 'tea', amt: 6 }, { label: 'DoorDash', cat: 'takeout', amt: 32 }]
 };
 let draft = {};
@@ -63,6 +63,9 @@ const todayBudget = () => Math.max(0, dailyBudget() - S.debt);
 // tomorrow gives up at most half its allowance, so one blown day can't zero out the rest of the week
 const debtCap = () => Math.round(dailyBudget() / 2);
 const weekDays = () => 7 - S.weekStart;
+// joining on Friday or later (or coming back that late after weeks away) leaves too few days for a fair target,
+// so those days are a warm-up: scored as usual, but they earn no stars and the first full week starts Monday
+const warmup = () => weekDays() <= 3;
 // stakes raise the bar after a pass, the way Balatro moves from white to black stake
 // star: what a pass's stars are multiplied by on this stake (rounded), rather than a flat bonus per stake
 const STAKES = [{ name: 'White Stake', k: 1, star: 1, bg: '#FFFFFF', fg: '#111' }, { name: 'Red Stake', k: 1.25, star: 1.25, bg: '#FF4D6A', fg: '#FFF' }, { name: 'Blue Stake', k: 1.5, star: 1.5, bg: '#2E8BFF', fg: '#FFF' }, { name: 'Black Stake', k: 1.8, star: 2, bg: '#111', fg: '#E4FF1A' }];
